@@ -21,7 +21,7 @@ from pathlib import Path
 
 from rich.console import Console
 
-from .media import FFMPEG, prepare_outro_video, probe
+from .media import FFMPEG, FFPROBE, prepare_outro_video, probe
 
 console = Console()
 W, H, FPS = 1080, 1920, 30
@@ -155,12 +155,18 @@ def append(short: Path, outro: Path, dst: Path, fade: float = 0.4) -> Path:
     dst.parent.mkdir(parents=True, exist_ok=True)
     fc = (f"[0:v]fps={FPS},settb=AVTB,format=yuv420p,tpad=stop_mode=clone:stop_duration={fade}[a];"
           f"[1:v]fps={FPS},settb=AVTB,format=yuv420p,scale={W}:{H}[b];"
-          f"[a][b]xfade=transition=fade:duration={fade}:offset={d:.3f}[v];"
+          f"[a][b]xfade=transition=fade:duration={fade}:offset={d:.3f},format=yuv420p[v];"
           f"[0:a]aresample=48000,apad,atrim=0:{total:.3f}[aout]")
     subprocess.run([FFMPEG, "-y", "-v", "error", "-i", str(short), "-i", str(outro), "-filter_complex", fc,
                     "-map", "[v]", "-map", "[aout]", "-c:v", "libx264", "-crf", "14", "-preset", "medium",
-                    "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", str(dst)], check=True)
+                    "-pix_fmt", "yuv420p", "-profile:v", "high", "-level", "4.2", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", str(dst)], check=True)
     return dst
+
+
+def _pix_fmt(f: Path) -> str:
+    r = subprocess.run([FFPROBE, "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=pix_fmt", "-of",
+                        "default=nw=1:nk=1", str(f)], capture_output=True, text=True)
+    return r.stdout.strip()
 
 
 def apply(brand, ep: Path, video: Path, only: set[int] | None = None, force: bool = False,
@@ -180,6 +186,10 @@ def apply(brand, ep: Path, video: Path, only: set[int] | None = None, force: boo
         append(s, outro, dst)
         want = float(probe(s)["duration"]) + float(probe(outro)["duration"])
         got = float(probe(dst)["duration"])
+        pf = _pix_fmt(dst)   # 4:4:4 (xfade, 11/10/2026) : illisible dans le lecteur Windows, les téléphones, les réseaux sociaux
+        if pf != "yuv420p":
+            rows.append({"short": s.name, "status": "ÉCHEC", "msg": f"format d'image {pf} (attendu yuv420p) : fichier illisible partout"})
+            continue
         rows.append({"short": s.name, "status": "OK" if abs(got - want) < 0.25 else "ATTENTION",
                      "msg": f"{got:.1f} s (short {float(probe(s)['duration']):.1f} s + outro) -> {folder}/{dst.name}"})
     (ep / folder).mkdir(exist_ok=True)
