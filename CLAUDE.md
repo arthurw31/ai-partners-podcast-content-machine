@@ -194,6 +194,15 @@ shorts il faut que la miniature soit validée »)
   multimédia Windows) : le `xfade` de `append` sortait en `yuv444p` (High 4:4:4), illisible dans le lecteur Windows, les téléphones
   et les réseaux sociaux. Corrigé (`format=yuv420p` après le xfade + `-pix_fmt yuv420p -profile:v high`) et `outro` vérifie le
   format de chaque fichier (ÉCHEC sinon). Tout nouveau MP4 livré doit passer `ffprobe` : `pix_fmt=yuv420p`.
+- **Jamais d'écran noir entre le short et l'outro** (Arthur, 11/10/2026 : « juste après, tu as mis un écran noir et après
+  l'animation de fin ») : un format sans carte de fin (`outro.enabled: false`) gardait sa durée (7 s de noir à la fin du rendu) ->
+  `compose` arrête la composition avec la parole ; l'animation commence par ~0,6 s de noir -> `append` saute ce début ; `qa
+  --render` (`black_runs`) et `outro` signalent ÉCHEC dès 0,2–0,3 s de noir.
+- **Fin du short = fin de la PENSÉE** (même retour : « tu l'as coupé un peu trop tôt, le mec était en train de parler ») : short 1
+  E22 finissait sur « …de l'entreprise. » alors que l'invité enchaînait sans pause (« Et puis cette transformation… ») ; `qa` :
+  fin du short suivie de la voix en < 0,1 s = ÉCHEC (avant : ATTENTION). Correction : prolonger jusqu'à une vraie pause ou un
+  changement d'orateur (E22 : « …cette dimension process dans l'entreprise. », puis Thomas) et, si c'est trop long, retirer une
+  phrase du milieu qui se raccorde naturellement (E22 : « Et je pense que ça va prendre un peu de temps… » retirée, 54 s).
 - **Miniature provisoire** (Arthur, 11/10/2026 : « fais-moi 2 shorts en 1080p… et l'outro avec la miniature », sans choix d'équipe
   encore) : `outro --thumb <image>` rend l'outro avec cette image dans `outro_short/outro_9x16_provisoire.mp4` et colle les
   shorts dans `livrables_provisoires/` ; `livrables/` et le choix officiel (`thumbnail --pick`) ne sont jamais touchés. Dès

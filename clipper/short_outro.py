@@ -151,10 +151,15 @@ def append(short: Path, outro: Path, dst: Path, fade: float = 0.4) -> Path:
     """short + outro -> dst. La dernière image du short est tenue `fade` s pendant que l'outro apparaît en fondu : la voix
     n'est JAMAIS raccourcie ni fondue (règle « jamais couper une fin de phrase »). Outro muette. H.264 CRF 14, AAC."""
     d = float(probe(short)["duration"])
-    total = d + float(probe(outro)["duration"])
+    # l'animation commence par ~0,6 s de noir (lignes pas encore dessinées) : collée telle quelle, ça faisait un trou noir
+    # entre le short et la carte (Arthur, 11/10/2026 : « juste après, tu as mis un écran noir ») -> début noir sauté
+    from .qa import black_runs
+    blk = black_runs(outro, min_len=0.1)
+    lead = max(0.0, blk[0][1] - 0.1) if blk and blk[0][0] < 0.05 else 0.0
+    total = d + float(probe(outro)["duration"]) - lead
     dst.parent.mkdir(parents=True, exist_ok=True)
     fc = (f"[0:v]fps={FPS},settb=AVTB,format=yuv420p,tpad=stop_mode=clone:stop_duration={fade}[a];"
-          f"[1:v]fps={FPS},settb=AVTB,format=yuv420p,scale={W}:{H}[b];"
+          f"[1:v]trim=start={lead:.3f},setpts=PTS-STARTPTS,fps={FPS},settb=AVTB,format=yuv420p,scale={W}:{H}[b];"
           f"[a][b]xfade=transition=fade:duration={fade}:offset={d:.3f},format=yuv420p[v];"
           f"[0:a]aresample=48000,apad,atrim=0:{total:.3f}[aout]")
     subprocess.run([FFMPEG, "-y", "-v", "error", "-i", str(short), "-i", str(outro), "-filter_complex", fc,
@@ -190,7 +195,12 @@ def apply(brand, ep: Path, video: Path, only: set[int] | None = None, force: boo
         if pf != "yuv420p":
             rows.append({"short": s.name, "status": "ÉCHEC", "msg": f"format d'image {pf} (attendu yuv420p) : fichier illisible partout"})
             continue
-        rows.append({"short": s.name, "status": "OK" if abs(got - want) < 0.25 else "ATTENTION",
+        from .qa import black_runs
+        blk = black_runs(dst, min_len=0.2)   # aucun noir entre le short et l'outro (11/10/2026)
+        if blk:
+            rows.append({"short": s.name, "status": "ÉCHEC", "msg": "écran noir à " + ", ".join(f"{a:.1f}–{b:.1f} s" for a, b in blk)})
+            continue
+        rows.append({"short": s.name, "status": "OK" if want - 0.8 < got < want + 0.25 else "ATTENTION",
                      "msg": f"{got:.1f} s (short {float(probe(s)['duration']):.1f} s + outro) -> {folder}/{dst.name}"})
     (ep / folder).mkdir(exist_ok=True)
     (ep / folder / "outro.json").write_text(json.dumps({"outro": str(outro), "shorts": rows}, ensure_ascii=False, indent=1),

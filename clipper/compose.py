@@ -843,9 +843,14 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
         thr = float(fcfg.montage.get("transition_min_diff", 25))
         fx_junctions = [j for j in junctions if frame_diff(j) >= thr]
         motion = _motion_ctx(fcfg, clip, words_rel, plan, D_speech, outro_start, brand, assets, fonts_dir)
+        # format SANS carte de fin (shorts 9:16 d'AI Corner : l'outro est collée après coup par `outro`) : la composition
+        # s'arrête avec la parole. Avant le 11/10/2026 elle gardait la durée de la carte -> 7 s de NOIR entre le short et
+        # l'outro (Arthur : « juste après, tu as mis un écran noir et après l'animation de fin »).
+        f_total = D_total if fcfg.outro.enabled else D_speech
+        f_adur, f_afade = (A_dur, A_fade) if fcfg.outro.enabled else (D_speech, 0.0)
         html = tpl.render(
             lang=cfg.get("language", "fr"), title=f"{clip.get('title','')} · {fmt}", W=W, H=H, fps=int(cfg.fps),
-            D_total=D_total, D_speech=D_speech, A_dur=A_dur, A_fade=round(A_fade, 3),
+            D_total=f_total, D_speech=D_speech, A_dur=f_adur, A_fade=round(f_afade, 3),
             font={"family": cfg.fonts.family, "italic_file": italic.name, "upright_file": upright.name},
             colors=dict(cfg.colors), plan=plan_render, captions=caps, cap=Cfg(cap_ctx), logo=Cfg(logo_ctx),
             outro=Cfg(outro_ctx), hook=Cfg(hook_ctx), broll=Cfg(broll_ctx), brolls=brolls_fmt, music=music,

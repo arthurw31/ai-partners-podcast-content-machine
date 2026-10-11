@@ -134,6 +134,12 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
         rows.append((WARN, f"blanc trop long en fin d'extrait à {', '.join(long_tail)}"))
     tight = [f"{float(segs[k]['end']):.2f}" for k in ends if _tail_silence(wav, float(segs[k]["end"])) < 0.1
              and not _voice_at(wav, float(segs[k]["end"]))]
+    last = f"{float(segs[-1]['end']):.2f}"
+    if last in tight:   # fin du short : l'orateur enchaîne sans pause = sa pensée n'est pas finie (Arthur, 11/10/2026 :
+        # « tu l'as coupé un peu trop tôt, le mec était en train de parler » — short 1 E22, « …l'entreprise. ‖ Et puis… »)
+        rows.append((FAIL, f"fin du short à {last} : l'orateur continue sans pause (< 0,1 s) — prolonger jusqu'à la vraie fin "
+                           f"de la pensée (pause ou changement d'orateur) ou finir sur une phrase précédente"))
+        tight = [t for t in tight if t != last]
     if tight:
         rows.append((WARN, f"fin serrée (< 0,1 s de respiration, la phrase suivante démarre tout de suite) à {', '.join(tight)}"))
     # 3. sous-titres
@@ -161,7 +167,9 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
     d = float(meta.get("D_speech", clip.get("duration", 0)))
     sel = cfg.get("selection") or {}
     lo, hi = float(sel.get("min_duration", 20)), float(sel.get("max_duration", 45)) + 12
-    rows.append((OK if lo - 5 <= d <= hi else WARN, f"durée : {d:.1f} s de parole + {float(meta.get('D_total', d)) - d:.1f} s de fin"))
+    m_root = re.search(r'id="root"[^>]*data-duration="([\d.]+)"', html.read_text(encoding="utf-8")) if html.exists() else None
+    d_fmt = float(m_root.group(1)) if m_root else float(meta.get("D_total", d))   # durée de la composition de CE format
+    rows.append((OK if lo - 5 <= d <= hi else WARN, f"durée : {d:.1f} s de parole + {max(0.0, d_fmt - d):.1f} s de fin"))
     n_leak = html.read_text(encoding="utf-8").count('id="leak-') if html.exists() else 0
     rows.append((OK, f"transitions lumineuses : {n_leak} (seulement aux changements de plan, sur {len(meta.get('junctions', []))} raccord(s))"))
     # 5. rendu / aperçu
@@ -173,8 +181,12 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
                                                                          else "à jour")))
         good_size = (info["width"], info["height"]) == (W, H)
         rows.append((OK if good_size else FAIL, f"format : {info['width']}×{info['height']} (attendu {W}×{H}), {info['fps']:.0f} i/s"))
-        dt = abs(float(info["duration"]) - float(meta.get("D_total", info["duration"])))
-        rows.append((OK if dt <= 0.2 else WARN, f"durée du rendu : {info['duration']:.2f} s (composition {float(meta.get('D_total', 0)):.2f} s)"))
+        m = re.search(r'id="root"[^>]*data-duration="([\d.]+)"', html.read_text(encoding="utf-8")) if html.exists() else None
+        comp = float(m.group(1)) if m else float(meta.get("D_total", info["duration"]))   # durée de CE format
+        dt = abs(float(info["duration"]) - comp)
+        rows.append((OK if dt <= 0.2 else WARN, f"durée du rendu : {info['duration']:.2f} s (composition {comp:.2f} s)"))
+        blk = black_runs(render)   # 11/10/2026 : 7 s de noir avant l'outro (carte de fin désactivée mais durée gardée)
+        rows.append((FAIL if blk else OK, "écran noir : " + (", ".join(f"{a:.1f}–{b:.1f} s" for a, b in blk) if blk else "aucun")))
         lu = loudness(render, 0, d)
         if lu is not None:
             rows.append((OK if abs(lu + 16) <= 1.5 else WARN, f"volume : {lu:.1f} LUFS (cible -16)"))
@@ -183,6 +195,13 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
         rows.append((OK, f"planche d'images à regarder : {sheet}"))
     status = FAIL if any(s == FAIL for s, _ in rows) else WARN if any(s == WARN for s, _ in rows) else OK
     return status, [f"- [{s}] {t}" for s, t in rows] + ["", f"Ce qu'on entend (‖ = raccord) : {heard}"]
+
+
+def black_runs(media: Path, min_len: float = 0.3) -> list[tuple[float, float]]:
+    """Passages noirs (≥ `min_len` s) d'une vidéo : [(début, fin)]."""
+    r = subprocess.run([FFMPEG, "-v", "info", "-i", str(media), "-vf", f"blackdetect=d={min_len}:pix_th=0.1", "-an",
+                        "-f", "null", "-"], capture_output=True, text=True, encoding="utf-8", errors="replace")
+    return [(float(a), float(b)) for a, b in re.findall(r"black_start:([\d.]+) black_end:([\d.]+)", r.stderr)]
 
 
 def _hms(t: float) -> str:
