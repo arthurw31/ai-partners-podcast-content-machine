@@ -92,17 +92,19 @@ def thumbnail(ep: Path) -> Path:
     return f
 
 
-def build(brand, ep: Path, video: Path, force: bool = False) -> Path:
+def build(brand, ep: Path, video: Path, force: bool = False, thumb: Path | None = None) -> Path:
     """Rend l'outro (7 s) une fois par épisode -> ep/outro_short/outro_9x16.mp4. Refaite si la miniature ou le texte change.
     Ne dépend que de la miniature choisie (aucune durée d'épisode affichée)."""
     from .render import lint, render
     cfg = brand.cfg.get("short_outro") or {}
     d = float(cfg.get("duration", 7.0))
-    thumb = thumbnail(ep)
+    provisional = thumb is not None   # miniature d'essai, pas le choix de l'équipe : fichiers à part, jamais dans livrables/
+    thumb = Path(thumb) if provisional else thumbnail(ep)
     title = str(cfg.get("title", "L'épisode complet"))
     cta = str(cfg.get("cta", "Regarder l'épisode — lien en description"))
-    proj = ep / "outro_short" / "9x16"
-    out = ep / "outro_short" / "outro_9x16.mp4"
+    tag = "_provisoire" if provisional else ""
+    proj = ep / "outro_short" / f"9x16{tag}"
+    out = ep / "outro_short" / f"outro_9x16{tag}.mp4"
     stamp = hashlib.sha256(thumb.read_bytes() + f"{title}|{cta}|{d}".encode()).hexdigest()[:16]
     stamp_f = out.with_suffix(".stamp")
     if out.exists() and not force and stamp_f.exists() and stamp_f.read_text() == stamp:
@@ -161,22 +163,26 @@ def append(short: Path, outro: Path, dst: Path, fade: float = 0.4) -> Path:
     return dst
 
 
-def apply(brand, ep: Path, video: Path, only: set[int] | None = None, force: bool = False) -> list[dict]:
-    """Outro rendue (si besoin) puis collée à chaque short rendu -> ep/livrables/<short>.mp4 ; rapport par short."""
-    outro = build(brand, ep, video, force=force)
+def apply(brand, ep: Path, video: Path, only: set[int] | None = None, force: bool = False,
+          thumb: Path | None = None) -> list[dict]:
+    """Outro rendue (si besoin) puis collée à chaque short rendu -> ep/livrables/<short>.mp4 ; rapport par short.
+    `thumb` : miniature PROVISOIRE (avant le choix de l'équipe) -> ep/livrables_provisoires/, livrables/ reste intact."""
+    outro = build(brand, ep, video, force=force, thumb=thumb)
+    folder = "livrables_provisoires" if thumb is not None else "livrables"
     rows = []
     for s in shorts(ep, only):
         if has_builtin_outro(ep, s):
             rows.append({"short": s.name, "status": "À REFAIRE",
                          "msg": "rendu avec l'ancienne carte de fin intégrée : `build --only N --force` puis `render --only N`"})
             continue
-        dst = ep / "livrables" / s.name
+        dst = ep / folder / s.name
+        dst.parent.mkdir(exist_ok=True)
         append(s, outro, dst)
         want = float(probe(s)["duration"]) + float(probe(outro)["duration"])
         got = float(probe(dst)["duration"])
         rows.append({"short": s.name, "status": "OK" if abs(got - want) < 0.25 else "ATTENTION",
-                     "msg": f"{got:.1f} s (short {float(probe(s)['duration']):.1f} s + outro) -> livrables/{dst.name}"})
-    (ep / "livrables").mkdir(exist_ok=True)
-    (ep / "livrables" / "outro.json").write_text(json.dumps({"outro": str(outro), "shorts": rows}, ensure_ascii=False, indent=1),
+                     "msg": f"{got:.1f} s (short {float(probe(s)['duration']):.1f} s + outro) -> {folder}/{dst.name}"})
+    (ep / folder).mkdir(exist_ok=True)
+    (ep / folder / "outro.json").write_text(json.dumps({"outro": str(outro), "shorts": rows}, ensure_ascii=False, indent=1),
                                                 encoding="utf-8")
     return rows

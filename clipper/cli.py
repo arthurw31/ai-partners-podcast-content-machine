@@ -684,7 +684,7 @@ def cmd_outro(a: argparse.Namespace) -> None:
     brand = Brand(a.brand)
     video = resolve_input(brand, a.input)
     ep = episode_dir(brand, video)
-    rows = apply(brand, ep, video, only=_parse_only(a.only), force=a.force)
+    rows = apply(brand, ep, video, only=_parse_only(a.only), force=a.force, thumb=Path(a.thumb) if a.thumb else None)
     if not rows:
         console.print("[yellow]Aucun short rendu dans renders/ : lancer `render` d'abord (l'outro est déjà prête).[/yellow]")
     for r in rows:
@@ -1276,6 +1276,7 @@ def main(argv: list[str] | None = None) -> None:
     sp = sub.add_parser("outro", help="après le choix de la miniature : outro des shorts (carte YouTube) collée à chaque short -> livrables/")
     common(sp)
     sp.add_argument("--only", default="", help="numéros des shorts, ex: 1,3 (défaut : tous les shorts rendus)")
+    sp.add_argument("--thumb", default="", help="miniature PROVISOIRE (avant le choix de l'équipe) -> livrables_provisoires/")
     sp.set_defaults(fn=cmd_outro)
     sp = sub.add_parser("rushes", help="range les rushs déposés dans depot/ (3 caméras + WAV) : rôles, synchro, multicam.json")
     sp.add_argument("--brand", required=True)

@@ -190,6 +190,10 @@ shorts il faut que la miniature soit validée »)
   avec l'ancienne carte de fin intégrée (`id="outro"` dans sa composition) est signalé « À REFAIRE » (`build --only N --force`
   puis `render --only N`) au lieu de recevoir deux cartes de fin. Réglages : section `short_outro:` de brand.yaml.
 - Livrer les shorts depuis `livrables/` (et non `renders/`, qui n'a pas de carte de fin).
+- **Miniature provisoire** (Arthur, 11/10/2026 : « fais-moi 2 shorts en 1080p… et l'outro avec la miniature », sans choix d'équipe
+  encore) : `outro --thumb <image>` rend l'outro avec cette image dans `outro_short/outro_9x16_provisoire.mp4` et colle les
+  shorts dans `livrables_provisoires/` ; `livrables/` et le choix officiel (`thumbnail --pick`) ne sont jamais touchés. Dès
+  la miniature choisie : `outro` sans option refait les livrables pour de bon.
 
 ## Miniatures YouTube : `thumbnail` (demande d'Arthur, 09/10/2026 : « automatise la création de miniatures, même style que les nôtres »)
 
