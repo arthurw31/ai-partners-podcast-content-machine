@@ -19,12 +19,13 @@ Deux façons de l'utiliser :
 
 ## Vue d'ensemble : des rushs du tournage à tous les livrables
 
+![Légende du schéma : violet = Claude rédige ou choisit, orange = l'équipe décide, blanc = automatique, vert = livrable ; flèche pleine = étape suivante, pointillés orange = attend une autre colonne](docs/schema_legende.svg)
+
 ![Schéma du process : des rushs du tournage à tous les livrables](docs/schema.svg)
 
 <sub>Source du schéma : [docs/schema.mmd](docs/schema.mmd) (Mermaid). L'image est régénérée par `python scripts/render_schema.py` (un schéma Mermaid dessiné en direct par GitHub ne s'affiche pas dans tous les navigateurs).</sub>
 
-Légende : orange = décision ou validation humaine · violet = Claude rédige ou choisit · vert = livrables · le reste
-est automatique. Aucune vidéo finale n'est rendue sans validation sur un aperçu.
+Aucune vidéo finale n'est rendue sans validation sur un aperçu.
 
 **Livrables d'un épisode** : 5 shorts MP4 (avec outro) et leurs 5 posts LinkedIn · l'épisode 1080p avec son teaser, sa
 description YouTube et ses chapitres · le titre validé et la miniature choisie · le carrousel LinkedIn (PDF) et la

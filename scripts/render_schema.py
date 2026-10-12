@@ -71,6 +71,44 @@ def source_hash(text: str) -> str:
     return hashlib.sha256(text.replace("\r\n", "\n").encode("utf-8")).hexdigest()[:16]
 
 
+LEGEND = ROOT / "docs" / "schema_legende.svg"
+# (couleur de fond, bord, texte, titre, explication) : mêmes couleurs que les classDef de schema.mmd
+LEGEND_ITEMS = [("#F1F0FF", "#7B6CF6", "#2B2366", "Claude rédige ou choisit", "propositions, textes, dérushage"),
+                ("#FFF4E6", "#F08C00", "#5C2C06", "L'équipe décide", "choix et validations humaines"),
+                ("#FFFFFF", "#C9D3E6", "#1B2440", "Automatique", "montage, rendu, contrôles"),
+                ("#E8F8F0", "#12A26B", "#0B3B29", "Livrable", "ce qui sort du process")]
+
+
+def write_legend() -> None:
+    """Légende du schéma (Arthur, 12/10/2026 : « rajoute une légende explicative ») : image à part, même habillage, pour
+    ne pas déplacer les colonnes du schéma."""
+    w, h, pad = 1180, 196, 28
+    parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" viewBox="0 0 {w} {h}">',
+             f"<style>{font_faces(True)}text{{font-family:Metropolis,'Segoe UI',Helvetica,Arial,sans-serif}}"
+             ".t{font-size:17px;font-weight:700}.d{font-size:14px;fill:#5B6680}</style>",
+             f'<rect x="0.5" y="0.5" width="{w - 1}" height="{h - 1}" rx="20" fill="#F4F6FB" stroke="#E1E6F0"/>',
+             f'<text x="{pad}" y="42" class="t" fill="#151D53">Légende</text>']
+    cw = (w - 2 * pad - 3 * 18) / 4
+    for k, (fill, stroke, color, title, desc) in enumerate(LEGEND_ITEMS):
+        x = pad + k * (cw + 18)
+        rx = 26 if title == "Livrable" else 14
+        parts += [f'<rect x="{x:.0f}" y="60" width="{cw:.0f}" height="62" rx="{rx}" fill="{fill}" stroke="{stroke}" stroke-width="1.5"/>',
+                  f'<text x="{x + cw / 2:.0f}" y="87" text-anchor="middle" class="t" fill="{color}">{html.escape(title)}</text>',
+                  f'<text x="{x + cw / 2:.0f}" y="108" text-anchor="middle" class="d">{html.escape(desc)}</text>']
+    y = 158
+    parts += [f'<line x1="{pad}" y1="{y}" x2="{pad + 70}" y2="{y}" stroke="#9AA6BF" stroke-width="1.6"/>',
+              f'<path d="M{pad + 70} {y - 5} L{pad + 80} {y} L{pad + 70} {y + 5} Z" fill="#9AA6BF"/>',
+              f'<text x="{pad + 94}" y="{y + 5}" class="d">étape suivante dans la colonne (« à corriger », « retouche » : retour en arrière)</text>',
+              f'<line x1="{w / 2 + 60}" y1="{y}" x2="{w / 2 + 130}" y2="{y}" stroke="#F08C00" stroke-width="1.8" stroke-dasharray="7 6"/>',
+              f'<path d="M{w / 2 + 130} {y - 5} L{w / 2 + 140} {y} L{w / 2 + 130} {y + 5} Z" fill="#F08C00"/>',
+              f'<text x="{w / 2 + 154}" y="{y + 5}" class="d">attend le résultat d\'une autre colonne</text>', "</svg>"]
+    svg = "\n".join(parts)
+    import xml.etree.ElementTree as ET
+    ET.fromstring(svg)
+    LEGEND.write_text("<!-- généré par scripts/render_schema.py -->\n" + svg, encoding="utf-8")
+    print(f"{LEGEND.relative_to(ROOT)} : {len(svg) // 1024} Ko")
+
+
 def main() -> int:
     sys.path.insert(0, str(ROOT))
     from clipper.thumbnail import _browser
@@ -106,6 +144,7 @@ def main() -> int:
     svg = f"<!-- généré par scripts/render_schema.py depuis docs/schema.mmd ; source-sha256: {source_hash(src)} -->\n" + svg
     OUT.write_text(svg, encoding="utf-8")
     print(f"{OUT.relative_to(ROOT)} : {len(svg) // 1024} Ko (Mermaid {MERMAID})")
+    write_legend()
     return 0
 
 
