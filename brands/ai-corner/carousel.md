@@ -30,8 +30,12 @@ page AI Partners. Ils veulent savoir ce qui marche VRAIMENT dans les entreprises
 
 ## Structure (7 à 9 slides, format 1080 × 1350)
 
-1. Couverture : la promesse en ≤ 9 mots, avec 1 à 3 mots mis en valeur (bandeau bleu) ; sur-titre « AI Corner · E22 »,
-   invité + entreprise en bas. Elle doit donner envie de faire défiler (bénéfice concret, chiffre ou tension).
+1. Couverture : la PROMESSE claire, ≤ 10 mots, entreprise + chiffre + bénéfice, 1 à 3 mots mis en valeur ; photo de
+   l'invité, sur-titre « AI Corner · E<n> », invité + entreprise en bas. Référence validée par Arthur (12/10/2026) :
+   « Coty : la méthode en [[5 étapes]] pour adopter l'IA ». Des accroches « choc » lui ont été proposées (« 3 000 agents
+   IA. Dont 10 qui font la même chose. », « Avant d'acheter de l'IA, Coty a d'abord écouté. ») : il a préféré la
+   promesse claire (« en vrai le titre de base était bien »). Pas de sous-titre par défaut.
+   - Jamais : question générique (« Et si l'IA changeait tout ? »), superlatif, « Découvrez… ».
 2. Pourquoi c'est important / le contexte : la situation de l'invité en 2 phrases (chiffre clé si l'épisode en donne).
 3 à 7. Le cœur : leçons, étapes ou idées reçues démontées — selon l'angle choisi. Chaque slide : titre-action + 1 à 2
    phrases d'explication + (si possible) une citation courte de l'invité. Une slide « chiffre » ou « citation » au

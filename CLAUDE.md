@@ -186,7 +186,13 @@ la valeur à la commu qui nous suit, et sur la dernière slide un call to action
   UNE page HTML (toutes les slides empilées, Metropolis, logo SVG recoloré, `outro_bg.png` = motif montagne, photo
   détourée de l'invité reprise des miniatures) -> Chrome `--screenshot` (fenêtre 1080 × 1350·n, `--virtual-time-budget`
   pour les polices) -> découpe en PNG -> PDF. `--render` refait le rendu depuis `contenu.json` ; `--final STYLE` ->
-  `carrousel/final/`. Styles : `usecase` (A), `lignes` (B), `portrait` (C).
+  `carrousel/final/`. Styles : `usecase` (A), `lignes` (B), `portrait` (C), `mix`.
+- **Choix d'Arthur sur E22 (12/10/2026)** : style `mix` = couverture du C (photo détourée de l'invité sur dégradé bleu,
+  titre à gauche, encart logo + invité) + slides du A (navy, cartes blanches) — `carousel.style: mix`, seul style rendu
+  désormais. Couverture : la promesse claire (« Coty : la méthode en [[5 étapes]] pour adopter l'IA »), PAS une
+  accroche choc (proposées : « 3 000 agents IA. Dont 10 qui font la même chose. »… -> « en vrai le titre de base était
+  bien »). CTA : « Vos équipes testent l'IA. Et après ? » / « Passons de l'expérimentation à l'impact : 30 minutes pour
+  en parler. » (`carousel.cta`) ; lien de prise de rendez-vous encore à confirmer.
 - Pièges du rendu (09–12/10) : un titre aligné en bas par flexbox déborde VERS LE HAUT sans que `scrollHeight` le voie
   -> le texte est dans un `<span>` mesuré par le script d'ajustement (`FIT_JS`, police réduite jusqu'à 50 %, cadre
   rouge `.overflow` si ça ne tient toujours pas) ; un élément en `position: absolute` (motif, photo) passe DEVANT le texte

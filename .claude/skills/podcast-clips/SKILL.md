@@ -281,9 +281,9 @@ Brief éditorial : `brands/<marque>/carousel.md` ; CTA final : `carousel.cta` de
    reçues, erreurs, cas, chiffres), chacun prouvé par des citations retrouvées dans l'épisode -> `carrousel/angles.md`.
    Donne les 3 angles à Arthur pour l'équipe marketing.
 2. L'équipe choisit : `carousel … --pick N [--note "précision"]` : Claude rédige 6 à 8 slides + le post, contrôlés (citations
-   mot pour mot, chiffres présents dans l'épisode, longueurs), puis rendu PNG + PDF. Tant que `carousel.style` est vide dans
-   brand.yaml, les 3 styles sont rendus (A cas client, B lignes, C portrait) avec une planche de comparaison
-   (`carrousel/planche.jpg`). REGARDE la planche et au moins la couverture, une slide de contenu et le CTA en grand avant
+   mot pour mot, chiffres présents dans l'épisode, longueurs), puis rendu PNG + PDF dans le style de la marque
+   (`carousel.style` ; AI Corner : `mix`, couverture photo de l'invité + slides navy à cartes blanches) avec une planche
+   (`carrousel/planche.jpg`). Style vide = tous les styles rendus pour que l'équipe choisisse. REGARDE la planche et au moins la couverture, une slide de contenu et le CTA en grand avant
    d'envoyer : texte qui déborde (cadre rouge), photo sur le titre, logo invisible.
 3. Contrôle ÉCHEC ou retouche demandée : corrige `carrousel/contenu.json` toi-même puis `carousel … --render` (aucun appel à
    Claude) ; boucle jusqu'à un contrôle propre.

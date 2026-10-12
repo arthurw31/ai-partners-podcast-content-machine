@@ -173,10 +173,12 @@ short_outro:
 # pour inciter les gens à bosser avec nous ») : commande `carousel`, brief éditorial dans carousel.md. En français.
 carousel:
   model: "claude-opus-5"
-  style: ""                    # style retenu par l'équipe (usecase | lignes | portrait) ; vide = les 3 sont rendus
-  cta:                         # dernière slide, écrite par le framework (jamais par Claude)
-    title: "Vous voulez [[la même chose]] dans votre entreprise ?"
-    text: "De l'ambition IA à l'exécution réelle : réservez 30 minutes avec l'équipe AI Partners."
+  # Arthur, 12/10/2026 : « j'aime bien la couverture avec la photo de l'invité du 3e carrousel et la charte graphique des
+  # slides du premier, mixe les deux » -> style « mix » (vide = les styles usecase | lignes | portrait | mix sont rendus)
+  style: "mix"
+  cta:                         # dernière slide, écrite par le framework (jamais par Claude) ; phrase choisie le 12/10/2026
+    title: "Vos équipes testent l'IA. [[Et après ?]]"
+    text: "Passons de l'expérimentation à l'impact : 30 minutes pour en parler."
     button: "Réserver un échange"
     url: "weareaipartners.com"   # À CONFIRMER par Arthur : page de prise de rendez-vous
     episode: "L'épisode complet : AI Corner {number}, sur YouTube"

@@ -36,7 +36,8 @@ W, H = 1080, 1350
 TYPES = ("lecons", "methode", "idees_recues", "cas", "erreurs", "chiffres")
 STYLES = {"usecase": "A · Cas client (modèle « Use case » de l'équipe)",
           "lignes": "B · Lignes (typographique, motif montagne)",
-          "portrait": "C · Portrait (photo de l'invité, slides claires)"}
+          "portrait": "C · Portrait (photo de l'invité, slides claires)",
+          "mix": "Couverture portrait + slides cas client (choix d'Arthur, 12/10/2026)"}
 RULES = {"title": 60, "title_hard": 80, "words": 35, "words_hard": 50, "min_slides": 6, "max_slides": 9}
 CTA_DEFAULT = {"title": "Vous voulez [[la même chose]] dans votre entreprise ?",
                "text": "De l'ambition IA à l'exécution réelle : réservez 30 minutes avec l'équipe AI Partners.",
@@ -171,7 +172,8 @@ ANGLE CHOISI PAR L'ÉQUIPE MARKETING :
 {angle}
 {note}
 Rédige 6 à 8 slides (la slide CTA finale est ajoutée automatiquement : ne l'écris pas). Types de slide :
-- "cover" (1re, obligatoire) : "title" = la promesse ≤ 9 mots, 1 à 3 mots clés entre [[ ]] ;
+- "cover" (1re, obligatoire) : "title" = la promesse claire (≤ 10 mots, voir le brief), 1 à 3 mots clés entre [[ ]] ;
+  "subtitle" facultatif (vide par défaut) ;
 - "intro" : "title" + "body" (contexte, pourquoi c'est important) ;
 - "point" : "n" (numéro), "title" (≤ 60 caractères, une action ou une idée) + "body" (≤ 35 mots) + "quote" facultative
   (citation COURTE de l'invité, mot pour mot, « […] » pour couper) ;
@@ -388,7 +390,24 @@ document.fonts.ready.then(() => {
 </script>"""
 
 
+MIX_COVER = """
+.slide.cover { background: linear-gradient(170deg, #258AF3 0%, #0A47B6 70%, #151D53 100%); }
+.person { position: absolute; right: -150px; bottom: 0; height: 800px; filter: drop-shadow(0 30px 60px rgba(5,15,60,.45)); }
+.cover .kicker { color: #fff; background: rgba(255,255,255,.16); align-self: flex-start; padding: 12px 22px;
+                 border-radius: 999px; font-size: 24px; }
+.cover h1 { margin-top: 56px; font-size: 100px; line-height: 1.06; width: 680px; height: auto; max-height: 560px; justify-content: flex-start;
+            text-shadow: 0 4px 30px rgba(5,15,60,.35); }
+.cover .hl { background: #151D53; }
+.cover .subt { font-size: 38px; font-weight: 700; line-height: 1.25; width: 560px; color: #E3EAFF; margin-top: 36px; }
+.cover .who { position: absolute; left: 88px; bottom: 150px; margin: 0; background: #fff; color: #151D53; border-radius: 22px;
+              padding: 20px 28px; font-size: 26px; font-weight: 700; max-width: 620px; z-index: 3; }
+.cover .who .gl { height: 40px; padding: 0; border-radius: 0; }
+"""
+
+
 def _style_css(style: str) -> str:
+    if style == "mix":
+        return _style_css("usecase") + MIX_COVER
     if style == "usecase":
         return """
 .slide { background: radial-gradient(120% 80% at 80% 0%, #24317F 0%, #151D53 55%, #0E1440 100%); color: #fff; }
@@ -522,7 +541,13 @@ def _slide_html(s: dict, i: int, n: int, style: str, ctx: dict) -> str:
     nxt = '<div class="next">GLISSEZ <span>→</span></div>' if i == 1 else f'<div class="page">{i:02d} / {n:02d}</div>'
     foot = f'<div class="foot">{logo}{nxt if i < n else ""}</div>'
     deco = ""
-    if style == "usecase" and kind in ("cover", "cta"):
+    if style == "mix":                      # couverture « portrait » + slides « cas client » (choix d'Arthur, 12/10/2026)
+        if kind == "cover" and ctx.get("guest_img"):
+            deco = f'<img class="person" src="{ctx["guest_img"]}">'
+        elif kind == "cta":
+            deco = f'<img class="glass2" src="{ctx["icon"]}"><img class="glass" src="{ctx["icon"]}">'
+        style = "usecase"
+    elif style == "usecase" and kind in ("cover", "cta"):
         deco = f'<img class="glass2" src="{ctx["icon"]}"><img class="glass" src="{ctx["icon"]}">'
     elif style == "lignes" and kind in ("cover", "cta", "quote", "stat"):
         deco = f'<img class="lines" src="{ctx["lines"]}">'
@@ -535,8 +560,9 @@ def _slide_html(s: dict, i: int, n: int, style: str, ctx: dict) -> str:
     by = html.escape(ctx["guest_short"])
     q = (f'<div class="qt fit">{_hl(s["quote"])}<span class="by">— {by}</span></div>' if s.get("quote") else "")
     if kind == "cover":
+        sub = f'<div class="subt">{_hl(s["subtitle"])}</div>' if s.get("subtitle") else ""
         inner = (f'<div class="kicker">AI Corner · {html.escape(ctx["number"])}</div><h1 class="fit"><span>{_hl(s.get("title"))}</span></h1>'
-                 f'<div class="who">{gl}<span>{html.escape(ctx["guest_line"])}</span></div>')
+                 f'{sub}<div class="who">{gl}<span>{html.escape(ctx["guest_line"])}</span></div>')
     elif kind == "stat":
         card_open, card_close = ('<div class="card">', '</div>') if style == "usecase" else ("", "")
         inner = (f'<div class="sub">{_hl(s.get("title") or "Le chiffre")}</div>{card_open}'
