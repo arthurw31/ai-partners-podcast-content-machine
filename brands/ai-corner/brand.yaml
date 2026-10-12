@@ -183,7 +183,8 @@ carousel:
     # Lien cliquable seulement dans le TEXTE du post : LinkedIn affiche les pages d'un carrousel (PDF) comme des images
     # (Arthur, 12/10/2026 : « mets le lien dans le post », agenda de prise de rendez-vous de Thomas)
     note: "Lien dans le post 👇"
-    booking_url: "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ0_yeSZr-eANdqFosuQLg2jE2smXxRU-eIMCXBA0WC3CynV7uSHwNeGX8FK-0MHDtpLcNiC4f9_"
+    # finit par « ?gv=true » : un lien qui finit par « _ » perd ce caractère quand il est rendu cliquable (12/10/2026)
+    booking_url: "https://calendar.google.com/calendar/appointments/schedules/AcZssZ0_yeSZr-eANdqFosuQLg2jE2smXxRU-eIMCXBA0WC3CynV7uSHwNeGX8FK-0MHDtpLcNiC4f9_?gv=true"
     post_line: "📅 Réserver un échange avec nous : {url}"
     episode: "L'épisode complet : AI Corner {number}, sur YouTube"
 
