@@ -416,6 +416,30 @@ triple check, optimise-le pour la rapidité sans réduire la qualité »)
   est une occlusion dans un mot (« bien-t-ôt », 0,06 s) -> on va jusqu'à la vraie fin de la voix. Teaser E22 : 5 fins
   reculées de 0,1–0,35 s ; épisode : fins de partie 2406,19 -> 2405,99 et 2819,02 -> 2818,67 (début du hors antenne).
 
+## Boucle de vérification intransigeante : `strict.py` (Arthur, 12/10/2026 : « il y a parfois des petits accrocs quand
+même, des sous-titres qui se chevauchent ou des phrases coupées légèrement trop tôt — il faudrait vraiment une boucle de
+vérification intransigeante qui règle ces problèmes »)
+
+- **Sous-titres superposés** : cause = `captions.group_words` prolongeait un bloc court à `min_group_duration` (0,5 s) PAR-DESSUS
+  le bloc suivant (E22 : 3 chevauchements de 0,12–0,3 s dans le short 1, 2 dans le short 2) -> la durée minimale ne déborde
+  plus jamais ; `strict.caption_problems` lit la COMPOSITION (blocs `cap-N`, `data-start` / `data-duration`, mots `data-t`) :
+  deux blocs à l'écran ensemble (≥ 1 image) ou mot prévu hors de son bloc = ÉCHEC dans `qa`.
+- **Fins coupées « un peu trop tôt »** : `qa._voice_at` tolérait une voix qui s'éteint à 10–20 % (dernière syllabe audible).
+  `strict.edge_problems` juge chaque bord de PHRASE (segments `end_text` / `start_text`, premier et dernier) sur le micro :
+  fin du short = voix < 10 % du niveau de parole pendant 0,12 s ; fin interne (une autre phrase suit) = < 15 % sur 0,04 s ;
+  début = départ d'un silence (< 12 % sur 0,06 s). Les bords de retrait de « euh » (coupés au point le plus calme) restent
+  contrôlés à l'écoute (`audit_joins`), pas par ces seuils.
+- **Correction automatique** `strict.fix_edges` : fin prolongée (≤ 0,6 s) jusqu'au vrai silence + un souffle de 0,06 s SEULEMENT
+  tant que le silence dure, jamais dans un nouveau son (vrai silence ≥ 0,06 s puis son > 30 % = mot suivant ; une occlusion
+  AVANT la coupe — « productivi-t-é », 0,04 s à 6 % — ne compte pas), sinon recul dans le dernier silence ; début avancé sur
+  une traîne qui s'éteint (« Et donc » à 2228,82, traîne d'hésitation à 2228,67) ou reculé (≤ 0,4 s). Chaque correction est
+  REVÉRIFIÉE : si le bord reste mauvais, retour à l'original et ÉCHEC. `polish` boucle : qa -> fix_edges -> build -> qa, 3 tours
+  au plus ; ce qui reste en ÉCHEC n'a ni aperçu ni rendu (`--anyway` pour forcer).
+- **Film des moments à risque** : `qa --render` écrit `qa/moments_NN[_apercu].mp4` (chaque raccord ± 1,5 s, fin - 2,5 / + 1 s,
+  instant écrit en haut) : ~20 s à regarder en premier, à donner à Arthur avec le short.
+- **Anti-régression** : `python scripts/test_qualite.py` (sans pytest, ~1 min) — chaque défaut trouvé devient un test (date +
+  phrase d'Arthur). À lancer après toute modification de `captions.py`, `strict.py`, `verify.py`, `fillers.py`, `qa.py`.
+
 ## Motion design discret du teaser (test du 09/10/2026 : « ajoute du motion design aux couleurs d'AI Partners, quelque
 chose de subtil, que ça ne fasse pas trop »)
 

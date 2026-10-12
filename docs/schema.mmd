@@ -10,7 +10,7 @@ flowchart TD
         direction TB
         S1{{"propose : Claude propose ~10 passages"}} --> S2["L'équipe choisit 5 passages (pick)<br/>et ses demandes particulières"]
         S2 --> S3["polish : « euh » et blancs retirés,<br/>gros plan / écran partagé,<br/>sous-titres vérifiés à l'écoute"]
-        S3 --> S4["qa + aperçus MP4 : raccords réécoutés,<br/>fins de phrase, sous-titres complets,<br/>volume, images ; sinon Claude retouche"]
+        S3 --> S4["qa stricte + aperçus MP4 : fins de phrase<br/>dans le silence, sous-titres jamais superposés,<br/>raccords, volume, aucun écran noir ;<br/>boucle de correction auto (3 tours),<br/>film des moments à risque"]
         S4 -->|à corriger| S3
         S4 -->|OK| S5["L'équipe valide les aperçus"]
         S5 -->|retouche| S3

@@ -158,6 +158,10 @@ def group_words(words: list[dict], clip_start: float, clip_end: float, cfg: Cfg,
         # le groupe reste affiché jusqu'au suivant (ou fin du clip)
         end = groups[gi + 1][0]["s"] if gi + 1 < len(groups) else min(D, g[-1]["e"] + 1.2)
         end = max(end, start + float(cap.min_group_duration))
+        # jamais deux blocs à l'écran en même temps (Arthur, 12/10/2026 : « des sous-titres qui se chevauchent ») : la durée
+        # minimale ne déborde JAMAIS sur le bloc suivant (avant : jusqu'à 0,3 s de deux blocs superposés, short 1 E22)
+        if gi + 1 < len(groups):
+            end = min(end, groups[gi + 1][0]["s"])
         lines = []
         if dialogue_flags[gi]:
             # une ligne par locuteur, chacune préfixée d'un tiret

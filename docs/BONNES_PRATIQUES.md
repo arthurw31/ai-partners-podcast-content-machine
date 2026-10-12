@@ -71,11 +71,15 @@ Résultat jugé « franchement plutôt bien » par Arthur (09/10/2026) : `output
 
 1. **Rien de final sans validation sur un aperçu.** Les aperçus sont des **MP4** (le Studio HyperFrames bugue chez
    Arthur), rapides (12 images/s), avec un **lien cliquable** vers chaque fichier.
-2. **Trois contrôles** avant toute livraison : automatique sur le montage (`qa`), automatique sur l'aperçu / le MP4
+2. **Contrôle intransigeant** (12/10) : chaque fin de phrase finit dans le silence, jamais deux sous-titres à l'écran en même
+   temps ; `polish` corrige seul et recontrôle (3 tours) ; ce qui reste en ÉCHEC n'est ni montré ni rendu. Un « film des
+   moments à risque » (~20 s : raccords + fin) accompagne chaque short. Chaque défaut trouvé devient un test
+   (`scripts/test_qualite.py`).
+3. **Trois contrôles** avant toute livraison : automatique sur le montage (`qa`), automatique sur l'aperçu / le MP4
    final (`qa --render`, `qa --episode`, planche d'images regardée), puis Arthur.
-3. Chemin d'un short : `pick` → `polish --only N` → liens MP4 → validation → `render` → `qa --render`.
-4. Jamais réécraser un MP4 livré : l'ancien est renommé (`_v1_<date>`).
-5. **Chaque retour d'Arthur devient une règle durable** (code ou réglage + CLAUDE.md + mémoire), datée, avec sa phrase.
-6. Aucune fenêtre ne s'ouvre chez Arthur (pas de Chrome, pas de console) ; tout est vérifié par images et par écoute.
-7. Plusieurs sessions Claude peuvent travailler en parallèle sur le dépôt : ne committer que ses propres fichiers,
+4. Chemin d'un short : `pick` → `polish --only N` → liens MP4 → validation → `render` → `qa --render`.
+5. Jamais réécraser un MP4 livré : l'ancien est renommé (`_v1_<date>`).
+6. **Chaque retour d'Arthur devient une règle durable** (code ou réglage + CLAUDE.md + mémoire), datée, avec sa phrase.
+7. Aucune fenêtre ne s'ouvre chez Arthur (pas de Chrome, pas de console) ; tout est vérifié par images et par écoute.
+8. Plusieurs sessions Claude peuvent travailler en parallèle sur le dépôt : ne committer que ses propres fichiers,
    jamais de modèle d'IA dans le dépôt (public).

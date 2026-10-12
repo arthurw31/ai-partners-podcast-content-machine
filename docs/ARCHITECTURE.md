@@ -26,7 +26,7 @@ flowchart TB
         PO["posts.py"]
         MC["multicam.py<br/>rushs 3 caméras"]
         IG["ingest.py<br/>rushs déposés : rôles, synchro"]
-        CHK["verify.py · fillers.py<br/>caption_check.py · qa.py"]
+        CHK["verify.py · fillers.py<br/>caption_check.py · qa.py · strict.py"]
         EPI["episode.py · diarize.py<br/>épisode complet + teaser"]
         TH["thumbnail.py · canva_template.py<br/>miniatures"]
     end
@@ -73,6 +73,7 @@ flowchart TB
 | `ingest.py` | Commande `rushes` : prend les 3 rushs + le WAV déposés dans `depot/`, écarte un fichier tronqué, reconnaît le plan large (2 visages) et l'animateur (empreinte de visage SFace comparée à `assets/host_face.jpg`), mesure le décalage du micro par corrélation avec le son des caméras, range et renomme d'après l'invité, écrit `multicam.json` (avec le côté de l'animateur dans le plan large). |
 | `multicam.py` | Rushs 3 caméras : gros plan de celui qui parle, écran partagé quand l'autre écoute (et seulement s'il est calme), son du micro. |
 | `verify.py`, `fillers.py`, `caption_check.py`, `qa.py` | Contrôles « à l'oreille » : vraies fins de phrase, « euh » retirés sans perdre un mot, sous-titres écoutés deux fois, rapport OK / ATTENTION / ÉCHEC avant chaque aperçu et après chaque rendu. |
+| `strict.py` | Contrôle intransigeant : bords de phrase jugés sur le son avec des seuils durs et corrigés seuls (`fix_edges`, boucle de `polish`, 3 tours), sous-titres de la composition (jamais deux blocs ensemble), film des moments à risque (`qa/moments_NN.mp4`). Cas anti-régression : `python scripts/test_qualite.py`. |
 | `episode.py`, `diarize.py` | Épisode complet : dérushage par Claude, qui parle (empreintes vocales), liste de plans façon monteur, teaser scripté, chapitres ; corps rendu en FFmpeg, teaser en HyperFrames. |
 | `short_outro.py` | Commande `outro`, une fois la miniature choisie : rend une seule fois par épisode la carte de fin des shorts (« carte YouTube » : miniature validée, bouton « Regarder l'épisode — lien en description », animation AI Partners), puis la colle à la fin de chaque short rendu (dernière image tenue 0,4 s et fondu, voix jamais raccourcie) -> `livrables/`. Les shorts 9:16 sont montés et rendus SANS carte de fin (`format_overrides.9x16.outro.enabled: false`). |
 | `titles.py` | Titre de l'épisode (un seul, pour YouTube et la vignette) : Claude écrit ~12 candidats d'après `brands/<m>/titles.md` (relevé des 16 titres publiés), chacun adossé à un passage réel de l'épisode ; contrôles automatiques (longueur, chiffres et noms présents dans la transcription, pas de nom d'invité, pas de copie d'un titre publié ou refusé) ; jury qui garde 5 titres de formules variées, proposés en texte (`--planche` : sur des vignettes, facultatif) ; `--pick N` = validation par l'équipe marketing, avant toute miniature. |

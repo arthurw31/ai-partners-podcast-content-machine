@@ -1129,6 +1129,34 @@ def cmd_polish(a: argparse.Namespace) -> None:
                                     "jobs": a.jobs}))
     console.rule("Contrôle qualité du montage")
     status = cmd_qa(argparse.Namespace(**{**vars(a), "only": sel, "render": False, "episode": False}))
+    # boucle intransigeante (Arthur, 12/10/2026 : « une boucle de vérification intransigeante qui règle ces problèmes ») :
+    # tant qu'un bord de phrase est coupé dans la voix et que `strict.fix_edges` sait le corriger -> correction, nouveau
+    # montage, nouveau contrôle ; 3 tours au plus ; ce qui reste est un ÉCHEC (rien ne part en aperçu ni en rendu)
+    from .strict import fix_edges
+    for rnd in range(1, 4):
+        if status != "ÉCHEC":
+            break
+        data = json.loads((ep / "clips.json").read_text(encoding="utf-8"))
+        changed = []
+        for i, c in enumerate(data["clips"]):
+            if c["index"] not in idx:
+                continue
+            segs, done, left = fix_edges(c["segments"], wav)
+            for m in done:
+                console.print(f"  [cyan]#{c['index']} correction : {m}[/cyan]")
+            for m in left:
+                console.print(f"  [red]#{c['index']} non corrigeable automatiquement : {m}[/red]")
+            if done:
+                data["clips"][i] = dict(c, segments=segs, duration=round(sum(float(x["duration"]) for x in segs), 2))
+                changed.append(c["index"])
+        if not changed:
+            break
+        (ep / "clips.json").write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+        resel = ",".join(str(k) for k in changed)
+        console.rule(f"Boucle de correction, tour {rnd} : shorts {resel}")
+        cmd_build(argparse.Namespace(**{**vars(a), "only": resel, "formats": a.formats, "force": False, "no_broll": False,
+                                        "jobs": a.jobs}))
+        status = cmd_qa(argparse.Namespace(**{**vars(a), "only": sel, "render": False, "episode": False}))
     if status == "ÉCHEC" and not a.anyway:
         sys.exit("Contrôle qualité en ÉCHEC : corriger avant l'aperçu (voir output/…/qa/). --anyway pour passer outre.")
     console.rule("Aperçus MP4")

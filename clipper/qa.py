@@ -142,6 +142,12 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
         tight = [t for t in tight if t != last]
     if tight:
         rows.append((WARN, f"fin serrée (< 0,1 s de respiration, la phrase suivante démarre tout de suite) à {', '.join(tight)}"))
+    # 2 bis. contrôle intransigeant des bords de phrase (seuils durs, `strict.py`, 12/10/2026)
+    from .strict import caption_problems, edge_problems
+    ep_ = edge_problems(segs, wav)
+    rows.append((FAIL if ep_ else OK, "bords de phrase (contrôle strict) : " + (
+        "; ".join(f"{p['kind']} à {p['t']:.2f} coupée dans la voix ({int(p['ratio'] * 100)} % du niveau)" for p in ep_)
+        + " -> `polish` corrige seul (fix_edges)" if ep_ else "toutes les fins retombées dans le silence, tous les débuts partent d'un silence")))
     # 3. sous-titres
     cc = proj / "captions_check.txt"
     if cc.exists():
@@ -155,6 +161,10 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
     # 4. composition
     meta = json.loads((proj / "clip.json").read_text(encoding="utf-8"))
     html = proj / fmt / "index.html"
+    if html.exists():
+        cp = caption_problems(html.read_text(encoding="utf-8"))
+        rows.append((FAIL if cp else OK, "sous-titres à l'écran : " + ("; ".join(cp[:6]) if cp else
+                                                                   "jamais deux blocs ensemble, chaque mot dans son bloc")))
     from .render import lint
     try:
         _ok, findings = lint(proj / fmt)
@@ -193,6 +203,16 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
         sheet = contact_sheet(render, [min(3.0, d / 4), d * 0.4, d * 0.75, d + 2.0],
                               work / f"qa_images_{clip['index']:02d}.png")
         rows.append((OK, f"planche d'images à regarder : {sheet}"))
+        try:   # film des moments à risque : chaque raccord ± 1,5 s + la fin, pour une validation humaine en ~20 s
+            from .strict import moments_reel
+            font = Path(__file__).resolve().parent.parent / "brands" / "ai-corner" / "assets" / "fonts" / "Metropolis-Bold.ttf"
+            reel = moments_reel(render, [float(j) for j in meta.get("junctions", [])], d,
+                                work / f"moments_{clip['index']:02d}{'_apercu' if 'apercu' in render.name else ''}.mp4",
+                                font=font if font.exists() else None)
+            if reel:
+                rows.append((OK, f"moments à risque (raccords + fin, à regarder en premier) : {reel}"))
+        except Exception as e:  # noqa: BLE001
+            rows.append((WARN, f"film des moments à risque impossible : {e}"))
     status = FAIL if any(s == FAIL for s, _ in rows) else WARN if any(s == WARN for s, _ in rows) else OK
     return status, [f"- [{s}] {t}" for s, t in rows] + ["", f"Ce qu'on entend (‖ = raccord) : {heard}"]
 
