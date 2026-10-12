@@ -57,7 +57,9 @@ Toujours en MP4 (le Studio HyperFrames bugue chez Arthur) : `preview --mp4 --cli
    aperçus à Arthur, validation, `render`, `qa --render`, `outro`.
 2. Teaser à reconstruire avec le nouveau son + validation de l'épisode complet (nouvelle liste de plans, fin logo) ->
    rendu final 1080p.
-3. Dès que l'équipe a choisi la miniature (`thumbnail --pick N`) : `outro` sans `--thumb` -> `livrables/` définitifs.
+3. FAIT le 12/10/2026 : titre validé par Arthur (proposition 4 de la 2e série : « AI Corner E22 | Réinventer ses processus
+   métier pour intégrer vraiment l'IA »), miniature = même photo que la variante 1 avec ce titre (`miniatures/miniature_finale.jpg`),
+   shorts 1 et 2 livrés avec l'outro définitive dans `livrables/`. Shorts 3–5 : `outro --only N` après leur rendu.
 4. CTA « bosser avec nous » dans les descriptions YouTube / posts LinkedIn : prêt mais désactivé (attendre Arthur).
 5. Les anciens fichiers (`renders/*_v…`, `E22_teaser_v2/_v3`) peuvent être supprimés par Arthur (pas par Claude).
 

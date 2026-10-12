@@ -70,5 +70,17 @@ Titres générés avant ce brief (E22), jugés « pas ouf » par l'équipe le 09
 - `Le vrai métier du / Head of AI selon Coty` : jargon, « selon X » qui ne dit rien.
 - `De 1000 licences / à 3000 agents chez Coty` : chiffres de l'entreprise sans enjeu pour le spectateur.
 
+2e série (propositions du 09/10/2026), jugée « pas fou » par Arthur le 12/10/2026 — justes mais PLATES :
+
+- `Passer de l'expérimentation / [à l'impact avec l'IA]` : formule de consultant, abstraite, déjà lue partout.
+- `Faut-il laisser chacun / [créer ses propres agents IA ?]` : la bonne question, mais tournure molle (« faut-il », « chacun »).
+- `Le Head of AI, architecte / [ou traducteur ?]` : débat d'initiés, le spectateur ne sait pas pourquoi c'est important pour lui.
+- `La transformation IA devient / [avant tout humaine]` : constat attendu, aucune surprise.
+- `Comment éviter les pièges / [du marché de l'IA ?]` : « pièges » vague, l'image forte de l'épisode (« un marché de vendeurs ») perdue.
+
+Ce qui manquait : du CONCRET qui accroche (un chiffre frappant, une image de l'invité, un mot qu'on retient : « 3 000
+agents », « marché de vendeurs », « 10 agents qui font la même chose ») mis au service d'une question du spectateur, et
+une TENSION (un risque, une surprise, une idée reçue renversée), comme « Combien vous coûte vraiment votre IA ? ».
+
 Règles qui en découlent : pas de fait interne présenté comme un titre, pas de jargon seul, pas de liste séparée par des
 virgules, pas de « selon <entreprise> », pas de nom d'invité, un seul sujet par titre.
