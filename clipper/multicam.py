@@ -197,7 +197,8 @@ def window_edl(turns: list[dict], start: float, duration: float, names: list[str
 
 
 def cut_multicam(spec: dict, dst: Path, start: float, duration: float, turns: list[dict], height: int | None = None,
-                 normalize_audio: bool = True, fps: int | None = None) -> Path:
+                 normalize_audio: bool = True, fps: int | None = None, frames: int | None = None,
+                 video_only: bool = False) -> Path:
     """Équivalent de media.cut_segment pour des rushs multicam : gros plan de la personne qui parle + micro.
 
     `turns` : tours de parole [{at, speaker}] ou plans imposés `cams` [{at, speaker: host|guest|wide|split, force}].
@@ -233,16 +234,18 @@ def cut_multicam(spec: dict, dst: Path, start: float, duration: float, turns: li
         vin.append("[split]")
     graph = ";".join(pre + [f"{vin[0]}sendcmd=f='{cpath}'[c0]",
                              f"[c0]{''.join(vin[1:])}streamselect@cam=inputs={len(vin)}:map={edl[0][1]},{','.join(vf)}[v]",
-                             f"[{n}:a]{af}[a]"])
+                             *([] if video_only else [f"[{n}:a]{af}[a]"])])
     script = dst.with_suffix(".graph.txt")
     script.write_text(graph, encoding="utf-8")
     inputs = [x for p in spec["cams"].values() for x in ("-ss", f"{start:.3f}", "-i", str(p))]
     audio = spec.get("audio") or spec["cams"][names[0]]
     a_start = max(0.0, start - float(spec.get("audio_delay", 0.0)))
-    run([FFMPEG, "-y", "-v", "error", *inputs, "-ss", f"{a_start:.3f}", "-i", str(audio), "-t", f"{duration:.3f}",
-         "-/filter_complex", str(script), "-map", "[v]", "-map", "[a]",
+    a_in = [] if video_only else ["-ss", f"{a_start:.3f}", "-i", str(audio)]
+    run([FFMPEG, "-y", "-v", "error", *inputs, *a_in, "-t", f"{duration:.3f}",
+         "-/filter_complex", str(script), "-map", "[v]", *([] if video_only else ["-map", "[a]"]),
          "-c:v", "libx264", "-preset", "medium", "-crf", "10",   # intermédiaire quasi sans perte, comme cut_segment
-         "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-movflags", "+faststart", str(dst)])
+         *(["-frames:v", str(frames)] if frames else []),
+         *(["-an"] if video_only else ["-c:a", "aac", "-b:a", "192k", "-ar", "48000"]), "-movflags", "+faststart", str(dst)])
     cmds.unlink(missing_ok=True)
     script.unlink(missing_ok=True)
     return dst

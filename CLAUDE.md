@@ -458,6 +458,27 @@ vérification intransigeante qui règle ces problèmes »)
   au plus ; ce qui reste en ÉCHEC n'a ni aperçu ni rendu (`--anyway` pour forcer).
 - **Film des moments à risque** : `qa --render` écrit `qa/moments_NN[_apercu].mp4` (chaque raccord ± 1,5 s, fin - 2,5 / + 1 s,
   instant écrit en haut) : ~20 s à regarder en premier, à donner à Arthur avec le short.
+- **Son du montage reconstruit en UN passage** (12/10/2026, 2e retour d'Arthur : « encore des phrases coupées trop tôt ») —
+  la vraie cause était dans l'ASSEMBLAGE, pas dans les coupes : chaque morceau avait son propre son AAC (préchauffage ~21 ms)
+  recollé sans réencodage -> le son prenait ~25 ms de retard PAR RACCORD (short 2 E22 : +149 ms au 10e morceau) ; la
+  composition s'arrêtant à l'heure prévue, la fin de la dernière phrase était tronquée, et sous-titres / lèvres se décalaient.
+  En plus, `loudnorm` était appliqué morceau par morceau (gain dynamique qui étouffe attaques et fins sur 0,5–5 s). Désormais
+  (`compose` + `media.rebuild_audio`) : durées arrondies à l'IMAGE SUPÉRIEURE (`ceil(d × fps − 1e-3)` : sans la tolérance,
+  6,266667 s × 30 = 188,00001 -> 189 images), morceaux vidéo SANS son (`video_only`, `-frames:v N`), son pris à l'échantillon
+  près dans le micro (`atrim`), fondus de 6 ms aux raccords, un seul `loudnorm` sur le clip. `qa` mesure la synchro du
+  FICHIER (`strict.sync_problems`, corrélation normalisée de 0,5 s au milieu de chaque morceau, ÉCHEC au-delà de ± 15 ms ;
+  simule un écart de 50 ms -> trouvé à la ms près). La QA réécoutait jusque-là un son reconstruit d'après le PLAN : elle
+  ne pouvait pas voir ce défaut.
+- **« Euh » collés coupés en pleine voix** : 9 retraits sur 18 (short 1), 7 sur 10 (short 2) tranchaient la fin du mot (voix à
+  26–89 % au point de coupe : « job principal‖euh »). `strict.refine_joins` (étape `joins` de `polish`) recale la fin au
+  début de la voyelle TENUE (flux spectral bas sur 3 trames de 10 ms) et le début du morceau suivant juste avant l'attaque
+  du mot (0,04–0,13 s) ; `qa` signale un « euh » redevenu audible.
+- Pistes retenues de la recherche (12/10/2026, à faire si des défauts restent) : **Smart Turn v3** (pipecat-ai, BSD-2, ONNX
+  8 Mo, français, ~12–100 ms CPU) = probabilité que l'orateur ait FINI sa phrase, d'après la prosodie, à chaque fin
+  d'extrait ; **alignement forcé CTC** (wav2vec2 français `bofenghuang/asr-wav2vec2-ctc-french`, Apache-2.0, Viterbi en numpy,
+  sans torchaudio) pour la fin exacte du dernier phonème ; énergie 2–8 kHz pour les fins en /s/ /ʃ/. À éviter : WhisperX et
+  stable-ts (torchaudio), ctc-forced-aligner (modèle MMS non commercial), CrisperWhisper (poids non commerciaux), détecteur de
+  tours LiveKit (licence liée à LiveKit).
 - **Anti-régression** : `python scripts/test_qualite.py` (sans pytest, ~1 min) — chaque défaut trouvé devient un test (date +
   phrase d'Arthur). À lancer après toute modification de `captions.py`, `strict.py`, `verify.py`, `fillers.py`, `qa.py`.
 

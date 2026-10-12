@@ -161,6 +161,15 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
     # 4. composition
     meta = json.loads((proj / "clip.json").read_text(encoding="utf-8"))
     html = proj / fmt / "index.html"
+    src_av = proj / "assets" / "source.mp4"
+    if src_av.exists() and meta.get("source"):   # synchro du FICHIER monté (pas du plan) : son à sa place, morceau par morceau
+        from .multicam import load_spec
+        from .strict import sync_problems
+        spec = load_spec(Path(meta["source"]))
+        a_src, dly = (Path(spec["audio"]), float(spec.get("audio_delay", 0.0))) if spec and spec.get("audio") else (Path(meta["source"]), 0.0)
+        sp = sync_problems(src_av, segs, a_src, dly, int(cfg.fps))
+        rows.append((FAIL if sp else OK, "son du montage : " + ("; ".join(sp[:6]) + " (rebuild : build --only N --force)" if sp
+                                                            else "chaque morceau exactement à sa place (± 15 ms)")))
     if html.exists():
         cp = caption_problems(html.read_text(encoding="utf-8"))
         rows.append((FAIL if cp else OK, "sous-titres à l'écran : " + ("; ".join(cp[:6]) if cp else

@@ -4,6 +4,7 @@ brand + clip (clips.json) + transcript + analyse vidéo.
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 import shutil
@@ -18,7 +19,7 @@ from . import broll as broll_mod
 from .analysis import analyze
 from .captions import group_words
 from .config import FORMATS, TEMPLATES_DIR, Brand, Cfg, deep_merge
-from .media import (concat_segments, cut_segment, extract_frame, make_blurred_still, prepare_outro_video, probe,
+from .media import (concat_segments, cut_segment, rebuild_audio, extract_frame, make_blurred_still, prepare_outro_video, probe,
                     reframe_video)
 from .multicam import cut_multicam, load_spec as load_multicam
 from .reframe import build_plan
@@ -442,6 +443,14 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
     segments = clip.get("segments") or [{"start": float(clip["start"]), "end": float(clip["end"]),
                                          "duration": float(clip["duration"]), "tail_silence": clip.get("tail_silence", 5.0)}]
     outro_d = float(cfg.outro.duration) if cfg.outro.enabled else 0.0
+    # durées arrondies à l'IMAGE SUPÉRIEURE (jamais plus courtes) : chaque morceau vidéo a un nombre entier d'images et son
+    # son exactement la même durée -> aucune dérive image / son / sous-titres d'un raccord à l'autre (12/10/2026)
+    _fps = int(cfg.fps)
+    segments = [dict(sg) for sg in segments]
+    for sg in segments:
+        n_fr = max(1, math.ceil(float(sg["duration"]) * _fps - 1e-3))
+        sg["duration"] = round(n_fr / _fps, 6)
+        sg["end"] = round(float(sg["start"]) + sg["duration"], 6)
     # offsets : temps absolu (épisode) -> temps relatif (clip assemblé)
     offsets = []
     t = 0.0
@@ -479,31 +488,40 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
             every=tuple(mc.get("split_every", (6.5, 9.5))), length=tuple(mc.get("split_len", (2.4, 3.2))),
             first_after=float(mc.get("first_after", 11.5)), seed=int(clip.get("index", 1)),
             calm=_calm_check(multicam, float(mc.get("max_listener_motion", 3.0))))
-        stamp = json.dumps([segments, cams or clip.get("turns", []), outro_d], sort_keys=True, default=str)
+        stamp = json.dumps([segments, cams or clip.get("turns", []), outro_d, "son-v2"], sort_keys=True, default=str)
         stamp_f = assets / "source.multicam.stamp"
         stale = stale or not stamp_f.exists() or stamp_f.read_text(encoding="utf-8") != stamp
     recut = bool(force or stale or not src_clip.exists())
     if recut:
         console.print(f"  découpe de {len(segments)} segment(s) source…")
-        parts = []
+        parts, pieces = [], []
         for j, sg in enumerate(segments):
             last = j == len(segments) - 1
             dur = float(sg["duration"]) + (outro_d if last else 0.0)
             dur = min(dur, max(0.0, info["duration"] - float(sg["start"])))
+            n_fr = max(1, math.ceil(dur * _fps - 1e-3))
+            dur = n_fr / _fps
             part = assets / (f"seg_{j+1}.mp4" if len(segments) > 1 else "source.mp4")
             # source 4K conservée (jusqu'à render.max_source_height) : le recadrage vertical y puise sa netteté
             h_max = min(info["height"], int(cfg.render.get("max_source_height", 2160)))
             if multicam:
                 cut_multicam(multicam, part, float(sg["start"]), dur, cams or clip.get("turns", []), height=h_max,
-                             normalize_audio=bool(cfg.audio.normalize), fps=int(cfg.fps))
+                             normalize_audio=False, fps=_fps, frames=n_fr, video_only=True)
+                a0 = max(0.0, float(sg["start"]) - float(multicam.get("audio_delay", 0.0)))
             else:
-                cut_segment(source, part, float(sg["start"]), dur, height=h_max,
-                            normalize_audio=bool(cfg.audio.normalize), fps=int(cfg.fps))
+                cut_segment(source, part, float(sg["start"]), dur, height=h_max, normalize_audio=False, fps=_fps,
+                            frames=n_fr, video_only=True)
+                a0 = float(sg["start"])
+            pieces.append((a0, n_fr / _fps))
             parts.append(part)
         if len(parts) > 1:
             concat_segments(parts, src_clip)
             for part in parts:
                 part.unlink(missing_ok=True)
+        # son reconstruit en UN passage depuis le micro (ou la source), à l'échantillon près, un seul loudnorm
+        audio_src = Path(multicam["audio"]) if multicam else source
+        console.print(f"[dim]  son : {len(pieces)} morceaux, {sum(d for _, d in pieces):.3f} s : {[(round(a, 3), round(d, 3)) for a, d in pieces]}[/dim]")
+        rebuild_audio(src_clip, audio_src, pieces, normalize=bool(cfg.audio.normalize))
         if multicam:
             stamp_f.write_text(stamp, encoding="utf-8")
     # l'audio sous la carte de fin s'arrête avant que le locuteur suivant reprenne

@@ -250,3 +250,116 @@ def moments_reel(render: Path, junctions: list[float], d_speech: float, out: Pat
     # police lue depuis son dossier (chemin sans accent ni « : » dans le filtre)
     subprocess.run(cmd, check=True, cwd=str(font.parent) if font else None)
     return out
+
+
+# ----------------------------------------------------------------------------------------------- synchro réelle du fichier
+
+def _pcm(f: Path, ss: float | None = None, t: float | None = None) -> np.ndarray:
+    cmd = [FFMPEG, "-v", "error"] + (["-ss", f"{ss:.4f}"] if ss is not None else []) + ["-i", str(f)] + \
+        (["-t", f"{t:.4f}"] if t else []) + ["-ac", "1", "-ar", "16000", "-f", "f32le", "-"]
+    return np.frombuffer(subprocess.run(cmd, capture_output=True).stdout, np.float32)
+
+
+def sync_problems(clip_media: Path, segs: list[dict], audio: Path, delay: float, fps: int, tol: float = 0.015) -> list[str]:
+    """Le son DU FICHIER monté (assets/source.mp4) est-il exactement celui prévu, morceau par morceau ? Corrélation
+    NORMALISÉE d'un extrait de 0,5 s au milieu de chaque morceau avec la source (12/10/2026 : on ne contrôlait que le plan,
+    pas le fichier ; le son dérivait de ~25 ms par raccord sans qu'aucun contrôle le voie). Morceaux de moins de 0,8 s
+    ignorés (extrait trop court pour une mesure sûre). Renvoie les morceaux décalés de plus de `tol`."""
+    import math
+    got = _pcm(clip_media)
+    out, off = [], 0.0
+    L, W = 0.5, 0.3
+    for k, s in enumerate(segs):
+        d = max(1, math.ceil((float(s["end"]) - float(s["start"])) * fps - 1e-3)) / fps
+        if d >= 0.8:
+            L_ = min(L, d - 0.1)
+            mid_rel, mid_src = off + d / 2, float(s["start"]) + d / 2 - delay
+            ref = _pcm(audio, mid_src - L_ / 2, L_).astype(np.float64)
+            lo = max(0, int((mid_rel - L_ / 2 - W) * 16000))
+            g = got[lo:int((mid_rel + L_ / 2 + W) * 16000)].astype(np.float64)
+            n = len(ref)
+            if n > 800 and len(g) > n and float((ref ** 2).sum()) > 1e-6:
+                cc = np.correlate(g, ref, "valid")
+                en = np.sqrt(np.convolve(g ** 2, np.ones(n), "valid") * (ref ** 2).sum()) + 1e-12
+                ncc = cc / en
+                i = int(np.argmax(ncc))
+                lag = (lo + i) / 16000 - (mid_rel - L_ / 2)
+                if ncc[i] > 0.5 and abs(lag) > tol:
+                    out.append(f"morceau {k + 1} décalé de {lag * 1000:+.0f} ms")
+                elif ncc[i] <= 0.5:
+                    out.append(f"morceau {k + 1} : son différent de la source (ressemblance {ncc[i]:.2f})")
+        off += d
+    return out
+
+
+# ----------------------------------------------------------------------------------------------- retraits de « euh » collés
+
+def _spec(wav: Path, a: float, b: float, hop: float = 0.01) -> tuple[np.ndarray, np.ndarray]:
+    """Spectre (trames de 25 ms tous les 10 ms) et énergie par trame entre a et b."""
+    x = _pcm(wav, max(0.0, a), b - max(0.0, a)).astype(np.float64)
+    n, h = 400, int(hop * 16000)
+    if len(x) < n + h:
+        return np.zeros((0, 201)), np.zeros(0)
+    fr = np.stack([x[i:i + n] * np.hanning(n) for i in range(0, len(x) - n, h)])
+    mag = np.abs(np.fft.rfft(fr, axis=1))
+    return np.log1p(mag), np.sqrt((fr ** 2).mean(1))
+
+
+def _steady_onset(wav: Path, t: float, ahead: float = 0.12) -> float | None:
+    """Coupe tombée en pleine voix avant un « euh » collé : instant (≥ t, ≤ t + ahead) où commence la voyelle TENUE (flux
+    spectral bas sur 3 trames) — avant lui : la fin du mot (détente, consonne), à garder. None si rien de stable."""
+    S, e = _spec(wav, t - 0.02, t + ahead + 0.06)
+    if len(S) < 6:
+        return None
+    flux = np.r_[0, np.sqrt(((S[1:] - S[:-1]) ** 2).mean(1))]
+    lim = np.percentile(flux, 35)
+    for i in range(2, len(flux) - 2):
+        if (flux[i:i + 3] <= lim).all() and e[i] > 0:
+            return round(t - 0.02 + i * 0.01, 3) if t - 0.02 + i * 0.01 > t + 0.005 else None
+    return None
+
+
+def _attack_start(wav: Path, t: float, back: float = 0.12) -> float | None:
+    """Début de morceau en pleine voix juste après un « euh » collé : instant (≤ t, ≥ t - back) où finit la voyelle tenue,
+    avant l'attaque du mot (flux qui remonte) — le mot qui suit garde son attaque."""
+    S, e = _spec(wav, t - back - 0.04, t + 0.06)
+    if len(S) < 6:
+        return None
+    flux = np.r_[0, np.sqrt(((S[1:] - S[:-1]) ** 2).mean(1))]
+    lim = np.percentile(flux, 35)
+    base = t - back - 0.04
+    for i in range(len(flux) - 3, 1, -1):
+        if (flux[i - 2:i + 1] <= lim).all():
+            nt = base + (i + 1) * 0.01
+            return round(nt, 3) if nt < t - 0.005 else None
+    return None
+
+
+def refine_joins(segs: list[dict], wav: Path, voiced: float = 0.25) -> tuple[list[dict], list[str]]:
+    """Retraits de « euh » coupés EN PLEINE VOIX (voix > `voiced` du niveau juste avant la coupe : E22, 9 coupes sur 18 dans le
+    short 1) : la fin du mot passait à la trappe (« job principal‖ », perçu comme « coupé trop tôt »). Fin recalée au début
+    du « euh » tenu, début du morceau suivant juste avant l'attaque du mot. Un morceau ne déborde jamais sur le suivant."""
+    segs = [dict(s) for s in segs]
+    log = []
+    ends, starts = passage_edges(segs)
+    for k in range(len(segs) - 1):
+        if k in ends:
+            continue
+        t = float(segs[k]["end"])
+        if end_ratio(wav, t, 0.04) > voiced:
+            nt = _steady_onset(wav, t)
+            if nt and nt < float(segs[k + 1]["start"]) - 0.02:
+                segs[k]["end"] = nt
+                log.append(f"fin de morceau {t:.2f} -> {nt:.2f} (fin du mot gardée, « euh » tenu laissé de côté)")
+    for k in range(1, len(segs)):
+        if k in starts:
+            continue
+        t = float(segs[k]["start"])
+        if start_ratio(wav, t, 0.04) > voiced:
+            nt = _attack_start(wav, t)
+            if nt and nt > float(segs[k - 1]["end"]) + 0.02:
+                segs[k]["start"] = nt
+                log.append(f"début de morceau {t:.2f} -> {nt:.2f} (attaque du mot gardée)")
+    for s in segs:
+        s["duration"] = round(float(s["end"]) - float(s["start"]), 3)
+    return segs, log

@@ -1171,6 +1171,13 @@ def cmd_polish(a: argparse.Namespace) -> None:
                 segs += drop_reactions(sg, words, wav, log=lambda m: console.print(m))
             c = _mark(dict(c, segments=segs, duration=round(sum(float(x["duration"]) for x in segs), 2)), "reactions")
             console.print("  réactions vides (« super intéressant »…) : contrôlées")
+        if "joins" not in (c.get("checks") or {}):
+            # retraits de « euh » coupés en pleine voix (12/10/2026) : la fin du mot et l'attaque du suivant sont gardées
+            from .strict import refine_joins
+            segs, log = refine_joins(c["segments"], wav)
+            for m in log:
+                console.print(f"  raccord recalé : {m}")
+            c = _mark(dict(c, segments=segs, duration=round(sum(float(x["duration"]) for x in segs), 2)), "joins")
         cap = brand.cfg.captions
         if cap.get("highlight_keywords") and cap.get("auto_keywords") and not c.get("keywords"):
             from .caption_check import pick_keywords

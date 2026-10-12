@@ -43,7 +43,8 @@ def extract_audio_wav(src: Path, dst: Path, sr: int = 16000) -> Path:
 
 
 def cut_segment(src: Path, dst: Path, start: float, duration: float, height: int | None = None,
-                normalize_audio: bool = True, fps: int | None = None) -> Path:
+                normalize_audio: bool = True, fps: int | None = None, frames: int | None = None,
+                video_only: bool = False) -> Path:
     """Découpe un segment ré-encodé (précis à l'image) avec audio normalisé."""
     dst.parent.mkdir(parents=True, exist_ok=True)
     vf = []
@@ -52,15 +53,47 @@ def cut_segment(src: Path, dst: Path, start: float, duration: float, height: int
     if fps:
         vf.append(f"fps={fps}")
     af = "loudnorm=I=-16:TP=-1.5:LRA=11" if normalize_audio else "anull"
+    # video_only : son reconstruit à part (rebuild_audio) — pas de piste AAC par morceau (décalage au recollage)
+    a_opts = ["-an"] if video_only else ["-map", "0:a:0?", "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-af", af]
     cmd = [FFMPEG, "-y", "-v", "error", "-ss", f"{start:.3f}", "-i", str(src), "-t", f"{duration:.3f}",
-           "-map", "0:v:0", "-map", "0:a:0?",
+           "-map", "0:v:0",
            "-c:v", "libx264", "-preset", "medium", "-crf", "10", "-pix_fmt", "yuv420p",   # intermédiaire quasi sans perte
-           "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-af", af, "-movflags", "+faststart"]
+           *a_opts, "-movflags", "+faststart"]
     if vf:
         cmd += ["-vf", ",".join(vf)]
+    if frames:
+        cmd += ["-frames:v", str(frames)]
     cmd.append(str(dst))
     run(cmd)
     return dst
+
+
+def rebuild_audio(clip_video: Path, audio_src: Path, pieces: list[tuple[float, float]], normalize: bool = True,
+                  fade: float = 0.006) -> Path:
+    """Remplace le son d'un clip assemblé par le son reconstruit EN UN SEUL PASSAGE depuis la source (12/10/2026).
+
+    Avant : chaque morceau avait son propre son AAC (préchauffage ~21 ms par fichier) recollé sans réencodage -> le son
+    prenait ~25 ms de retard PAR RACCORD (short 2 E22 : +295 ms au 8e morceau) : fin de la dernière phrase tronquée,
+    sous-titres et lèvres décalés ; et `loudnorm` appliqué morceau par morceau (gain dynamique qui étouffe attaques et
+    fins sur des morceaux de 0,5–5 s). Ici : chaque morceau (début dans la source, durée = durée EXACTE de sa vidéo)
+    est pris à l'échantillon près, fondu de 6 ms aux raccords (pas de clic, durée inchangée), puis un seul `loudnorm`."""
+    n = len(pieces)
+    chains = []
+    for j, (a, d) in enumerate(pieces):
+        f = min(fade, d / 4)
+        chains.append(f"[1:a]atrim=start={a:.5f}:duration={d:.5f},asetpts=PTS-STARTPTS,aresample=48000,"
+                      f"afade=t=in:d={f:.4f},afade=t=out:st={max(0.0, d - f):.5f}:d={f:.4f}[a{j}]")
+    post = "loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000" if normalize else "anull"
+    graph = ";".join(chains) + ";" + "".join(f"[a{j}]" for j in range(n)) + f"concat=n={n}:v=0:a=1,{post}[a]"
+    script = clip_video.with_suffix(".audio.graph.txt")
+    script.write_text(graph, encoding="utf-8")
+    tmp = clip_video.with_name(clip_video.stem + ".av.mp4")
+    run([FFMPEG, "-y", "-v", "error", "-i", str(clip_video), "-i", str(audio_src), "-/filter_complex", str(script),
+         "-map", "0:v:0", "-map", "[a]", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-ar", "48000",
+         "-movflags", "+faststart", str(tmp)])
+    script.unlink(missing_ok=True)
+    tmp.replace(clip_video)
+    return clip_video
 
 
 def concat_segments(parts: list[Path], dst: Path) -> Path:

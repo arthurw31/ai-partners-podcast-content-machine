@@ -100,6 +100,44 @@ def test_depart_sur_une_traine_corrige_en_avant():
     assert done and 2228.68 <= fixed[0]["start"] <= 2228.82, fixed[0]["start"]
 
 
+def test_durees_a_l_image_sans_double_arrondi():
+    """12/10/2026 : une durée déjà arrondie à l'image (6,266667 s) repassait à 189 images au lieu de 188 (erreur de
+    virgule flottante) -> une image de trop par morceau, son et image décalés de 33 ms par raccord."""
+    import math
+    for d in (6.25, 4.16, 6.85, 5.85, 7.45, 0.51, 3.08):
+        n1 = max(1, math.ceil(d * 30 - 1e-3))
+        q = round(n1 / 30, 6)
+        assert max(1, math.ceil(q * 30 - 1e-3)) == n1, (d, q)
+
+
+def test_son_reconstruit_a_la_bonne_duree():
+    """12/10/2026 « phrases coupées trop tôt » : le son des morceaux recollés sans réencodage prenait ~25 ms de retard par
+    raccord (préchauffage AAC) ; reconstruit en un passage, il doit durer exactement la somme des morceaux."""
+    wav = _e22()
+    import shutil, subprocess, tempfile
+    from clipper.media import FFMPEG, rebuild_audio
+    with tempfile.TemporaryDirectory() as d:
+        v = Path(d) / "v.mp4"
+        subprocess.run([FFMPEG, "-y", "-v", "error", "-f", "lavfi", "-i", "color=c=black:s=64x64:r=30:d=3.0",
+                        "-c:v", "libx264", str(v)], check=True)
+        pieces = [(2045.093, 0.5333333), (2046.023, 1.1), (2049.903, 1.3666667)]
+        rebuild_audio(v, wav, pieces, normalize=False)
+        out = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "a", "-show_entries", "stream=duration",
+                              "-of", "csv=p=0", str(v)], capture_output=True, text=True).stdout.strip()
+        assert abs(float(out) - sum(x for _, x in pieces)) < 0.03, out
+
+
+def test_retrait_euh_colle_garde_la_fin_du_mot():
+    """12/10/2026 : « …leur job principal‖euh » (short 2 E22, coupe à 2076,47 en pleine voix, 81 %) : la coupe est recalée
+    au début du « euh » tenu, la fin de « principal » est gardée."""
+    wav = _e22()
+    from clipper.strict import refine_joins
+    segs = [{"start": 2070.6, "end": 2076.47}, {"start": 2077.0, "end": 2077.77}, {"start": 2078.42, "end": 2080.0,
+                                                                                 "end_text": "x"}]
+    fixed, log = refine_joins(segs, wav)
+    assert fixed[0]["end"] > 2076.47 and fixed[0]["end"] < 2076.6, (fixed[0]["end"], log)
+
+
 class _Skip(Exception):
     pass
 
