@@ -23,6 +23,9 @@ Habillage (Arthur, 12/10/2026 : « les formes sont un peu vieillottes et moches,
 `base`, police Metropolis EMBARQUÉE dans le SVG (GitHub l'affiche comme une image : aucune police externe), cartes
 arrondies (Claude = `("…")` violet, humain = orange, entrée et livrables = pastilles `(["…"])` vertes), colonnes sur fond
 gris clair, dépendances entre colonnes en pointillés orange (`EXTRA_CSS` de `render_schema.py`). Pas d'hexagone ni de cylindre.
+Libellés COURTS (Arthur, 12/10/2026 : « trop de texte, écris seulement ce qui est important, éléments importants en gras ») :
+libellé Markdown de Mermaid ``"`**commande ou action**\nune ligne d'explication`"`` ; le détail va dans ARCHITECTURE.md et
+le skill, pas dans le schéma ; libellés de flèches de 1 à 3 mots.
 Légende = `docs/schema_legende.svg` (même script). Schéma interactif (Arthur, 12/10/2026 : « zoomer sans déformer la page ») :
 GitHub Pages sur `docs/` -> https://arthurw31.github.io/podcast-clipper/ (`docs/index.html` lit `schema.svg` : rien à
 mettre à jour, le push suffit ; `docs/.nojekyll`). Ce n'est PAS l'ancienne page artifact supprimée.

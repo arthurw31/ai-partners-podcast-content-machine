@@ -55,7 +55,7 @@ PAGE = """<!doctype html><meta charset="utf-8"><style>{fonts}</style><body><pre 
 import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@{ver}/dist/mermaid.esm.min.mjs";
 await document.fonts.load("17px Metropolis"); await document.fonts.load("bold 17px Metropolis");
 mermaid.initialize({{startOnLoad: false, securityLevel: "strict", htmlLabels: false, theme: "base",
-  flowchart: {{htmlLabels: false, curve: "basis", nodeSpacing: 46, rankSpacing: 52, padding: 18, diagramPadding: 28}},
+  flowchart: {{htmlLabels: false, curve: "basis", nodeSpacing: 46, rankSpacing: 52, padding: 18, diagramPadding: 28, wrappingWidth: 290}},
   themeVariables: {{fontFamily: "Metropolis, 'Segoe UI', Helvetica, Arial, sans-serif", fontSize: "17px",
     primaryColor: "#FFFFFF", primaryBorderColor: "#C9D3E6", primaryTextColor: "#1B2440", lineColor: "#9AA6BF",
     clusterBkg: "#F4F6FB", clusterBorder: "#E1E6F0", titleColor: "#151D53", edgeLabelBackground: "#FFFFFF",
