@@ -26,6 +26,8 @@
   #legend img { width: 100%; display: block; border-radius: 16px; }
   #legend button { position: absolute; top: 6px; right: 8px; border: 0; background: none; font-size: 18px; color: #5B6680; cursor: pointer; }
   #view { position: fixed; top: 64px; left: 0; right: 0; bottom: 0; overflow: hidden; cursor: grab; touch-action: none; }
+  /* glisser pour se déplacer ne doit jamais surligner le texte du schéma (retour d'Arthur, 12/10/2026) */
+  #view, #view *, .tools, #legend { -webkit-user-select: none; user-select: none; }
   #view.drag { cursor: grabbing; }
   #stage { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
   #stage svg { display: block; border-radius: 18px; box-shadow: 0 8px 30px rgba(21,29,83,.10); }
@@ -71,9 +73,10 @@
   const center = () => { const r = view.getBoundingClientRect(); return [r.width / 2, r.height / 2]; };
   view.addEventListener("wheel", e => { e.preventDefault(); const r = view.getBoundingClientRect();
     zoomAt(Math.exp(-e.deltaY * 0.0015), e.clientX - r.left, e.clientY - r.top); }, {passive: false});
-  view.addEventListener("dblclick", e => { const r = view.getBoundingClientRect(); zoomAt(1.8, e.clientX - r.left, e.clientY - r.top); });
+  view.addEventListener("selectstart", e => e.preventDefault());
+  view.addEventListener("dblclick", e => { getSelection().removeAllRanges(); const r = view.getBoundingClientRect(); zoomAt(1.8, e.clientX - r.left, e.clientY - r.top); });
   const pts = new Map(); let last = null, pinch = null;
-  view.addEventListener("pointerdown", e => { view.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]);
+  view.addEventListener("pointerdown", e => { e.preventDefault(); getSelection().removeAllRanges(); view.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]);
     view.classList.add("drag"); last = [e.clientX, e.clientY]; });
   view.addEventListener("pointermove", e => {
     if (!pts.has(e.pointerId)) return;
