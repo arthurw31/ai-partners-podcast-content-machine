@@ -80,7 +80,7 @@ def _ask_anthropic(system: str, user: str, model: str, max_tokens: int, images: 
 def _ask_claude_cli(system: str, user: str, model: str, images: list[Path] | None = None) -> dict:
     # alias courts acceptés par le CLI
     alias = {"claude-sonnet-5": "sonnet", "claude-opus-5": "opus", "claude-haiku-4-5-20251001": "haiku"}.get(model, model)
-    prompt = f"{system}\n\n---\n\n{user}"
+    prompt = user
     # cwd neutre pour ne pas charger le contexte d'un projet Claude Code
     # ignore_cleanup_errors : sous Windows, un process fils de `claude` peut encore verrouiller le dossier à la sortie
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
@@ -96,7 +96,14 @@ def _ask_claude_cli(system: str, user: str, model: str, images: list[Path] | Non
             tools = "Read"
         prompt_file = Path(tmp) / "prompt.txt"
         prompt_file.write_text(prompt, encoding="utf-8")
-        cmd = ["claude", "-p", "--output-format", "json", "--model", alias, "--tools", tools]
+        # Contexte MINIMAL (12/10/2026 : une relecture a chargé ~670 000 tokens, 6,8 $, et épuisé la limite de l'abonnement :
+        # le CLI embarquait les serveurs MCP, plugins, skills et le prompt système de Claude Code de l'utilisateur) :
+        # aucun serveur MCP, aucun skill, aucun réglage utilisateur (plugins, hooks), notre consigne comme prompt système.
+        sys_file = Path(tmp) / "system.txt"
+        sys_file.write_text(system, encoding="utf-8")
+        cmd = ["claude", "-p", "--output-format", "json", "--model", alias, "--tools", tools,
+               "--strict-mcp-config", "--mcp-config", '{"mcpServers":{}}', "--disable-slash-commands",
+               "--setting-sources", "local", "--system-prompt-file", str(sys_file)]
         if tools:
             cmd += ["--allowedTools", tools]
         with open(prompt_file, "r", encoding="utf-8") as fh:
@@ -108,6 +115,28 @@ def _ask_claude_cli(system: str, user: str, model: str, images: list[Path] | Non
     try:
         payload = json.loads(res.stdout)
         text = payload.get("result", "")
+        _log_usage(alias, payload)
     except json.JSONDecodeError:
         text = res.stdout
     return _extract_json(text)
+
+
+def _log_usage(model: str, payload: dict) -> None:
+    """Tokens et coût de chaque appel : affichés, et ajoutés à output/llm_usage.csv ; alerte au-delà de 150 000 tokens
+    d'entrée (un appel normal du projet en fait 5 000 à 60 000)."""
+    from datetime import datetime
+    u = payload.get("usage") or {}
+    tokens = sum(int(u.get(k) or 0) for k in ("input_tokens", "cache_creation_input_tokens", "cache_read_input_tokens"))
+    cost = float(payload.get("total_cost_usd") or 0)
+    print(f"  [tokens] {model} : {tokens} en entrée, {int(u.get('output_tokens') or 0)} en sortie, ~{cost:.2f} $"
+          + ("  <- ANORMAL, vérifier le contexte envoyé" if tokens > 150_000 else ""))
+    try:
+        log = Path(__file__).resolve().parent.parent / "output" / "llm_usage.csv"
+        log.parent.mkdir(parents=True, exist_ok=True)
+        new = not log.exists()
+        with open(log, "a", encoding="utf-8") as fh:
+            if new:
+                fh.write("date;modele;tokens_entree;tokens_sortie;cout_usd\n")
+            fh.write(f"{datetime.now():%Y-%m-%d %H:%M};{model};{tokens};{int(u.get('output_tokens') or 0)};{cost:.4f}\n")
+    except OSError:
+        pass

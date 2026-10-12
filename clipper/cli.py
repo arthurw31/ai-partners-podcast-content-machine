@@ -786,6 +786,38 @@ def cmd_newsletter(a: argparse.Namespace) -> None:
                   f"l'équipe valide, puis : {base} --final")
 
 
+def cmd_review(a: argparse.Namespace) -> None:
+    """Relecture critique par un Claude sans contexte (Arthur, 12/10/2026), une fois le contrôle `qa` propre, avant de
+    montrer un livrable à l'équipe. Un appel par livrable, jamais deux fois sur un livrable inchangé."""
+    from .review import review
+    brand = Brand(a.brand)
+    video = resolve_input(brand, a.input)
+    ep = episode_dir(brand, video)
+    if a.episode:
+        targets = [("episode", None)]
+    elif a.carousel:
+        targets = [("carousel", None)]
+    elif a.newsletter:
+        targets = [("newsletter", None)]
+    else:
+        only = _parse_only(a.only)
+        if not only:
+            sys.exit("Préciser le livrable : --only N (short), --episode, --carousel ou --newsletter")
+        targets = [("short", n) for n in only]
+    worst = "OK"
+    for kind, n in targets:
+        res = review(brand, ep, kind, n, force=a.force, model=a.model or None)
+        color = {"OK": "green", "ATTENTION": "yellow"}.get(res["verdict"], "red")
+        console.print(f"[{color}]{res['verdict']}[/{color}] {res['deliverable']} : {len(res['issues'])} défaut(s) "
+                      f"-> {ep / 'qa' / ('review_' + res['deliverable'] + '.md')}")
+        for i in res["issues"]:
+            console.print(f"  {i['severity']} · {i['where']} · {i['problem']}")
+        if res["verdict"] == "A_CORRIGER" or (res["verdict"] == "ATTENTION" and worst == "OK"):
+            worst = res["verdict"]
+    if worst == "A_CORRIGER":
+        sys.exit(1)
+
+
 def cmd_outro(a: argparse.Namespace) -> None:
     """Outro des shorts (carte YouTube avec la miniature validée) rendue une fois, puis collée à chaque short -> livrables/."""
     from .short_outro import apply
@@ -1467,6 +1499,14 @@ def main(argv: list[str] | None = None) -> None:
     sp.add_argument("--by", default="", help="qui a validé (prénom)")
     sp.add_argument("--note", default="", help="précision pour la rédaction, ou remarque avec --final")
     sp.set_defaults(fn=cmd_newsletter)
+    sp = sub.add_parser("review", help="relecture critique par un Claude sans contexte, avant de montrer un livrable à l'équipe")
+    common(sp)
+    sp.add_argument("--only", default="", help="shorts à relire, ex: 1,3")
+    sp.add_argument("--episode", action="store_true", help="relire l'aperçu de l'épisode (et le teaser)")
+    sp.add_argument("--carousel", action="store_true", help="relire le carrousel LinkedIn")
+    sp.add_argument("--newsletter", action="store_true", help="relire le mail de Thomas")
+    sp.add_argument("--model", default="", help="modèle du relecteur (défaut : review.model, Opus)")
+    sp.set_defaults(fn=cmd_review)
     sp = sub.add_parser("outro", help="après le choix de la miniature : outro des shorts (carte YouTube) collée à chaque short -> livrables/")
     common(sp)
     sp.add_argument("--only", default="", help="numéros des shorts, ex: 1,3 (défaut : tous les shorts rendus)")

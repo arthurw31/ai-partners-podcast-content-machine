@@ -30,6 +30,13 @@ il ne tape aucune commande, tu fais tout et tu lui parles simplement (pas de jar
 Dès que la transcription est prête, lance donc `propose`, `titles` ET `carousel` (en arrière-plan) et, si l'épisode complet est
 demandé, `episode-plan` : l'équipe peut choisir les passages et le titre pendant que le reste tourne.
 
+**Relecture critique avant chaque validation** (Arthur, 12/10/2026) : une fois le contrôle `qa` propre, et AVANT de montrer
+un livrable à l'équipe, lance `python -m clipper review --brand <m> --input <E>.mp4 --only N | --episode | --carousel |
+--newsletter` : un Claude Opus SANS le contexte de la conversation relit le livrable contre `config/review_checklist.md`.
+Défaut ÉCHEC -> corrige (boucle « à corriger ») puis relance ; ATTENTION et remarques de goût -> dis-les à Arthur avec le
+livrable. Une seule relecture par version (un livrable inchangé n'est pas relu deux fois) : ne la lance qu'une fois tous
+les défauts mesurables corrigés, pour ne pas payer plusieurs relectures.
+
 **Huit moments où l'humain décide** (rien ne passe sans) : les 5 passages, la validation des aperçus des shorts, la
 validation de l'aperçu de l'épisode, le titre, la miniature, l'angle du carrousel, la validation du carrousel, la
 validation du mail de Thomas. Avant chaque aperçu, la vidéo passe le contrôle

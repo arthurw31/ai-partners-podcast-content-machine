@@ -188,6 +188,11 @@ carousel:
     post_line: "📅 Réserver un échange avec nous : {url}"
     episode: "L'épisode complet : AI Corner {number}, sur YouTube"
 
+# Relecture critique sans contexte (Arthur, 12/10/2026 : « un regard neuf et plus critique, un modèle assez performant ;
+# attention à la consommation de tokens ») : commande `review`, checklist config/review_checklist.md
+review:
+  model: "claude-opus-5"
+
 # Mail podcast de Thomas (idée de Thomas, 08/10/2026 : « un mail qui part direct de la part du founder, en plus de la
 # newsletter ») : commande `newsletter`, brief dans newsletter.md. En français, vouvoiement, mis en page.
 newsletter:

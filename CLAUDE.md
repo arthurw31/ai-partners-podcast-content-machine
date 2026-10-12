@@ -228,6 +228,25 @@ newsletter dans ce style-là : un mail qui part direct de la part du founder »)
   (provisoires sinon : signalé), la photo détourée de l'invité (`carousel.portraits`). Bandeau rendu par Chrome
   (`outro_bg.png` en `mix-blend-mode: screen` : son fond est noir). `--final` exige lien YouTube + titre + miniature.
 
+## Relecture critique sans contexte : `review` (Arthur, 12/10/2026 : « un sous-agent qui n'a pas le contexte de la
+conversation principale, pour un regard neuf et plus critique ; un modèle assez performant » puis « attention à la
+consommation de tokens »)
+
+- `qa` (code) MESURE ; `review` (Claude Opus, `review.model`) JUGE ce qui demande un œil, juste avant de montrer un livrable
+  à l'équipe : sens, cadrage, lisibilité, fidélité à l'épisode, règles validées (`config/review_checklist.md`, une section
+  par type : seule la section utile est envoyée). Il ne voit ni n'entend la vidéo : planche d'images, « ce qu'on entend »,
+  rapport `qa`, passages exacts de l'épisode. Défaut sans « où » ni règle = écarté ; ÉCHEC -> boucle « à corriger ».
+- Test sur le carrousel E22 : sans les passages de l'épisode, le relecteur prenait des citations vérifiées et des faits dits
+  ailleurs (« 3 000 agents » à 34:04, « contrat avec Microsoft ») pour des inventions -> `_passages` fournit l'extrait exact
+  autour de chaque preuve, citation, chiffre et expression entre « ». Défauts réels trouvés : « 1 000 licences » au lieu de
+  « près de 1 000 », « GLISSEZ » illisible sur la chemise blanche, « 5 étapes dans l'ordre » alors que l'invité décrit des
+  chantiers en parallèle, « marché par marché » non dit.
+- **Coût des appels à `claude -p`** (12/10/2026) : une relecture a chargé ~670 000 tokens (6,8 $) et épuisé la limite de
+  l'abonnement — le CLI embarquait les serveurs MCP, plugins, skills et le prompt système de Claude Code de l'utilisateur.
+  `llm._ask_claude_cli` lance désormais `claude -p` avec `--strict-mcp-config --mcp-config {"mcpServers":{}}
+  --disable-slash-commands --setting-sources local --system-prompt-file` (notre consigne comme prompt système) ; chaque appel
+  affiche ses tokens et son coût et les ajoute à `output/llm_usage.csv` (alerte > 150 000 tokens d'entrée).
+
 ## Outro des shorts : `outro` (Arthur, 09/10/2026 : « pour les shorts, mettre en outro la première des 4 outros en motion design,
 call to action avec la miniature ; on peut monter les shorts en parallèle, mais pour créer l'outro et la rajouter à la fin des
 shorts il faut que la miniature soit validée »)

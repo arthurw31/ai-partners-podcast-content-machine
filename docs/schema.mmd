@@ -21,7 +21,10 @@ Claude propose ~10 passages`") --> S2["`**L'équipe choisit 5 passages**
         S3 --> S4["`**qa + aperçus MP4**
 contrôle strict, correction auto`"]
         S4 -->|à corriger| S3
-        S4 -->|OK| S5["`**L'équipe valide les aperçus**`"]
+        S4 -->|OK| SR("`**review**
+relecteur Claude sans contexte`")
+        SR -->|à corriger| S3
+        SR -->|OK| S5["`**L'équipe valide les aperçus**`"]
         S5 -->|retouche| S3
         S5 -->|validé| S6["`**render 1080p et posts**
 1 post LinkedIn par short`"]
@@ -44,7 +47,10 @@ script de Claude, extraits vérifiés`")
 aperçu 540p`"]
         E6 --> E7["`**qa --episode**
 raccords, image, volume`"]
-        E7 -->|OK| E8["`**L'équipe valide l'aperçu**`"]
+        E7 -->|OK| ER("`**review**
+relecteur Claude sans contexte`")
+        ER -->|à corriger| E6
+        ER -->|OK| E8["`**L'équipe valide l'aperçu**`"]
         E7 -->|à corriger| E6
         E8 -->|retouche| E6
         E8 -->|validé| E9["`**episode-render 1080p**
@@ -73,7 +79,10 @@ citations vérifiées, CTA final`")
 avec le lien de réservation`")
         C3b --> C4["`**Rendu PDF**
 charte AI Partners`"]
-        C4 --> C5["`**L'équipe valide**
+        C4 --> CR("`**review**
+relecteur Claude sans contexte`")
+        CR -->|à corriger| C3
+        CR -->|OK| C5["`**L'équipe valide**
 (carousel --final STYLE)`"]
         C5 -->|retouche| C4
     end
@@ -84,7 +93,10 @@ charte AI Partners`"]
 Claude écrit le mail de Thomas`")
         N1 --> N2["`**Mail mis en page**
 photo, miniature YouTube`"]
-        N2 --> N3["`**L'équipe valide le mail**
+        N2 --> NR("`**review**
+relecteur Claude sans contexte`")
+        NR -->|à corriger| N1
+        NR -->|OK| N3["`**L'équipe valide le mail**
 (newsletter --final)`"]
         N3 -->|retouche| N2
     end
@@ -108,5 +120,5 @@ prêt à envoyer`"])
     classDef llm fill:#F1F0FF,stroke:#7B6CF6,stroke-width:1.5px,color:#2B2366;
     classDef deliver fill:#E8F8F0,stroke:#12A26B,stroke-width:1.5px,color:#0B3B29;
     class IN,S2,S5,E8,M2,M4,C2,C5,N3 human;
-    class S1,E1,E4,M1,C1,C3,C3b,N1 llm;
+    class S1,E1,E4,M1,C1,C3,C3b,N1,SR,ER,CR,NR llm;
     class L1,L2,L3,L4,L5 deliver;
