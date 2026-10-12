@@ -27,7 +27,7 @@ Libellés COURTS (Arthur, 12/10/2026 : « trop de texte, écris seulement ce qui
 libellé Markdown de Mermaid ``"`**commande ou action**\nune ligne d'explication`"`` ; le détail va dans ARCHITECTURE.md et
 le skill, pas dans le schéma ; libellés de flèches de 1 à 3 mots.
 Légende = `docs/schema_legende.svg` (même script). Schéma interactif (Arthur, 12/10/2026 : « zoomer sans déformer la page ») :
-GitHub Pages sur `docs/` -> https://arthurw31.github.io/podcast-clipper/ (`docs/index.html` lit `schema.svg` : rien à
+GitHub Pages sur `docs/` -> https://arthurw31.github.io/ai-partners-podcast-content-machine/ (`docs/index.html` lit `schema.svg` : rien à
 mettre à jour, le push suffit ; `docs/.nojekyll`). Ce n'est PAS l'ancienne page artifact supprimée.
 À CHAQUE modification du process (nouvelle commande, étape ajoutée, retirée ou déplacée, nouvelle validation humaine, nouveau
 livrable), dans le MÊME commit :

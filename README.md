@@ -21,11 +21,11 @@ Deux façons de l'utiliser :
 
 ![Légende du schéma : violet = Claude rédige ou choisit, orange = l'équipe décide, blanc = automatique, vert = livrable ; flèche pleine = étape suivante, pointillés orange = attend une autre colonne](docs/schema_legende.svg)
 
-**🔍 [Ouvrir le schéma interactif](https://arthurw31.github.io/podcast-clipper/)** (ou cliquer dessus) : zoom à la molette
+**🔍 [Ouvrir le schéma interactif](https://arthurw31.github.io/ai-partners-podcast-content-machine/)** (ou cliquer dessus) : zoom à la molette
 ou au pincement, déplacement en glissant, net à tout zoom. Version image seule :
-[schema.svg](https://raw.githubusercontent.com/arthurw31/podcast-clipper/main/docs/schema.svg).
+[schema.svg](https://raw.githubusercontent.com/arthurw31/ai-partners-podcast-content-machine/main/docs/schema.svg).
 
-[![Schéma du process : des rushs du tournage à tous les livrables](docs/schema.svg)](https://arthurw31.github.io/podcast-clipper/)
+[![Schéma du process : des rushs du tournage à tous les livrables](docs/schema.svg)](https://arthurw31.github.io/ai-partners-podcast-content-machine/)
 
 <sub>Source du schéma : [docs/schema.mmd](docs/schema.mmd) (Mermaid). L'image est régénérée par `python scripts/render_schema.py` (un schéma Mermaid dessiné en direct par GitHub ne s'affiche pas dans tous les navigateurs).</sub>
 
@@ -52,11 +52,11 @@ l'épisode et choisir le titre en même temps.
    reçue par e-mail (il faut un compte GitHub) ; s'il est public, rien à faire.
 3. Dans Claude Code, ouvrez un dossier de travail (ex. `Documents`) et écrivez :
 
-   > clone https://github.com/arthurw31/podcast-clipper et installe tout ce qu'il faut
+   > clone https://github.com/arthurw31/ai-partners-podcast-content-machine et installe tout ce qu'il faut
 
    Claude récupère le projet, installe Python, Node, FFmpeg et les dépendances (validez les fenêtres
    d'installation si Windows en affiche), puis vérifie que tout est prêt.
-4. Ouvrez le dossier `podcast-clipper` dans Claude Code. C'est prêt : déposez un épisode dans `depot/` et
+4. Ouvrez le dossier `ai-partners-podcast-content-machine` dans Claude Code. C'est prêt : déposez un épisode dans `depot/` et
    écrivez « fais-moi 5 shorts de ce podcast » (ou `/podcast-clips`).
 
 Pour récupérer les améliorations plus tard : « mets à jour le projet » (Claude fait un `git pull`).
@@ -82,15 +82,15 @@ Ordres de grandeur sans GPU (PC portable) : transcription ≈ 20 min pour un ép
 
 ## 2. Installation
 
-Le plus simple : ouvrez Claude Code et écrivez « clone https://github.com/arthurw31/podcast-clipper et
+Le plus simple : ouvrez Claude Code et écrivez « clone https://github.com/arthurw31/ai-partners-podcast-content-machine et
 installe tout ce qu'il faut pour que je puisse l'utiliser ». Claude lance le script d'installation, vous
 demande votre clé Pexels et vérifie que tout fonctionne.
 
 À la main :
 
 ```bash
-git clone https://github.com/arthurw31/podcast-clipper.git
-cd podcast-clipper
+git clone https://github.com/arthurw31/ai-partners-podcast-content-machine.git
+cd ai-partners-podcast-content-machine
 powershell -ExecutionPolicy Bypass -File scripts\setup.ps1      # Windows
 bash scripts/setup.sh                                            # macOS / Linux
 ```
