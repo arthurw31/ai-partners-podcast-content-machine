@@ -21,10 +21,11 @@ Deux façons de l'utiliser :
 
 ![Légende du schéma : violet = Claude rédige ou choisit, orange = l'équipe décide, blanc = automatique, vert = livrable ; flèche pleine = étape suivante, pointillés orange = attend une autre colonne](docs/schema_legende.svg)
 
-**🔍 [Ouvrir le schéma en grand](https://raw.githubusercontent.com/arthurw31/podcast-clipper/main/docs/schema.svg)** (ou cliquer dessus) :
-il s'ouvre seul dans un onglet, en taille réelle, et reste net quel que soit le zoom.
+**🔍 [Ouvrir le schéma interactif](https://arthurw31.github.io/podcast-clipper/)** (ou cliquer dessus) : zoom à la molette
+ou au pincement, déplacement en glissant, net à tout zoom. Version image seule :
+[schema.svg](https://raw.githubusercontent.com/arthurw31/podcast-clipper/main/docs/schema.svg).
 
-[![Schéma du process : des rushs du tournage à tous les livrables](docs/schema.svg)](https://raw.githubusercontent.com/arthurw31/podcast-clipper/main/docs/schema.svg)
+[![Schéma du process : des rushs du tournage à tous les livrables](docs/schema.svg)](https://arthurw31.github.io/podcast-clipper/)
 
 <sub>Source du schéma : [docs/schema.mmd](docs/schema.mmd) (Mermaid). L'image est régénérée par `python scripts/render_schema.py` (un schéma Mermaid dessiné en direct par GitHub ne s'affiche pas dans tous les navigateurs).</sub>
 
