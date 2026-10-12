@@ -229,6 +229,13 @@ la validation se fait sur les aperçus MP4.
 - **Jamais de pensée coupée** : chaque extrait commence au début d'une phrase et finit sur une fin de phrase
   complète (le LLM cite les premiers et derniers mots exacts ; le code cale les timecodes dessus et n'attrape
   jamais le début de la phrase suivante). Un extrait peut dépasser la durée cible de quelques secondes pour finir l'idée.
+- **Contrôle qualité intransigeant** (process validé le 12/10/2026), à chaque short, avant tout aperçu et après chaque
+  rendu, avec correction automatique en boucle (6 tours) : jamais une fin de phrase coupée (le son doit être retombé dans
+  le silence ; un modèle d'intonation, Smart Turn, vérifie que la pensée est finie), jamais de « euh » ni de « hmm »
+  d'acquiescement (les mots sont alignés sur le son par un modèle français), son exactement synchronisé avec l'image,
+  jamais deux sous-titres à l'écran en même temps, aucun écran noir. Avec chaque short : un **film des moments à risque**
+  (`qa/moments_NN.mp4`, chaque raccord + la fin) pour valider en quelques secondes. Cas déjà rencontrés vérifiés par
+  `python scripts/test_qualite.py`.
 - **Recadrage vertical intelligent** : gros plans centrés sur le visage, plans larges recadrés sur celui qui
   parle (d'après les tours de parole) ou en écran partagé.
 - **Le B-roll ne couvre jamais un visage** (placement automatique, sinon plein écran).

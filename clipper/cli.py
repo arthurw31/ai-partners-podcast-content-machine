@@ -574,9 +574,15 @@ def cmd_doctor(_: argparse.Namespace) -> None:
         alt = fallback_browser()
         check("navigateur de rendu", bool(alt), f"Chrome embarqué bloqué par Windows -> {alt or '?'}",
               "installer Google Chrome, ou renseigner HYPERFRAMES_BROWSER_PATH dans .env")
-    for mod, pipname in [("faster_whisper", "faster-whisper"), ("cv2", "opencv-python"), ("jinja2", "jinja2"), ("yaml", "pyyaml"), ("rich", "rich"), ("requests", "requests"), ("dotenv", "python-dotenv")]:
+    for mod, pipname in [("faster_whisper", "faster-whisper"), ("cv2", "opencv-python"), ("jinja2", "jinja2"), ("yaml", "pyyaml"), ("rich", "rich"), ("requests", "requests"), ("dotenv", "python-dotenv"), ("onnxruntime", "onnxruntime"), ("transformers", "transformers")]:
         check(f"python: {pipname}", importlib.util.find_spec(mod) is not None, "", "pip install -r requirements.txt")
     check("modèle visages (YuNet)", (ROOT / "models" / "face_detection_yunet_2023mar.onnx").exists(), "", "fichier models/face_detection_yunet_2023mar.onnx manquant (voir README)")
+    # contrôle des coupes (clipper/endpoint.py) : Smart Turn v3 + alignement CTC français, téléchargés au 1er usage (~1,2 Go)
+    from .endpoint import CTC_DIR, TURN_DIR, TURN_FILE
+    have = (TURN_DIR / TURN_FILE).exists() and (CTC_DIR / "model.safetensors").exists()
+    console.print(f"  {'[green]OK[/green]' if have else '[yellow]--[/yellow]'}  modèles de contrôle des coupes   "
+                  + ("models/hf/ (Smart Turn v3 + wav2vec2 français)" if have else
+                     "absents : téléchargés au premier `polish` (~1,2 Go), ou `python -c \"from clipper.endpoint import ensure_models; ensure_models()\"`"))
     # Pexels ne sert qu'au B-roll : facultatif (AI Corner n'en utilise pas) — signalé sans bloquer
     if env("PEXELS_API_KEY"):
         check("PEXELS_API_KEY", True, "")

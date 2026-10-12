@@ -166,32 +166,41 @@ passage suivant. Corrige dans `clips.json` et relance `check`.
 python -m clipper polish --brand <marque> --input <fichier> --only 1,2,3,4,5      # arrière-plan, ≈ 6–8 min/short
 ```
 
-`polish` enchaîne, pour chaque short, dans UN seul processus (Whisper chargé une fois) :
+`polish` enchaîne, pour chaque short, dans UN seul processus (Whisper chargé une fois). Process **validé par Arthur le
+12/10/2026** (« c'est clean, le process a l'air de fonctionner ») — l'équipe marketing exige mieux que le monteur actuel :
 
 1. `tighten` — blancs et « euh » entre les mots (trous > 0,6 s ; en dessous = respiration, on garde) ;
-2. `verify --fix` — contrôle « à l'oreille » : vraies fins de phrase (ponctuation stable + vraie pause dans le son),
-   bords recalés sur la voix, « euh » isolés retirés, et **chaque fin attend la fin de la voix + ~0,35 s de
-   respiration, sans jamais entendre le début de la phrase suivante** (`verify.pad_end`) ;
-3. `fillers` — « euh » collés aux mots (voyelles tenues détectées dans le son) ; toutes les coupes d'un passage
-   validées en une écoute, sinon une par une : jamais un mot perdu, jamais un raccord dans un mot ;
-4. `build` — montage ; les **sous-titres sont contrôlés à l'écoute** : le montage est écouté 2 fois, tout mot entendu
-   les 2 fois est sous-titré, les bouts de phrase non entendus près d'un raccord sont retirés
-   (`clips/<clip>/captions_check.txt`) ; flash lumineux seulement quand l'angle de caméra change ;
-5. `qa` — **1er contrôle** (rapport `output/<marque>/<episode>/qa/clip_NN.md`) : raccords à l'écoute, fins jamais
-   pendant la voix, début de la phrase suivante jamais entendu, sous-titres complets, composition valide, durée ;
-   un ÉCHEC arrête la chaîne (à corriger, puis relancer `polish --only N`) ;
-6. aperçus **MP4** (12 i/s, brouillon, 2 à la fois ; ≈ 2–3 min/short) dans `output/…/apercus/` ;
-7. `qa --render` — **2e contrôle** sur l'aperçu : format, durée, volume -16 LUFS, et une **planche d'images**
-   (`qa/qa_images_NN.png`) que tu DOIS regarder (Read) avant d'envoyer le lien : visages cadrés, logos, bulle,
-   sous-titres (pas de carte de fin : l'outro est ajoutée à la livraison, étape 5).
+2. `verify --fix` — vraies fins de phrase (ponctuation stable + vraie pause), bords recalés sur la voix, « euh » isolés
+   retirés, chaque fin attend la fin de la voix + ~0,35 s de respiration sans entendre la phrase suivante (`pad_end`) ;
+3. `fillers` — « euh » collés aux mots (voyelles tenues) ; jamais un mot perdu, jamais un raccord dans un mot ;
+4. réactions vides retirées (« super intéressant »…) ;
+5. `joins` — retraits coupés en pleine voix recalés : la fin du mot et l'attaque du suivant sont gardées ;
+6. `ctc` — **mots alignés sur le son** (wav2vec2 français) : toute voix sans mot ≥ 0,35 s entre deux mots est retirée
+   (« euh » que `fillers` n'a pas pu couper, « hmm » d'acquiescement de l'animateur) ; mots élidés (« qu'il ») jamais coupés ;
+7. `build` — montage ; **son reconstruit en un seul passage** depuis le micro (à l'échantillon près, fondus de 6 ms, un seul
+   réglage de volume ; jamais de son recollé morceau par morceau : il dérivait de ~25 ms par raccord) ; sous-titres
+   contrôlés à l'écoute (2 écoutes) ; flash lumineux seulement quand l'angle de caméra change ;
+8. `qa` — **contrôle intransigeant** (rapport `qa/clip_NN.md`) : raccords à l'écoute (mot coupé), fins jamais pendant la
+   voix, bords de phrase stricts (voix retombée sous 10 % pendant 0,12 s), **pensée finie** (Smart Turn : fin du short
+   < 0,5 = ÉCHEC), synchro du **fichier** monté (± 15 ms par morceau), sous-titres jamais superposés, composition, durée ;
+9. **boucle de correction automatique, 6 tours** : bord de phrase dans la voix -> recalé dans le silence ; raccord entendu
+   dans un mot -> ce retrait est annulé ; puis remontage et nouveau contrôle. Ce qui reste en ÉCHEC n'a ni aperçu ni rendu ;
+10. aperçus **MP4** (12 i/s) dans `output/…/apercus/` ;
+11. `qa --render` — 2e contrôle sur l'aperçu : format, durée, volume -16 LUFS, **aucun écran noir**, une **planche d'images**
+    (`qa/qa_images_NN.png`, à REGARDER avant d'envoyer le lien) et le **film des moments à risque** (`qa/moments_NN.mp4` :
+    chaque raccord ± 1,5 s + la fin, ~20–40 s), à donner avec chaque short.
 
-Les étapes 1–3 déjà faites sont sautées (`checks` dans `clips.json`) : relancer `polish` après une retouche ne
-recoupe rien deux fois. `--redo` repart des passages d'origine (`clips_before_tighten.json`).
+Les étapes 1–6 déjà faites sont sautées (`checks` dans `clips.json`) ; `--redo` repart des passages d'origine
+(`clips_before_tighten.json`). Sauvegardes : `clips_before_fillers.json`, `clips_before_ctc.json`.
 
-**Boucle « à corriger » (Arthur, 09/10/2026 : la même que pour l'épisode complet)** : lis chaque rapport `qa/clip_NN.md` et
-regarde chaque planche. Un ÉCHEC, une ATTENTION qui s'entend ou se voit (mot coupé, fin dans la voix, sous-titre manquant,
-visage mal cadré, volume) -> corrige toi-même (`clips.json` : passages, coupes, `hook_title` ; ou la config) et relance
-`polish --only N`, jusqu'à un contrôle propre. Seuls les shorts propres partent en validation ; dis ce que tu as corrigé.
+**Après tout changement de code** du nettoyage ou des contrôles : `python scripts/test_qualite.py` (cas réels E22, tous
+OK attendus). **Chaque défaut signalé par l'équipe** (short + seconde) -> corrigé ET ajouté comme test dans ce script.
+
+**Boucle « à corriger » (Arthur, 09/10/2026)** : lis chaque rapport `qa/clip_NN.md` et regarde chaque planche. Ce que la
+boucle automatique n'a pas réglé (ÉCHEC restant, ATTENTION qui s'entend ou se voit) -> corrige toi-même (`clips.json` :
+passages, coupes, `hook_title` ; ou la config) et relance `polish --only N`. Pour un passage difficile (hésitations en
+cascade), place les coupes d'après l'alignement (`clipper.endpoint.align`) et l'énergie du son, pas d'après Whisper.
+Seuls les shorts propres partent en validation ; dis ce que tu as corrigé.
 
 Puis le **3e contrôle, humain** : envoie à l'utilisateur les liens cliquables vers les MP4 (jamais seulement le
 Studio HyperFrames, qui bugue chez Arthur), un par short, avec le titre de la bulle, plus ce que le rapport `qa`
@@ -228,6 +237,8 @@ python -m clipper qa     --brand <marque> --input <fichier> --only N --render   
 - Ne réécrase jamais un MP4 déjà livré : renomme l'ancien (`…_v1_<date>.mp4`) avant le rendu (un fichier ouvert
   dans le lecteur de l'utilisateur bloque l'écriture).
 - `qa --render` doit être OK (ou ATTENTION expliquée) ; regarde la planche d'images du MP4 final.
+- `outro` vérifie chaque livrable : H.264 `yuv420p` (sinon illisible sur Windows / téléphone), aucun écran noir entre le
+  short et l'outro. Miniature pas encore choisie : `outro --thumb <image>` -> `livrables_provisoires/` (provisoire).
 - Les shorts sont rendus SANS carte de fin. Dès que l'équipe a choisi la miniature (`thumbnail --pick`, section « Titre et
   miniature »), lance `python -m clipper outro --brand <marque> --input <fichier>` : l'outro « carte YouTube » avec la
   miniature est rendue une fois et collée à chaque short -> `output/<marque>/<episode>/livrables/`. Un short signalé

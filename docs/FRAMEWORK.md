@@ -30,8 +30,12 @@ Une vidéo est d'abord une « page » (images + sous-titres, logos, transitions 
 en est une version rapide (un peu saccadée, 12 images/s) à ouvrir dans votre lecteur vidéo habituel : idéal pour
 vérifier le contenu. Le **rendu** final la transforme en MP4 net et fluide (≈ 10 min par short) : on ne le fait
 qu'une fois, après votre validation. Avant qu'un aperçu vous soit montré, le contrôle qualité automatique est passé
-(aucun mot coupé à un raccord, fins de phrase complètes, « euh » retirés sans perdre un mot, sous-titres vérifiés à
-l'écoute, volume -16 LUFS) ; tant qu'il trouve un défaut, Claude corrige et recommence. Rapports : `output/…/qa/`.
+(aucun mot coupé à un raccord, fins de phrase retombées dans le silence et pensée finie, « euh » et « hmm » retirés
+sans perdre un mot, son synchronisé au morceau près, sous-titres vérifiés à l'écoute et jamais superposés, aucun écran
+noir, volume -16 LUFS) ; tant qu'il trouve un défaut, il corrige seul et recommence (6 tours), puis Claude reprend ce qui
+reste. Rapports : `output/…/qa/` ; à regarder en premier : `qa/moments_NN.mp4` (raccords + fin du short, ~30 s).
+Vous trouvez quand même un accroc ? Donnez à Claude le short et la seconde : il le corrige et l'ajoute aux tests
+(`scripts/test_qualite.py`) pour qu'il ne revienne jamais.
 
 ## Modifier le format (tout est dans des fichiers texte)
 

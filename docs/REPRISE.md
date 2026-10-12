@@ -1,4 +1,4 @@
-# Reprise de session — état au 08/10/2026 (fin d'après-midi)
+# Reprise de session — état au 12/10/2026
 
 À lire par une nouvelle session Claude Code qui reprend le projet (changement de compte Claude : même PC, mêmes
 dossiers). Les règles durables sont dans [CLAUDE.md](../CLAUDE.md) ; ce fichier dit **où on en est** et **ce qui reste**.
@@ -27,19 +27,24 @@ dossiers). Les règles durables sont dans [CLAUDE.md](../CLAUDE.md) ; ce fichier
 Commande de base : `python -m clipper <commande> --brand ai-corner --input E22_nicolas-comestaz_coty.mp4`
 (+ `--guest "Nicolas Comestaz" --company Coty --host "Thomas Spitz (CEO AI Partners)"` pour `episode-*`).
 
-## Où on en est (08/10/2026, fin de journée)
+## Où on en est (12/10/2026)
 
-1. **5 shorts E22** livrés le 07/10 dans l'ancien style (gros plan seul) : `renders/clip_0N_*_9x16.mp4` + posts.
-2. **Short 1 refait (nouveau style), RENDU en 1080p** après `polish` + `qa` : `renders/clip_01_…_9x16.mp4`
-   (≈ 44 s : 36,8 s de parole + fin AI Partners de 7 s). « Euh » collés retirés (`fillers`), sous-titres doublement
-   contrôlés à l'écoute, fins avec respiration sans jamais entendre la phrase suivante, flash seulement aux changements
-   de plan. Anciennes versions gardées : `…_v1_0710.mp4`, `…_v2_sans-double-check.mp4`.
-3. **Teaser + épisode complet : RENDUS FINAUX validés par Arthur le 09/10/2026** —
-   `episode/E22_teaser_final.mp4` (44,6 s) et `episode/E22_nicolas-comestaz_coty_episode.mp4` (47 min 10 s, teaser au début, logo
-   en haut à droite, fin AI Partners 8 s). Teaser : sous-titres variante B, carte invité (seul motion design retenu),
-   musique « Driving Momentum » très basse, « Super intéressant » retiré. `qa --episode` : tout OK (raccords propres,
-   fin sur « À bientôt » entier, volumes -16,0 / -15,9 LUFS). Versions précédentes : `*_v1_0810.mp4`.
-   `episode/description_youtube.md` régénéré.
+1. **Process des shorts validé par Arthur le 12/10/2026** (« c'est clean, le process a l'air de fonctionner ») :
+   `polish` = nettoyage (tighten, verify, fillers, réactions, joins, **ctc** : « euh » / « hmm » retirés d'après les mots
+   alignés sur le son) -> montage (**son reconstruit en un passage**, plus de dérive par raccord) -> **contrôle
+   intransigeant** (`strict.py` + `endpoint.py` : bords de phrase stricts, pensée finie par Smart Turn, synchro du fichier,
+   sous-titres jamais superposés, aucun écran noir) -> **boucle de correction auto, 6 tours** -> aperçus -> 2e contrôle +
+   film des moments à risque. Tests : `python scripts/test_qualite.py` (11/11). Détails : CLAUDE.md « Boucle de
+   vérification intransigeante », skill `podcast-clips` § 4.
+2. **Shorts 1 et 2 E22 refaits avec ce process, rendus 1080p + outro** (miniature PROVISOIRE, variante 1, l'équipe n'a pas
+   encore choisi) : `livrables_provisoires/clip_01_…_9x16.mp4` (55,2 s) et `clip_02_…_9x16.mp4` (40,7 s). Anciennes
+   versions gardées dans `renders/` (suffixes `_v…_1110` / `_1210`).
+3. **Teaser + épisode complet : rendus finaux validés le 09/10/2026** — `episode/E22_teaser_final.mp4` et
+   `episode/E22_nicolas-comestaz_coty_episode.mp4`. Depuis : fin du teaser = animation logo AI Partners (règle permanente,
+   aperçu `apercus/E22_teaser_fin-logo_apercu.mp4`) et liste de plans « on voit toujours celui qui parle » (aperçu
+   `episode/E22_nicolas-comestaz_coty_episode_apercu.mp4`, QA OK) : **rendu final 1080p en attente de validation**. Le
+   teaser a été monté avec l'ANCIEN assemblage du son : probablement la même dérive par raccord -> à refaire avec le
+   nouveau (`episode-render` le reconstruit, puis `qa`).
 
 ## Aperçus
 
@@ -48,13 +53,13 @@ Toujours en MP4 (le Studio HyperFrames bugue chez Arthur) : `preview --mp4 --cli
 
 ## Ce qui reste à faire (dans l'ordre probable)
 
-1. Livrer à Arthur le teaser + l'épisode + la description YouTube (fait le 09/10/2026).
-2. Shorts 2 à 5 dans le nouveau style : `python -m clipper polish --brand ai-corner --input E22_nicolas-comestaz_coty.mp4
-   --only 2,3,4,5 --redo` (repart des passages d'origine), regarder les planches `qa/`, envoyer les aperçus MP4,
-   validation, renommer les MP4 du 07/10, `render --only N`, `qa --render --only N`.
-3. Pistes de la recherche d'outils (08/10) mises de côté par Arthur (« on reste sur notre workflow ») : Silero VAD
-   (déjà installé), alignement CTC français, ducking de la musique, détection de parole simultanée (pyannote ONNX).
-4. Les anciens fichiers `E22_teaser.mp4` / `_v2` / `_v3` peuvent être supprimés par Arthur (pas par Claude).
+1. Shorts 3, 4, 5 avec le process validé : `polish --only 3,4,5 --redo`, regarder rapports / planches / moments à risque,
+   aperçus à Arthur, validation, `render`, `qa --render`, `outro`.
+2. Teaser à reconstruire avec le nouveau son + validation de l'épisode complet (nouvelle liste de plans, fin logo) ->
+   rendu final 1080p.
+3. Dès que l'équipe a choisi la miniature (`thumbnail --pick N`) : `outro` sans `--thumb` -> `livrables/` définitifs.
+4. CTA « bosser avec nous » dans les descriptions YouTube / posts LinkedIn : prêt mais désactivé (attendre Arthur).
+5. Les anciens fichiers (`renders/*_v…`, `E22_teaser_v2/_v3`) peuvent être supprimés par Arthur (pas par Claude).
 
 ## Points techniques à connaître (détails dans CLAUDE.md)
 
