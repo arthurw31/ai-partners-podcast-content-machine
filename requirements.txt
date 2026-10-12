@@ -1,6 +1,8 @@
 faster-whisper>=1.1
 onnxruntime           # reconnaissance des voix (clipper/diarize.py, modèle WeSpeaker téléchargé au 1er usage)
 torch
+transformers>=4.45  # contrôle des coupes (clipper/endpoint.py) : alignement CTC français + Smart Turn v3, modèles dans models/hf/
+safetensors
 opencv-python>=4.9
 numpy
 pyyaml

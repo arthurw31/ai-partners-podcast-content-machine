@@ -11,8 +11,8 @@ flowchart TD
     subgraph SH["5 shorts 9:16"]
         direction TB
         S1{{"propose : Claude propose ~10 passages"}} --> S2["L'équipe choisit 5 passages (pick)<br/>et ses demandes particulières"]
-        S2 --> S3["polish : « euh » et blancs retirés,<br/>gros plan / écran partagé,<br/>sous-titres vérifiés à l'écoute"]
-        S3 --> S4["qa stricte + aperçus MP4 : fins de phrase<br/>dans le silence, sous-titres jamais superposés,<br/>raccords, volume, aucun écran noir ;<br/>boucle de correction auto (3 tours),<br/>film des moments à risque"]
+        S2 --> S3["polish : « euh », « hmm » et blancs retirés<br/>(mots alignés sur le son),<br/>gros plan / écran partagé,<br/>sous-titres vérifiés à l'écoute"]
+        S3 --> S4["qa stricte + aperçus MP4 : fins de phrase<br/>dans le silence, sous-titres jamais superposés,<br/>raccords, volume, aucun écran noir ;<br/>pensée finie (Smart Turn),<br/>boucle de correction auto (6 tours),<br/>film des moments à risque"]
         S4 -->|à corriger| S3
         S4 -->|OK| S5["L'équipe valide les aperçus"]
         S5 -->|retouche| S3

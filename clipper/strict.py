@@ -363,3 +363,59 @@ def refine_joins(segs: list[dict], wav: Path, voiced: float = 0.25) -> tuple[lis
     for s in segs:
         s["duration"] = round(float(s["end"]) - float(s["start"]), 3)
     return segs, log
+
+
+# ----------------------------------------------------------------------------------------------- hésitations restantes (CTC)
+
+def ctc_hesitations(segs: list[dict], words: list[dict], wav: Path, cfg=None, min_gap: float = 0.35, voiced: float = 0.15,
+                    pad_end: float = 0.06, pad_start: float = 0.03, min_piece: float = 0.25) -> tuple[list[dict], list[str]]:
+    """Retire les blocs de voix SANS MOT entre deux mots (« euh » collés que `fillers` n'a pas pu couper, « hmm »
+    d'acquiescement de l'autre personne, Arthur 12/10/2026 : « on entend plusieurs fois Thomas acquiescer en faisant hmm,
+    ça n'apporte rien, ça ne fait pas pro »). Les mots de la transcription normale (qui n'écrit jamais ces bruits) sont
+    ALIGNÉS sur le son (CTC, `endpoint.align`) : leurs frontières sont exactes à ~20 ms près ; un trou ≥ `min_gap` entre
+    deux mots alignés qui contient de la voix est coupé de la fin du mot (+ `pad_end`) au début du suivant (- `pad_start`)."""
+    from .endpoint import align
+    from .verify import FILLERS, _norm, verbatim
+    out, log = [], []
+    for s in segs:
+        a, b = float(s["start"]), float(s["end"])
+        # texte VERBATIM (hésitations comprises) : la transcription normale « nettoie » aussi de vrais mots (« en fait »,
+        # « c'est ») qu'il ne faut pas couper ; seuls les fillers et la voix que personne n'a transcrite sont retirés
+        vb = verbatim(wav, a, b, cfg) if cfg is not None else []
+        toks = [w["w"] for w in vb] or [w["w"] for w in words if w["s"] >= a - 0.05 and w["e"] <= b + 0.05]
+        merged: list[str] = []
+        for tk in toks:                     # « qu » + « 'il » (Whisper) -> « qu'il » : jamais de coupe dans un mot élidé
+            if merged and (tk.startswith("'") or tk.startswith("’") or merged[-1].endswith("'")):
+                merged[-1] += tk
+            else:
+                merged.append(tk)
+        toks = merged
+        if len(toks) < 2 or b - a < 1.0:
+            out.append(dict(s))
+            continue
+        al = [x for x in align(wav, a, b, " ".join(toks)) if _norm(x["w"]) not in FILLERS]
+        cuts = []
+        for x, y in zip(al, al[1:]):
+            g0, g1 = x["e"] + pad_end, y["s"] - pad_start
+            if g1 - g0 < min_gap - pad_end - pad_start:
+                continue
+            r = _rms(wav, g0, g1)
+            lvl = _level(wav, (g0 + g1) / 2)
+            if len(r) and lvl > 0 and float((r > voiced * lvl).mean()) > 0.3:   # de la voix, pas un silence
+                cuts.append((round(g0, 3), round(g1, 3), x["w"], y["w"]))
+        pieces, cur = [], a
+        for g0, g1, w0, w1 in cuts:
+            if g0 - cur >= min_piece and b - g1 >= min_piece:
+                pieces.append((cur, g0))
+                cur = g1
+                log.append(f"« {w0} ‖ {w1} » : {g1 - g0:.2f} s de voix sans mot retirées ({g0:.2f}–{g1:.2f})")
+        pieces.append((cur, b))
+        for k, (p0, p1) in enumerate(pieces):
+            n = dict(s)
+            n["start"], n["end"], n["duration"] = round(p0, 3), round(p1, 3), round(p1 - p0, 3)
+            if k < len(pieces) - 1:          # seul le dernier morceau garde la citation de fin
+                n.pop("end_text", None)
+            if k > 0:
+                n.pop("start_text", None)
+            out.append(n)
+    return out, log

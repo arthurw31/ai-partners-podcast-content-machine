@@ -138,6 +138,27 @@ def test_retrait_euh_colle_garde_la_fin_du_mot():
     assert fixed[0]["end"] > 2076.47 and fixed[0]["end"] < 2076.6, (fixed[0]["end"], log)
 
 
+def test_pensee_pas_finie_detectee():
+    """11/10/2026 « le mec était en train de parler » : short 1 coupé après « …de l'entreprise. » alors que l'invité
+    enchaînait « Et puis… » : Smart Turn doit dire « pas fini » (< 0,5) ; les fins validées, « fini » (> 0,9)."""
+    wav = _e22()
+    from clipper.endpoint import turn_complete
+    assert turn_complete(wav, 2345.08) < 0.5
+    assert turn_complete(wav, 2372.76) > 0.9 and turn_complete(wav, 2089.31) > 0.9
+
+
+def test_hesitation_collee_retiree_par_alignement():
+    """12/10/2026 : « produits de beauté, euh, à nos consommateurs » (short 2 E22, « euh » collé, retrait annulé par
+    fillers) : retiré grâce à l'alignement CTC, sans perdre « beauté » ni « à »."""
+    wav = _e22()
+    from clipper.config import Brand
+    from clipper.strict import ctc_hesitations
+    segs = [{"start": 2085.0, "end": 2089.31, "end_text": "à nos consommateurs."}]
+    out, log = ctc_hesitations(segs, [], wav, Brand("ai-corner").cfg)
+    assert any("beauté" in m for m in log), log
+    assert out[-1].get("end_text") and len(out) >= 2
+
+
 class _Skip(Exception):
     pass
 

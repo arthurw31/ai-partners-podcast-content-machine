@@ -72,7 +72,7 @@ Résultat jugé « franchement plutôt bien » par Arthur (09/10/2026) : `output
 1. **Rien de final sans validation sur un aperçu.** Les aperçus sont des **MP4** (le Studio HyperFrames bugue chez
    Arthur), rapides (12 images/s), avec un **lien cliquable** vers chaque fichier.
 2. **Contrôle intransigeant** (12/10) : chaque fin de phrase finit dans le silence, jamais deux sous-titres à l'écran en même
-   temps ; `polish` corrige seul et recontrôle (3 tours) ; ce qui reste en ÉCHEC n'est ni montré ni rendu. Un « film des
+   temps ; `polish` corrige seul et recontrôle (6 tours ; un raccord entendu dans un mot annule ce retrait) ; jamais de « hmm » d'acquiescement ni de « euh » collé (mots alignés sur le son) ; la fin du short doit sonner comme une fin de pensée (Smart Turn) ; ce qui reste en ÉCHEC n'est ni montré ni rendu. Un « film des
    moments à risque » (~20 s : raccords + fin) accompagne chaque short. Chaque défaut trouvé devient un test
    (`scripts/test_qualite.py`).
 3. **Trois contrôles** avant toute livraison : automatique sur le montage (`qa`), automatique sur l'aperçu / le MP4

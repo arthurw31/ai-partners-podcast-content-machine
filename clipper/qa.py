@@ -148,6 +148,24 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
     rows.append((FAIL if ep_ else OK, "bords de phrase (contrôle strict) : " + (
         "; ".join(f"{p['kind']} à {p['t']:.2f} coupée dans la voix ({int(p['ratio'] * 100)} % du niveau)" for p in ep_)
         + " -> `polish` corrige seul (fix_edges)" if ep_ else "toutes les fins retombées dans le silence, tous les débuts partent d'un silence")))
+    # 2 ter. la pensée est-elle FINIE ? (Smart Turn v3, intonation ; 12/10/2026) — fin du short : ÉCHEC sous 0,5 ;
+    # fins internes : ATTENTION (le vote est moins sûr au milieu d'une réponse)
+    try:
+        from .endpoint import turn_complete
+        from .strict import passage_edges
+        ends_, _st = passage_edges(segs)
+        low = []
+        for k in ends_:
+            p_ = turn_complete(wav, float(segs[k]["end"]))
+            if p_ < 0.5:
+                low.append((k, p_))
+        last_low = [x for x in low if x[0] == len(segs) - 1]
+        rows.append((FAIL if last_low else (WARN if low else OK), "pensée finie (Smart Turn) : " + (
+            "; ".join(f"{'FIN DU SHORT' if k == len(segs) - 1 else 'fin interne'} à {float(segs[k]['end']):.2f} : "
+                      f"l'orateur continue (probabilité de fin {p_:.2f})" for k, p_ in low) if low
+            else "chaque fin de passage sonne comme une fin de pensée")))
+    except Exception as e:  # noqa: BLE001
+        rows.append((WARN, f"Smart Turn indisponible : {e}"))
     # 3. sous-titres
     cc = proj / "captions_check.txt"
     if cc.exists():

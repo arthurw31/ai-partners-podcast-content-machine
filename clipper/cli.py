@@ -1221,6 +1221,17 @@ def cmd_polish(a: argparse.Namespace) -> None:
             for m in log:
                 console.print(f"  raccord recalé : {m}")
             c = _mark(dict(c, segments=segs, duration=round(sum(float(x["duration"]) for x in segs), 2)), "joins")
+        if "ctc" not in (c.get("checks") or {}):
+            # hésitations restantes et « hmm » d'acquiescement (12/10/2026) : mots du verbatim ALIGNÉS sur le son (CTC),
+            # toute voix sans mot entre deux mots (≥ 0,35 s) est retirée
+            from .strict import ctc_hesitations
+            bk = ep / "clips_before_ctc.json"
+            if not bk.exists():
+                bk.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
+            segs, log = ctc_hesitations(c["segments"], words, wav, brand.cfg)
+            for m in log:
+                console.print(f"  hésitation retirée : {m}")
+            c = _mark(dict(c, segments=segs, duration=round(sum(float(x["duration"]) for x in segs), 2)), "ctc")
         cap = brand.cfg.captions
         if cap.get("highlight_keywords") and cap.get("auto_keywords") and not c.get("keywords"):
             from .caption_check import pick_keywords
@@ -1240,9 +1251,9 @@ def cmd_polish(a: argparse.Namespace) -> None:
     status = cmd_qa(argparse.Namespace(**{**vars(a), "only": sel, "render": False, "episode": False}))
     # boucle intransigeante (Arthur, 12/10/2026 : « une boucle de vérification intransigeante qui règle ces problèmes ») :
     # tant qu'un bord de phrase est coupé dans la voix et que `strict.fix_edges` sait le corriger -> correction, nouveau
-    # montage, nouveau contrôle ; 3 tours au plus ; ce qui reste est un ÉCHEC (rien ne part en aperçu ni en rendu)
+    # montage, nouveau contrôle ; 6 tours au plus ; ce qui reste est un ÉCHEC (rien ne part en aperçu ni en rendu)
     from .strict import fix_edges
-    for rnd in range(1, 4):
+    for rnd in range(1, 7):   # 6 tours (3 avant le 12/10/2026 : Arthur « augmente le nombre pour que le short soit parfait »)
         if status != "ÉCHEC":
             break
         data = json.loads((ep / "clips.json").read_text(encoding="utf-8"))
@@ -1251,6 +1262,19 @@ def cmd_polish(a: argparse.Namespace) -> None:
             if c["index"] not in idx:
                 continue
             segs, done, left = fix_edges(c["segments"], wav)
+            # raccord entendu AU MILIEU D'UN MOT (écoute de qa) : ce retrait-là est annulé (les deux morceaux d'un même
+            # passage sont recollés) — 12/10/2026, avant la boucle ne corrigeait que les bords de phrase
+            cache = ep / "qa" / f"qa_audit_{c['index']:02d}.json"
+            if cache.exists():
+                from .verify import audit_joins
+                bad = sorted(audit_joins(json.loads(cache.read_text(encoding="utf-8")).get("heard", "")), reverse=True)
+                for j in bad:
+                    if j + 1 < len(segs) and 0 <= float(segs[j + 1]["start"]) - float(segs[j]["end"]) <= 3.0:
+                        a_, b_ = segs[j], segs[j + 1]
+                        segs[j] = dict(a_, end=b_["end"], duration=round(float(b_["end"]) - float(a_["start"]), 3),
+                                       **({"end_text": b_["end_text"]} if b_.get("end_text") else {}))
+                        del segs[j + 1]
+                        done.append(f"raccord {j + 1} entendu dans un mot : retrait annulé ({float(a_['end']):.2f}–{float(b_['start']):.2f})")
             for m in done:
                 console.print(f"  [cyan]#{c['index']} correction : {m}[/cyan]")
             for m in left:

@@ -498,7 +498,24 @@ vérification intransigeante qui règle ces problèmes »)
   26–89 % au point de coupe : « job principal‖euh »). `strict.refine_joins` (étape `joins` de `polish`) recale la fin au
   début de la voyelle TENUE (flux spectral bas sur 3 trames de 10 ms) et le début du morceau suivant juste avant l'attaque
   du mot (0,04–0,13 s) ; `qa` signale un « euh » redevenu audible.
-- Pistes retenues de la recherche (12/10/2026, à faire si des défauts restent) : **Smart Turn v3** (pipecat-ai, BSD-2, ONNX
+- **Installés le 12/10/2026** (Arthur : « installe-les si c'est pertinent et que ça peut tourner sur mon PC sans le faire
+  laguer ») — `clipper/endpoint.py`, modèles dans `models/hf/` (non versionnés, téléchargés au 1er usage, ~1,2 Go) :
+  **Smart Turn v3.2** (`turn_complete(wav, t)`, ~20 ms, 2 threads) : calibré sur E22 — fins validées 0,96–0,99, « …de
+  l'entreprise. ‖ Et puis » (l'invité continuait) 0,23, « parce qu'encore » 0,01 ; aveugle à une syllabe coupée
+  (« productivi-té » 0,99 : c'est le rôle du contrôle d'énergie) et trompé par une virgule (0,95) -> `qa` : fin du short
+  < 0,5 = ÉCHEC, fin interne < 0,5 = ATTENTION. **Alignement CTC** (`align(wav, a, b, texte)`, wav2vec2 français, Viterbi
+  numpy, ~1 s par fenêtre après ~15 s de chargement) : frontières exactes des mots. Étape `ctc` de `polish`
+  (`strict.ctc_hesitations`) : le VERBATIM (hésitations comprises, il garde « en fait », « c'est » que la transcription
+  normale omet) est aligné ; toute voix sans mot ≥ 0,35 s entre deux mots est retirée (« euh » collés dont `fillers` avait
+  annulé la coupe, « hmm » d'acquiescement de l'animateur — Arthur, 12/10/2026 : « on entend plusieurs fois Thomas
+  acquiescer en faisant hmm, ça n'apporte rien, ça ne fait pas pro »). E22 : short 2 « …beauté, euh, à nos consommateurs »
+  (1,13 s), « …en fait, euh, et de vendre » (1,23 s). Si l'acquiescement est PAR-DESSUS la voix de l'invité (micro mono),
+  il ne peut pas être retiré par une coupe. Boucle de `polish` : **6 tours** (3 avant ; Arthur : « augmente le nombre pour
+  que le short soit parfait »).
+- Short 1 E22 vers 34 s (Arthur, 12/10/2026 : « encore un bug ») : « Et puis, euh, cette transformation, elle… humaine, elle
+  doit » mal nettoyé (« euh » resté, 4 coupes en 2,5 s, « humaine » étiré + 2 s de blanc) -> refait d'après l'alignement :
+  « Et puis ‖ cette transformation ‖ humaine, elle doit… » (morceaux 2345,08–2346,05 / 2347,64–2348,62 / 2350,50–…).
+- Pistes restantes de la recherche (si des défauts restent) : **Smart Turn v3** (pipecat-ai, BSD-2, ONNX
   8 Mo, français, ~12–100 ms CPU) = probabilité que l'orateur ait FINI sa phrase, d'après la prosodie, à chaque fin
   d'extrait ; **alignement forcé CTC** (wav2vec2 français `bofenghuang/asr-wav2vec2-ctc-french`, Apache-2.0, Viterbi en numpy,
   sans torchaudio) pour la fin exacte du dernier phonème ; énergie 2–8 kHz pour les fins en /s/ /ʃ/. À éviter : WhisperX et

@@ -26,7 +26,7 @@ flowchart TB
         PO["posts.py"]
         MC["multicam.py<br/>rushs 3 caméras"]
         IG["ingest.py<br/>rushs déposés : rôles, synchro"]
-        CHK["verify.py · fillers.py<br/>caption_check.py · qa.py · strict.py"]
+        CHK["verify.py · fillers.py<br/>caption_check.py · qa.py · strict.py · endpoint.py"]
         EPI["episode.py · diarize.py<br/>épisode complet + teaser"]
         TH["thumbnail.py · canva_template.py<br/>miniatures"]
     end
@@ -73,6 +73,7 @@ flowchart TB
 | `ingest.py` | Commande `rushes` : prend les 3 rushs + le WAV déposés dans `depot/`, écarte un fichier tronqué, reconnaît le plan large (2 visages) et l'animateur (empreinte de visage SFace comparée à `assets/host_face.jpg`), mesure le décalage du micro par corrélation avec le son des caméras, range et renomme d'après l'invité, écrit `multicam.json` (avec le côté de l'animateur dans le plan large). |
 | `multicam.py` | Rushs 3 caméras : gros plan de celui qui parle, écran partagé quand l'autre écoute (et seulement s'il est calme), son du micro. |
 | `verify.py`, `fillers.py`, `caption_check.py`, `qa.py` | Contrôles « à l'oreille » : vraies fins de phrase, « euh » retirés sans perdre un mot, sous-titres écoutés deux fois, rapport OK / ATTENTION / ÉCHEC avant chaque aperçu et après chaque rendu. |
+| `endpoint.py` | Fin de phrase « à l'oreille » : Smart Turn v3 (l'orateur a-t-il fini sa pensée ?) et alignement CTC français (frontières exactes des mots) ; modèles dans `models/hf/`. |
 | `strict.py` | Contrôle intransigeant : bords de phrase jugés sur le son avec des seuils durs et corrigés seuls (`fix_edges`, boucle de `polish`, 3 tours), sous-titres de la composition (jamais deux blocs ensemble), film des moments à risque (`qa/moments_NN.mp4`). Cas anti-régression : `python scripts/test_qualite.py`. |
 | `episode.py`, `diarize.py` | Épisode complet : dérushage par Claude, qui parle (empreintes vocales), liste de plans façon monteur, teaser scripté, chapitres ; corps rendu en FFmpeg, teaser en HyperFrames. |
 | `carousel.py` | Commande `carousel` : carrousel LinkedIn tiré de l'épisode (Arthur, 12/10/2026). Claude Opus propose 3 angles (citations retrouvées dans la transcription, orateurs d'après `work/diarized_words.json`) -> l'équipe en choisit un (`--pick N`) -> Claude rédige 6 à 8 slides + le post (brief `brands/<m>/carousel.md`) -> contrôles (citations mot pour mot, chiffres présents, longueurs) -> rendu HTML (polices Metropolis, logos de la charte, photo détourée de l'invité réutilisée des miniatures) par Chrome sans fenêtre -> PNG 1080×1350 + PDF ; slide CTA écrite depuis `carousel.cta` (brand.yaml). 3 styles tant que l'équipe n'a pas choisi (`carousel.style`) ; `--final STYLE` -> `carrousel/final/`. |
