@@ -1,4 +1,4 @@
-# Podcast Clipper — guide pour Claude Code
+# AI Partners Podcast Content Machine — guide pour Claude Code
 
 Framework Python qui transforme un épisode de podcast (mp4) en shorts/reels montés
 (9:16, 16:9, 1:1) via HyperFrames. Lis [README.md](README.md) pour l'usage complet ;

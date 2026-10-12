@@ -1,4 +1,4 @@
-# Podcast Clipper
+# AI Partners Podcast Content Machine
 
 Transforme un épisode de podcast (fichier vidéo long) en **shorts / reels / clips LinkedIn montés**,
 prêts à publier : sélection des meilleurs extraits par Claude, recadrage vertical qui suit celui qui parle,
