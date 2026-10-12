@@ -188,6 +188,14 @@ carousel:
     post_line: "📅 Réserver un échange avec nous : {url}"
     episode: "L'épisode complet : AI Corner {number}, sur YouTube"
 
+# Mail podcast de Thomas (idée de Thomas, 08/10/2026 : « un mail qui part direct de la part du founder, en plus de la
+# newsletter ») : commande `newsletter`, brief dans newsletter.md. En français, vouvoiement, mis en page.
+newsletter:
+  model: "claude-opus-5"
+  from_name: "Thomas Spitz"
+  button: "REGARDER L'ÉPISODE"
+  signature: "Thomas Spitz<br>CEO et fondateur d'AI Partners"
+
 # Teaser d'ouverture de l'épisode complet (commande episode, 07/10/2026) — calqué sur E20 MAIF : ~50 s de phrases fortes
 # sous-titrées, puis le logo AI Partners sur l'animation de la charte. Appliqué PAR-DESSUS la config ci-dessus.
 teaser:

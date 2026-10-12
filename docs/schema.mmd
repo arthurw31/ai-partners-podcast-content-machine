@@ -6,6 +6,7 @@ flowchart TD
     TR --> E1
     TR --> M1
     TR --> C1
+    TR --> N1
 
     subgraph SH["5 shorts 9:16"]
         direction TB
@@ -51,17 +52,28 @@ flowchart TD
         C5 -->|retouche| C4
     end
 
+    subgraph NL["Mail podcast de Thomas"]
+        direction TB
+        N1{{"newsletter : Claude écrit le mail<br/>de Thomas à la 1re personne :<br/>objet, accroche, l'invité,<br/>au programme (4 points)"}}
+        N1 --> N2["mail mis en page (HTML 600 px)<br/>bandeau, photo de l'invité,<br/>miniature YouTube cliquable ;<br/>faits et chiffres vérifiés"]
+        N2 --> N3["L'équipe valide le mail<br/>(newsletter --final, avec<br/>le lien YouTube publié)"]
+        N3 -->|retouche| N2
+    end
+
     S7 --> L1[("5 shorts MP4 avec outro<br/>et 5 posts LinkedIn")]
 
     M2 -.->|attend le titre validé| E5
     M4 -.->|attend la miniature choisie| S7
     E9 --> L2[("Épisode 1080p avec teaser,<br/>description YouTube (titre validé)<br/>et chapitres")]
     C5 --> L4[("Carrousel LinkedIn (PDF)<br/>et la description LinkedIn<br/>qui l'accompagne, avec<br/>le lien de réservation")]
+    N3 --> L5[("Mail de Thomas prêt à envoyer :<br/>HTML et images, objet,<br/>version texte")]
+    E5 -.->|chapitres de l'épisode| N1
+    M4 -.->|miniature choisie| N2
     M4 --> L3[("Titre validé + miniature choisie<br/>1280×720 + HD")]
 
     classDef human fill:#FFF2DF,stroke:#C26A00,color:#3A2810;
     classDef llm fill:#EFEBFF,stroke:#6B4FD8,color:#251C47;
     classDef deliver fill:#E2F5EC,stroke:#0F7A55,color:#0F3127;
-    class IN,S2,S5,E8,M2,M4,C2,C5 human;
-    class S1,E1,E4,M1,C1,C3,C3b llm;
-    class L1,L2,L3,L4 deliver;
+    class IN,S2,S5,E8,M2,M4,C2,C5,N3 human;
+    class S1,E1,E4,M1,C1,C3,C3b,N1 llm;
+    class L1,L2,L3,L4,L5 deliver;

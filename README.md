@@ -28,12 +28,12 @@ est automatique. Aucune vidéo finale n'est rendue sans validation sur un aperç
 
 **Livrables d'un épisode** : 5 shorts MP4 (avec outro) et leurs 5 posts LinkedIn · l'épisode 1080p avec son teaser, sa
 description YouTube et ses chapitres · le titre validé et la miniature choisie · le carrousel LinkedIn (PDF) et la
-description LinkedIn qui l'accompagne (avec le lien de réservation).
+description LinkedIn qui l'accompagne (avec le lien de réservation) · le mail podcast de Thomas, prêt à envoyer.
 
-**Ce qui se fait en parallèle** : dès la transcription, les quatre colonnes avancent en même temps (flèches pleines =
+**Ce qui se fait en parallèle** : dès la transcription, les cinq colonnes avancent en même temps (flèches pleines =
 étape suivante dans la colonne). Une **flèche en pointillés** = une étape qui attend le résultat d'une autre colonne :
-la description YouTube de l'épisode attend le titre validé ; l'outro des shorts attend la miniature choisie. Le
-carrousel LinkedIn, lui, n'attend rien. Tout le reste n'attend rien : on peut monter, faire valider et rendre les shorts, monter
+la description YouTube de l'épisode attend le titre validé ; l'outro des shorts attend la miniature choisie ; le mail de Thomas prend les
+chapitres de l'épisode et la miniature choisie. Le carrousel LinkedIn, lui, n'attend rien. Tout le reste n'attend rien : on peut monter, faire valider et rendre les shorts, monter
 l'épisode et choisir le titre en même temps.
 
 - Guide pratique (délais, aperçu ou rendu, « quel fichier modifier pour changer le format ») : **[docs/FRAMEWORK.md](docs/FRAMEWORK.md)**

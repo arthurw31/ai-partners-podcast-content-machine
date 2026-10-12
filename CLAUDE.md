@@ -204,6 +204,20 @@ la valeur à la commu qui nous suit, et sur la dernière slide un call to action
   -> `:where(.slide > *) { position: relative; z-index: 2 }` ; jamais le même nom de classe pour une slide et un élément
   (`.recap` écrasait la slide récapitulatif à 760 px de haut).
 
+## Mail podcast de Thomas : `newsletter` (idée de Thomas, 08/10/2026 ; Arthur, 12/10/2026 : « rajoute un 5e workflow, une
+newsletter dans ce style-là : un mail qui part direct de la part du founder »)
+
+- Thomas : « la NL part d'AI Partners mais le mail podcast part de moi ; ça valoriserait bien le podcast ». Modèle : mail
+  « Nostra #3 » d'On Train (Mailjet) : bandeau, photo + nom de l'invité + phrase-thème, accroche, « j'ai le plaisir
+  d'accueillir… », bouton « Écouter l'épisode », « Au programme de cet épisode » (4 points en gras), miniature YouTube.
+- Choix d'Arthur : mail MIS EN PAGE, vouvoiement, contenu de base (invité + programme + YouTube), outil d'envoi pas encore
+  choisi -> HTML d'e-mail universel (tableaux, styles en ligne, 600 px, Helvetica/Arial : aucune police web dans un mail)
+  + `images/` à téléverser dans l'outil (un mail ne peut pas contenir d'images locales) + `email.txt` + `objet.txt`.
+- `clipper/newsletter.py` + brief `brands/ai-corner/newsletter.md` + section `newsletter:` de brand.yaml. Entrées : la
+  transcription (qui parle), les chapitres (`episode/description_youtube.md`), le titre validé et la miniature choisie
+  (provisoires sinon : signalé), la photo détourée de l'invité (`carousel.portraits`). Bandeau rendu par Chrome
+  (`outro_bg.png` en `mix-blend-mode: screen` : son fond est noir). `--final` exige lien YouTube + titre + miniature.
+
 ## Outro des shorts : `outro` (Arthur, 09/10/2026 : « pour les shorts, mettre en outro la première des 4 outros en motion design,
 call to action avec la miniature ; on peut monter les shorts en parallèle, mais pour créer l'outro et la rajouter à la fin des
 shorts il faut que la miniature soit validée »)

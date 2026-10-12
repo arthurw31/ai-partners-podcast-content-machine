@@ -1,9 +1,9 @@
 ---
 name: podcast-clips
-description: Pilote tout le process AI Corner avec le framework « clipper » de ce dépôt, des rushs d'un tournage (3 caméras MP4 + audio WAV déposés dans depot/) jusqu'à tous les livrables, en quatre colonnes parallèles — 5 shorts verticaux montés + leur post LinkedIn (10 passages proposés, l'équipe en choisit 5, contrôle qualité, validation, rendu, outro avec la miniature), l'épisode complet monté avec son teaser (dérushage, aperçu, contrôle qualité, validation, rendu 1080p), le titre puis la miniature YouTube (5 titres en texte, l'équipe en choisit un, puis 4 miniatures, l'équipe en choisit une), le carrousel LinkedIn (3 angles proposés, l'équipe en choisit un, slides rédigées et rendues dans la charte AI Partners, CTA « réserver un échange »). Déclencher sur « clip », « short », « reel », « découpe mon podcast », « fais des extraits », « nouveau podcast », « monte l'épisode », « teaser », « titre de l'épisode », « miniature », « carrousel », « carousel LinkedIn », « /podcast-clips », ou dès que des rushs ou un épisode sont déposés dans depot/.
+description: Pilote tout le process AI Corner avec le framework « clipper » de ce dépôt, des rushs d'un tournage (3 caméras MP4 + audio WAV déposés dans depot/) jusqu'à tous les livrables, en cinq colonnes parallèles — 5 shorts verticaux montés + leur post LinkedIn (10 passages proposés, l'équipe en choisit 5, contrôle qualité, validation, rendu, outro avec la miniature), l'épisode complet monté avec son teaser (dérushage, aperçu, contrôle qualité, validation, rendu 1080p), le titre puis la miniature YouTube (5 titres en texte, l'équipe en choisit un, puis 4 miniatures, l'équipe en choisit une), le carrousel LinkedIn (3 angles proposés, l'équipe en choisit un, slides rédigées et rendues dans la charte AI Partners, CTA « réserver un échange »), le mail podcast de Thomas (newsletter écrite à la 1re personne, mise en page, validée par l'équipe). Déclencher sur « clip », « short », « reel », « découpe mon podcast », « fais des extraits », « nouveau podcast », « monte l'épisode », « teaser », « titre de l'épisode », « miniature », « carrousel », « carousel LinkedIn », « newsletter », « mail de Thomas », « /podcast-clips », ou dès que des rushs ou un épisode sont déposés dans depot/.
 ---
 
-# Podcast → shorts, épisode complet, titre et miniature, carrousel
+# Podcast → shorts, épisode complet, titre et miniature, carrousel, mail de Thomas
 
 Tu pilotes le framework `clipper` (voir [CLAUDE.md](../../../CLAUDE.md), le schéma du process dans
 [README.md](../../../README.md) et le guide pratique [docs/FRAMEWORK.md](../../../docs/FRAMEWORK.md) : délais, quel fichier modifier). **Lis d'abord [docs/BONNES_PRATIQUES.md](../../../docs/BONNES_PRATIQUES.md)** :
@@ -11,13 +11,14 @@ ce qui a été validé sur E22 (le résultat de référence) et ce qu'il ne faut
 il ne tape aucune commande, tu fais tout et tu lui parles simplement (pas de jargon technique).
 
 **Le process (schéma de référence : « Vue d'ensemble » du README, sur GitHub)** : dépôt des rushs -> `rushes` ->
-`transcribe`, puis **quatre colonnes lancées en parallèle**, sans s'attendre :
+`transcribe`, puis **cinq colonnes lancées en parallèle**, sans s'attendre :
 
 | Colonne | Étapes | Section |
 | --- | --- | --- |
 | 5 shorts 9:16 | `propose` -> l'équipe choisit 5 passages -> `polish` (+ `qa`, boucle « à corriger ») -> l'équipe valide les aperçus -> `render` + `posts` -> **`outro`** | 2 à 5 |
 | Épisode + teaser | `episode-plan` -> `episode-render --proxy` (+ `qa`, boucle « à corriger ») -> l'équipe valide l'aperçu -> `episode-render` 1080p | « Épisode complet » |
 | Titre puis miniature | `titles` (5 titres en texte) -> l'équipe en choisit un -> `thumbnail` (4 miniatures) -> l'équipe en choisit une | « Titre et miniature » |
+| Mail de Thomas | `newsletter` (mail écrit + mis en page) -> l'équipe valide -> `newsletter --youtube-url … --final` | « Mail podcast de Thomas » |
 | Carrousel LinkedIn | `carousel` (3 angles) -> l'équipe en choisit un -> `carousel --pick N` (slides + post, rendu PDF) -> l'équipe valide -> `carousel --final STYLE` | « Carrousel LinkedIn » |
 
 **Deux seules dépendances entre colonnes** (flèches en pointillés du schéma) :
@@ -29,8 +30,9 @@ il ne tape aucune commande, tu fais tout et tu lui parles simplement (pas de jar
 Dès que la transcription est prête, lance donc `propose`, `titles` ET `carousel` (en arrière-plan) et, si l'épisode complet est
 demandé, `episode-plan` : l'équipe peut choisir les passages et le titre pendant que le reste tourne.
 
-**Sept moments où l'humain décide** (rien ne passe sans) : les 5 passages, la validation des aperçus des shorts, la
-validation de l'aperçu de l'épisode, le titre, la miniature, l'angle du carrousel, la validation du carrousel. Avant chaque aperçu, la vidéo passe le contrôle
+**Huit moments où l'humain décide** (rien ne passe sans) : les 5 passages, la validation des aperçus des shorts, la
+validation de l'aperçu de l'épisode, le titre, la miniature, l'angle du carrousel, la validation du carrousel, la
+validation du mail de Thomas. Avant chaque aperçu, la vidéo passe le contrôle
 automatique (`qa`) ; tant qu'il montre un défaut, tu corriges et tu recommences (boucle « à corriger ») avant de la
 montrer.
 
@@ -293,6 +295,21 @@ Brief éditorial : `brands/<marque>/carousel.md` ; CTA final : `carousel.cta` de
 4. L'équipe valide le texte, le post et le style : `carousel … --final STYLE --by <prénom>` -> `carrousel/final/` (PDF +
    PNG + `post_linkedin.md`, à publier ensemble : post + document). Au 1er choix de style, écris `carousel.style: <style>` dans brand.yaml (les épisodes suivants
    n'ont plus qu'un style). Toute remarque de fond devient une règle dans `carousel.md` (« À éviter »).
+
+## Mail podcast de Thomas (idée de Thomas, 08/10/2026)
+
+Un mail qui part de Thomas (fondateur), en plus de la newsletter d'AI Partners, pour valoriser chaque épisode. Modèle :
+le mail « Nostra » d'On Train. Mis en page, en français, vouvoiement. Brief : `brands/<marque>/newsletter.md`.
+
+1. `python -m clipper newsletter --brand <marque> --input <E>.mp4` (après `episode-plan` pour les chapitres ; idéalement
+   après `thumbnail --pick`) : Claude écrit le mail à la 1re personne (objet, aperçu, accroche, l'invité, « Au programme »
+   en 4 points, mot de fin) ; faits et chiffres contrôlés ; rendu `newsletter/email.html` + `images/` + `apercu.png`.
+   REGARDE `apercu.png` (bandeau, photo, miniature) avant de l'envoyer à Arthur. Titre ou miniature encore provisoires :
+   le dire.
+2. Retouche : `newsletter/contenu.json`, puis `newsletter … --render` (sans nouvel appel à Claude).
+3. Une fois l'épisode publié : `newsletter … --youtube-url <lien> --render`, puis après validation de l'équipe
+   `newsletter … --final --by <prénom>` -> `newsletter/final/` (HTML + images à importer dans l'outil d'envoi, objet,
+   version texte). `--final` refuse sans lien YouTube, sans titre validé ou sans miniature choisie.
 
 ## Retouches courantes
 

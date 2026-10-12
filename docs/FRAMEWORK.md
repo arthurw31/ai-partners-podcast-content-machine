@@ -20,6 +20,7 @@ jour à chaque changement. Cette page ne refait pas le schéma ; elle répond au
 | 4 miniatures avec le titre choisi -> choix | Claude, puis **vous** | ≈ 5 min |
 | Outro des shorts (avec la miniature choisie) | Claude | ≈ 3 min + ≈ 1 min par short |
 | Carrousel LinkedIn : 3 angles -> choix -> slides rendues | Claude, puis **vous** (angle, puis validation) | ≈ 3 min + ≈ 5 min |
+| Mail podcast de Thomas : rédaction + mise en page | Claude, puis **vous** (validation) | ≈ 4 min |
 | Épisode complet : aperçu 540p + contrôle | Claude | ≈ 15 min |
 | Épisode complet : rendu 1080p | Claude, après **votre** validation | ≈ 1 h |
 
@@ -44,6 +45,7 @@ l'écoute, volume -16 LUFS) ; tant qu'il trouve un défaut, Claude corrige et re
 | l'outro des shorts (texte, bouton, durée) | `brand.yaml` → `short_outro` | `cta: "Regarder l'épisode — lien en description"` |
 | le contenu des carrousels (règles, angles) | `brands/<marque>/carousel.md` | « pas plus de 7 slides » |
 | la dernière slide des carrousels (CTA, lien) | `brand.yaml` → `carousel.cta` | `url: "…/prendre-rendez-vous"` |
+| le mail de Thomas (ton, structure, signature) | `brands/<marque>/newsletter.md`, `brand.yaml` → `newsletter` | « 3 points au programme » |
 | le gabarit des miniatures | réimport du design Canva (`thumbnail-template`) | nouveau design exporté en PPTX + PNG |
 | les logos, la police, l'animation de fin | `brands/<marque>/assets/` | remplacer `outro_anim.mov` |
 | le style de montage (bulle, sous-titres, coupes) | `config/presets/aip-short.yaml` | taille des sous-titres, durée de la bulle |

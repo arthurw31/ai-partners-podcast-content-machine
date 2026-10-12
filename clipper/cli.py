@@ -738,6 +738,48 @@ def cmd_carousel(a: argparse.Namespace) -> None:
     console.print(f"[green]3 angles proposés[/green] -> {md}\nL'équipe marketing en choisit un, puis : {base} --pick N")
 
 
+def cmd_newsletter(a: argparse.Namespace) -> None:
+    """Mail podcast de Thomas (idée de Thomas, 08/10/2026) : Claude l'écrit -> rendu HTML + aperçu -> l'équipe valide (--final)."""
+    from .carousel import portraits
+    from .multicam import load_spec
+    from .newsletter import finalize, render, save, write
+    from .titles import episode_number
+    brand = Brand(a.brand)
+    video = resolve_input(brand, a.input)
+    ep = episode_dir(brand, video)
+    number = episode_number(video, a.number)
+    d = ep / "newsletter"
+    base = f"python -m clipper newsletter --brand {brand.slug} --input {Path(a.input).name}"
+    if a.final:
+        mail = json.loads((d / "contenu.json").read_text(encoding="utf-8"))
+        out = finalize(ep, mail, a.by, a.note)
+        console.print(f"[green]Mail validé[/green] -> {out} : email.html + images/ à importer dans l'outil d'envoi, objet.txt, email.txt")
+        return
+    spec = load_spec(video)
+    cj = ep / "clips.json"
+    meta = json.loads(cj.read_text(encoding="utf-8")) if cj.exists() else {}
+    guest, company = a.guest or meta.get("guest", ""), a.company or meta.get("company", "")
+    role = a.role or meta.get("guest_role", "")
+    transcript = transcribe((spec or {}).get("audio") or video, ep / "transcript.json", brand.cfg, ep / "work",
+                            names=[guest, company])
+    if (a.render or a.youtube_url) and (d / "contenu.json").exists():
+        mail = json.loads((d / "contenu.json").read_text(encoding="utf-8"))
+    else:
+        mail = write(brand, transcript, ep, {"number": number, "guest": guest, "company": company, "role": role}, a.note)
+    if a.youtube_url:
+        mail["youtube_url"] = a.youtube_url.strip()
+    save(ep, mail, transcript["segments"])
+    res = render(brand, ep, mail, portraits(brand, ep, video, company))
+    for c in mail["checks"]:
+        color = "red" if c["level"] == "ÉCHEC" else "yellow"
+        console.print(f"  [{color}]{c['level']}[/{color}] {c['msg']}")
+    for n in res["notes"]:
+        console.print(f"  [yellow]{n}[/yellow]")
+    console.print(f"Objet : {mail.get('subject', '')}\n[green]Mail prêt[/green] -> {res['html']} ; aperçu : {res['preview']}\n"
+                  f"Contrôles : {mail['status']}. Retouche : modifier newsletter/contenu.json puis {base} --render ; "
+                  f"l'équipe valide, puis : {base} --final")
+
+
 def cmd_outro(a: argparse.Namespace) -> None:
     """Outro des shorts (carte YouTube avec la miniature validée) rendue une fois, puis collée à chaque short -> livrables/."""
     from .short_outro import apply
@@ -1383,6 +1425,18 @@ def main(argv: list[str] | None = None) -> None:
     sp.add_argument("--by", default="", help="qui a validé (prénom)")
     sp.add_argument("--note", default="", help="avec --pick : précision pour la rédaction ; avec --final : remarque")
     sp.set_defaults(fn=cmd_carousel)
+    sp = sub.add_parser("newsletter", help="mail podcast de Thomas (fondateur) : rédigé, mis en page (HTML + images), --final après validation")
+    common(sp)
+    sp.add_argument("--number", default="", help="numéro de l'épisode, ex: E23 (défaut : début du nom du fichier)")
+    sp.add_argument("--guest", default="", help="nom de l'invité (défaut : clips.json)")
+    sp.add_argument("--company", default="", help="entreprise de l'invité (défaut : clips.json)")
+    sp.add_argument("--role", default="", help="rôle de l'invité (défaut : clips.json, guest_role)")
+    sp.add_argument("--youtube-url", default="", help="lien de l'épisode publié sur YouTube (bouton + miniature cliquable)")
+    sp.add_argument("--render", action="store_true", help="refait le rendu depuis newsletter/contenu.json (après retouche du texte)")
+    sp.add_argument("--final", action="store_true", help="validation de l'équipe -> newsletter/final/ (refusé sans lien YouTube)")
+    sp.add_argument("--by", default="", help="qui a validé (prénom)")
+    sp.add_argument("--note", default="", help="précision pour la rédaction, ou remarque avec --final")
+    sp.set_defaults(fn=cmd_newsletter)
     sp = sub.add_parser("outro", help="après le choix de la miniature : outro des shorts (carte YouTube) collée à chaque short -> livrables/")
     common(sp)
     sp.add_argument("--only", default="", help="numéros des shorts, ex: 1,3 (défaut : tous les shorts rendus)")
