@@ -172,6 +172,27 @@ process pour les rendre mieux, et une étape où quelqu'un du marketing valide u
   Claude (limite d'abonnement atteinte le 09/10 : propositions E22 écrites dans la session à partir de la transcription).
 - Chaque remarque de l'équipe sur un titre -> ligne dans « À éviter » ou règle dans titles.md (puis noter ici).
 
+## Carrousels LinkedIn : `carousel` (Arthur, 12/10/2026 : « créer des carrousels LinkedIn à partir des podcasts, pour donner de
+la valeur à la commu qui nous suit, et sur la dernière slide un call to action pour inciter les gens à bosser avec nous »)
+
+- Choix d'Arthur : Claude propose l'angle (3 propositions, l'équipe choisit), en FRANÇAIS, CTA « réserver un échange »
+  (`carousel.cta` de brand.yaml, URL `weareaipartners.com` À CONFIRMER), 3 styles testés sur E22 puis l'équipe garde le sien.
+- Références : dossier Drive « Design » de l'équipe marketing (charte AI Partners, modèles Canva « Use case Carousel » —
+  couverture bleue avec le « A » en verre, slides navy à cartes blanches, CTA final — et « Carousel GEO », 1200×1500).
+- `clipper/carousel.py` + brief `brands/ai-corner/carousel.md` (injecté tel quel) : `carousel` -> 3 angles (`angles.md`,
+  citations retrouvées par `titles.find_evidence`, orateurs d'après `work/diarized_words.json`) -> `--pick N [--note]` ->
+  Claude Opus rédige 6–8 slides (cover, intro, point, stat, quote, recap) + le post -> `check_slides` (citation affichée
+  retrouvée ≥ 90 % mot pour mot, chiffres présents dans la transcription, titre ≤ 60 car., texte ≤ 35 mots) -> rendu :
+  UNE page HTML (toutes les slides empilées, Metropolis, logo SVG recoloré, `outro_bg.png` = motif montagne, photo
+  détourée de l'invité reprise des miniatures) -> Chrome `--screenshot` (fenêtre 1080 × 1350·n, `--virtual-time-budget`
+  pour les polices) -> découpe en PNG -> PDF. `--render` refait le rendu depuis `contenu.json` ; `--final STYLE` ->
+  `carrousel/final/`. Styles : `usecase` (A), `lignes` (B), `portrait` (C).
+- Pièges du rendu (09–12/10) : un titre aligné en bas par flexbox déborde VERS LE HAUT sans que `scrollHeight` le voie
+  -> le texte est dans un `<span>` mesuré par le script d'ajustement (`FIT_JS`, police réduite jusqu'à 50 %, cadre
+  rouge `.overflow` si ça ne tient toujours pas) ; un élément en `position: absolute` (motif, photo) passe DEVANT le texte
+  -> `:where(.slide > *) { position: relative; z-index: 2 }` ; jamais le même nom de classe pour une slide et un élément
+  (`.recap` écrasait la slide récapitulatif à 760 px de haut).
+
 ## Outro des shorts : `outro` (Arthur, 09/10/2026 : « pour les shorts, mettre en outro la première des 4 outros en motion design,
 call to action avec la miniature ; on peut monter les shorts en parallèle, mais pour créer l'outro et la rajouter à la fin des
 shorts il faut que la miniature soit validée »)

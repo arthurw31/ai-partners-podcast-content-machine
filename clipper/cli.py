@@ -678,6 +678,65 @@ def cmd_titles(a: argparse.Namespace) -> None:
                   + f"\nL'équipe marketing en choisit un, puis : {base} --pick N  (ensuite seulement : thumbnail)")
 
 
+def cmd_carousel(a: argparse.Namespace) -> None:
+    """Carrousel LinkedIn : 3 angles -> l'équipe en choisit un (--pick N) -> slides rédigées, contrôlées et rendues en
+    plusieurs styles -> l'équipe valide (--final STYLE) -> carrousel/final/ (PDF à téléverser + post)."""
+    from .carousel import (STYLES, check_slides, contact_sheet, finalize, portraits, propose_angles, render,
+                           save_content, write_angles_md, write_slides)
+    from .multicam import load_spec
+    from .titles import episode_number
+    brand = Brand(a.brand)
+    video = resolve_input(brand, a.input)
+    ep = episode_dir(brand, video)
+    number = episode_number(video, a.number)
+    base = f"python -m clipper carousel --brand {brand.slug} --input {Path(a.input).name}"
+    d = ep / "carrousel"
+    cfg = brand.cfg.get("carousel") or {}
+    if a.final:
+        content = json.loads((d / "contenu.json").read_text(encoding="utf-8"))
+        rec = finalize(ep, content, a.final, a.by, a.note)
+        console.print(f"[green]Carrousel validé[/green] (style {rec['style']}) -> {d / 'final'} : PDF à téléverser sur LinkedIn "
+                      "(publication « document ») + post_linkedin.md")
+        if not cfg.get("style"):
+            console.print(f"Pour les épisodes suivants : `carousel.style: {a.final}` dans brands/{brand.slug}/brand.yaml")
+        return
+    spec = load_spec(video)
+    cj = ep / "clips.json"
+    meta = json.loads(cj.read_text(encoding="utf-8")) if cj.exists() else {}
+    guest, company = a.guest or meta.get("guest", ""), a.company or meta.get("company", "")
+    role = a.role or meta.get("guest_role", "")
+    transcript = transcribe((spec or {}).get("audio") or video, ep / "transcript.json", brand.cfg, ep / "work",
+                            names=[guest, company])
+    styles = [a.styles] if a.styles in STYLES else ([cfg["style"]] if cfg.get("style") else list(cfg.get("styles") or STYLES))
+    if a.pick or a.render or a.slides_file:
+        if a.render:
+            content = json.loads((d / "contenu.json").read_text(encoding="utf-8"))
+        elif a.slides_file:
+            content = json.loads(Path(a.slides_file).read_text(encoding="utf-8"))
+        else:
+            angles = json.loads((d / "angles.json").read_text(encoding="utf-8"))
+            angle = next((x for x in angles["angles"] if x["rank"] == a.pick), None)
+            if not angle:
+                sys.exit(f"Angle {a.pick} introuvable (1 à {len(angles['angles'])})")
+            content = write_slides(brand, transcript, ep, angle,
+                                   {"number": number, "guest": guest, "company": company, "role": role}, a.note)
+        md = save_content(ep, content, transcript["segments"], base)
+        for c in content["checks"]:
+            color = "red" if c["level"] == "ÉCHEC" else "yellow"
+            console.print(f"  [{color}]{c['level']}[/{color}] slide {c['slide']} : {c['msg']}")
+        result = render(brand, ep, content, styles, portraits(brand, ep, video, company))
+        sheet = contact_sheet(brand, result, d / "planche.jpg")
+        console.print(f"[green]{len(content['slides']) + 1} slides[/green], {len(result)} style(s) -> {d} ; texte : {md} ; planche : {sheet}\n"
+                      f"Contrôles : {content['status']}. L'équipe valide le texte et le style, puis : {base} --final STYLE")
+        return
+    res = propose_angles(brand, transcript, ep, number, guest, company, role,
+                         import_file=Path(a.import_file) if a.import_file else None)
+    md = write_angles_md(res, d / "angles.md", base)
+    for x in res["angles"]:
+        console.print(f"  {x['rank']}. [{x['status']}] ({x.get('type')}) {x.get('cover', '')}")
+    console.print(f"[green]3 angles proposés[/green] -> {md}\nL'équipe marketing en choisit un, puis : {base} --pick N")
+
+
 def cmd_outro(a: argparse.Namespace) -> None:
     """Outro des shorts (carte YouTube avec la miniature validée) rendue une fois, puis collée à chaque short -> livrables/."""
     from .short_outro import apply
@@ -1301,6 +1360,21 @@ def main(argv: list[str] | None = None) -> None:
     sp.add_argument("--by", default="", help="qui a validé (prénom)")
     sp.add_argument("--note", default="", help="remarque de l'équipe (gardée avec les propositions écartées)")
     sp.set_defaults(fn=cmd_titles)
+    sp = sub.add_parser("carousel", help="carrousel LinkedIn : 3 angles -> --pick N -> slides en plusieurs styles -> --final STYLE")
+    common(sp)
+    sp.add_argument("--number", default="", help="numéro de l'épisode, ex: E23 (défaut : début du nom du fichier)")
+    sp.add_argument("--guest", default="", help="nom de l'invité (défaut : clips.json)")
+    sp.add_argument("--company", default="", help="entreprise de l'invité (défaut : clips.json)")
+    sp.add_argument("--role", default="", help="rôle de l'invité (défaut : clips.json, guest_role)")
+    sp.add_argument("--import-file", default="", help="angles déjà écrits (JSON {angles: […]}) : contrôlés sans appeler Claude")
+    sp.add_argument("--pick", type=int, default=None, help="angle choisi par l'équipe : Claude rédige les slides et les rend")
+    sp.add_argument("--slides-file", default="", help="slides déjà écrites (JSON, format de contenu.json) : contrôlées et rendues")
+    sp.add_argument("--render", action="store_true", help="refait le rendu depuis carrousel/contenu.json (après retouche du texte)")
+    sp.add_argument("--styles", default="", help="un seul style à rendre : usecase | lignes | portrait")
+    sp.add_argument("--final", default="", help="validation de l'équipe : style retenu -> carrousel/final/")
+    sp.add_argument("--by", default="", help="qui a validé (prénom)")
+    sp.add_argument("--note", default="", help="avec --pick : précision pour la rédaction ; avec --final : remarque")
+    sp.set_defaults(fn=cmd_carousel)
     sp = sub.add_parser("outro", help="après le choix de la miniature : outro des shorts (carte YouTube) collée à chaque short -> livrables/")
     common(sp)
     sp.add_argument("--only", default="", help="numéros des shorts, ex: 1,3 (défaut : tous les shorts rendus)")

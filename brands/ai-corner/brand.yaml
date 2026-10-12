@@ -169,6 +169,18 @@ short_outro:
   video_focus_x: 0.62
   logo: "logo.png"
 
+# Carrousels LinkedIn (Arthur, 12/10/2026 : « donner de la valeur à la communauté LinkedIn, et sur la dernière slide un CTA
+# pour inciter les gens à bosser avec nous ») : commande `carousel`, brief éditorial dans carousel.md. En français.
+carousel:
+  model: "claude-opus-5"
+  style: ""                    # style retenu par l'équipe (usecase | lignes | portrait) ; vide = les 3 sont rendus
+  cta:                         # dernière slide, écrite par le framework (jamais par Claude)
+    title: "Vous voulez [[la même chose]] dans votre entreprise ?"
+    text: "De l'ambition IA à l'exécution réelle : réservez 30 minutes avec l'équipe AI Partners."
+    button: "Réserver un échange"
+    url: "weareaipartners.com"   # À CONFIRMER par Arthur : page de prise de rendez-vous
+    episode: "L'épisode complet : AI Corner {number}, sur YouTube"
+
 # Teaser d'ouverture de l'épisode complet (commande episode, 07/10/2026) — calqué sur E20 MAIF : ~50 s de phrases fortes
 # sous-titrées, puis le logo AI Partners sur l'animation de la charte. Appliqué PAR-DESSUS la config ci-dessus.
 teaser:

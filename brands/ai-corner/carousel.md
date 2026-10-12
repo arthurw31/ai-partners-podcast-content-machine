@@ -1,0 +1,59 @@
+# Carrousels LinkedIn — brief AI Corner (AI Partners)
+
+Demande d'Arthur (12/10/2026) : « créer des carrousels LinkedIn à partir des podcasts, pour donner de la valeur à la
+communauté qui nous suit sur LinkedIn, et sur la dernière slide un call to action pour inciter les gens à bosser avec nous ».
+Ce fichier est injecté tel quel dans le prompt de Claude (`clipper/carousel.py`) : le compléter à chaque retour de l'équipe.
+
+## Objectif
+
+Le lecteur doit repartir avec quelque chose d'UTILE pour son entreprise, même s'il ne regarde jamais l'épisode. Le
+carrousel n'est pas une bande-annonce : c'est le meilleur de l'épisode, rendu actionnable. La dernière slide propose de
+travailler avec AI Partners (réserver un échange) : elle est crédible parce que les slides précédentes ont prouvé
+qu'on sait de quoi on parle.
+
+## Public
+
+Dirigeants, directeurs data / IA / transformation, managers de grandes entreprises et d'ETI françaises qui suivent la
+page AI Partners. Ils veulent savoir ce qui marche VRAIMENT dans les entreprises (pas de théorie, pas de buzz).
+
+## Règles d'écriture
+
+- En français, voix de la page AI Partners : sobre, concrète, experte, jamais racoleuse. Pas de « 🚀 », pas de
+  « Révolution », pas de « Vous n'allez pas y croire ». Vouvoiement si on s'adresse au lecteur.
+- UNE idée par slide. Titre de slide ≤ 60 caractères. Texte ≤ 35 mots. Si ça ne tient pas, couper l'idée en deux slides.
+- Chaque idée vient de l'épisode : on cite le passage (horodatage + citation EXACTE) qui la prouve. Aucun chiffre, nom
+  d'outil ou fait qui ne soit pas dans la transcription.
+- L'invité est la preuve, pas le sujet : « Chez Coty, … » ; on le présente une fois (Prénom Nom, rôle, entreprise).
+- Les citations de l'invité sont reprises mot pour mot (on peut couper avec « […] », jamais reformuler entre guillemets).
+  On retire les tics oraux (« euh », « en fait », « voilà ») d'une citation seulement en coupant avec « […] ».
+- Pas de nom de l'animateur dans les slides de contenu (Thomas Spitz n'apparaît que si sa question est l'idée).
+
+## Structure (7 à 9 slides, format 1080 × 1350)
+
+1. Couverture : la promesse en ≤ 9 mots, avec 1 à 3 mots mis en valeur (bandeau bleu) ; sur-titre « AI Corner · E22 »,
+   invité + entreprise en bas. Elle doit donner envie de faire défiler (bénéfice concret, chiffre ou tension).
+2. Pourquoi c'est important / le contexte : la situation de l'invité en 2 phrases (chiffre clé si l'épisode en donne).
+3 à 7. Le cœur : leçons, étapes ou idées reçues démontées — selon l'angle choisi. Chaque slide : titre-action + 1 à 2
+   phrases d'explication + (si possible) une citation courte de l'invité. Une slide « chiffre » ou « citation » au
+   milieu casse le rythme.
+8. Récapitulatif : les idées en une liste courte (le lecteur la sauvegarde).
+9. CTA (écrit par le framework depuis `carousel.cta` de brand.yaml, pas par Claude) : réserver un échange avec AI
+   Partners + rappel de l'épisode complet.
+
+## Angles possibles (Claude en propose 3, l'équipe en choisit un)
+
+- `lecons` : « N leçons de <entreprise> pour … » — ce qu'on peut appliquer demain.
+- `methode` : « Comment <entreprise> a … : la méthode en N étapes ».
+- `idees_recues` : « N idées reçues sur … que <invité> démonte ».
+- `cas` : avant / ce qui a été fait / résultats (comme le carrousel Bouygues de l'équipe).
+- `erreurs` : « Les N erreurs à éviter quand … ».
+- `chiffres` : l'épisode raconté par ses chiffres (seulement si l'épisode en donne au moins 4).
+
+## Post LinkedIn qui accompagne le carrousel
+
+4 à 8 lignes : accroche (la promesse de la couverture, reformulée), 2–3 lignes de contexte, « Les N idées dans le
+carrousel 👇 » (seul emoji autorisé avec 🎙️), invité nommé, lien de l'épisode en commentaire. Pas de hashtags.
+
+## À éviter
+
+(à compléter avec les retours de l'équipe)

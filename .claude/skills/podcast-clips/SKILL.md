@@ -1,9 +1,9 @@
 ---
 name: podcast-clips
-description: Pilote tout le process AI Corner avec le framework « clipper » de ce dépôt, des rushs d'un tournage (3 caméras MP4 + audio WAV déposés dans depot/) jusqu'à tous les livrables, en trois colonnes parallèles — 5 shorts verticaux montés + leur post LinkedIn (10 passages proposés, l'équipe en choisit 5, contrôle qualité, validation, rendu, outro avec la miniature), l'épisode complet monté avec son teaser (dérushage, aperçu, contrôle qualité, validation, rendu 1080p), le titre puis la miniature YouTube (5 titres en texte, l'équipe en choisit un, puis 4 miniatures, l'équipe en choisit une). Déclencher sur « clip », « short », « reel », « découpe mon podcast », « fais des extraits », « nouveau podcast », « monte l'épisode », « teaser », « titre de l'épisode », « miniature », « /podcast-clips », ou dès que des rushs ou un épisode sont déposés dans depot/.
+description: Pilote tout le process AI Corner avec le framework « clipper » de ce dépôt, des rushs d'un tournage (3 caméras MP4 + audio WAV déposés dans depot/) jusqu'à tous les livrables, en quatre colonnes parallèles — 5 shorts verticaux montés + leur post LinkedIn (10 passages proposés, l'équipe en choisit 5, contrôle qualité, validation, rendu, outro avec la miniature), l'épisode complet monté avec son teaser (dérushage, aperçu, contrôle qualité, validation, rendu 1080p), le titre puis la miniature YouTube (5 titres en texte, l'équipe en choisit un, puis 4 miniatures, l'équipe en choisit une), le carrousel LinkedIn (3 angles proposés, l'équipe en choisit un, slides rédigées et rendues dans la charte AI Partners, CTA « réserver un échange »). Déclencher sur « clip », « short », « reel », « découpe mon podcast », « fais des extraits », « nouveau podcast », « monte l'épisode », « teaser », « titre de l'épisode », « miniature », « carrousel », « carousel LinkedIn », « /podcast-clips », ou dès que des rushs ou un épisode sont déposés dans depot/.
 ---
 
-# Podcast → shorts, épisode complet, titre et miniature
+# Podcast → shorts, épisode complet, titre et miniature, carrousel
 
 Tu pilotes le framework `clipper` (voir [CLAUDE.md](../../../CLAUDE.md), le schéma du process dans
 [README.md](../../../README.md) et le guide pratique [docs/FRAMEWORK.md](../../../docs/FRAMEWORK.md) : délais, quel fichier modifier). **Lis d'abord [docs/BONNES_PRATIQUES.md](../../../docs/BONNES_PRATIQUES.md)** :
@@ -11,13 +11,14 @@ ce qui a été validé sur E22 (le résultat de référence) et ce qu'il ne faut
 il ne tape aucune commande, tu fais tout et tu lui parles simplement (pas de jargon technique).
 
 **Le process (schéma de référence : « Vue d'ensemble » du README, sur GitHub)** : dépôt des rushs -> `rushes` ->
-`transcribe`, puis **trois colonnes lancées en parallèle**, sans s'attendre :
+`transcribe`, puis **quatre colonnes lancées en parallèle**, sans s'attendre :
 
 | Colonne | Étapes | Section |
 | --- | --- | --- |
 | 5 shorts 9:16 | `propose` -> l'équipe choisit 5 passages -> `polish` (+ `qa`, boucle « à corriger ») -> l'équipe valide les aperçus -> `render` + `posts` -> **`outro`** | 2 à 5 |
 | Épisode + teaser | `episode-plan` -> `episode-render --proxy` (+ `qa`, boucle « à corriger ») -> l'équipe valide l'aperçu -> `episode-render` 1080p | « Épisode complet » |
 | Titre puis miniature | `titles` (5 titres en texte) -> l'équipe en choisit un -> `thumbnail` (4 miniatures) -> l'équipe en choisit une | « Titre et miniature » |
+| Carrousel LinkedIn | `carousel` (3 angles) -> l'équipe en choisit un -> `carousel --pick N` (slides + post, rendu PDF) -> l'équipe valide -> `carousel --final STYLE` | « Carrousel LinkedIn » |
 
 **Deux seules dépendances entre colonnes** (flèches en pointillés du schéma) :
 - **A** — la description YouTube de l'épisode prend le titre validé (`titles --pick`). Si l'épisode est rendu avant, la
@@ -25,11 +26,11 @@ il ne tape aucune commande, tu fais tout et tu lui parles simplement (pas de jar
 - **B** — l'outro des shorts montre la miniature choisie : `outro` ne tourne qu'après `thumbnail --pick`. Le montage, la
   validation et le rendu des shorts, eux, n'attendent pas.
 
-Dès que la transcription est prête, lance donc `propose` ET `titles` (en arrière-plan) et, si l'épisode complet est
+Dès que la transcription est prête, lance donc `propose`, `titles` ET `carousel` (en arrière-plan) et, si l'épisode complet est
 demandé, `episode-plan` : l'équipe peut choisir les passages et le titre pendant que le reste tourne.
 
-**Cinq moments où l'humain décide** (rien ne passe sans) : les 5 passages, la validation des aperçus des shorts, la
-validation de l'aperçu de l'épisode, le titre, la miniature. Avant chaque aperçu, la vidéo passe le contrôle
+**Sept moments où l'humain décide** (rien ne passe sans) : les 5 passages, la validation des aperçus des shorts, la
+validation de l'aperçu de l'épisode, le titre, la miniature, l'angle du carrousel, la validation du carrousel. Avant chaque aperçu, la vidéo passe le contrôle
 automatique (`qa`) ; tant qu'il montre un défaut, tu corriges et tu recommences (boucle « à corriger ») avant de la
 montrer.
 
@@ -270,6 +271,26 @@ shorts (aucune attente mutuelle) :
 `thumbnail` s'arrête s'il n'y a pas de titre validé ; la description YouTube de l'épisode reprend le même titre. Dès la
 miniature choisie, lance `outro` (étape 5, dépendance B) si des shorts sont déjà rendus.
 
+## Carrousel LinkedIn (donner de la valeur à la communauté, CTA « réserver un échange »)
+
+Demande d'Arthur (12/10/2026). En français, charte AI Partners, 1080 × 1350, PDF à publier comme « document » LinkedIn.
+Brief éditorial : `brands/<marque>/carousel.md` ; CTA final : `carousel.cta` de `brand.yaml` (jamais écrit par Claude).
+À lancer après `transcribe`, en parallèle de tout le reste :
+
+1. `python -m clipper carousel --brand <marque> --input <E>.mp4` : 3 angles de types différents (méthode, leçons, idées
+   reçues, erreurs, cas, chiffres), chacun prouvé par des citations retrouvées dans l'épisode -> `carrousel/angles.md`.
+   Donne les 3 angles à Arthur pour l'équipe marketing.
+2. L'équipe choisit : `carousel … --pick N [--note "précision"]` : Claude rédige 6 à 8 slides + le post, contrôlés (citations
+   mot pour mot, chiffres présents dans l'épisode, longueurs), puis rendu PNG + PDF. Tant que `carousel.style` est vide dans
+   brand.yaml, les 3 styles sont rendus (A cas client, B lignes, C portrait) avec une planche de comparaison
+   (`carrousel/planche.jpg`). REGARDE la planche et au moins la couverture, une slide de contenu et le CTA en grand avant
+   d'envoyer : texte qui déborde (cadre rouge), photo sur le titre, logo invisible.
+3. Contrôle ÉCHEC ou retouche demandée : corrige `carrousel/contenu.json` toi-même puis `carousel … --render` (aucun appel à
+   Claude) ; boucle jusqu'à un contrôle propre.
+4. L'équipe valide le texte et le style : `carousel … --final STYLE --by <prénom>` -> `carrousel/final/` (PDF + PNG +
+   `post_linkedin.md`). Au 1er choix de style, écris `carousel.style: <style>` dans brand.yaml (les épisodes suivants
+   n'ont plus qu'un style). Toute remarque de fond devient une règle dans `carousel.md` (« À éviter »).
+
 ## Retouches courantes
 
 | Demande | Action |
@@ -282,6 +303,8 @@ miniature choisie, lance `outro` (étape 5, dépendance B) si des shorts sont d�
 | « refais le post » | `posts --only N --force` (ajouter une consigne dans `posts.md` si c'est un défaut récurrent) |
 | « autre titre d'épisode » | `titles … --pick M` (ou `--lines`), puis `thumbnail` (nouvelle planche), choix, `thumbnail --pick N`, puis `outro` |
 | « autre miniature » | `thumbnail … --pick N` (autre numéro), puis `outro` : l'outro est re-rendue avec la nouvelle miniature |
+| « un autre angle de carrousel » | `carousel … --pick M` (angle déjà proposé) ou `carousel` (3 nouveaux angles) |
+| « change le texte d'une slide » | `carrousel/contenu.json`, puis `carousel … --render` |
 | « l'outro ne va pas » | réglages `short_outro:` de `brand.yaml` (texte du bouton, titre), puis `outro --force` |
 | « nouvelle marque / autre podcast » | `python -m clipper new-brand <slug>`, puis brand.yaml, guidelines.md, posts.md (voir README) |
 
