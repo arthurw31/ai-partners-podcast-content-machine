@@ -1,5 +1,5 @@
 flowchart TD
-    IN[/"1 · Dépôt dans depot/ : 3 rushs MP4 + l'audio WAV<br/>gros plan invité · plan large · gros plan animateur · micro"/]
+    IN(["1 · Dépôt dans depot/ : 3 rushs MP4 + l'audio WAV<br/>gros plan invité · plan large · gros plan animateur · micro"])
     IN --> FE["2 · rushes : fichiers vérifiés, caméras reconnues (visages),<br/>micro synchronisé, rangement + multicam.json"]
     FE --> TR["3 · transcribe : texte mot à mot (Whisper)<br/>et qui parle quand (empreintes vocales)"]
     TR --> S1
@@ -10,7 +10,7 @@ flowchart TD
 
     subgraph SH["5 shorts 9:16"]
         direction TB
-        S1{{"propose : Claude propose ~10 passages"}} --> S2["L'équipe choisit 5 passages (pick)<br/>et ses demandes particulières"]
+        S1("propose : Claude propose ~10 passages") --> S2["L'équipe choisit 5 passages (pick)<br/>et ses demandes particulières"]
         S2 --> S3["polish : « euh », « hmm » et blancs retirés<br/>(mots alignés sur le son),<br/>gros plan / écran partagé,<br/>sous-titres vérifiés à l'écoute"]
         S3 --> S4["qa stricte + aperçus MP4 : fins de phrase<br/>dans le silence, sous-titres jamais superposés,<br/>raccords, volume, aucun écran noir ;<br/>pensée finie (Smart Turn),<br/>boucle de correction auto (6 tours),<br/>film des moments à risque"]
         S4 -->|à corriger| S3
@@ -22,10 +22,10 @@ flowchart TD
 
     subgraph EP["Épisode + teaser"]
         direction TB
-        E1{{"episode-plan · dérushage par Claude :<br/>dernière prise de l'intro, coupes hors antenne,<br/>questions reposées, fin sur l'au revoir"}}
+        E1("episode-plan · dérushage par Claude :<br/>dernière prise de l'intro, coupes hors antenne,<br/>questions reposées, fin sur l'au revoir")
         E1 --> E2["qui parle quand (empreintes vocales),<br/>raccords nettoyés : sans hésitation,<br/>blanc ni mot coupé"]
         E2 --> E3["liste de plans façon monteur :<br/>gros plans, plan large, écran partagé ;<br/>on voit toujours celui qui parle"]
-        E3 --> E4{{"teaser : Claude écrit le script<br/>(thèse, ping-pong, chute), extraits<br/>vérifiés à l'écoute, ordre relu"}}
+        E3 --> E4("teaser : Claude écrit le script<br/>(thèse, ping-pong, chute), extraits<br/>vérifiés à l'écoute, ordre relu")
         E4 --> E5["chapitres et description YouTube<br/>(titre validé)"]
         E5 --> E6["episode-render --proxy : aperçu 540p<br/>teaser, épisode et fin AI Partners"]
         E6 --> E7["qa --episode : raccords réécoutés,<br/>celui qui parle bien à l'image,<br/>volumes, images ; sinon Claude retouche"]
@@ -37,16 +37,16 @@ flowchart TD
 
     subgraph MI["Titre puis miniature"]
         direction TB
-        M1{{"titles : Claude propose 5 titres en texte,<br/>chacun prouvé par un passage de l'épisode"}} --> M2["L'équipe marketing choisit 1 titre<br/>(titles --pick N)"]
+        M1("titles : Claude propose 5 titres en texte,<br/>chacun prouvé par un passage de l'épisode") --> M2["L'équipe marketing choisit 1 titre<br/>(titles --pick N)"]
         M2 --> M3["thumbnail : planche de 4 miniatures avec ce titre,<br/>photos où les deux sourient,<br/>gabarit Canva (thumbnail-template)"]
         M3 --> M4["L'équipe marketing choisit sa miniature<br/>(thumbnail --pick N)"]
     end
 
     subgraph CA["Carrousel LinkedIn"]
         direction TB
-        C1{{"carousel : Claude propose 3 angles<br/>(méthode, leçons, idées reçues…),<br/>chacun prouvé par l'épisode"}} --> C2["L'équipe marketing choisit 1 angle<br/>(carousel --pick N)"]
-        C2 --> C3{{"Claude rédige 7 à 9 slides, citations<br/>et chiffres vérifiés ; dernière slide :<br/>réserver un échange, lien dans le post"}}
-        C3 --> C3b{{"description LinkedIn qui accompagne<br/>le carrousel : le présente en 3 à 5 lignes,<br/>finit par le lien de réservation"}}
+        C1("carousel : Claude propose 3 angles<br/>(méthode, leçons, idées reçues…),<br/>chacun prouvé par l'épisode") --> C2["L'équipe marketing choisit 1 angle<br/>(carousel --pick N)"]
+        C2 --> C3("Claude rédige 7 à 9 slides, citations<br/>et chiffres vérifiés ; dernière slide :<br/>réserver un échange, lien dans le post")
+        C3 --> C3b("description LinkedIn qui accompagne<br/>le carrousel : le présente en 3 à 5 lignes,<br/>finit par le lien de réservation")
         C3b --> C4["rendu PDF 1080×1350 dans la charte<br/>AI Partners : couverture photo de l'invité,<br/>slides bleu nuit à cartes blanches"]
         C4 --> C5["L'équipe valide le texte et le style<br/>(carousel --final STYLE)"]
         C5 -->|retouche| C4
@@ -54,26 +54,26 @@ flowchart TD
 
     subgraph NL["Mail podcast de Thomas"]
         direction TB
-        N1{{"newsletter : Claude écrit le mail<br/>de Thomas à la 1re personne :<br/>objet, accroche, l'invité,<br/>au programme (4 points)"}}
+        N1("newsletter : Claude écrit le mail<br/>de Thomas à la 1re personne :<br/>objet, accroche, l'invité,<br/>au programme (4 points)")
         N1 --> N2["mail mis en page (HTML 600 px)<br/>bandeau, photo de l'invité,<br/>miniature YouTube cliquable ;<br/>faits et chiffres vérifiés"]
         N2 --> N3["L'équipe valide le mail<br/>(newsletter --final, avec<br/>le lien YouTube publié)"]
         N3 -->|retouche| N2
     end
 
-    S7 --> L1[("5 shorts MP4 avec outro<br/>et 5 posts LinkedIn")]
+    S7 --> L1(["5 shorts MP4 avec outro<br/>et 5 posts LinkedIn"])
 
     M2 -.->|attend le titre validé| E5
     M4 -.->|attend la miniature choisie| S7
-    E9 --> L2[("Épisode 1080p avec teaser,<br/>description YouTube (titre validé)<br/>et chapitres")]
-    C5 --> L4[("Carrousel LinkedIn (PDF)<br/>et la description LinkedIn<br/>qui l'accompagne, avec<br/>le lien de réservation")]
-    N3 --> L5[("Mail de Thomas prêt à envoyer :<br/>HTML et images, objet,<br/>version texte")]
+    E9 --> L2(["Épisode 1080p avec teaser,<br/>description YouTube (titre validé)<br/>et chapitres"])
+    C5 --> L4(["Carrousel LinkedIn (PDF)<br/>et la description LinkedIn<br/>qui l'accompagne, avec<br/>le lien de réservation"])
+    N3 --> L5(["Mail de Thomas prêt à envoyer :<br/>HTML et images, objet,<br/>version texte"])
     E5 -.->|chapitres de l'épisode| N1
     M4 -.->|miniature choisie| N2
-    M4 --> L3[("Titre validé + miniature choisie<br/>1280×720 + HD")]
+    M4 --> L3(["Titre validé + miniature choisie<br/>1280×720 + HD"])
 
-    classDef human fill:#FFF2DF,stroke:#C26A00,color:#3A2810;
-    classDef llm fill:#EFEBFF,stroke:#6B4FD8,color:#251C47;
-    classDef deliver fill:#E2F5EC,stroke:#0F7A55,color:#0F3127;
+    classDef human fill:#FFF4E6,stroke:#F08C00,stroke-width:1.5px,color:#5C2C06;
+    classDef llm fill:#F1F0FF,stroke:#7B6CF6,stroke-width:1.5px,color:#2B2366;
+    classDef deliver fill:#E8F8F0,stroke:#12A26B,stroke-width:1.5px,color:#0B3B29;
     class IN,S2,S5,E8,M2,M4,C2,C5,N3 human;
     class S1,E1,E4,M1,C1,C3,C3b,N1 llm;
     class L1,L2,L3,L4,L5 deliver;

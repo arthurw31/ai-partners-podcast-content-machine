@@ -24,13 +24,42 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SRC, OUT = ROOT / "docs" / "schema.mmd", ROOT / "docs" / "schema.svg"
 MERMAID = "11.4.1"          # version figée : le rendu ne change pas tout seul
+FONTS = ROOT / "brands" / "ai-corner" / "assets" / "fonts"
+# Habillage (Arthur, 12/10/2026 : « les formes sont un peu vieillottes et moches, garde la même structure ») : police de
+# la charte embarquée dans l'image (GitHub affiche le SVG comme une image : aucune police externe n'y est chargée),
+# cartes arrondies, colonnes sur fond gris clair, dépendances entre colonnes en pointillés orange.
+EXTRA_CSS = (
+    "#schema .node rect{rx:14px;ry:14px}"
+    "#schema .cluster rect{rx:22px;ry:22px;stroke-width:1px}"
+    "#schema .cluster-label text,#schema .cluster-label tspan{fill:#151D53!important;font-weight:700;letter-spacing:.02em}"
+    "#schema .flowchart-link{stroke-width:1.6px}"
+    "#schema .edge-pattern-dotted{stroke:#F08C00!important;stroke-dasharray:7 6!important;stroke-width:1.8px!important}"
+    "#schema .edgeLabel rect,#schema .labelBkg{fill:#FFFFFF;opacity:1}"
+    "#schema .edgeLabel text,#schema .edgeLabel tspan{fill:#5B6680;font-size:15px}"
+    "#schema .marker{fill:#9AA6BF!important;stroke:#9AA6BF!important}")
 
-PAGE = """<!doctype html><meta charset="utf-8"><body><pre id="src">{src}</pre><pre id="out"></pre>
+
+def font_faces(embed: bool) -> str:
+    import base64
+    out = []
+    for weight, name in ((400, "Metropolis-Regular.ttf"), (700, "Metropolis-Bold.ttf")):
+        f = FONTS / name
+        if not f.exists():
+            continue
+        src = (f"data:font/ttf;base64,{base64.b64encode(f.read_bytes()).decode()}" if embed else f.resolve().as_uri())
+        out.append(f'@font-face{{font-family:Metropolis;font-weight:{weight};src:url("{src}") format("truetype")}}')
+    return "".join(out)
+
+PAGE = """<!doctype html><meta charset="utf-8"><style>{fonts}</style><body><pre id="src">{src}</pre><pre id="out"></pre>
 <script type="module">
 import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@{ver}/dist/mermaid.esm.min.mjs";
-mermaid.initialize({{startOnLoad: false, securityLevel: "strict", htmlLabels: false,
-  flowchart: {{htmlLabels: false, curve: "basis", nodeSpacing: 40, rankSpacing: 45}},
-  themeVariables: {{fontFamily: "Arial, Helvetica, sans-serif", fontSize: "18px"}}}});
+await document.fonts.load("17px Metropolis"); await document.fonts.load("bold 17px Metropolis");
+mermaid.initialize({{startOnLoad: false, securityLevel: "strict", htmlLabels: false, theme: "base",
+  flowchart: {{htmlLabels: false, curve: "basis", nodeSpacing: 46, rankSpacing: 52, padding: 18, diagramPadding: 28}},
+  themeVariables: {{fontFamily: "Metropolis, 'Segoe UI', Helvetica, Arial, sans-serif", fontSize: "17px",
+    primaryColor: "#FFFFFF", primaryBorderColor: "#C9D3E6", primaryTextColor: "#1B2440", lineColor: "#9AA6BF",
+    clusterBkg: "#F4F6FB", clusterBorder: "#E1E6F0", titleColor: "#151D53", edgeLabelBackground: "#FFFFFF",
+    tertiaryColor: "#F4F6FB"}}}});
 try {{
   const {{svg}} = await mermaid.render("schema", document.getElementById("src").textContent);
   document.getElementById("out").textContent = svg;
@@ -51,7 +80,7 @@ def main() -> int:
         sys.exit("Chrome ou Edge introuvable")
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as td:
         page = Path(td) / "schema.html"
-        page.write_text(PAGE.format(src=html.escape(src), ver=MERMAID), encoding="utf-8")
+        page.write_text(PAGE.format(src=html.escape(src), ver=MERMAID, fonts=font_faces(False)), encoding="utf-8")
         res = subprocess.run([browser, "--headless=new", "--disable-gpu", "--virtual-time-budget=30000",
                               f"--user-data-dir={Path(td) / 'profil'}", "--dump-dom", page.as_uri()],
                              capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180,
@@ -69,6 +98,9 @@ def main() -> int:
     if vb:
         w, h = (round(float(v)) for v in vb.groups())
         svg = re.sub(r' width="100%"', f' width="{w}" height="{h}"', svg, count=1)
+    # coins arrondis aussi en attribut (les visionneurs qui ignorent rx en CSS) + police et habillage dans le <style>
+    svg = re.sub(r'(<rect class="basic label-container"[^>]*?)( x=)', r'\1 rx="14" ry="14"\2', svg)
+    svg = svg.replace("<style>", "<style>" + font_faces(True) + EXTRA_CSS, 1)
     import xml.etree.ElementTree as ET
     ET.fromstring(svg)                      # SVG valide, sinon GitHub affiche une image cassée
     svg = f"<!-- généré par scripts/render_schema.py depuis docs/schema.mmd ; source-sha256: {source_hash(src)} -->\n" + svg

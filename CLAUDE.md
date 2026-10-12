@@ -19,6 +19,10 @@ générée depuis la source Mermaid [docs/schema.mmd](docs/schema.mmd) : le mêm
 « Unable to render rich display — Cannot read properties of undefined (reading 'render') » (09/10/2026), alors qu'il se
 dessinait sans erreur avec Mermaid 10.0 à 12.1 et sur GitHub dans un autre navigateur. Dans les libellés, jamais de ligne
 qui commence par « + » après `<br/>` : en image, elle est prise pour une puce et effacée.
+Habillage (Arthur, 12/10/2026 : « les formes sont un peu vieillottes et moches, garde la même structure ») : thème Mermaid
+`base`, police Metropolis EMBARQUÉE dans le SVG (GitHub l'affiche comme une image : aucune police externe), cartes
+arrondies (Claude = `("…")` violet, humain = orange, entrée et livrables = pastilles `(["…"])` vertes), colonnes sur fond
+gris clair, dépendances entre colonnes en pointillés orange (`EXTRA_CSS` de `render_schema.py`). Pas d'hexagone ni de cylindre.
 À CHAQUE modification du process (nouvelle commande, étape ajoutée, retirée ou déplacée, nouvelle validation humaine, nouveau
 livrable), dans le MÊME commit :
 1. `docs/schema.mmd` (les étapes citent leur commande), puis `python scripts/render_schema.py` (Chrome sans fenêtre,
