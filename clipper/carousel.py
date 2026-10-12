@@ -41,7 +41,8 @@ STYLES = {"usecase": "A · Cas client (modèle « Use case » de l'équipe)",
 RULES = {"title": 60, "title_hard": 80, "words": 35, "words_hard": 50, "min_slides": 6, "max_slides": 9}
 CTA_DEFAULT = {"title": "Vous voulez [[la même chose]] dans votre entreprise ?",
                "text": "De l'ambition IA à l'exécution réelle : réservez 30 minutes avec l'équipe AI Partners.",
-               "button": "Réserver un échange", "url": "weareaipartners.com",
+               "button": "Réserver un échange", "note": "Lien dans le post 👇", "booking_url": "",
+               "post_line": "📅 Réserver un échange avec nous : {url}",
                "episode": "L'épisode complet : AI Corner {number}, sur YouTube"}
 
 
@@ -186,7 +187,7 @@ Rien qui ne soit dans la transcription (chiffres, outils, noms). Citations : seu
 
 Réponds UNIQUEMENT en JSON :
 {{"guest_line": "Prénom Nom · rôle en français, Entreprise", "slides": [{{"kind": "cover", "title": "…"}}, …],
-  "post": "texte du post LinkedIn qui accompagne le carrousel (voir le brief)"}}"""
+  "post": "texte du post LinkedIn qui présente le carrousel, SANS lien (le lien de réservation est ajouté automatiquement)"}}"""
 
 
 def write_slides(brand, transcript: dict, ep: Path, angle: dict, meta: dict, note: str = "") -> dict:
@@ -205,6 +206,16 @@ def write_slides(brand, transcript: dict, ep: Path, angle: dict, meta: dict, not
                "slides": [s for s in data.get("slides", []) if isinstance(s, dict) and s.get("kind") != "cta"],
                "post": data.get("post", "")}
     return content
+
+
+def post_text(brand, content: dict) -> str:
+    """Post LinkedIn final = texte de Claude + ligne de réservation (lien cliquable : le seul endroit où il l'est, LinkedIn
+    affiche les pages d'un document comme des images ; Arthur, 12/10/2026 : « mets le lien dans le post »)."""
+    cta = {**CTA_DEFAULT, **(_cfg(brand).get("cta") or {})}
+    body = (content.get("post") or "").rstrip()
+    if not cta.get("booking_url"):
+        return body
+    return f"{body}\n\n{cta['post_line'].format(url=cta['booking_url'])}"
 
 
 def check_slides(content: dict, segments: list[dict]) -> list[dict]:
@@ -263,6 +274,10 @@ def _status(checks: list[dict]) -> str:
 
 def save_content(ep: Path, content: dict, segments: list[dict], command: str) -> Path:
     content["checks"] = check_slides(content, segments)
+    if not content.get("post_final", "").strip():
+        content["checks"].append({"slide": 0, "level": "ÉCHEC", "msg": "post LinkedIn vide"})
+    elif "http" not in content["post_final"]:
+        content["checks"].append({"slide": 0, "level": "ATTENTION", "msg": "post sans lien de réservation (carousel.cta.booking_url)"})
     content["status"] = _status(content["checks"])
     d = ep / "carrousel"
     d.mkdir(parents=True, exist_ok=True)
@@ -285,7 +300,9 @@ def save_content(ep: Path, content: dict, segments: list[dict], command: str) ->
                 md.append(f"- **{c['level']}** : {c['msg']}")
         md.append("")
     md += [f"## {len(content['slides']) + 1}. cta — ajoutée par le framework (`carousel.cta` de brand.yaml)", "",
-           "## Post LinkedIn qui accompagne le carrousel", "", content.get("post", ""), ""]
+           "## Post LinkedIn qui accompagne le carrousel (à publier avec le PDF)", "",
+           content.get("post_final") or content.get("post", ""), ""]
+    (d / "post_linkedin.md").write_text((content.get("post_final") or content.get("post", "")) + "\n", encoding="utf-8")
     (d / "contenu.md").write_text("\n".join(md) + "\n", encoding="utf-8")
     return d / "contenu.md"
 
@@ -577,7 +594,7 @@ def _slide_html(s: dict, i: int, n: int, style: str, ctx: dict) -> str:
         inner = f'<h2 class="fit" style="height:200px"><span>{_hl(s.get("title") or "À retenir")}</span></h2><ul class="rlist fit">{items}</ul>'
     elif kind == "cta":
         inner = (f'<h1 class="fit"><span>{_hl(s.get("title"))}</span></h1><p class="fit"><span>{_hl(s.get("text"))}</span></p>'
-                 f'<div class="btn">{html.escape(s.get("button", ""))} →</div><div class="url">{html.escape(s.get("url", ""))}</div>'
+                 f'<div class="btn">{html.escape(s.get("button", ""))} →</div><div class="url">{html.escape(s.get("note") or s.get("url", ""))}</div>'
                  f'<div class="ep">{html.escape(s.get("episode", ""))}</div>')
     else:                                   # intro / point
         label = "Le contexte" if kind == "intro" else f"Idée {s.get('n') or i - 1}"
@@ -686,7 +703,7 @@ def finalize(ep: Path, content: dict, style: str, by: str = "", note: str = "") 
     shutil.copy2(pdf, final / f"{content['episode']}_carrousel.pdf")
     for p in sorted(src.glob("slide_*.png")):
         shutil.copy2(p, final / p.name)
-    (final / "post_linkedin.md").write_text(content.get("post", "") + "\n", encoding="utf-8")
+    (final / "post_linkedin.md").write_text((content.get("post_final") or content.get("post", "")) + "\n", encoding="utf-8")
     rec = {"episode": content["episode"], "style": style, "angle": content.get("angle"), "validated_by": by,
            "validated_on": date.today().isoformat(), "note": note}
     (ep / "carrousel" / "carrousel_valide.json").write_text(json.dumps(rec, ensure_ascii=False, indent=1), encoding="utf-8")

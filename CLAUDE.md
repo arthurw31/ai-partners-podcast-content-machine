@@ -192,7 +192,12 @@ la valeur à la commu qui nous suit, et sur la dernière slide un call to action
   désormais. Couverture : la promesse claire (« Coty : la méthode en [[5 étapes]] pour adopter l'IA »), PAS une
   accroche choc (proposées : « 3 000 agents IA. Dont 10 qui font la même chose. »… -> « en vrai le titre de base était
   bien »). CTA : « Vos équipes testent l'IA. Et après ? » / « Passons de l'expérimentation à l'impact : 30 minutes pour
-  en parler. » (`carousel.cta`) ; lien de prise de rendez-vous encore à confirmer.
+  en parler. » (`carousel.cta`).
+- **Lien de réservation = dans le post, pas dans le PDF** (Arthur, 12/10/2026 : « mets le lien dans le post », agenda
+  Google de Thomas) : LinkedIn affiche les pages d'un carrousel (document PDF) comme des images, aucun lien n'y est
+  cliquable. La dernière slide dit « Réserver un échange » + « Lien dans le post 👇 » (`cta.note`) ; `post_text` ajoute
+  `cta.post_line` avec `cta.booking_url` à la fin du post rédigé par Claude (3 à 5 lignes qui présentent le carrousel) ;
+  sortie `carrousel/post_linkedin.md` ; contrôle : post vide = ÉCHEC, post sans lien = ATTENTION.
 - Pièges du rendu (09–12/10) : un titre aligné en bas par flexbox déborde VERS LE HAUT sans que `scrollHeight` le voie
   -> le texte est dans un `<span>` mesuré par le script d'ajustement (`FIT_JS`, police réduite jusqu'à 50 %, cadre
   rouge `.overflow` si ça ne tient toujours pas) ; un élément en `position: absolute` (motif, photo) passe DEVANT le texte

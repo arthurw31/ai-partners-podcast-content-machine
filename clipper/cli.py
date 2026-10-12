@@ -681,7 +681,7 @@ def cmd_titles(a: argparse.Namespace) -> None:
 def cmd_carousel(a: argparse.Namespace) -> None:
     """Carrousel LinkedIn : 3 angles -> l'équipe en choisit un (--pick N) -> slides rédigées, contrôlées et rendues en
     plusieurs styles -> l'équipe valide (--final STYLE) -> carrousel/final/ (PDF à téléverser + post)."""
-    from .carousel import (STYLES, check_slides, contact_sheet, finalize, portraits, propose_angles, render,
+    from .carousel import (STYLES, check_slides, contact_sheet, finalize, portraits, post_text, propose_angles, render,
                            save_content, write_angles_md, write_slides)
     from .multicam import load_spec
     from .titles import episode_number
@@ -720,6 +720,7 @@ def cmd_carousel(a: argparse.Namespace) -> None:
                 sys.exit(f"Angle {a.pick} introuvable (1 à {len(angles['angles'])})")
             content = write_slides(brand, transcript, ep, angle,
                                    {"number": number, "guest": guest, "company": company, "role": role}, a.note)
+        content["post_final"] = post_text(brand, content)
         md = save_content(ep, content, transcript["segments"], base)
         for c in content["checks"]:
             color = "red" if c["level"] == "ÉCHEC" else "yellow"

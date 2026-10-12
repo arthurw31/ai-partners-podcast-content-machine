@@ -55,8 +55,11 @@ page AI Partners. Ils veulent savoir ce qui marche VRAIMENT dans les entreprises
 
 ## Post LinkedIn qui accompagne le carrousel
 
-4 à 8 lignes : accroche (la promesse de la couverture, reformulée), 2–3 lignes de contexte, « Les N idées dans le
-carrousel 👇 » (seul emoji autorisé avec 🎙️), invité nommé, lien de l'épisode en commentaire. Pas de hashtags.
+Il présente VITE le carrousel (Arthur, 12/10/2026 : « le texte LinkedIn qui présente vite fait le carrousel et qui donne
+le lien ») : 3 à 5 lignes courtes — l'accroche (la promesse de la couverture, reformulée), l'invité nommé (Prénom Nom,
+rôle, entreprise), 1 phrase sur ce que le lecteur va trouver, « Les N étapes dans le carrousel 👇 ». Pas de hashtags, pas
+de lien : la ligne « 📅 Réserver un échange avec nous : <lien> » est ajoutée automatiquement à la fin (`carousel.cta`).
+Emojis autorisés : 👇 🎙️ 📅 seulement.
 
 ## À éviter
 

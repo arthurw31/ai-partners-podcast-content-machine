@@ -180,7 +180,11 @@ carousel:
     title: "Vos équipes testent l'IA. [[Et après ?]]"
     text: "Passons de l'expérimentation à l'impact : 30 minutes pour en parler."
     button: "Réserver un échange"
-    url: "weareaipartners.com"   # À CONFIRMER par Arthur : page de prise de rendez-vous
+    # Lien cliquable seulement dans le TEXTE du post : LinkedIn affiche les pages d'un carrousel (PDF) comme des images
+    # (Arthur, 12/10/2026 : « mets le lien dans le post », agenda de prise de rendez-vous de Thomas)
+    note: "Lien dans le post 👇"
+    booking_url: "https://calendar.google.com/calendar/u/0/appointments/schedules/AcZssZ0_yeSZr-eANdqFosuQLg2jE2smXxRU-eIMCXBA0WC3CynV7uSHwNeGX8FK-0MHDtpLcNiC4f9_"
+    post_line: "📅 Réserver un échange avec nous : {url}"
     episode: "L'épisode complet : AI Corner {number}, sur YouTube"
 
 # Teaser d'ouverture de l'épisode complet (commande episode, 07/10/2026) — calqué sur E20 MAIF : ~50 s de phrases fortes

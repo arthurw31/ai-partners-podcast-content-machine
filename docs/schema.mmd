@@ -44,8 +44,9 @@ flowchart TD
     subgraph CA["Carrousel LinkedIn"]
         direction TB
         C1{{"carousel : Claude propose 3 angles<br/>(méthode, leçons, idées reçues…),<br/>chacun prouvé par l'épisode"}} --> C2["L'équipe marketing choisit 1 angle<br/>(carousel --pick N)"]
-        C2 --> C3{{"Claude rédige 7 à 9 slides et le post,<br/>citations et chiffres vérifiés ;<br/>dernière slide : réserver un échange"}}
-        C3 --> C4["rendu PDF 1080×1350 dans la charte<br/>AI Partners (3 styles tant que<br/>l'équipe n'a pas choisi le sien)"]
+        C2 --> C3{{"Claude rédige 7 à 9 slides, citations<br/>et chiffres vérifiés ; dernière slide :<br/>réserver un échange, lien dans le post"}}
+        C3 --> C3b["post LinkedIn : présente le carrousel<br/>en 3 à 5 lignes, finit par le lien<br/>de réservation (Calendly)"]
+        C3b --> C4["rendu PDF 1080×1350 dans la charte<br/>AI Partners (3 styles tant que<br/>l'équipe n'a pas choisi le sien)"]
         C4 --> C5["L'équipe valide le texte et le style<br/>(carousel --final STYLE)"]
         C5 -->|retouche| C4
     end
@@ -55,7 +56,7 @@ flowchart TD
     M2 -.->|attend le titre validé| E5
     M4 -.->|attend la miniature choisie| S7
     E9 --> L2[("Épisode 1080p avec teaser,<br/>description YouTube (titre validé)<br/>et chapitres")]
-    C5 --> L4[("Carrousel PDF prêt à publier<br/>+ post LinkedIn")]
+    C5 --> L4[("Carrousel PDF prêt à publier<br/>+ post LinkedIn avec le lien de réservation")]
     M4 --> L3[("Titre validé + miniature choisie<br/>1280×720 + HD")]
 
     classDef human fill:#FFF2DF,stroke:#C26A00,color:#3A2810;

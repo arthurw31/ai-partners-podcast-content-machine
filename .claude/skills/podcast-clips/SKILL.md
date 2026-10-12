@@ -287,8 +287,11 @@ Brief éditorial : `brands/<marque>/carousel.md` ; CTA final : `carousel.cta` de
    d'envoyer : texte qui déborde (cadre rouge), photo sur le titre, logo invisible.
 3. Contrôle ÉCHEC ou retouche demandée : corrige `carrousel/contenu.json` toi-même puis `carousel … --render` (aucun appel à
    Claude) ; boucle jusqu'à un contrôle propre.
-4. L'équipe valide le texte et le style : `carousel … --final STYLE --by <prénom>` -> `carrousel/final/` (PDF + PNG +
-   `post_linkedin.md`). Au 1er choix de style, écris `carousel.style: <style>` dans brand.yaml (les épisodes suivants
+   Le post LinkedIn (`carrousel/post_linkedin.md`) présente le carrousel en 3 à 5 lignes et finit par le lien de
+   réservation (`carousel.cta.booking_url`, ajouté par le framework) : le lien n'est cliquable QUE dans le texte du post,
+   LinkedIn affiche les pages d'un carrousel comme des images ; la dernière slide dit donc « Lien dans le post 👇 ».
+4. L'équipe valide le texte, le post et le style : `carousel … --final STYLE --by <prénom>` -> `carrousel/final/` (PDF +
+   PNG + `post_linkedin.md`, à publier ensemble : post + document). Au 1er choix de style, écris `carousel.style: <style>` dans brand.yaml (les épisodes suivants
    n'ont plus qu'un style). Toute remarque de fond devient une règle dans `carousel.md` (« À éviter »).
 
 ## Retouches courantes
