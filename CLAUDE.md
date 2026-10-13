@@ -544,6 +544,16 @@ vérification intransigeante qui règle ces problèmes »)
 - Short 1 E22 vers 34 s (Arthur, 12/10/2026 : « encore un bug ») : « Et puis, euh, cette transformation, elle… humaine, elle
   doit » mal nettoyé (« euh » resté, 4 coupes en 2,5 s, « humaine » étiré + 2 s de blanc) -> refait d'après l'alignement :
   « Et puis ‖ cette transformation ‖ humaine, elle doit… » (morceaux 2345,08–2346,05 / 2347,64–2348,62 / 2350,50–…).
+- Shorts 3–5 E22 (12–13/10/2026) — règles ajoutées : **répétitions** (« qu'il faut avoir, qu'il faut avoir ») retirées
+  par l'étape `ctc` (groupe de 1 à 4 mots dit deux fois de suite : 1re occurrence coupée) ; **double écoute des raccords** :
+  un raccord signalé « dans un mot » par la réécoute du clip entier est réécouté SEUL (± 3 s) ; seul un raccord signalé par
+  les DEUX écoutes est un ÉCHEC et est annulé par la boucle (la réécoute du clip entier varie avec le contexte : elle avait
+  fait annuler « dans le cadre ‖ d'un précédent poste », propre seule) ; **fin suivie de près par un autre son** (« Ouais »
+  de Thomas 0,08 s après « …en bon escient. ») : règle des raccords internes + Smart Turn arbitre (pensée finie = ATTENTION,
+  pas ÉCHEC) ; **début au creux** entre un « euh » collé et le mot (« euh, ‖ là où », 22 %, aucun silence) : accepté
+  (`strict._valley`). Fin dans une phrase enchaînée sans pause (« …ces réunions. ‖ Donc j'ai toujours… ») : prolonger
+  jusqu'à la vraie pause (short 4 : « …la data, c'était une forme de pouvoir. »). Garder le PC éveillé pendant les longs
+  traitements (`request_keep_awake`) : une mise en veille avait interrompu la chaîne la nuit du 12/10.
 - Pistes restantes de la recherche (si des défauts restent) : **Smart Turn v3** (pipecat-ai, BSD-2, ONNX
   8 Mo, français, ~12–100 ms CPU) = probabilité que l'orateur ait FINI sa phrase, d'après la prosodie, à chaque fin
   d'extrait ; **alignement forcé CTC** (wav2vec2 français `bofenghuang/asr-wav2vec2-ctc-french`, Apache-2.0, Viterbi en numpy,

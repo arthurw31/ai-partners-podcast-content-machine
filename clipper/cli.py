@@ -1305,7 +1305,8 @@ def cmd_polish(a: argparse.Namespace) -> None:
             cache = ep / "qa" / f"qa_audit_{c['index']:02d}.json"
             if cache.exists():
                 from .verify import audit_joins
-                bad = sorted(audit_joins(json.loads(cache.read_text(encoding="utf-8")).get("heard", "")), reverse=True)
+                cj = json.loads(cache.read_text(encoding="utf-8"))
+                bad = sorted(cj["bad"] if "bad" in cj else audit_joins(cj.get("heard", "")), reverse=True)   # confirmés par la qa
                 for j in bad:
                     if j + 1 < len(segs) and 0 <= float(segs[j + 1]["start"]) - float(segs[j]["end"]) <= 3.0:
                         a_, b_ = segs[j], segs[j + 1]

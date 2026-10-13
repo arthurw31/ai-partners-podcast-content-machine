@@ -70,6 +70,13 @@ def edge_problems(segs: list[dict], wav: Path) -> list[dict]:
     for k in ends:
         t = float(segs[k]["end"])
         last = k == len(segs) - 1
+        # fin du short suivie DE PRÈS par un autre son dans la source (≤ 0,12 s : souffle, « Ouais » de l'autre) : impossible
+        # d'avoir 0,12 s de silence -> même règle qu'un raccord interne (short 5 E22, « …en bon escient. » / « Ouais », 12/10)
+        if last:
+            lvl = _level(wav, t - 1.0)
+            nxt = _rms(wav, t, t + 0.12)
+            if lvl > 0 and len(nxt) and float(nxt.max()) > END_THR * lvl:
+                last = False
         hold, thr = (END_HOLD, END_THR) if last else (JOIN_HOLD, JOIN_THR)
         x = end_ratio(wav, t, hold)
         if x >= thr:
@@ -77,9 +84,26 @@ def edge_problems(segs: list[dict], wav: Path) -> list[dict]:
     for k in starts:
         t = float(segs[k]["start"])
         x = start_ratio(wav, t)
+        if x >= START_THR and _valley(wav, t):   # début au creux entre un « euh » collé et le mot : rien de mieux possible
+            continue
         if x >= START_THR:
             out.append({"k": k, "kind": "début", "t": t, "ratio": round(x, 2)})
     return out
+
+
+def _valley(wav: Path, t: float, around: float = 0.3, max_ratio: float = 0.3) -> bool:
+    """t est-il au CREUX d'énergie entre deux sons collés (aucun silence à moins de `around` s : « euh » enchaîné sur le
+    mot) ? Vrai si la voix y descend sous `max_ratio` du niveau et que c'est le point le plus bas des environs (± 0,04 s).
+    Short 4 E22 : « euh, ‖ là où » — 22 % à 579,08, aucun silence entre les deux (12/10/2026)."""
+    lvl = _level(wav, t)
+    r = _rms(wav, t - around, t + 0.1)
+    if lvl <= 0 or len(r) < 5:
+        return False
+    if (r < START_THR * lvl).sum() >= 3:      # un vrai silence existe à côté : la correction doit aller le chercher
+        return False
+    i = int(round(around / FRAME))
+    lo = max(0, i - 2)
+    return float(r[lo:i + 2].min()) <= max_ratio * lvl and float(r[lo:i + 2].min()) <= float(r.min()) * 1.05
 
 
 def _fix_end(wav: Path, t: float, limit: float, hold: float = END_HOLD, thr: float = END_THR) -> float | None:
@@ -403,12 +427,34 @@ def ctc_hesitations(segs: list[dict], words: list[dict], wav: Path, cfg=None, mi
             lvl = _level(wav, (g0 + g1) / 2)
             if len(r) and lvl > 0 and float((r > voiced * lvl).mean()) > 0.3:   # de la voix, pas un silence
                 cuts.append((round(g0, 3), round(g1, 3), x["w"], y["w"]))
+        # répétitions (« qu'il faut avoir, qu'il faut avoir », « de mes… de d'un ») : groupe de 1 à 4 mots dit deux fois de
+        # suite -> la 1re occurrence est retirée (12/10/2026, shorts 4 et 5 E22 ; un monteur les coupe toujours)
+        norm = [_norm(x["w"]) for x in al]
+        i = 0
+        while i < len(al) - 1:
+            hit = 0
+            for n_ in (4, 3, 2, 1):
+                if i + 2 * n_ <= len(al) and norm[i:i + n_] == norm[i + n_:i + 2 * n_] and any(len(t) > 2 for t in norm[i:i + n_]):
+                    hit = n_
+                    break
+            if hit:
+                g0 = max(a, al[i]["s"] - pad_start)
+                g1 = al[i + hit]["s"] - pad_start
+                if g1 - g0 > 0.1:
+                    cuts.append((round(g0, 3), round(g1, 3), "", " ".join(x["w"] for x in al[i:i + hit]) + " (répété)"))
+                i += hit
+            else:
+                i += 1
+        cuts.sort()
         pieces, cur = [], a
         for g0, g1, w0, w1 in cuts:
+            if g0 < cur:      # recouvrements entre retraits : ignorés
+                continue
             if g0 - cur >= min_piece and b - g1 >= min_piece:
                 pieces.append((cur, g0))
                 cur = g1
-                log.append(f"« {w0} ‖ {w1} » : {g1 - g0:.2f} s de voix sans mot retirées ({g0:.2f}–{g1:.2f})")
+                log.append(f"répétition « {w1.replace(' (répété)', '')} » retirée ({g0:.2f}–{g1:.2f})" if not w0 else
+                           f"« {w0} ‖ {w1} » : {g1 - g0:.2f} s de voix sans mot retirées ({g0:.2f}–{g1:.2f})")
         pieces.append((cur, b))
         for k, (p0, p1) in enumerate(pieces):
             n = dict(s)

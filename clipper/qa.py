@@ -111,8 +111,23 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
         heard = audit(segs, wav, work / f"qa_audit_{clip['index']:02d}.wav", cfg)
         cache.write_text(json.dumps({"key": key, "heard": heard}, ensure_ascii=False), encoding="utf-8")
     bad = audit_joins(heard)
-    rows.append((FAIL if bad else OK, f"raccords à l'écoute : {len(segs) - 1} raccord(s)"
-                 + (f", {len(bad)} au milieu d'un mot" if bad else ", aucun mot coupé")))
+    # double écoute (13/10/2026) : chaque raccord signalé est réécouté SEUL (3 s de part et d'autre) ; la transcription du clip
+    # entier varie avec le contexte (short 4 E22 : « cadre ‖ d'un » signalé dans le clip, propre seul). Seuls les raccords
+    # signalés par les DEUX écoutes comptent (et sont annulés par la boucle de polish)
+    conf = c.get("bad") if c.get("key") == key and "bad" in c else None
+    if conf is None:
+        conf = []
+        for j in bad:
+            if j + 1 < len(segs):
+                loc = [dict(segs[j], start=max(float(segs[j]["start"]), float(segs[j]["end"]) - 3.0)),
+                       dict(segs[j + 1], end=min(float(segs[j + 1]["end"]), float(segs[j + 1]["start"]) + 3.0))]
+                if audit_joins(audit(loc, wav, work / "join_check.wav", cfg)):
+                    conf.append(j)
+        cache.write_text(json.dumps({"key": key, "heard": heard, "bad": conf}, ensure_ascii=False), encoding="utf-8")
+    doubt = [j for j in bad if j not in conf]
+    rows.append((FAIL if conf else OK, f"raccords à l'écoute : {len(segs) - 1} raccord(s)"
+                 + (f", {len(conf)} au milieu d'un mot (confirmé par la réécoute seule)" if conf else ", aucun mot coupé")
+                 + (f" ; {len(doubt)} douteux à la 1re écoute, propre(s) à la réécoute seule" if doubt else "")))
     euh = [f for f in audit_flags(heard) if "entendu" in f]
     if euh:
         rows.append((WARN, f"hésitations encore entendues : {len(euh)} ({', '.join(euh[:4])})"))
@@ -135,6 +150,13 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
     tight = [f"{float(segs[k]['end']):.2f}" for k in ends if _tail_silence(wav, float(segs[k]["end"])) < 0.1
              and not _voice_at(wav, float(segs[k]["end"]))]
     last = f"{float(segs[-1]['end']):.2f}"
+    try:   # c'est Smart Turn qui tranche : un son juste après peut être l'AUTRE personne (« Ouais »), pas l'orateur qui continue
+        from .endpoint import turn_complete
+        if last in tight and turn_complete(wav, float(segs[-1]["end"])) >= 0.5:
+            rows.append((WARN, f"fin du short à {last} : un autre son suit de près, mais la pensée est finie (Smart Turn)"))
+            tight = [t for t in tight if t != last]
+    except Exception:  # noqa: BLE001
+        pass
     if last in tight:   # fin du short : l'orateur enchaîne sans pause = sa pensée n'est pas finie (Arthur, 11/10/2026 :
         # « tu l'as coupé un peu trop tôt, le mec était en train de parler » — short 1 E22, « …l'entreprise. ‖ Et puis… »)
         rows.append((FAIL, f"fin du short à {last} : l'orateur continue sans pause (< 0,1 s) — prolonger jusqu'à la vraie fin "

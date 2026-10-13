@@ -159,6 +159,34 @@ def test_hesitation_collee_retiree_par_alignement():
     assert out[-1].get("end_text") and len(out) >= 2
 
 
+def test_fin_suivie_de_pres_par_un_autre_son():
+    """12/10/2026, short 5 E22 : « …en bon escient. » puis souffle et « Ouais » de Thomas 0,08 s après : couper dans ce
+    petit silence (1408,70) doit être accepté ; couper sur le souffle / le « Ouais » (1409,12) jamais."""
+    wav = _e22()
+    fins = lambda t: [p for p in edge_problems([{"start": 1405.0, "end": t, "end_text": "x"}], wav) if p["kind"] == "fin"]  # noqa: E731
+    assert not fins(1408.70), fins(1408.70)
+    assert fins(1409.14)
+
+
+def test_fin_dans_une_phrase_enchainee_refusee():
+    """12/10/2026, short 4 E22 : « …ces réunions. » enchaîné sans pause par « Donc j'ai toujours considéré… » : une coupe
+    à 596,42 est dans la voix (refusée) ; la fin prolongée après « …une forme de pouvoir, je dirais. » (602,25) est propre."""
+    wav = _e22()
+    fins = lambda t: [p for p in edge_problems([{"start": 590.0, "end": t, "end_text": "x"}], wav) if p["kind"] == "fin"]  # noqa: E731
+    assert fins(596.42)
+    assert not fins(602.253), fins(602.253)
+
+
+def test_repetition_retiree():
+    """12/10/2026, short 5 E22 : « …en fait, qu'il faut avoir, qu'il faut avoir lorsque… » : la 1re occurrence est retirée."""
+    wav = _e22()
+    from clipper.config import Brand
+    from clipper.strict import ctc_hesitations
+    out, log = ctc_hesitations([{"start": 1395.15, "end": 1398.65, "end_text": "x"}], [], wav, Brand("ai-corner").cfg)
+    assert any("répétition" in m for m in log), log
+    assert len(out) == 2 and 1397.0 < out[0]["end"] < 1397.2 and 1397.9 < out[1]["start"] < 1398.15, out
+
+
 class _Skip(Exception):
     pass
 
