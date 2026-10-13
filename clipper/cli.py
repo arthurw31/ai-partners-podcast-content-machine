@@ -28,7 +28,7 @@ from pathlib import Path
 
 from rich.console import Console
 
-from .config import BRANDS_DIR, FORMATS, OUTPUT_DIR, ROOT as ROOT_DIR, Brand, list_brands
+from .config import BRANDS_DIR, DEPOT_DIR, EPISODES_DIR, FORMATS, ROOT as ROOT_DIR, Brand, archives_dir, list_brands
 from .compose import build_clip, slugify
 from .posts import write_posts
 from .render import lint, render
@@ -39,21 +39,30 @@ console = Console()
 
 
 def resolve_input(brand: Brand, given: str) -> Path:
-    """`--input` : chemin complet, ou simple nom de fichier cherché dans brands/<slug>/episodes/."""
+    """`--input` : chemin complet, ou simple nom de fichier cherché dans EPISODES/<marque>/<épisode>/rushs/."""
     p = Path(given)
     if p.exists():
         return p.resolve()
-    cand = brand.dir / "episodes" / given
-    if cand.exists():
-        return cand.resolve()
-    matches = list((brand.dir / "episodes").glob(f"*{given}*")) if (brand.dir / "episodes").exists() else []
+    root = EPISODES_DIR / brand.slug
+    exact = sorted(root.glob(f"*/rushs/{given}")) if root.exists() else []
+    if exact:
+        return exact[0].resolve()
+    vids = (".mp4", ".mov", ".mkv", ".m4v")
+    matches = [m for m in (root.glob(f"*/rushs/*{given}*") if root.exists() else []) if m.suffix.lower() in vids]
     if len(matches) == 1:
         return matches[0].resolve()
-    sys.exit(f"Épisode introuvable : {given} (ni comme chemin, ni dans {brand.dir / 'episodes'})")
+    legacy = brand.dir / "episodes" / given          # ancienne arborescence (avant le 13/10/2026)
+    if legacy.exists():
+        return legacy.resolve()
+    sys.exit(f"Épisode introuvable : {given} (ni comme chemin, ni dans {root}/<épisode>/rushs/)")
 
 
 def episode_dir(brand: Brand, video: Path) -> Path:
-    d = OUTPUT_DIR / brand.slug / slugify(video.stem, 60)
+    """Dossier de TRAVAIL de l'épisode : EPISODES/<marque>/<épisode>/travail/ (l'épisode = le dossier qui contient rushs/)."""
+    if video.parent.name == "rushs":
+        d = video.parent.parent / "travail"
+    else:
+        d = EPISODES_DIR / brand.slug / video.stem / "travail"
     d.mkdir(parents=True, exist_ok=True)
     return d
 
@@ -147,7 +156,7 @@ def cmd_pick(a: argparse.Namespace) -> dict:
     clips = [dict(by_id[i], index=n, candidate=i) for n, i in enumerate(ids, 1)]
     out = dict(cand, clips=clips)
     if (ep / "clips.json").exists():
-        shutil.copy2(ep / "clips.json", ep / "clips_previous.json")
+        shutil.copy2(ep / "clips.json", archives_dir(ep) / "clips_previous.json")
     (ep / "clips.json").write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     console.print(f"[green]{len(clips)} shorts retenus[/green] → {ep / 'clips.json'}")
     for c in clips:
@@ -211,7 +220,7 @@ def cmd_passages(a: argparse.Namespace) -> dict:
     out = {"brand": brand.slug, "guest": a.guest, "company": a.company, "guest_role": a.guest_role,
            "host_side": a.host_side or brand.cfg.framing.get("host_side", ""), "clips": clips}
     if (ep / "clips.json").exists():
-        shutil.copy2(ep / "clips.json", ep / "clips_previous.json")
+        shutil.copy2(ep / "clips.json", archives_dir(ep) / "clips_previous.json")
     (ep / "clips.json").write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     console.print(f"[green]{len(clips)} passages[/green] → {ep / 'clips.json'} — vérifier avec `check`, compléter "
                   f"hook_title et turns (qui parle) si absents")
@@ -413,7 +422,7 @@ def cmd_render(a: argparse.Namespace) -> list[Path]:
 
 
 def cmd_posts(a: argparse.Namespace) -> dict:
-    """Post LinkedIn + description courte pour chaque clip (brief : brands/<slug>/posts.md)."""
+    """Post LinkedIn + description courte pour chaque clip (brief : MARQUES/<slug>/posts.md)."""
     brand = Brand(a.brand)
     video = resolve_input(brand, a.input)
     ep = episode_dir(brand, video)
@@ -704,7 +713,7 @@ def cmd_carousel(a: argparse.Namespace) -> None:
         console.print(f"[green]Carrousel validé[/green] (style {rec['style']}) -> {d / 'final'} : PDF à téléverser sur LinkedIn "
                       "(publication « document ») + post_linkedin.md")
         if not cfg.get("style"):
-            console.print(f"Pour les épisodes suivants : `carousel.style: {a.final}` dans brands/{brand.slug}/brand.yaml")
+            console.print(f"Pour les épisodes suivants : `carousel.style: {a.final}` dans MARQUES/{brand.slug}/brand.yaml")
         return
     spec = load_spec(video)
     cj = ep / "clips.json"
@@ -833,11 +842,23 @@ def cmd_outro(a: argparse.Namespace) -> None:
     console.print(f"Outro : {ep / 'outro_short' / 'outro_9x16.mp4'} ; shorts livrables : {ep / 'livrables'}")
 
 
+def cmd_livraison(a: argparse.Namespace) -> None:
+    """Dossier LIVRABLES de l'épisode (versions finales seulement, à copier sur le Drive) + contrôle de ce qui manque."""
+    from .livraison import MISSING, OK, build
+    brand = Brand(a.brand)
+    video = resolve_input(brand, a.input)
+    out, rows = build(brand, video, episode_dir(brand, video))
+    color = {OK: "green", MISSING: "red"}
+    for st, what, detail in rows:
+        console.print(f"  [{color.get(st, 'yellow')}]{st:9s}[/{color.get(st, 'yellow')}] {what} : {detail}")
+    console.print(f"[bold]Livrables[/bold] -> {out}  (récapitulatif : LISEZMOI.md)")
+
+
 def cmd_rushes(a: argparse.Namespace) -> None:
-    """Rushs déposés dans depot/ (3 caméras + WAV) -> rangés, renommés, synchronisés, multicam.json écrit."""
+    """Rushs déposés dans DEPOT/ (3 caméras + WAV) -> rangés, renommés, synchronisés, multicam.json écrit."""
     from .ingest import ingest
     brand = Brand(a.brand)
-    src = Path(a.source) if a.source else ROOT_DIR / "depot"
+    src = Path(a.source) if a.source else DEPOT_DIR
     plan = ingest(brand, src, a.episode, a.guest, a.company, host_file=a.host or None, dry_run=a.dry_run)
     r = plan["roles"]
     console.print(f"Plan large : {r['wide']}\nAnimateur  : {r['host']}\nInvité     : {r['guest']}\n"
@@ -855,7 +876,7 @@ def cmd_rushes(a: argparse.Namespace) -> None:
 
 
 def cmd_thumbnail_template(a: argparse.Namespace) -> None:
-    """Design Canva -> brands/<m>/assets/thumbnail/ (calques + template.json) : `thumbnail` le reproduit ensuite."""
+    """Design Canva -> MARQUES/<m>/assets/thumbnail/ (calques + template.json) : `thumbnail` le reproduit ensuite."""
     from .canva_template import import_pptx
     brand = Brand(a.brand)
     out = brand.assets_dir / "thumbnail"
@@ -866,7 +887,7 @@ def cmd_thumbnail_template(a: argparse.Namespace) -> None:
 
 def cmd_fetch(a: argparse.Namespace) -> None:
     from .fetch import fetch
-    dest = Path(a.dest) if a.dest else ROOT_DIR / "depot"
+    dest = Path(a.dest) if a.dest else DEPOT_DIR
     done = fetch(a.url, dest, skip=[x for x in a.skip.split(",") if x], jobs=a.jobs)
     if not done:
         sys.exit(1)
@@ -1062,8 +1083,8 @@ def cmd_verify(a: argparse.Namespace) -> None:
     dw = ep / "work" / "diarized_words.json"   # qui parle (si déjà calculé) : un changement d'orateur est une fin naturelle
     words = json.loads(dw.read_text(encoding="utf-8")) if dw.exists() else all_words(transcript)
     only = _parse_only(a.only)
-    if a.fix and not (ep / "clips_before_verify.json").exists():
-        shutil.copy2(ep / "clips.json", ep / "clips_before_verify.json")
+    if a.fix and not (archives_dir(ep) / "clips_before_verify.json").exists():
+        shutil.copy2(ep / "clips.json", archives_dir(ep) / "clips_before_verify.json")
     for i, c in enumerate(data["clips"]):
         if only and c["index"] not in only:
             continue
@@ -1093,8 +1114,8 @@ def cmd_fillers(a: argparse.Namespace) -> None:
     spec = video.with_suffix(".multicam.json")
     wav = (video.parent / json.loads(spec.read_text(encoding="utf-8"))["audio"]) if spec.exists() else video
     data = json.loads((ep / "clips.json").read_text(encoding="utf-8"))
-    if not (ep / "clips_before_fillers.json").exists():
-        shutil.copy2(ep / "clips.json", ep / "clips_before_fillers.json")
+    if not (archives_dir(ep) / "clips_before_fillers.json").exists():
+        shutil.copy2(ep / "clips.json", archives_dir(ep) / "clips_before_fillers.json")
     only = _parse_only(a.only)
     for i, c in enumerate(data["clips"]):
         if only and c["index"] not in only:
@@ -1121,8 +1142,8 @@ def cmd_tighten(a: argparse.Namespace) -> None:
     W = all_words(transcript)
     data = json.loads((ep / "clips.json").read_text(encoding="utf-8"))
     only = _parse_only(a.only)
-    if not (ep / "clips_before_tighten.json").exists():
-        shutil.copy2(ep / "clips.json", ep / "clips_before_tighten.json")
+    if not (archives_dir(ep) / "clips_before_tighten.json").exists():
+        shutil.copy2(ep / "clips.json", archives_dir(ep) / "clips_before_tighten.json")
     for i, c in enumerate(data["clips"]):
         if only and c["index"] not in only:
             continue
@@ -1155,7 +1176,7 @@ def _project(ep: Path, clip: dict) -> Path:
 
 
 def cmd_qa(a: argparse.Namespace) -> str:
-    """Contrôle qualité : rapport par short (`output/…/qa/`), --render = aussi le MP4 (final ou aperçu), --episode =
+    """Contrôle qualité : rapport par short (`EPISODES/…/travail/qa/`), --render = aussi le MP4 (final ou aperçu), --episode =
     l'épisode complet. À lancer avant de montrer quoi que ce soit à Arthur ; un ÉCHEC se corrige d'abord."""
     from .qa import FAIL, qa_episode, qa_short
     brand = Brand(a.brand)
@@ -1213,8 +1234,8 @@ def cmd_polish(a: argparse.Namespace) -> None:
     ep = episode_dir(brand, video)
     wav = _wav_for(video)
     only = _parse_only(a.only)
-    if a.redo and (ep / "clips_before_tighten.json").exists():
-        orig = {c["index"]: c for c in json.loads((ep / "clips_before_tighten.json").read_text(encoding="utf-8"))["clips"]}
+    if a.redo and (archives_dir(ep) / "clips_before_tighten.json").exists():
+        orig = {c["index"]: c for c in json.loads((archives_dir(ep) / "clips_before_tighten.json").read_text(encoding="utf-8"))["clips"]}
     else:
         orig = {}
     data = json.loads((ep / "clips.json").read_text(encoding="utf-8"))
@@ -1222,8 +1243,8 @@ def cmd_polish(a: argparse.Namespace) -> None:
     dw = ep / "work" / "diarized_words.json"
     words = json.loads(dw.read_text(encoding="utf-8")) if dw.exists() else all_words(transcript)
     for name in ("clips_before_tighten.json", "clips_before_verify.json", "clips_before_fillers.json"):
-        if not (ep / name).exists():
-            shutil.copy2(ep / "clips.json", ep / name)
+        if not (archives_dir(ep) / name).exists():
+            shutil.copy2(ep / "clips.json", archives_dir(ep) / name)
     idx = []
     for i, c in enumerate(data["clips"]):
         if only and c["index"] not in only:
@@ -1263,7 +1284,7 @@ def cmd_polish(a: argparse.Namespace) -> None:
             # hésitations restantes et « hmm » d'acquiescement (12/10/2026) : mots du verbatim ALIGNÉS sur le son (CTC),
             # toute voix sans mot entre deux mots (≥ 0,35 s) est retirée
             from .strict import ctc_hesitations
-            bk = ep / "clips_before_ctc.json"
+            bk = archives_dir(ep) / "clips_before_ctc.json"
             if not bk.exists():
                 bk.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
             segs, log = ctc_hesitations(c["segments"], words, wav, brand.cfg)
@@ -1330,13 +1351,13 @@ def cmd_polish(a: argparse.Namespace) -> None:
                                         "jobs": a.jobs}))
         status = cmd_qa(argparse.Namespace(**{**vars(a), "only": sel, "render": False, "episode": False}))
     if status == "ÉCHEC" and not a.anyway:
-        sys.exit("Contrôle qualité en ÉCHEC : corriger avant l'aperçu (voir output/…/qa/). --anyway pour passer outre.")
+        sys.exit("Contrôle qualité en ÉCHEC : corriger avant l'aperçu (voir EPISODES/…/travail/qa/). --anyway pour passer outre.")
     console.rule("Aperçus MP4")
     cmd_preview(argparse.Namespace(brand=a.brand, input=a.input, clip=sel, formats=a.formats, port="3002",
                                    no_open=True, stop=False, mp4=True, fps=a.fps))
     console.rule("Contrôle qualité des aperçus")
     cmd_qa(argparse.Namespace(**{**vars(a), "only": sel, "render": True, "episode": False, "preview_check": True}))
-    console.print("[bold]Prochaine étape[/bold] : regarder les planches d'images (output/…/qa/), envoyer les liens des aperçus "
+    console.print("[bold]Prochaine étape[/bold] : regarder les planches d'images (EPISODES/…/travail/qa/), envoyer les liens des aperçus "
                   "à Arthur ; après sa validation seulement : render --only N, puis qa --render --only N.")
 
 
@@ -1351,9 +1372,9 @@ def main(argv: list[str] | None = None) -> None:
     sub = p.add_subparsers(dest="cmd", required=True)
 
     def common(sp: argparse.ArgumentParser, need_input: bool = True) -> None:
-        sp.add_argument("--brand", required=True, help="slug du dossier brands/<slug>")
+        sp.add_argument("--brand", required=True, help="slug du dossier MARQUES/<slug>")
         if need_input:
-            sp.add_argument("--input", required=True, help="podcast source : chemin, ou nom de fichier dans brands/<slug>/episodes/")
+            sp.add_argument("--input", required=True, help="podcast source : chemin, ou nom de fichier dans EPISODES/<marque>/<épisode>/rushs/")
         sp.add_argument("--force", action="store_true", help="ignore les caches")
 
     def selection_args(sp: argparse.ArgumentParser) -> None:
@@ -1429,7 +1450,7 @@ def main(argv: list[str] | None = None) -> None:
     sp.add_argument("--redo", action="store_true", help="tout refaire depuis clips_before_tighten.json")
     sp.add_argument("--anyway", action="store_true", help="faire l'aperçu même si le contrôle qualité échoue")
     sp.set_defaults(fn=cmd_polish, render=False, episode=False, proxy=False)
-    sp = sub.add_parser("qa", help="contrôle qualité : rapport par short (output/…/qa/) ; --render ; --episode")
+    sp = sub.add_parser("qa", help="contrôle qualité : rapport par short (EPISODES/…/travail/qa/) ; --render ; --episode")
     common(sp); sp.add_argument("--only", default=""); sp.add_argument("--formats", default="")
     sp.add_argument("--render", action="store_true", help="contrôle aussi le MP4 rendu (ou l'aperçu)")
     sp.add_argument("--episode", action="store_true", help="contrôle l'épisode complet (MP4 final)")
@@ -1442,14 +1463,14 @@ def main(argv: list[str] | None = None) -> None:
     sp.set_defaults(fn=cmd_tighten)
     sp = sub.add_parser("fetch", help="télécharge les rushs d'un lien Dropbox (reprise automatique, tailles vérifiées)")
     sp.add_argument("url", help="lien Dropbox partagé (dossier ou fichier)")
-    sp.add_argument("--dest", default="", help="dossier de destination (défaut : depot/)")
+    sp.add_argument("--dest", default="", help="dossier de destination (défaut : DEPOT/)")
     sp.add_argument("--skip", default="", help="fichiers à ignorer (morceaux de nom, ex: MIC,.wav)")
     sp.add_argument("--jobs", type=int, default=3, help="téléchargements en parallèle")
     sp.set_defaults(fn=cmd_fetch)
-    sp = sub.add_parser("thumbnail", help="miniatures YouTube de l'épisode (rushs multicam) -> output/…/miniatures/")
+    sp = sub.add_parser("thumbnail", help="miniatures YouTube de l'épisode (rushs multicam) -> EPISODES/…/travail/miniatures/")
     common(sp)
     sp.add_argument("--guest", default="", help="nom de l'invité (défaut : clips.json)")
-    sp.add_argument("--company", default="", help="entreprise invitée -> logo brands/<m>/assets/guests/<entreprise>.svg|png")
+    sp.add_argument("--company", default="", help="entreprise invitée -> logo MARQUES/<m>/assets/guests/<entreprise>.svg|png")
     sp.add_argument("--n", type=int, default=4, help="nombre de variantes")
     sp.add_argument("--title", default="", help="titre imposé « ligne 1 | ligne 2 » (sinon : le titre validé par `titles --pick`)")
     sp.add_argument("--host-frame", type=float, default=None, help="instant (s) de la photo de l'animateur")
@@ -1508,17 +1529,20 @@ def main(argv: list[str] | None = None) -> None:
     sp.add_argument("--newsletter", action="store_true", help="relire le mail de Thomas")
     sp.add_argument("--model", default="", help="modèle du relecteur (défaut : review.model, Opus)")
     sp.set_defaults(fn=cmd_review)
+    sp = sub.add_parser("livraison", help="dossier LIVRABLES de l'épisode : versions finales rangées, prêtes à copier sur le Drive")
+    common(sp)
+    sp.set_defaults(fn=cmd_livraison)
     sp = sub.add_parser("outro", help="après le choix de la miniature : outro des shorts (carte YouTube) collée à chaque short -> livrables/")
     common(sp)
     sp.add_argument("--only", default="", help="numéros des shorts, ex: 1,3 (défaut : tous les shorts rendus)")
     sp.add_argument("--thumb", default="", help="miniature PROVISOIRE (avant le choix de l'équipe) -> livrables_provisoires/")
     sp.set_defaults(fn=cmd_outro)
-    sp = sub.add_parser("rushes", help="range les rushs déposés dans depot/ (3 caméras + WAV) : rôles, synchro, multicam.json")
+    sp = sub.add_parser("rushes", help="range les rushs déposés dans DEPOT/ (3 caméras + WAV) : rôles, synchro, multicam.json")
     sp.add_argument("--brand", required=True)
     sp.add_argument("--episode", required=True, help="numéro de l'épisode, ex: E23")
     sp.add_argument("--guest", required=True, help="prénom nom de l'invité (nom des fichiers)")
     sp.add_argument("--company", default="", help="entreprise de l'invité")
-    sp.add_argument("--source", default="", help="dossier des rushs (défaut : depot/)")
+    sp.add_argument("--source", default="", help="dossier des rushs (défaut : DEPOT/)")
     sp.add_argument("--host", default="", help="corrige : morceau du nom de fichier de la caméra de l'animateur")
     sp.add_argument("--dry-run", action="store_true", help="identifie et mesure sans rien déplacer")
     sp.set_defaults(fn=cmd_rushes)

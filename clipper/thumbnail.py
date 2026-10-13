@@ -1,4 +1,4 @@
-"""Miniature YouTube d'un épisode, dans le style des miniatures AI Corner (références : brands/<m>/references/thumbnails/).
+"""Miniature YouTube d'un épisode, dans le style des miniatures AI Corner (références : MARQUES/<m>/references/thumbnails/).
 
 Gabarit (demande d'Arthur, 09/10/2026 — « automatise la création de miniatures, même style que les nôtres ») :
 animateur à gauche et invité à droite, chacun détouré depuis SA caméra (rushs multicam), sur le studio flouté et

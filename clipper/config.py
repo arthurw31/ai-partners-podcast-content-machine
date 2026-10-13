@@ -15,8 +15,14 @@ from dotenv import load_dotenv
 
 ROOT = Path(__file__).resolve().parent.parent
 CONFIG_DIR = ROOT / "config"
-BRANDS_DIR = ROOT / "brands"
-OUTPUT_DIR = ROOT / "output"
+# Arborescence (13/10/2026, demande d'Arthur : « une organisation logique depuis la racine ») :
+#   DEPOT/                      ce que l'équipe dépose (rushs d'un nouveau tournage)
+#   EPISODES/<marque>/<épisode>/ rushs/ (sources) · travail/ (pipeline) · archives/ · LIVRABLES/ (à copier sur le Drive)
+#   MARQUES/<marque>/           charte, briefs, logos, polices, références
+BRANDS_DIR = ROOT / "MARQUES"
+EPISODES_DIR = ROOT / "EPISODES"
+DEPOT_DIR = ROOT / "DEPOT"
+OUTPUT_DIR = EPISODES_DIR          # compatibilité : l'ancien EPISODES/<marque>/<épisode>/travail/ est devenu EPISODES/…/travail/
 CACHE_DIR = ROOT / "cache"
 MODELS_DIR = ROOT / "models"
 TEMPLATES_DIR = Path(__file__).resolve().parent / "templates"
@@ -67,7 +73,7 @@ def _load_yaml(path: Path) -> dict:
 
 
 class Brand:
-    """Une marque = un dossier brands/<slug>/ (brand.yaml, guidelines.md, assets/)."""
+    """Une marque = un dossier MARQUES/<slug>/ (brand.yaml, guidelines.md, assets/)."""
 
     def __init__(self, slug: str):
         self.slug = slug
@@ -122,3 +128,15 @@ def env(key: str, default: str | None = None) -> str | None:
 
 def list_brands() -> list[str]:
     return sorted(p.name for p in BRANDS_DIR.iterdir() if p.is_dir() and not p.name.startswith("_"))
+
+
+def episode_home(work: Path) -> Path:
+    """Dossier de l'épisode à partir de son dossier de travail (EPISODES/<marque>/<épisode>/travail -> …/<épisode>)."""
+    return work.parent if work.name == "travail" else work
+
+
+def archives_dir(work: Path) -> Path:
+    """Sauvegardes et anciennes versions d'un épisode (jamais dans le dossier de travail : il resterait encombré)."""
+    d = episode_home(work) / "archives"
+    d.mkdir(parents=True, exist_ok=True)
+    return d

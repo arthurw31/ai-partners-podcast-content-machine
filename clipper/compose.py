@@ -676,7 +676,7 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
             else:
                 _copy_logo(src_gl, assets / guest_logo_file)
         else:
-            console.print(f"  [yellow]logo invité introuvable (brands/{brand.slug}/assets/guests/{slugify(clip.get('company', '') or 'entreprise')}.svg|png)[/yellow]")
+            console.print(f"  [yellow]logo invité introuvable (MARQUES/{brand.slug}/assets/guests/{slugify(clip.get('company', '') or 'entreprise')}.svg|png)[/yellow]")
     logo_file = None
     if cfg.logo.enabled and cfg.logo.mode in ("auto", "image") and brand.logo_path:
         logo_file = "logo" + brand.logo_path.suffix.lower()

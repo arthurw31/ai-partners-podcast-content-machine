@@ -1,6 +1,6 @@
 ---
 name: podcast-clips
-description: Pilote tout le process AI Corner avec le framework « clipper » de ce dépôt, des rushs d'un tournage (3 caméras MP4 + audio WAV déposés dans depot/) jusqu'à tous les livrables, en cinq colonnes parallèles — 5 shorts verticaux montés + leur post LinkedIn (10 passages proposés, l'équipe en choisit 5, contrôle qualité, validation, rendu, outro avec la miniature), l'épisode complet monté avec son teaser (dérushage, aperçu, contrôle qualité, validation, rendu 1080p), le titre puis la miniature YouTube (5 titres en texte, l'équipe en choisit un, puis 4 miniatures, l'équipe en choisit une), le carrousel LinkedIn (3 angles proposés, l'équipe en choisit un, slides rédigées et rendues dans la charte AI Partners, CTA « réserver un échange »), le mail podcast de Thomas (newsletter écrite à la 1re personne, mise en page, validée par l'équipe). Déclencher sur « clip », « short », « reel », « découpe mon podcast », « fais des extraits », « nouveau podcast », « monte l'épisode », « teaser », « titre de l'épisode », « miniature », « carrousel », « carousel LinkedIn », « newsletter », « mail de Thomas », « /podcast-clips », ou dès que des rushs ou un épisode sont déposés dans depot/.
+description: Pilote tout le process AI Corner avec le framework « clipper » de ce dépôt, des rushs d'un tournage (3 caméras MP4 + audio WAV déposés dans DEPOT/) jusqu'à tous les livrables, en cinq colonnes parallèles — 5 shorts verticaux montés + leur post LinkedIn (10 passages proposés, l'équipe en choisit 5, contrôle qualité, validation, rendu, outro avec la miniature), l'épisode complet monté avec son teaser (dérushage, aperçu, contrôle qualité, validation, rendu 1080p), le titre puis la miniature YouTube (5 titres en texte, l'équipe en choisit un, puis 4 miniatures, l'équipe en choisit une), le carrousel LinkedIn (3 angles proposés, l'équipe en choisit un, slides rédigées et rendues dans la charte AI Partners, CTA « réserver un échange »), le mail podcast de Thomas (newsletter écrite à la 1re personne, mise en page, validée par l'équipe). Déclencher sur « clip », « short », « reel », « découpe mon podcast », « fais des extraits », « nouveau podcast », « monte l'épisode », « teaser », « titre de l'épisode », « miniature », « carrousel », « carousel LinkedIn », « newsletter », « mail de Thomas », « /podcast-clips », ou dès que des rushs ou un épisode sont déposés dans DEPOT/.
 ---
 
 # Podcast → shorts, épisode complet, titre et miniature, carrousel, mail de Thomas
@@ -54,7 +54,7 @@ Si un point est KO : suis les indications (`-> …`), ou lance `scripts\setup.ps
 
 ## 1. Récupérer et ranger l'épisode
 
-0. **Rushs déposés dans `depot/`** (cas habituel depuis octobre 2026 : 3 caméras de 13–14 Go + l'audio WAV) :
+0. **Rushs déposés dans `DEPOT/`** (cas habituel depuis octobre 2026 : 3 caméras de 13–14 Go + l'audio WAV) :
 
    ```bash
    python -m clipper rushes --brand <marque> --episode <E-numéro> --guest "Prénom Nom" --company "Entreprise" --dry-run
@@ -71,16 +71,16 @@ Si un point est KO : suis les indications (`-> …`), ou lance `scripts\setup.ps
    illisible (« moov atom not found »). Lance toi-même, en arrière-plan (≈ 40 Go en 1 h 30) :
 
    ```bash
-   python -m clipper fetch "<lien Dropbox>" --dest depot
+   python -m clipper fetch "<lien Dropbox>" --dest DEPOT
    ```
 
    Reprise automatique après coupure (y compris d'un fichier partiel déjà présent : `--dest` vers son dossier),
    fichier déclaré complet seulement à la taille exacte annoncée par Dropbox ; si un fichier reste incomplet, relancer
    la même commande. Puis range-les avec `rushes` comme ci-dessus.
-1. Regarde `depot/` (sinon les fichiers récents de Téléchargements). Vérifie toujours qu'une vidéo s'ouvre
+1. Regarde `DEPOT/` (sinon les fichiers récents de Téléchargements). Vérifie toujours qu'une vidéo s'ouvre
    (`ffprobe`) : « moov atom not found » = téléchargement tronqué -> `fetch` (avec le lien) pour la compléter. Range chaque fichier et dis où tu l'as mis :
-   épisode → `brands/<marque>/episodes/<E-numéro>_<invite>_<entreprise>.mp4` ; logo de l'entreprise invitée →
-   `brands/<marque>/assets/guests/<entreprise>.svg|png` ; clips de référence → `references/` ; logos/polices → `assets/`.
+   épisode → `EPISODES/<marque>/<épisode>/rushs/<E-numéro>_<invite>_<entreprise>.mp4` ; logo de l'entreprise invitée →
+   `MARQUES/<marque>/assets/guests/<entreprise>.svg|png` ; clips de référence → `references/` ; logos/polices → `assets/`.
 2. Cas normal : les rushs (3 caméras 1080p + WAV), rangés par `rushes`. Si on te donne au contraire un épisode déjà
    monté, prends la **version 4K** si elle existe (bien plus nette en vertical ; `ffprobe` : 3840×2160) ; en 1080p,
    signale-le en une phrase et continue.
@@ -104,7 +104,7 @@ python -m clipper transcribe --brand <marque> --input <fichier> --guest "Prénom
 ## 1 bis. Les passages sont déjà choisis (fournis par l'équipe)
 
 Si l'utilisateur colle une liste de passages (timecodes + « De … jusqu'à … »), saute les étapes 2 et 3 :
-écris un fichier `output/<marque>/<episode>/passages.yaml` puis lance `passages` :
+écris un fichier `EPISODES/<marque>/<épisode>/travail/passages.yaml` puis lance `passages` :
 
 ```yaml
 - start: "00:18:17:09"          # HH:MM:SS(:images à 24 i/s) ou MM:SS ; « ~ » accepté
@@ -116,7 +116,7 @@ Si l'utilisateur colle une liste de passages (timecodes + « De … jusqu'à …
 ```
 
 ```bash
-python -m clipper passages --brand <marque> --input <fichier> --file output/<marque>/<episode>/passages.yaml --guest "…" --company "…" --guest-role "<Rôle> at <Entreprise>" --host-side left|right
+python -m clipper passages --brand <marque> --input <fichier> --file EPISODES/<marque>/<épisode>/travail/passages.yaml --guest "…" --company "…" --guest-role "<Rôle> at <Entreprise>" --host-side left|right
 python -m clipper check    --brand <marque> --input <fichier>
 ```
 
@@ -137,7 +137,7 @@ python -m clipper propose --brand <marque> --input <fichier> --guest "…" --com
 ```
 
 Trois lectures de l'épisode en parallèle (une par angle éditorial de la marque), puis un « jury » garde les 10
-meilleurs, variés. Sortie : `output/<marque>/<episode>/candidates.md` (+ `candidates.json`).
+meilleurs, variés. Sortie : `EPISODES/<marque>/<épisode>/travail/candidates.md` (+ `candidates.json`).
 
 Présente-les à l'utilisateur dans le chat, numérotés, chacun en 3 lignes : **le titre de la bulle** (la question),
 le thème + timecodes + durée, et une phrase-clé de ce qu'on entend. Puis demande :
@@ -153,7 +153,7 @@ python -m clipper pick --brand <marque> --input <fichier> --ids 1,3,4,7,9
 Pour chaque demande particulière :
 - « il faut absolument le passage où il dit … » → `python -m clipper find --brand … --input … "mots de la phrase"`
   donne le timecode et le contexte. Intègre ce passage au short le plus proche par le thème (comme accroche ou
-  conclusion), ou remplace un candidat — en éditant `segments` dans `output/…/clips.json` (début = début d'une
+  conclusion), ou remplace un candidat — en éditant `segments` dans `EPISODES/…/travail/clips.json` (début = début d'une
   phrase, fin = fin d'une phrase) ; dis à l'utilisateur ce que tu as fait.
 - « pas ce sujet / pas ce chiffre » → retire ou recoupe le segment concerné.
 - un changement de titre de bulle → `hook_title` dans `clips.json`.
@@ -192,7 +192,7 @@ python -m clipper polish --brand <marque> --input <fichier> --only 1,2,3,4,5    
    < 0,5 = ÉCHEC), synchro du **fichier** monté (± 15 ms par morceau), sous-titres jamais superposés, composition, durée ;
 9. **boucle de correction automatique, 6 tours** : bord de phrase dans la voix -> recalé dans le silence ; raccord entendu
    dans un mot -> ce retrait est annulé ; puis remontage et nouveau contrôle. Ce qui reste en ÉCHEC n'a ni aperçu ni rendu ;
-10. aperçus **MP4** (12 i/s) dans `output/…/apercus/` ;
+10. aperçus **MP4** (12 i/s) dans `EPISODES/…/travail/apercus/` ;
 11. `qa --render` — 2e contrôle sur l'aperçu : format, durée, volume -16 LUFS, **aucun écran noir**, une **planche d'images**
     (`qa/qa_images_NN.png`, à REGARDER avant d'envoyer le lien) et le **film des moments à risque** (`qa/moments_NN.mp4` :
     chaque raccord ± 1,5 s + la fin, ~20–40 s), à donner avec chaque short.
@@ -213,8 +213,8 @@ Puis le **3e contrôle, humain** : envoie à l'utilisateur les liens cliquables 
 Studio HyperFrames, qui bugue chez Arthur), un par short, avec le titre de la bulle, plus ce que le rapport `qa`
 signale (ATTENTION) et les instants à écouter de près :
 
-> 1. [Short 1 : <titre de la bulle>](output/<marque>/<episode>/apercus/clip_01_…_9x16_apercu.mp4)
-> 2. [Short 2 : <titre de la bulle>](output/<marque>/<episode>/apercus/clip_02_…_9x16_apercu.mp4)
+> 1. [Short 1 : <titre de la bulle>](EPISODES/<marque>/<épisode>/travail/apercus/clip_01_…_9x16_apercu.mp4)
+> 2. [Short 2 : <titre de la bulle>](EPISODES/<marque>/<épisode>/travail/apercus/clip_02_…_9x16_apercu.mp4)
 > …
 >
 > Aperçus rapides (image un peu saccadée, normal) : dites-moi ce que vous voulez changer.
@@ -225,7 +225,7 @@ Pendant qu'il regarde, rédige les posts (ils ne dépendent pas du rendu) :
 python -m clipper posts --brand <marque> --input <fichier> --guest-role "<Rôle> at <Entreprise>" [--episode-url URL]
 ```
 
-Les posts suivent `brands/<marque>/posts.md` (méthode « post d'un short » : accroche-thèse, contraste, invité,
+Les posts suivent `MARQUES/<marque>/posts.md` (méthode « post d'un short » : accroche-thèse, contraste, invité,
 développement concret, chute, CTA ; anglais pour AI Corner, sans hashtags). Relis-les : rien d'inventé (chiffre,
 exemple, citation absents du short), deux posts ne commencent pas pareil.
 
@@ -248,10 +248,21 @@ python -m clipper qa     --brand <marque> --input <fichier> --only N --render   
   short et l'outro. Miniature pas encore choisie : `outro --thumb <image>` -> `livrables_provisoires/` (provisoire).
 - Les shorts sont rendus SANS carte de fin. Dès que l'équipe a choisi la miniature (`thumbnail --pick`, section « Titre et
   miniature »), lance `python -m clipper outro --brand <marque> --input <fichier>` : l'outro « carte YouTube » avec la
-  miniature est rendue une fois et collée à chaque short -> `output/<marque>/<episode>/livrables/`. Un short signalé
+  miniature est rendue une fois et collée à chaque short -> `EPISODES/<marque>/<épisode>/travail/livrables/`. Un short signalé
   « À REFAIRE » a encore l'ancienne carte intégrée : `build --only N --force` puis `render --only N`, puis relance `outro`.
 - Envoie les MP4 de `livrables/` (pas `renders/`) avec SendUserFile, dans l'ordre ; colle pour chaque short le titre, la
   durée et son **post LinkedIn** prêt à copier ; donne le chemin du dossier.
+
+## Livraison : `livraison` (Arthur, 13/10/2026 : « un dossier avec toutes les versions finales, à copier dans le Drive »)
+
+```bash
+python -m clipper livraison --brand <marque> --input <fichier>
+```
+
+Copie les versions finales dans `EPISODES/<marque>/<épisode>/LIVRABLES/` (épisode + miniature + titre et description,
+shorts + posts, carrousel, newsletter, teaser) et écrit `LISEZMOI.md` : l'état de chaque livrable (✅ / ⚠️ À REVOIR /
+❌ MANQUANT, avec la commande pour corriger). Relance-la après chaque retouche et donne à l'utilisateur le lien vers
+`LIVRABLES/` et ce qui reste ⚠️ ou ❌. Arborescence complète : CLAUDE.md, « Arborescence ».
 
 ## Épisode complet (rushs multicam -> épisode monté + teaser)
 
@@ -279,7 +290,7 @@ Le titre de l'épisode est validé par l'équipe marketing AVANT les miniatures.
 shorts (aucune attente mutuelle) :
 
 1. `python -m clipper titles --brand <marque> --input <E>.mp4` : 5 titres contrôlés, en TEXTE (chacun prouvé par un passage
-   de l'épisode, format `AI Corner E<n> | …`, brief `brands/<marque>/titles.md`). Donne les 5 titres à Arthur pour l'équipe
+   de l'épisode, format `AI Corner E<n> | …`, brief `MARQUES/<marque>/titles.md`). Donne les 5 titres à Arthur pour l'équipe
    marketing, avec le lien vers `titres/propositions.md`. Aucune miniature à ce stade.
 2. L'équipe répond par un numéro (ou corrige une ligne) : `titles … --pick N [--lines "ligne 1 | *ligne 2"] --by <prénom>
    --note "<remarque>"`. Toute remarque de fond devient une ligne « À éviter » ou une règle dans `titles.md`.
@@ -294,7 +305,7 @@ miniature choisie, lance `outro` (étape 5, dépendance B) si des shorts sont d�
 ## Carrousel LinkedIn (donner de la valeur à la communauté, CTA « réserver un échange »)
 
 Demande d'Arthur (12/10/2026). En français, charte AI Partners, 1080 × 1350, PDF à publier comme « document » LinkedIn.
-Brief éditorial : `brands/<marque>/carousel.md` ; CTA final : `carousel.cta` de `brand.yaml` (jamais écrit par Claude).
+Brief éditorial : `MARQUES/<marque>/carousel.md` ; CTA final : `carousel.cta` de `brand.yaml` (jamais écrit par Claude).
 À lancer après `transcribe`, en parallèle de tout le reste :
 
 1. `python -m clipper carousel --brand <marque> --input <E>.mp4` : 3 angles de types différents (méthode, leçons, idées
@@ -317,7 +328,7 @@ Brief éditorial : `brands/<marque>/carousel.md` ; CTA final : `carousel.cta` de
 ## Mail podcast de Thomas (idée de Thomas, 08/10/2026)
 
 Un mail qui part de Thomas (fondateur), en plus de la newsletter d'AI Partners, pour valoriser chaque épisode. Modèle :
-le mail « Nostra » d'On Train. Mis en page, en français, vouvoiement. Brief : `brands/<marque>/newsletter.md`.
+le mail « Nostra » d'On Train. Mis en page, en français, vouvoiement. Brief : `MARQUES/<marque>/newsletter.md`.
 
 1. `python -m clipper newsletter --brand <marque> --input <E>.mp4` (après `episode-plan` pour les chapitres ; idéalement
    après `thumbnail --pick`) : Claude écrit le mail à la 1re personne (objet, aperçu, accroche, l'invité, « Au programme »
@@ -353,7 +364,7 @@ le mail « Nostra » d'On Train. Mis en page, en français, vouvoiement. Brief :
   de shorts livrés depuis `renders/` (sans outro) : toujours depuis `livrables/`.
 - Jamais d'aperçu montré à l'équipe tant que le contrôle `qa` signale un défaut que tu peux corriger.
 - Un short qui dépasse un peu la durée cible pour finir une idée est correct ; un short coupé au milieu ne l'est pas.
-- Ne modifie pas `config/defaults.yaml` pour un besoin propre à une marque : passe par `brands/<marque>/brand.yaml`.
+- Ne modifie pas `config/defaults.yaml` pour un besoin propre à une marque : passe par `MARQUES/<marque>/brand.yaml`.
 - Un retour de l'utilisateur sur le style qui vaut pour la suite (« moins de coupes », « logos plus grands »)
   se règle dans la config de la marque ou le preset, pas seulement sur ce short — et se note dans CLAUDE.md.
 - Toute modification du PROCESS (étape ajoutée, retirée, déplacée, nouvelle validation, nouvelle dépendance) : mets à

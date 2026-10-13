@@ -5,7 +5,7 @@ Ce qu'Arthur et l'équipe ont validé sur E22 (teaser, épisode complet, short 1
 dit *quoi* et *pourquoi* ; le *comment* (code, réglages) est dans [CLAUDE.md](../CLAUDE.md), le pas à pas dans le skill
 [podcast-clips](../.claude/skills/podcast-clips/SKILL.md), le teaser dans [TEASER_FRAMEWORK.md](TEASER_FRAMEWORK.md).
 
-Résultat jugé « franchement plutôt bien » par Arthur (09/10/2026) : `output/ai-corner/e22-nicolas-comestaz-coty/episode/`
+Résultat jugé « franchement plutôt bien » par Arthur (09/10/2026) : `EPISODES/ai-corner/E22_nicolas-comestaz_coty/travail/episode/`
 (`E22_teaser_final.mp4`, `E22_nicolas-comestaz_coty_episode.mp4`) et `renders/clip_01_…_9x16.mp4` (style à reprendre).
 
 ## 1. Le son et les coupes (valable pour TOUT : shorts, teaser, épisode)
@@ -78,7 +78,8 @@ Résultat jugé « franchement plutôt bien » par Arthur (09/10/2026) : `output
 3. **Trois contrôles** avant toute livraison : automatique sur le montage (`qa`), automatique sur l'aperçu / le MP4
    final (`qa --render`, `qa --episode`, planche d'images regardée), puis Arthur.
 4. Chemin d'un short : `pick` → `polish --only N` → liens MP4 → validation → `render` → `qa --render`.
-5. Jamais réécraser un MP4 livré : l'ancien est renommé (`_v1_<date>`).
+5. Jamais réécraser un MP4 livré : l'ancien va dans `archives/` de l'épisode. Ce qui part chez l'équipe = le dossier
+   `LIVRABLES/` produit par `livraison` (versions finales + état de chaque livrable dans `LISEZMOI.md`).
 6. **Chaque retour d'Arthur devient une règle durable** (code ou réglage + CLAUDE.md + mémoire), datée, avec sa phrase.
 7. Aucune fenêtre ne s'ouvre chez Arthur (pas de Chrome, pas de console) ; tout est vérifié par images et par écoute.
 8. Plusieurs sessions Claude peuvent travailler en parallèle sur le dépôt : ne committer que ses propres fichiers,

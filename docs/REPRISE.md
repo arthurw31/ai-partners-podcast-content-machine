@@ -19,10 +19,10 @@ dossiers). Les règles durables sont dans [CLAUDE.md](../CLAUDE.md) ; ce fichier
 
 | Quoi | Où |
 |---|---|
-| Rushs (40 Go, non versionnés) | `brands/ai-corner/episodes/rushes/E22/cam1_nicolas.mp4`, `cam2_large.mp4`, `cam3_thomas.mp4` |
-| Audio micro | `brands/ai-corner/episodes/E22_nicolas-comestaz_coty.wav` |
+| Rushs (40 Go, non versionnés) | `EPISODES/ai-corner/<épisode>/rushs/rushes/E22/cam1_nicolas.mp4`, `cam2_large.mp4`, `cam3_thomas.mp4` |
+| Audio micro | `EPISODES/ai-corner/<épisode>/rushs/E22_nicolas-comestaz_coty.wav` |
 | « Épisode » (lien dur vers le plan large) + description des caméras | `E22_nicolas-comestaz_coty.mp4` + `E22_nicolas-comestaz_coty.multicam.json` |
-| Tout le travail généré | `output/ai-corner/e22-nicolas-comestaz-coty/` (transcript, clips.json, teaser_*, episode_plan.*, work/) |
+| Tout le travail généré | `EPISODES/ai-corner/E22_nicolas-comestaz_coty/travail/` (transcript, clips.json, teaser_*, episode_plan.*, work/) |
 
 Commande de base : `python -m clipper <commande> --brand ai-corner --input E22_nicolas-comestaz_coty.mp4`
 (+ `--guest "Nicolas Comestaz" --company Coty --host "Thomas Spitz (CEO AI Partners)"` pour `episode-*`).

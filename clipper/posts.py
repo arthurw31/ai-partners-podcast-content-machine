@@ -1,8 +1,8 @@
 """Rédaction des textes de publication de chaque clip (post LinkedIn + description courte).
 
-Entrées : clips.json, transcript.json, le brief `brands/<slug>/posts.md` (règles + posts publiés
+Entrées : clips.json, transcript.json, le brief `MARQUES/<slug>/posts.md` (règles + posts publiés
 servant de référence de ton) et la section « Publication » de guidelines.md.
-Sortie  : output/<brand>/<ep>/posts/clip_NN_<titre>.md (un fichier par clip), les champs
+Sortie  : EPISODES/<marque>/<épisode>/travail/posts/clip_NN_<titre>.md (un fichier par clip), les champs
 `linkedin_post` / `short_description` dans clips.json, et le récap dans summary.md.
 
 Un seul appel LLM pour tous les clips de l'épisode : le modèle voit l'ensemble et varie les

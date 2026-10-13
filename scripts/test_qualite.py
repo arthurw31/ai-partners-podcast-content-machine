@@ -18,7 +18,7 @@ from clipper.compose import cfg_for_format  # noqa: E402
 from clipper.config import Brand  # noqa: E402
 from clipper.strict import caption_problems, edge_problems, fix_edges  # noqa: E402
 
-E22_WAV = ROOT / "brands" / "ai-corner" / "episodes" / "E22_nicolas-comestaz_coty.wav"
+E22_WAV = ROOT / "EPISODES" / "ai-corner" / "E22_nicolas-comestaz_coty" / "rushs" / "E22_nicolas-comestaz_coty.wav"
 
 
 def _words(spec: list[tuple[str, float, float]]) -> list[dict]:

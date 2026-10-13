@@ -1,4 +1,4 @@
-"""Rushs déposés dans depot/ -> épisode prêt pour tout le pipeline (commande `rushes`).
+"""Rushs déposés dans DEPOT/ -> épisode prêt pour tout le pipeline (commande `rushes`).
 
 Demande d'Arthur (09/10/2026) : « on dépose les rushs MP4 et l'audio dans le dossier depot » — 3 caméras (gros plan
 invité, plan large, gros plan animateur) + 1 WAV du micro. Pour E22 tout avait été fait à la main ; ici :
@@ -7,7 +7,7 @@ invité, plan large, gros plan animateur) + 1 WAV du micro. Pour E22 tout avait 
    chaque personne aux 2 personnes du plan large (couleurs du visage et du haut du corps), l'animateur étant du côté
    `framing.host_side` du plan large ; planche `rushes_<E>.jpg` à REGARDER, `--host <fichier>` pour corriger ;
 3. décalage du micro sur les caméras : corrélation du son témoin du plan large avec le WAV (E22 : 0,037 s) ;
-4. rangement : `brands/<m>/episodes/rushes/<E>/{invite,large,animateur}_<prénom>.mp4`, WAV ->
+4. rangement : `EPISODES/<marque>/<épisode>/rushs/rushes/<E>/{invite,large,animateur}_<prénom>.mp4`, WAV ->
    `episodes/<E>_<invite>_<entreprise>.wav`, `<base>.mp4` = lien dur vers le plan large, `<base>.multicam.json`.
 Les fichiers sont DÉPLACÉS (même disque : instantané), jamais copiés (13–14 Go par caméra).
 """
@@ -26,6 +26,7 @@ from rich.console import Console
 
 from .analysis import _detector
 from .compose import slugify
+from .config import BRANDS_DIR
 from .media import FFMPEG, FFPROBE
 
 console = Console()
@@ -193,7 +194,7 @@ def audio_delay(cam: Path, mic: Path, at: float, dur: float = 90.0, max_lag: flo
 
 
 def _label_font(size: int):
-    for f in (Path(__file__).resolve().parent.parent / "brands" / "ai-corner" / "assets" / "fonts" / "Montserrat-VF.ttf",
+    for f in (BRANDS_DIR / "ai-corner" / "assets" / "fonts" / "Montserrat-VF.ttf",
               Path("C:/Windows/Fonts/arial.ttf"), Path("/Library/Fonts/Arial.ttf")):
         if f.exists():
             return ImageFont.truetype(str(f), size)
@@ -258,12 +259,15 @@ def ingest(brand, src: Path, episode: str, guest: str, company: str, host_file: 
                  or (brand.cfg.get("posts") or {}).get("host_name") or "animateur")
     g_first, h_first = slugify(guest.split()[0] if guest else "invite", 20), slugify(host_name.split()[0], 20)
     base = f"{episode}_{slugify(guest, 30)}" + (f"_{slugify(company, 20)}" if company else "")
-    ep_dir = brand.dir / "episodes"
-    rush_dir = ep_dir / "rushes" / episode
+    from .config import EPISODES_DIR
+    ep_dir = EPISODES_DIR / brand.slug / base / "rushs"      # EPISODES/<marque>/<épisode>/rushs/ (13/10/2026)
+    rush_dir = ep_dir / "cameras"
     names = {"guest": f"invite_{g_first}{roles['guest'].suffix.lower()}",
              "wide": f"large{roles['wide'].suffix.lower()}",
              "host": f"animateur_{h_first}{roles['host'].suffix.lower()}"}
     labels = {"guest": f"INVITÉ ({guest or '?'})", "wide": "PLAN LARGE", "host": f"ANIMATEUR ({host_name})"}
+    if not dry_run:
+        ep_dir.mkdir(parents=True, exist_ok=True)
     sheet = contact(roles, src / f"rushes_{episode}.jpg" if dry_run else ep_dir / f"rushes_{episode}.jpg", labels)
     plan = {"episode": base, "roles": {r: roles[r].name for r in roles}, "renamed": names, "audio": mic.name,
             "audio_delay": round(delay, 3), "sync_peak": round(peak, 1), "sheet": str(sheet), **detail}
@@ -280,7 +284,7 @@ def ingest(brand, src: Path, episode: str, guest: str, company: str, host_file: 
             os.link(rush_dir / names["wide"], master)          # lien dur : 0 octet de plus
         except OSError:
             master.symlink_to(rush_dir / names["wide"])
-    spec = {"cams": {r: f"rushes/{episode}/{names[r]}" for r in ("host", "guest", "wide")},
+    spec = {"cams": {r: f"cameras/{names[r]}" for r in ("host", "guest", "wide")},
             "audio": wav.name, "audio_delay": round(delay, 3), "lead": 0.15, "min_shot": 2.0,
             "host_side": detail.get("host_side", host_side)}
     (ep_dir / f"{base}.multicam.json").write_text(json.dumps(spec, indent=2), encoding="utf-8")

@@ -1,7 +1,7 @@
 # Framework teaser d'épisode — modèle « Dans la tête d'un CEO », charte AI Partners
 
 Teaser d'ouverture d'un épisode complet (16:9, ~40 s). Déduit de l'analyse des 3 teasers de référence de
-« Dans la tête d'un CEO » (`brands/dans-la-tete-dun-ceo/references/`, analyse du 08/10/2026), puis adapté à la charte
+« Dans la tête d'un CEO » (`MARQUES/dans-la-tete-dun-ceo/references/`, analyse du 08/10/2026), puis adapté à la charte
 AI Partners (AI Corner). Demande d'Arthur : « un truc très catchy comme dans les teasers de Dans la tête d'un CEO ».
 
 ## 1. Ce que font les références (mesuré)
@@ -89,5 +89,5 @@ réagit) ; jamais de mise en contexte ; chaque extrait se comprend seul et finit
 
 - `python -m clipper episode-plan … --new-teaser` : script (LLM, `TEASER_PROMPT` = sections 2 et 4 : extraits +
   mots-clés), découpe sur fins de phrase réelles, « euh » et blancs retirés, plans de caméra (section 3), écoute finale.
-- Charte : section `teaser:` de `brands/ai-corner/brand.yaml` (sous-titres, logo, carte de fin).
+- Charte : section `teaser:` de `MARQUES/ai-corner/brand.yaml` (sous-titres, logo, carte de fin).
 - Aperçu : `python -m clipper preview … --clip 99 --formats 16x9` — MP4 seulement après validation.

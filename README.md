@@ -56,7 +56,7 @@ l'épisode et choisir le titre en même temps.
 
    Claude récupère le projet, installe Python, Node, FFmpeg et les dépendances (validez les fenêtres
    d'installation si Windows en affiche), puis vérifie que tout est prêt.
-4. Ouvrez le dossier `ai-partners-podcast-content-machine` dans Claude Code. C'est prêt : déposez un épisode dans `depot/` et
+4. Ouvrez le dossier `ai-partners-podcast-content-machine` dans Claude Code. C'est prêt : déposez un épisode dans `DEPOT/` et
    écrivez « fais-moi 5 shorts de ce podcast » (ou `/podcast-clips`).
 
 Pour récupérer les améliorations plus tard : « mets à jour le projet » (Claude fait un `git pull`).
@@ -109,7 +109,7 @@ seul au premier lancement.
 ## 3. Premiers shorts (mode guidé)
 
 1. Ouvrez le dossier du projet dans **Claude Code**.
-2. Déposez dans `depot/` les **3 rushs MP4** (gros plan invité, plan large, gros plan animateur) et l'**audio
+2. Déposez dans `DEPOT/` les **3 rushs MP4** (gros plan invité, plan large, gros plan animateur) et l'**audio
    WAV** du micro, avec le logo de l'entreprise invitée. Claude les range lui-même (`python -m clipper rushes` :
    chaque caméra reconnue à ses visages, micro synchronisé). Un épisode déjà monté (de préférence en **4K**) peut
    aussi être déposé ; des rushs restés sur Dropbox se récupèrent avec `python -m clipper fetch "<lien>"`.
@@ -133,16 +133,29 @@ Vous pouvez aussi taper `/podcast-clips` pour lancer le workflow directement.
 python -m clipper new-brand mon-podcast
 ```
 
-crée `brands/mon-podcast/` :
+crée `MARQUES/mon-podcast/` :
 
 ```
-brands/mon-podcast/
+AI Partners Podcast Content Machine/
+├── DEPOT/        ← vous déposez ici les rushs d'un nouveau tournage (3 caméras + son)
+├── EPISODES/     ← un dossier par épisode, TOUT dedans
+│   └── <marque>/<épisode>/        ex. ai-corner/E22_nicolas-comestaz_coty/
+│       ├── LIVRABLES/  ← à copier sur le Drive (`python -m clipper livraison`), rien d'autre
+│       ├── rushs/      ← sources : <épisode>.mp4, .wav, .multicam.json, cameras/
+│       ├── travail/    ← fichiers du pipeline (transcription, clips, rendus, contrôles, aperçus)
+│       └── archives/   ← sauvegardes et anciennes versions (supprimables)
+├── MARQUES/      ← la charte de chaque podcast (voir ci-dessous)
+├── docs/         ← guides et schéma (publié sur GitHub Pages : le nom doit rester « docs »)
+└── moteur technique : clipper/ config/ scripts/ models/ node_modules/ cache/ + CLAUDE.md, README.md, …
+```
+
+```
+MARQUES/mon-podcast/
   brand.yaml       ← charte : couleurs, police, logo, sous-titres, B-roll, recadrage, formats, carte de fin
   guidelines.md    ← consignes éditoriales (ton, ce qui fait un bon extrait, à éviter, hashtags)
   posts.md         ← brief des posts LinkedIn (langue, voix, structure, CTA) + vos posts déjà publiés = référence de ton
   assets/          ← logo.png (fond transparent), fonts/*.ttf, musique éventuelle,
                      guests/<entreprise>.svg|png (logo de l'entreprise invitée, affiché si `guest_logo.enabled`)
-  episodes/        ← vos épisodes sources
   references/      ← clips déjà publiés ou exemples du style voulu
 ```
 
@@ -151,8 +164,8 @@ entièrement commenté). Le plus rapide : choisir un **preset de montage** et aj
 
 | Preset | Style | Exemple |
 | --- | --- | --- |
-| `dynamic` | capitales, mots-clés colorés, révélation « machine à écrire », coupes rythmées, zoom lent, B-roll en fenêtre | `brands/dans-la-tete-dun-ceo/` |
-| `aip-short` | shorts du monteur AI Partners : logo invité + logo marque en haut, titre-question dans une bulle blanche, sous-titres mot à mot sous la bulle, écran partagé, light leak aux raccords | `brands/ai-corner/` |
+| `dynamic` | capitales, mots-clés colorés, révélation « machine à écrire », coupes rythmées, zoom lent, B-roll en fenêtre | `MARQUES/dans-la-tete-dun-ceo/` |
+| `aip-short` | shorts du monteur AI Partners : logo invité + logo marque en haut, titre-question dans une bulle blanche, sous-titres mot à mot sous la bulle, écran partagé, light leak aux raccords | `MARQUES/ai-corner/` |
 | `editorial` | sous-titres sobres en minuscules centrés en bas, montage multi-segments (accroche + développement + conclusion), pas de B-roll | |
 | `clean` | sobre, mot à mot, B-roll plein écran | |
 | `minimal` | recadrage + sous-titres uniquement | |
@@ -187,7 +200,7 @@ python -m clipper pick       --brand mon-podcast --input episode-12.mp4 --ids 1,
 python -m clipper find       --brand mon-podcast --input episode-12.mp4 "mots d'une phrase à retrouver"
 python -m clipper check      --brand mon-podcast --input episode-12.mp4                                  # coupes mot à mot
 python -m clipper polish     --brand mon-podcast --input episode-12.mp4 --only 1,2,3,4,5                 # nettoyage + montage + contrôles + aperçus MP4
-python -m clipper qa         --brand mon-podcast --input episode-12.mp4 --only 1 [--render]              # rapport de contrôle (output/…/qa/)
+python -m clipper qa         --brand mon-podcast --input episode-12.mp4 --only 1 [--render]              # rapport de contrôle (EPISODES/…/travail/qa/)
 python -m clipper preview    --brand mon-podcast --input episode-12.mp4 --clip 1 --mp4                   # aperçu MP4 rapide seul
 
 # ou étape par étape (chaque étape est mise en cache et reprend là où elle s'est arrêtée)
@@ -199,19 +212,19 @@ python -m clipper posts      --brand mon-podcast --input episode-12.mp4 [--episo
 python -m clipper preview    --brand mon-podcast --input episode-12.mp4 --clip 1     # ouvre l'éditeur HyperFrames
 ```
 
-- `--input` : un chemin, ou simplement le nom d'un fichier déposé dans `brands/<marque>/episodes/`.
+- `--input` : un chemin, ou simplement le nom d'un fichier déposé dans `EPISODES/<marque>/<épisode>/rushs/`.
 - `--host-side left|right` : côté de l'animateur dans le plan large (peut être fixé dans `brand.yaml`).
 - `select … --instructions "…"` : consignes ponctuelles (« évite les passages sur la levée de fonds »).
 - `select … --ranges 120-160,900-940` : sélection manuelle par timecodes, sans LLM.
 - `select … --force` : refaire la sélection.
 - `posts` : rédige pour chaque clip le **post LinkedIn** complet et la **description courte** Reels/Shorts, dans le
-  ton de `brands/<marque>/posts.md` (lancé aussi par `run`). `--episode-url` met le lien de l'épisode en clair dans
+  ton de `MARQUES/<marque>/posts.md` (lancé aussi par `run`). `--episode-url` met le lien de l'épisode en clair dans
   le CTA ; `--force` réécrit un post déjà généré.
 
 ## 6. Ce que vous obtenez
 
 ```
-output/<marque>/<episode>/
+EPISODES/<marque>/<épisode>/travail/
   renders/                 ← les MP4 finaux : clip_01_<titre>_9x16.mp4, clip_01_<titre>_16x9.mp4, …
   posts/                   ← un .md par clip : post LinkedIn prêt à coller + description courte Reels/Shorts
   summary.md               ← récap des extraits (timecodes, segments, mots-clés) + les posts

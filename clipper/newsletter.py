@@ -6,7 +6,7 @@ Idée de Thomas Spitz (08/10/2026), demande d'Arthur (12/10/2026) : « un 5e wor
 -> HTML d'e-mail compatible avec tous les outils (tableaux, styles en ligne, 600 px) + images à téléverser + version texte.
 
 1. `write` : Claude Opus lit la transcription (qui parle), les chapitres et le titre validé, et écrit le mail (brief
-   `brands/<m>/newsletter.md`) ; chaque fait sur l'invité est adossé à un passage de l'épisode ;
+   `MARQUES/<m>/newsletter.md`) ; chaque fait sur l'invité est adossé à un passage de l'épisode ;
 2. `check` : faits retrouvés, chiffres présents dans l'épisode, longueurs (objet, aperçu, programme) ;
 3. `render` : images (bandeau, photo de l'invité, miniature YouTube avec bouton lecture) + `email.html` + `email.txt` +
    `objet.txt` + aperçu PNG ; le titre et la miniature viennent de `titles --pick` / `thumbnail --pick` (provisoires sinon) ;

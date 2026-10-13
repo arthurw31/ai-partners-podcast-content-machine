@@ -11,7 +11,7 @@ jour à chaque changement. Cette page ne refait pas le schéma ; elle répond au
 
 | Étape | Qui | Durée |
 | --- | --- | --- |
-| Dépôt + transcription | vous déposez les 3 rushs MP4 et l'audio WAV dans `depot/`, Claude les range, les synchronise et transcrit | ≈ 1 min + ≈ 20 min (automatique) |
+| Dépôt + transcription | vous déposez les 3 rushs MP4 et l'audio WAV dans `DEPOT/`, Claude les range, les synchronise et transcrit | ≈ 1 min + ≈ 20 min (automatique) |
 | 10 passages proposés | Claude | ≈ 8 min |
 | Choix des 5 passages + demandes | **vous** | 2 min |
 | Nettoyage, montage, contrôle qualité, aperçus, posts | Claude prépare, **vous regardez les aperçus et validez** | ≈ 6–8 min par short, ≈ 3 min par retouche |
@@ -33,7 +33,7 @@ qu'une fois, après votre validation. Avant qu'un aperçu vous soit montré, le 
 (aucun mot coupé à un raccord, fins de phrase retombées dans le silence et pensée finie, « euh » et « hmm » retirés
 sans perdre un mot, son synchronisé au morceau près, sous-titres vérifiés à l'écoute et jamais superposés, aucun écran
 noir, volume -16 LUFS) ; tant qu'il trouve un défaut, il corrige seul et recommence (6 tours), puis Claude reprend ce qui
-reste. Rapports : `output/…/qa/` ; à regarder en premier : `qa/moments_NN.mp4` (raccords + fin du short, ~30 s).
+reste. Rapports : `EPISODES/…/travail/qa/` ; à regarder en premier : `qa/moments_NN.mp4` (raccords + fin du short, ~30 s).
 Vous trouvez quand même un accroc ? Donnez à Claude le short et la seconde : il le corrige et l'ajoute aux tests
 (`scripts/test_qualite.py`) pour qu'il ne revienne jamais.
 
@@ -41,17 +41,17 @@ Vous trouvez quand même un accroc ? Donnez à Claude le short et la seconde : i
 
 | Je veux changer… | Fichier | Exemple |
 | --- | --- | --- |
-| la durée des shorts, le nombre de propositions | `brands/<marque>/brand.yaml` → `selection` | `min_duration: 25`, `max_duration: 45` |
+| la durée des shorts, le nombre de propositions | `MARQUES/<marque>/brand.yaml` → `selection` | `min_duration: 25`, `max_duration: 45` |
 | les formats (vertical, LinkedIn 16:9, carré) | `brand.yaml` → `formats` | `["9x16", "16x9"]` |
-| ce que Claude doit chercher / éviter | `brands/<marque>/guidelines.md` | « éviter les passages sur la levée de fonds » |
-| le style des posts LinkedIn | `brands/<marque>/posts.md` | coller de nouveaux posts publiés en exemples |
-| le style des titres d'épisode | `brands/<marque>/titles.md` | ajouter un titre refusé dans « À éviter » |
+| ce que Claude doit chercher / éviter | `MARQUES/<marque>/guidelines.md` | « éviter les passages sur la levée de fonds » |
+| le style des posts LinkedIn | `MARQUES/<marque>/posts.md` | coller de nouveaux posts publiés en exemples |
+| le style des titres d'épisode | `MARQUES/<marque>/titles.md` | ajouter un titre refusé dans « À éviter » |
 | l'outro des shorts (texte, bouton, durée) | `brand.yaml` → `short_outro` | `cta: "Regarder l'épisode — lien en description"` |
-| le contenu des carrousels (règles, angles) | `brands/<marque>/carousel.md` | « pas plus de 7 slides » |
+| le contenu des carrousels (règles, angles) | `MARQUES/<marque>/carousel.md` | « pas plus de 7 slides » |
 | la dernière slide des carrousels (CTA, lien) | `brand.yaml` → `carousel.cta` | `url: "…/prendre-rendez-vous"` |
-| le mail de Thomas (ton, structure, signature) | `brands/<marque>/newsletter.md`, `brand.yaml` → `newsletter` | « 3 points au programme » |
+| le mail de Thomas (ton, structure, signature) | `MARQUES/<marque>/newsletter.md`, `brand.yaml` → `newsletter` | « 3 points au programme » |
 | le gabarit des miniatures | réimport du design Canva (`thumbnail-template`) | nouveau design exporté en PPTX + PNG |
-| les logos, la police, l'animation de fin | `brands/<marque>/assets/` | remplacer `outro_anim.mov` |
+| les logos, la police, l'animation de fin | `MARQUES/<marque>/assets/` | remplacer `outro_anim.mov` |
 | le style de montage (bulle, sous-titres, coupes) | `config/presets/aip-short.yaml` | taille des sous-titres, durée de la bulle |
 | tout le reste (valeurs par défaut commentées) | `config/defaults.yaml` | — |
 
@@ -60,5 +60,5 @@ Le plus simple reste de le demander à Claude dans Claude Code (« les sous-titr
 
 ## Ajouter un autre podcast
 
-`python -m clipper new-brand <nom>` crée `brands/<nom>/` à partir du modèle. Déposez 2 ou 3 shorts déjà publiés
-et quelques posts LinkedIn dans `depot/` et demandez à Claude de « caler la charte sur ces exemples ».
+`python -m clipper new-brand <nom>` crée `MARQUES/<nom>/` à partir du modèle. Déposez 2 ou 3 shorts déjà publiés
+et quelques posts LinkedIn dans `DEPOT/` et demandez à Claude de « caler la charte sur ces exemples ».

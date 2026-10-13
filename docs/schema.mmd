@@ -1,6 +1,6 @@
 flowchart TD
     IN(["`**Dépôt des rushs**
-3 caméras + micro dans depot/`"])
+3 caméras + micro dans DEPOT/`"])
     IN --> FE["`**rushes**
 caméras reconnues, micro synchronisé`"]
     FE --> TR["`**transcribe**
@@ -115,10 +115,13 @@ prêt à envoyer`"])
     M4 -.->|miniature| N2
     M4 --> L3(["`**Titre et miniature**
 1280×720 + HD`"])
+    L1 & L2 & L3 & L4 & L5 --> LV(["`**livraison**
+dossier LIVRABLES/ : versions finales
+et état de chaque livrable, à copier sur le Drive`"])
 
     classDef human fill:#FFF4E6,stroke:#F08C00,stroke-width:1.5px,color:#5C2C06;
     classDef llm fill:#F1F0FF,stroke:#7B6CF6,stroke-width:1.5px,color:#2B2366;
     classDef deliver fill:#E8F8F0,stroke:#12A26B,stroke-width:1.5px,color:#0B3B29;
     class IN,S2,S5,E8,M2,M4,C2,C5,N3 human;
     class S1,E1,E4,M1,C1,C3,C3b,N1,SR,ER,CR,NR llm;
-    class L1,L2,L3,L4,L5 deliver;
+    class L1,L2,L3,L4,L5,LV deliver;

@@ -12,7 +12,7 @@ flowchart TB
     end
 
     subgraph PY["Package Python clipper/ (python -m clipper …)"]
-        CLI["cli.py<br/>commandes : run, rushes, fetch, transcribe, titles, propose, select, pick, passages, find, check,<br/>polish (verify, fillers, tighten), qa, build, preview, render, posts, episode-plan, episode-render,<br/>thumbnail, thumbnail-template, outro, carousel, newsletter, review, new-brand, brands, doctor"]
+        CLI["cli.py<br/>commandes : run, rushes, fetch, transcribe, titles, propose, select, pick, passages, find, check,<br/>polish (verify, fillers, tighten), qa, build, preview, render, posts, episode-plan, episode-render,<br/>thumbnail, thumbnail-template, outro, carousel, newsletter, review, livraison, new-brand, brands, doctor"]
         CFG["config.py<br/>fusion de la configuration"]
         TR["transcribe.py"]
         SEL["select_clips.py"]
@@ -60,8 +60,8 @@ flowchart TB
 | Brique | Rôle |
 | --- | --- |
 | **Skill** `podcast-clips` | Mode d'emploi lu par Claude Code : enchaîne les commandes, pose les questions, vérifie, livre. Ne contient pas de code. |
-| `cli.py` | Point d'entrée `python -m clipper <commande>`. Chaque étape lit et écrit des fichiers dans `output/` (reprise possible à tout moment). |
-| `config.py` | Fusionne `config/defaults.yaml` ← `config/presets/<preset>.yaml` ← `brands/<marque>/brand.yaml` ← surcharges par format. |
+| `cli.py` | Point d'entrée `python -m clipper <commande>`. Chaque étape lit et écrit des fichiers dans `EPISODES/<marque>/<épisode>/travail/` (reprise possible à tout moment). |
+| `config.py` | Fusionne `config/defaults.yaml` ← `config/presets/<preset>.yaml` ← `MARQUES/<marque>/brand.yaml` ← surcharges par format. |
 | `transcribe.py` | Whisper sur CPU : texte mot à mot avec horodatage, découpé en phrases. |
 | `select_clips.py` + `llm.py` | Envoie la transcription (phrase par phrase, avec horaires) et `guidelines.md` à Claude ; 3 lectures en parallèle (une par angle) puis un jury. Cale chaque passage sur les mots cités. |
 | `analysis.py` | Détecte les changements de plan et les visages (position, taille, qui parle). |
@@ -70,17 +70,18 @@ flowchart TB
 | `compose.py` | Assemble les passages, lisse les coupes, recadre avec FFmpeg, écrit la composition HTML HyperFrames (sous-titres, bulle-titre, logos, light leak, carte de fin). |
 | `media.py` | Toutes les opérations FFmpeg : découpe, concaténation, recadrage Lanczos, animation de fin. |
 | `render.py` | Rendu de la composition en MP4 par HyperFrames (Chrome headless invisible), lint, captures. `preview --mp4` produit l'aperçu brouillon (12 i/s) validé par l'équipe ; `preview --open` lance le Studio pour une retouche fine. |
-| `ingest.py` | Commande `rushes` : prend les 3 rushs + le WAV déposés dans `depot/`, écarte un fichier tronqué, reconnaît le plan large (2 visages) et l'animateur (empreinte de visage SFace comparée à `assets/host_face.jpg`), mesure le décalage du micro par corrélation avec le son des caméras, range et renomme d'après l'invité, écrit `multicam.json` (avec le côté de l'animateur dans le plan large). |
+| `ingest.py` | Commande `rushes` : prend les 3 rushs + le WAV déposés dans `DEPOT/`, écarte un fichier tronqué, reconnaît le plan large (2 visages) et l'animateur (empreinte de visage SFace comparée à `assets/host_face.jpg`), mesure le décalage du micro par corrélation avec le son des caméras, range et renomme d'après l'invité, écrit `multicam.json` (avec le côté de l'animateur dans le plan large). |
 | `multicam.py` | Rushs 3 caméras : gros plan de celui qui parle, écran partagé quand l'autre écoute (et seulement s'il est calme), son du micro. |
 | `verify.py`, `fillers.py`, `caption_check.py`, `qa.py` | Contrôles « à l'oreille » : vraies fins de phrase, « euh » retirés sans perdre un mot, sous-titres écoutés deux fois, rapport OK / ATTENTION / ÉCHEC avant chaque aperçu et après chaque rendu. |
 | `endpoint.py` | Fin de phrase « à l'oreille » : Smart Turn v3 (l'orateur a-t-il fini sa pensée ?) et alignement CTC français (frontières exactes des mots) ; modèles dans `models/hf/`. |
+| `livraison.py` | Dossier `LIVRABLES/` de l'épisode : copie les versions finales (épisode, miniature, titre et description, shorts et posts, carrousel validé, newsletter, teaser) avec des noms clairs et écrit `LISEZMOI.md` (état de chaque livrable). À copier tel quel sur le Drive. |
 | `strict.py` | Contrôle intransigeant : bords de phrase jugés sur le son avec des seuils durs et corrigés seuls (`fix_edges`, boucle de `polish`, 3 tours), sous-titres de la composition (jamais deux blocs ensemble), film des moments à risque (`qa/moments_NN.mp4`). Cas anti-régression : `python scripts/test_qualite.py`. |
 | `episode.py`, `diarize.py` | Épisode complet : dérushage par Claude, qui parle (empreintes vocales), liste de plans façon monteur, teaser scripté, chapitres ; corps rendu en FFmpeg, teaser en HyperFrames. |
-| `carousel.py` | Commande `carousel` : carrousel LinkedIn tiré de l'épisode (Arthur, 12/10/2026). Claude Opus propose 3 angles (citations retrouvées dans la transcription, orateurs d'après `work/diarized_words.json`) -> l'équipe en choisit un (`--pick N`) -> Claude rédige 6 à 8 slides + le post (brief `brands/<m>/carousel.md`) -> contrôles (citations mot pour mot, chiffres présents, longueurs) -> rendu HTML (polices Metropolis, logos de la charte, photo détourée de l'invité réutilisée des miniatures) par Chrome sans fenêtre -> PNG 1080×1350 + PDF ; slide CTA écrite depuis `carousel.cta` (brand.yaml). 3 styles tant que l'équipe n'a pas choisi (`carousel.style`) ; `--final STYLE` -> `carrousel/final/`. |
+| `carousel.py` | Commande `carousel` : carrousel LinkedIn tiré de l'épisode (Arthur, 12/10/2026). Claude Opus propose 3 angles (citations retrouvées dans la transcription, orateurs d'après `work/diarized_words.json`) -> l'équipe en choisit un (`--pick N`) -> Claude rédige 6 à 8 slides + le post (brief `MARQUES/<m>/carousel.md`) -> contrôles (citations mot pour mot, chiffres présents, longueurs) -> rendu HTML (polices Metropolis, logos de la charte, photo détourée de l'invité réutilisée des miniatures) par Chrome sans fenêtre -> PNG 1080×1350 + PDF ; slide CTA écrite depuis `carousel.cta` (brand.yaml). 3 styles tant que l'équipe n'a pas choisi (`carousel.style`) ; `--final STYLE` -> `carrousel/final/`. |
 | `review.py` | Commande `review` (Arthur, 12/10/2026 : « un regard neuf et plus critique ») : relecture d'un livrable (short, épisode, carrousel, mail) par Claude Opus SANS le contexte du montage, une fois `qa` propre et avant de le montrer à l'équipe. Entrées compactes : planche d'images réduite (JPEG), rapport `qa` (lignes non OK + « ce qu'on entend »), passages exacts de l'épisode autour de chaque preuve, citation et chiffre affichés, section de `config/review_checklist.md`. Chaque défaut doit citer où et quelle règle ; ÉCHEC -> boucle « à corriger », remarques de goût -> l'équipe. Empreinte des entrées : jamais deux relectures d'un livrable inchangé. Rapport `qa/review_<livrable>.md`. |
-| `newsletter.py` | Commande `newsletter` : le mail podcast de Thomas (idée de Thomas, 08/10/2026 ; modèle : mail « Nostra » d'On Train). Claude Opus l'écrit à la 1re personne (brief `brands/<m>/newsletter.md` : objet, aperçu, phrase-thème, accroche, mot de Thomas, « Au programme » en 4 points d'après les chapitres, mot de fin) avec les preuves de chaque fait ; contrôles (faits retrouvés, chiffres présents, longueurs) ; images (bandeau, photo détourée de l'invité, miniature choisie + bouton lecture) ; `email.html` (tableaux, styles en ligne, 600 px, images `images/…` à téléverser dans l'outil d'envoi), `email.txt`, `objet.txt`, `apercu.png`. `--youtube-url` puis `--final` -> `newsletter/final/` (refusé sans lien YouTube, titre validé et miniature choisie). |
+| `newsletter.py` | Commande `newsletter` : le mail podcast de Thomas (idée de Thomas, 08/10/2026 ; modèle : mail « Nostra » d'On Train). Claude Opus l'écrit à la 1re personne (brief `MARQUES/<m>/newsletter.md` : objet, aperçu, phrase-thème, accroche, mot de Thomas, « Au programme » en 4 points d'après les chapitres, mot de fin) avec les preuves de chaque fait ; contrôles (faits retrouvés, chiffres présents, longueurs) ; images (bandeau, photo détourée de l'invité, miniature choisie + bouton lecture) ; `email.html` (tableaux, styles en ligne, 600 px, images `images/…` à téléverser dans l'outil d'envoi), `email.txt`, `objet.txt`, `apercu.png`. `--youtube-url` puis `--final` -> `newsletter/final/` (refusé sans lien YouTube, titre validé et miniature choisie). |
 | `short_outro.py` | Commande `outro`, une fois la miniature choisie : rend une seule fois par épisode la carte de fin des shorts (« carte YouTube » : miniature validée, bouton « Regarder l'épisode — lien en description », animation AI Partners), puis la colle à la fin de chaque short rendu (dernière image tenue 0,4 s et fondu, voix jamais raccourcie) -> `livrables/`. Les shorts 9:16 sont montés et rendus SANS carte de fin (`format_overrides.9x16.outro.enabled: false`). |
-| `titles.py` | Titre de l'épisode (un seul, pour YouTube et la vignette) : Claude écrit ~12 candidats d'après `brands/<m>/titles.md` (relevé des 16 titres publiés), chacun adossé à un passage réel de l'épisode ; contrôles automatiques (longueur, chiffres et noms présents dans la transcription, pas de nom d'invité, pas de copie d'un titre publié ou refusé) ; jury qui garde 5 titres de formules variées, proposés en texte (`--planche` : sur des vignettes, facultatif) ; `--pick N` = validation par l'équipe marketing, avant toute miniature. |
+| `titles.py` | Titre de l'épisode (un seul, pour YouTube et la vignette) : Claude écrit ~12 candidats d'après `MARQUES/<m>/titles.md` (relevé des 16 titres publiés), chacun adossé à un passage réel de l'épisode ; contrôles automatiques (longueur, chiffres et noms présents dans la transcription, pas de nom d'invité, pas de copie d'un titre publié ou refusé) ; jury qui garde 5 titres de formules variées, proposés en texte (`--planche` : sur des vignettes, facultatif) ; `--pick N` = validation par l'équipe marketing, avant toute miniature. |
 | `thumbnail.py`, `canva_template.py` | Miniatures YouTube : photos où les deux sourient en se regardant (détecteur d'expressions + jury visuel Claude), détourage, composition sur le gabarit Canva importé du PPTX de l'équipe. |
 | `posts.py` | Rédige le post LinkedIn de chaque short avec `posts.md` (méthode + exemples). |
 
@@ -88,7 +89,7 @@ flowchart TB
 
 ```mermaid
 flowchart TD
-    EP[("brands/marque/episodes/<br/>rushs 3 caméras + micro (multicam.json)<br/>ou épisode monté .mp4")]
+    EP[("EPISODES/marque/épisode/rushs/<br/>rushs 3 caméras + micro (multicam.json)<br/>ou épisode monté .mp4")]
 
     EP -->|transcribe<br/>faster-whisper| T["transcript.json<br/>mots + horaires"]
     T -->|propose<br/>Claude × 3 angles + jury| CA["candidates.json / .md<br/>~10 passages"]
@@ -120,7 +121,7 @@ L'épisode complet (`episode-plan` → `episode_plan.md` à relire → `episode-
 dans `episode/`) et les miniatures (`thumbnail` → `miniatures/`) partent de la même transcription : voir le schéma
 d'ensemble du [README](../README.md).
 
-Tout est rangé dans `output/<marque>/<episode>/` (jamais versionné). Chaque fichier intermédiaire est
+Tout est rangé dans `EPISODES/<marque>/<épisode>/travail/` (jamais versionné). Chaque fichier intermédiaire est
 lisible et modifiable : on peut corriger `clips.json` à la main puis relancer seulement `build` et `render`
 pour le short concerné (`--only N`).
 
@@ -166,6 +167,6 @@ sequenceDiagram
 - **Le look** (bulle, sous-titres, logos, carte de fin) : `clipper/templates/clip.html.j2` + les options de
   `config/presets/aip-short.yaml`. Valider avec `npx hyperframes lint` dans le dossier d'un short.
 - **La sélection** : le prompt système dans `select_clips.py`, les angles dans `brand.yaml` → `selection.angles`.
-- **Les posts** : le prompt dans `posts.py`, la méthode dans `brands/<marque>/posts.md`.
+- **Les posts** : le prompt dans `posts.py`, la méthode dans `MARQUES/<marque>/posts.md`.
 - **Le cadrage** : `reframe.py` (plan de caméras) et `compose._smooth_plan` (lissage).
 - Les règles produit à ne pas casser et les pièges connus sont listés dans [CLAUDE.md](../CLAUDE.md).

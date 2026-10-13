@@ -2,7 +2,7 @@
 
 Demande d'Arthur (09/10/2026) : « pour les titres des épisodes, l'équipe m'a retourné qu'ils n'étaient pas ouf : un process
 pour les rendre mieux, et une étape où quelqu'un du marketing valide un titre parmi 5 propositions », à partir des
-titres des 16 épisodes déjà publiés (brands/<m>/titles.md).
+titres des 16 épisodes déjà publiés (MARQUES/<m>/titles.md).
 
 Cause du problème : le titre YouTube était un sous-produit du prompt de dérushage (`"youtube_title": "<titre YouTube>"`, aucun
 brief) et la vignette avait son propre générateur : deux titres qui ne se parlaient pas, aucun format, aucune validation.

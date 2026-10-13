@@ -254,7 +254,8 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
         rows.append((OK, f"planche d'images à regarder : {sheet}"))
         try:   # film des moments à risque : chaque raccord ± 1,5 s + la fin, pour une validation humaine en ~20 s
             from .strict import moments_reel
-            font = Path(__file__).resolve().parent.parent / "brands" / "ai-corner" / "assets" / "fonts" / "Metropolis-Bold.ttf"
+            from .config import BRANDS_DIR
+            font = BRANDS_DIR / "ai-corner" / "assets" / "fonts" / "Metropolis-Bold.ttf"
             reel = moments_reel(render, [float(j) for j in meta.get("junctions", [])], d,
                                 work / f"moments_{clip['index']:02d}{'_apercu' if 'apercu' in render.name else ''}.mp4",
                                 font=font if font.exists() else None)

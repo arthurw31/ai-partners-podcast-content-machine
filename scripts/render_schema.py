@@ -24,7 +24,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 SRC, OUT = ROOT / "docs" / "schema.mmd", ROOT / "docs" / "schema.svg"
 MERMAID = "11.4.1"          # version figée : le rendu ne change pas tout seul
-FONTS = ROOT / "brands" / "ai-corner" / "assets" / "fonts"
+FONTS = ROOT / "MARQUES" / "ai-corner" / "assets" / "fonts"
 # Habillage (Arthur, 12/10/2026 : « les formes sont un peu vieillottes et moches, garde la même structure ») : police de
 # la charte embarquée dans l'image (GitHub affiche le SVG comme une image : aucune police externe n'y est chargée),
 # cartes arrondies, colonnes sur fond gris clair, dépendances entre colonnes en pointillés orange.

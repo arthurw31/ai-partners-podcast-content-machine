@@ -122,7 +122,7 @@ def _ask_claude_cli(system: str, user: str, model: str, images: list[Path] | Non
 
 
 def _log_usage(model: str, payload: dict) -> None:
-    """Tokens et coût de chaque appel : affichés, et ajoutés à output/llm_usage.csv ; alerte au-delà de 150 000 tokens
+    """Tokens et coût de chaque appel : affichés, et ajoutés à cache/llm_usage.csv ; alerte au-delà de 150 000 tokens
     d'entrée (un appel normal du projet en fait 5 000 à 60 000)."""
     from datetime import datetime
     u = payload.get("usage") or {}
@@ -131,7 +131,7 @@ def _log_usage(model: str, payload: dict) -> None:
     print(f"  [tokens] {model} : {tokens} en entrée, {int(u.get('output_tokens') or 0)} en sortie, ~{cost:.2f} $"
           + ("  <- ANORMAL, vérifier le contexte envoyé" if tokens > 150_000 else ""))
     try:
-        log = Path(__file__).resolve().parent.parent / "output" / "llm_usage.csv"
+        log = Path(__file__).resolve().parent.parent / "cache" / "llm_usage.csv"
         log.parent.mkdir(parents=True, exist_ok=True)
         new = not log.exists()
         with open(log, "a", encoding="utf-8") as fh:

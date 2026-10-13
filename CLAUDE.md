@@ -10,6 +10,38 @@ ce fichier résume ce qu'il faut savoir pour **modifier** le projet sans casser 
 > **Reprise de session** : l'état du travail en cours (épisode, ce qui est validé, ce qui reste) est dans
 > [docs/REPRISE.md](docs/REPRISE.md) — à lire en premier dans une nouvelle session.
 
+## Arborescence (Arthur, 13/10/2026 : « organiser tout depuis la racine… un dossier qui ait toutes les versions finales de
+chaque livrable, pour qu'on n'ait plus qu'à le copier dans le Drive »)
+
+```
+AI Partners Podcast Content Machine/
+├── DEPOT/        ← vous déposez ici les rushs d'un nouveau tournage (3 caméras + son)
+├── EPISODES/     ← un dossier par épisode, TOUT dedans
+│   └── <marque>/<épisode>/        ex. ai-corner/E22_nicolas-comestaz_coty/
+│       ├── LIVRABLES/  ← à copier sur le Drive (`python -m clipper livraison`), rien d'autre
+│       ├── rushs/      ← sources : <épisode>.mp4, .wav, .multicam.json, cameras/
+│       ├── travail/    ← fichiers du pipeline (transcription, clips, rendus, contrôles, aperçus)
+│       └── archives/   ← sauvegardes et anciennes versions (supprimables)
+├── MARQUES/      ← la charte de chaque podcast (voir ci-dessous)
+├── docs/         ← guides et schéma (publié sur GitHub Pages : le nom doit rester « docs »)
+└── moteur technique : clipper/ config/ scripts/ models/ node_modules/ cache/ + CLAUDE.md, README.md, …
+```
+
+- Chemins centralisés dans `clipper/config.py` : `BRANDS_DIR` (MARQUES/), `EPISODES_DIR`, `DEPOT_DIR`, `episode_home(travail)`,
+  `archives_dir(travail)` ; `cli.resolve_input` cherche `--input` dans `EPISODES/<marque>/*/rushs/` ; `cli.episode_dir` = le
+  dossier `travail/` de l'épisode ; `rushes` (ingest) range un nouveau tournage dans `EPISODES/<marque>/<base>/rushs/`
+  (caméras dans `cameras/`, `multicam.json` en chemins relatifs « cameras/… »).
+- Toute sauvegarde (`clips_before_*.json`, `clips_previous.json`) va dans `archives/` (`--redo` y relit
+  `clips_before_tighten.json`). Ancienne version d'un MP4 avant un nouveau rendu : la déplacer dans `archives/`.
+- **`livraison`** (`clipper/livraison.py`) : copie les versions finales dans `LIVRABLES/` avec des noms clairs (épisode +
+  miniature + titre/description, shorts + posts, carrousel validé, newsletter, teaser) et écrit `LISEZMOI.md` avec l'état
+  de chaque livrable (QA, titre et miniature validés, posts / carrousel / newsletter plus récents que ce dont ils dépendent).
+  Le pipeline n'écrit jamais dans `LIVRABLES/` ; relancer `livraison` après chaque retouche.
+- `docs/` reste en minuscules : GitHub Pages publie le schéma depuis ce dossier (seuls `/` ou `/docs` sont possibles).
+- Migration du 13/10/2026 (output/ -> EPISODES/…/travail, brands/ -> MARQUES/, depot/ -> DEPOT/) : 4 347 fichiers médias
+  vérifiés à l'octet, 28 jonctions `assets/` recréées, chemins absolus ET relatifs des JSON réécrits, tests 14/14 et QA
+  identiques avant/après.
+
 ## Règle de maintenance : le schéma suit le process (Arthur, 09/10/2026 : « mets à jour le schéma d'architecture à chaque fois
 qu'on modifie le process » ; précisé le même jour : « le schéma, c'est celui de GitHub, on met à jour que celui-là »)
 
@@ -43,10 +75,10 @@ Puis noter la demande et sa date dans la section concernée de ce fichier.
 
 ## Point d'entrée utilisateur
 
-Arthur dépose ses fichiers (épisodes, clips de référence, logos, posts) dans `depot/` (non versionné) : les ranger
-dans `brands/<marque>/episodes|references|assets|assets/guests/` (voir `depot/README.md`). S'il est vide, regarder
+Arthur dépose ses fichiers (épisodes, clips de référence, logos, posts) dans `DEPOT/` (non versionné) : les ranger
+dans `MARQUES/<marque>/episodes|references|assets|assets/guests/` (voir `DEPOT/README.md`). S'il est vide, regarder
 les fichiers récents de `~/Downloads`. Depuis E22, l'équipe livre des **rushs** : 3 caméras 1080p de 13–14 Go
-(gros plan invité, plan large, gros plan animateur) + 1 WAV du micro, **déposés dans `depot/`** (Arthur, 09/10/2026 :
+(gros plan invité, plan large, gros plan animateur) + 1 WAV du micro, **déposés dans `DEPOT/`** (Arthur, 09/10/2026 :
 « on dépose les rushs MP4 et l'audio dans le dossier depot ») -> `python -m clipper rushes --brand <m> --episode E23
 --guest "Prénom Nom" --company X` (voir « Rushs déposés » plus bas). Si des rushs restent sur Dropbox :
 `python -m clipper fetch "<lien>"` (jamais via le navigateur : coupure vers 50 min, fichier tronqué gardé sous son nom).
@@ -77,19 +109,19 @@ installe via « clone … et installe tout ce qu'il faut » dans Claude Code —
 
 ```bash
 python -m clipper doctor                # vérifie l'installation
-python -m clipper run --brand <slug> --input <fichier-dans-brands/slug/episodes/> --guest "…" --company "…" --host-side left|right
-python -m clipper transcribe|select|build|posts|render|preview … --brand <slug> --input …   # étapes séparées, cache dans output/
+python -m clipper run --brand <slug> --input <fichier-dans-EPISODES/<marque>/<épisode>/rushs/> --guest "…" --company "…" --host-side left|right
+python -m clipper transcribe|select|build|posts|render|preview … --brand <slug> --input …   # étapes séparées, cache dans EPISODES/…/travail/
 python -m clipper posts --brand <slug> --input … [--episode-url URL] [--guest-role "…"] [--only N] [--force]   # post LinkedIn + description par clip
 python -m clipper build|render … --jobs N          # parallélisme (défaut : build.jobs / render.jobs = auto)
 python -m clipper propose|pick|find|check … --brand <slug> --input …   # workflow 10 propositions -> 5 choisies (skill)
 python -m clipper polish … --only N   # APRÈS pick : tighten -> verify -> fillers -> réactions -> mots-clés -> build -> qa -> aperçu MP4 -> qa
-python -m clipper qa … --only N [--render] | --episode   # contrôle qualité (rapport output/…/qa/), à relancer après tout rendu
+python -m clipper qa … --only N [--render] | --episode   # contrôle qualité (rapport EPISODES/…/travail/qa/), à relancer après tout rendu
 python -m clipper fillers … --only N   # retire les « euh » collés aux mots (inclus dans polish)
 python -m clipper preview … [--clip all|N] [--stop] [--mp4]   # aperçu (Studio ports 3002+, ou MP4 brouillon --mp4), validé AVANT render
-python -m clipper new-brand <slug>   # copie brands/_template
-python -m clipper rushes --brand <m> --episode E23 --guest "…" --company "…" [--dry-run] [--host <fichier>]   # rushs de depot/
+python -m clipper new-brand <slug>   # copie MARQUES/_template
+python -m clipper rushes --brand <m> --episode E23 --guest "…" --company "…" [--dry-run] [--host <fichier>]   # rushs de DEPOT/
 python -m clipper fetch "<lien Dropbox>" [--dest dossier] [--skip MIC]   # rushs restés sur Dropbox : reprise auto, taille vérifiée
-npx hyperframes lint|check|snapshot --at 3,10 --no-end -o <dir>   # dans output/<brand>/<ep>/clips/<clip>/<format>/
+npx hyperframes lint|check|snapshot --at 3,10 --no-end -o <dir>   # dans EPISODES/<marque>/<épisode>/travail/clips/<clip>/<format>/
 ```
 
 Sous Windows : le package force stdout en UTF-8 (`clipper/__init__.py`) ; dans un script ad hoc,
@@ -97,10 +129,10 @@ exporter `PYTHONIOENCODING=utf-8` avant tout `print` contenant des accents ou de
 
 ## Structure
 
-- `brands/<slug>/` : **un dossier par podcasteur/marque** — `brand.yaml` (surcharge de `config/defaults.yaml`),
+- `MARQUES/<slug>/` : **un dossier par podcasteur/marque** — `brand.yaml` (surcharge de `config/defaults.yaml`),
   `guidelines.md` (brief éditorial injecté tel quel dans le prompt LLM), `posts.md` (brief des posts LinkedIn +
   posts déjà publiés, injecté tel quel dans `clipper/posts.py`), `assets/` (logo, fonts, musique),
-  `episodes/` (sources), `references/` (clips existants pour caler le style).
+  `references/` (clips existants pour caler le style) ; les épisodes sont dans `EPISODES/` (voir « Arborescence »).
 - `config/defaults.yaml` : toutes les options, commentées. `config/presets/` : styles de montage.
   Fusion : defaults ← preset ← brand.yaml ← `format_overrides[<format>]`.
 - `clipper/` : `transcribe` (faster-whisper) → `select_clips` (Claude) → `analysis` (plans, visages YuNet, locuteur)
@@ -108,7 +140,7 @@ exporter `PYTHONIOENCODING=utf-8` avant tout `print` contenant des accents ou de
   (Claude : post LinkedIn + description courte par clip, un seul appel pour l'épisode) → `render`.
 - `clipper/templates/clip.html.j2` : LA composition HyperFrames. Respecte le contrat du skill `hyperframes-core`
   (voir « Pièges » ci-dessous) ; valider avec `npx hyperframes lint --json` après toute modification.
-- `output/<brand>/<episode>/` : généré, jamais versionné. `clips.json` est éditable à la main puis `build --only N`.
+- `EPISODES/<marque>/<épisode>/travail/` : généré, jamais versionné. `clips.json` est éditable à la main puis `build --only N`.
 
 ## Règles produit (demandes explicites d'Arthur — ne pas régresser)
 
@@ -123,7 +155,7 @@ exporter `PYTHONIOENCODING=utf-8` avant tout `print` contenant des accents ou de
 3. Le B-roll ne couvre jamais un visage : `compose._pip_box` cherche un espace libre sur toute la durée de
    l'insert ; sinon l'insert passe en plein écran. En écran partagé, les sous-titres se centrent sur la séparation.
 4. Chartes : DLTDC = Montserrat ExtraBold Italic, jaune #FFE14D, typewriter (preset `dynamic`).
-   AI Corner = **shorts du monteur AI Partners** (5 shorts de référence dans `brands/ai-corner/references/dust/`,
+   AI Corner = **shorts du monteur AI Partners** (5 shorts de référence dans `MARQUES/ai-corner/references/dust/`,
    demande d'Arthur du 05/10/2026 : « refaire exactement le même montage ») : preset `aip-short` — **barre de
    logos centrée** en haut (`guest_logo.bar`) : logo de l'entreprise invitée (`assets/guests/<entreprise>.svg|png`)
    + logo AI PARTNERS blanc, même hauteur, même ligne, agrandis jusqu'à `bar_max_width` (marges PNG rognées) ; titre-question (`hook_title`) dans une bulle blanche translucide (`hook.style: pill`,
@@ -143,11 +175,11 @@ exporter `PYTHONIOENCODING=utf-8` avant tout `print` contenant des accents ou de
    segment, les concatène (`media.concat_segments`) et remappe mots/tours de parole/B-roll en temps relatif
    (`abs_to_rel`). `montage.join_transition: cut|flash`.
 6. **Un post LinkedIn par clip** (`clipper/posts.py`, commande `posts`, lancée par `run`) : rédigé dans le ton de
-   `brands/<slug>/posts.md` (règles + posts réellement publiés par la marque, à ne jamais recopier), porte l'idée
+   `MARQUES/<slug>/posts.md` (règles + posts réellement publiés par la marque, à ne jamais recopier), porte l'idée
    du clip, n'invente rien qui ne soit dans la transcription de l'extrait. AI Corner : **méthode « post d'un short »**
    déduite des 4 posts publiés pour les shorts Dust (accroche-thèse en 1 ligne — citation, constat ou question —,
    contraste, invité « Prénom Nom, Rôle at Entreprise », développement concret, chute en 1 ligne, CTA 🎬/🎙️ + lien) ;
-   anglais, voix de la page AI Partners, sans hashtags. Les formats « nouvel épisode / preview » seulement sur demande. Sortie : `output/…/posts/clip_NN_<titre>.md` + champs
+   anglais, voix de la page AI Partners, sans hashtags. Les formats « nouvel épisode / preview » seulement sur demande. Sortie : `EPISODES/…/travail/posts/clip_NN_<titre>.md` + champs
    `linkedin_post` / `short_description` dans `clips.json` + `summary.md`.
 
 ## Titre de l'épisode : `titles` (Arthur, 09/10/2026 : « l'équipe m'a retourné que les titres n'étaient pas ouf ; réfléchis à un
@@ -156,7 +188,7 @@ process pour les rendre mieux, et une étape où quelqu'un du marketing valide u
 - **Cause** : le titre YouTube sortait du prompt de dérushage (`"youtube_title": "<titre YouTube>"`, aucun brief) et la vignette
   avait son propre générateur ; E22 : `IA en entreprise chez Coty : 3000 agents, Microsoft Copilot et la vraie transformation`
   (liste de mots-clés, pas de préfixe) et des vignettes qui énonçaient des faits internes (« Chez Coty il y a 3000 agents »).
-- **Un seul générateur** (`clipper/titles.py`, brief `brands/ai-corner/titles.md` = relevé des 16 titres publiés E06–E21,
+- **Un seul générateur** (`clipper/titles.py`, brief `MARQUES/ai-corner/titles.md` = relevé des 16 titres publiés E06–E21,
   captures d'Arthur) : format YouTube `AI Corner E<n> | <titre>` (sans nom d'invité depuis E16) ; vignette = le MÊME titre en 2
   lignes ≤ 34 caractères, bandeau sur la ligne du sujet (2e ligne dans 12 cas sur 16) ; 5 formules (`comment`, `tension`,
   `promesse`, `enjeu`, `constat`) ; le titre pose LA question du spectateur, l'invité est la preuve ; ton sobre.
@@ -189,7 +221,7 @@ la valeur à la commu qui nous suit, et sur la dernière slide un call to action
   (`carousel.cta` de brand.yaml, URL `weareaipartners.com` À CONFIRMER), 3 styles testés sur E22 puis l'équipe garde le sien.
 - Références : dossier Drive « Design » de l'équipe marketing (charte AI Partners, modèles Canva « Use case Carousel » —
   couverture bleue avec le « A » en verre, slides navy à cartes blanches, CTA final — et « Carousel GEO », 1200×1500).
-- `clipper/carousel.py` + brief `brands/ai-corner/carousel.md` (injecté tel quel) : `carousel` -> 3 angles (`angles.md`,
+- `clipper/carousel.py` + brief `MARQUES/ai-corner/carousel.md` (injecté tel quel) : `carousel` -> 3 angles (`angles.md`,
   citations retrouvées par `titles.find_evidence`, orateurs d'après `work/diarized_words.json`) -> `--pick N [--note]` ->
   Claude Opus rédige 6–8 slides (cover, intro, point, stat, quote, recap) + le post -> `check_slides` (citation affichée
   retrouvée ≥ 90 % mot pour mot, chiffres présents dans la transcription, titre ≤ 60 car., texte ≤ 35 mots) -> rendu :
@@ -223,7 +255,7 @@ newsletter dans ce style-là : un mail qui part direct de la part du founder »)
 - Choix d'Arthur : mail MIS EN PAGE, vouvoiement, contenu de base (invité + programme + YouTube), outil d'envoi pas encore
   choisi -> HTML d'e-mail universel (tableaux, styles en ligne, 600 px, Helvetica/Arial : aucune police web dans un mail)
   + `images/` à téléverser dans l'outil (un mail ne peut pas contenir d'images locales) + `email.txt` + `objet.txt`.
-- `clipper/newsletter.py` + brief `brands/ai-corner/newsletter.md` + section `newsletter:` de brand.yaml. Entrées : la
+- `clipper/newsletter.py` + brief `MARQUES/ai-corner/newsletter.md` + section `newsletter:` de brand.yaml. Entrées : la
   transcription (qui parle), les chapitres (`episode/description_youtube.md`), le titre validé et la miniature choisie
   (provisoires sinon : signalé), la photo détourée de l'invité (`carousel.portraits`). Bandeau rendu par Chrome
   (`outro_bg.png` en `mix-blend-mode: screen` : son fond est noir). `--final` exige lien YouTube + titre + miniature.
@@ -245,13 +277,13 @@ consommation de tokens »)
   l'abonnement — le CLI embarquait les serveurs MCP, plugins, skills et le prompt système de Claude Code de l'utilisateur.
   `llm._ask_claude_cli` lance désormais `claude -p` avec `--strict-mcp-config --mcp-config {"mcpServers":{}}
   --disable-slash-commands --setting-sources local --system-prompt-file` (notre consigne comme prompt système) ; chaque appel
-  affiche ses tokens et son coût et les ajoute à `output/llm_usage.csv` (alerte > 150 000 tokens d'entrée).
+  affiche ses tokens et son coût et les ajoute à `cache/llm_usage.csv` (alerte > 150 000 tokens d'entrée).
 
 ## Outro des shorts : `outro` (Arthur, 09/10/2026 : « pour les shorts, mettre en outro la première des 4 outros en motion design,
 call to action avec la miniature ; on peut monter les shorts en parallèle, mais pour créer l'outro et la rajouter à la fin des
 shorts il faut que la miniature soit validée »)
 
-- Design = **variante A** du test du 09/10 (`output/…/motion_design/outro_short/`, 4 variantes A–D faites par une autre
+- Design = **variante A** du test du 09/10 (`EPISODES/…/travail/motion_design/outro_short/`, 4 variantes A–D faites par une autre
   session) : animation AI Partners, logo, « L'ÉPISODE COMPLET », la miniature en carte YouTube (bouton lecture, barre de
   progression), flèche, bouton « Regarder l'épisode — lien en description » ; 7 s, 1080×1920, 30 i/s. Le test utilisait
   une ancienne miniature : `clipper/short_outro.py` prend la miniature CHOISIE (`miniatures/miniature_finale.jpg`). **Pas de
@@ -285,13 +317,13 @@ shorts il faut que la miniature soit validée »)
 
 ## Miniatures YouTube : `thumbnail` (demande d'Arthur, 09/10/2026 : « automatise la création de miniatures, même style que les nôtres »)
 
-- Références : `brands/ai-corner/references/thumbnails/` (+ README d'analyse). Gabarit : animateur à gauche / invité à
+- Références : `MARQUES/ai-corner/references/thumbnails/` (+ README d'analyse). Gabarit : animateur à gauche / invité à
   droite détourés depuis LEUR caméra, studio flouté recoloré bleu, 2 icônes d'app 3D au centre (AI Partners / entreprise
   invitée `assets/guests/<entreprise>.svg|png`), titre 2 lignes Metropolis ExtraBold, une ligne sur bandeau bleu arrondi
   (le titre vient de `titles` : voir la section précédente ; depuis le 09/10 ombre douce sous la ligne hors bandeau,
   `title.shadow` dans template.json, 0 pour la retirer).
 - `python -m clipper thumbnail --brand ai-corner --input E22_nicolas-comestaz_coty.mp4 [--n 4] [--title "l1 | *l2"]
-  [--host-frame s] [--guest-frame s]` -> `output/…/miniatures/` (`variante_N.jpg` 1280×720, `_HD.png`, `planche.jpg`,
+  [--host-frame s] [--guest-frame s]` -> `EPISODES/…/travail/miniatures/` (`variante_N.jpg` 1280×720, `_HD.png`, `planche.jpg`,
   `titres.md`). Invité/entreprise lus dans clips.json. ~5 min (détourage ≈ 45 s par photo, CPU).
 - `clipper/thumbnail.py` : images clés toutes les 8 s -> note YuNet (netteté, regard vers le centre, sourire) ->
   **jury visuel** (Claude regarde les planches `work/thumbnail/candidats_*.jpg` : `llm.ask_json(images=…)`, le CLI lit les
@@ -329,12 +361,12 @@ shorts il faut que la miniature soit validée »)
 - Nommage des épisodes : **d'après l'INVITÉ**, `E<n>_<prenom-nom-invite>_<entreprise>` (E20 `thierry-champeroux_maif`,
   E21 `quentin-amaudry_mendo`, E22 `nicolas-comestaz_coty`) — jamais d'après Thomas Spitz, l'animateur (CEO AI
   Partners, présent dans tous les épisodes). E22 était nommé « thomas-spitz » : renommé le 09/10/2026 (demande
-  d'Arthur, « pour être cohérent avec ce qu'on faisait avant ») — sources, dossier `output/…/e22-nicolas-comestaz-coty`,
+  d'Arthur, « pour être cohérent avec ce qu'on faisait avant ») — sources, dossier `EPISODES/…/travail/e22-nicolas-comestaz-coty`,
   fichiers et chemins dans les JSON ; jonctions `assets/` des projets recréées (cible absolue).
 
 ## Rushs déposés : `rushes` (Arthur, 09/10/2026 : « on dépose les rushs MP4 et l'audio dans le dossier depot »)
 
-- `clipper/ingest.py` : 3 vidéos + 1 audio lisibles dans `depot/` (un fichier tronqué — `ffprobe` en échec — est
+- `clipper/ingest.py` : 3 vidéos + 1 audio lisibles dans `DEPOT/` (un fichier tronqué — `ffprobe` en échec — est
   ignoré et signalé : les anciens téléchargements partiels d'E22 de 9,3 Go y sont encore). Plan large = la caméra qui
   montre 2 visages ; animateur = gros plan dont l'empreinte de visage (SFace, ONNX, `models/face_recognition_sface.onnx`,
   alignement sur les 5 repères YuNet) ressemble le plus à `assets/host_face.jpg` (Thomas : 0,80 contre 0,20 pour
@@ -347,13 +379,14 @@ shorts il faut que la miniature soit validée »)
   3 moments, alors que le fichier E22 contient +0,037 (signe probablement inversé à la mesure manuelle du 06/10 : le
   son des rendus E22 serait ~74 ms en retard sur l'image) — extraits de test `apercus/test_synchro_{A_actuel,B_mesure}.mp4`,
   à trancher par Arthur avant de corriger E22.
-- Rangement : `episodes/rushes/<E>/{invite_<prénom>,large,animateur_<prénom>}.mp4`, `episodes/<E>_<invité>_<entreprise>.wav`,
-  `<base>.mp4` = lien dur vers le plan large, `<base>.multicam.json` ; planche `episodes/rushes_<E>.jpg` à REGARDER
+- Rangement (depuis le 13/10/2026) : `EPISODES/<marque>/<E>_<invité>_<entreprise>/rushs/cameras/{invite_<prénom>,large,animateur_<prénom>}.mp4`,
+  `rushs/<E>_<invité>_<entreprise>.wav`,
+  `<base>.mp4` = lien dur vers le plan large, `<base>.multicam.json` ; planche `rushs/rushes_<E>.jpg` à REGARDER
   (`--host <morceau de nom>` corrige l'animateur). Fichiers déplacés, jamais copiés. `--dry-run` : identifie sans déplacer.
 
 ## Rushs multicam (E22, 06/10/2026 : l'équipe livre 3 caméras + 1 WAV au lieu de l'épisode monté)
 
-- `clipper/multicam.py` : si `brands/<m>/episodes/<ep>.multicam.json` existe, `compose` découpe chaque passage avec
+- `clipper/multicam.py` : si `EPISODES/<marque>/<épisode>/rushs/<ep>.multicam.json` existe, `compose` découpe chaque passage avec
   `cut_multicam` (gros plan de la personne qui parle, d'après les `turns` de clips.json — la vérité du pipeline ; coupe
   0,15 s avant la prise de parole, plans ≥ 2 s) au lieu de `cut_segment`. `<ep>.mp4` = lien dur vers le plan large
   (probe/analyse), `cams` = {host, guest, wide}, audio = WAV du micro (`audio_delay` mesuré par corrélation : 0,037 s).
@@ -367,7 +400,7 @@ shorts il faut que la miniature soit validée »)
 
 `python -m clipper episode-plan …` puis `episode-render … --proxy` (aperçu 540p, ~15 min) -> validation -> `episode-render`
 (1080p). Fichiers : `clipper/episode.py`, `clipper/diarize.py`, section `teaser:` de brand.yaml. Sorties :
-`output/<m>/<ep>/episode_plan.md` (à relire : coupes, teaser, % de plans), `episode/<ep>_episode[_apercu].mp4`,
+`EPISODES/<marque>/<épisode>/travail/episode_plan.md` (à relire : coupes, teaser, % de plans), `episode/<ep>_episode[_apercu].mp4`,
 `episode/description_youtube.md` (titre + chapitres aux temps du montage).
 - Style mesuré sur les montages du monteur (E20 MAIF, E21 Mendo — même studio que E22) : plan médian ≈ 10 s ;
   gros plans 76 %, large 14 %, écran partagé (2 gros plans côte à côte, animateur du côté où il est dans le large) 10 % ;
@@ -584,7 +617,7 @@ chose de subtil, que ça ne fasse pas trop »)
 ## Aperçus en MP4 (retour d'Arthur, 08/10/2026 : « les aperçus dans HyperFrames buguent à chaque fois »)
 
 Le Studio HyperFrames ne suffit pas pour valider : donner à Arthur un MP4 brouillon à ouvrir dans son lecteur
-(`preview --mp4 --clip N` -> `output/…/apercus/clip_NN_…_<fmt>_apercu.mp4` ; épisode : `episode-render --proxy`, avec
+(`preview --mp4 --clip N` -> `EPISODES/…/travail/apercus/clip_NN_…_<fmt>_apercu.mp4` ; épisode : `episode-render --proxy`, avec
 `--minutes 2` pour juger teaser + raccord + volumes). Le lien Studio peut être donné en plus. Lien cliquable vers le
 fichier dans la réponse. Toujours un aperçu avant le rendu final.
 - Vitesse (Arthur : « fais le genre en 240p pour que ce soit rapide sur la phase d'itération ») : HyperFrames ne rend
@@ -797,7 +830,7 @@ short -> `preview` libère le port ; 16:9 inutile -> `formats: ["9x16"]` ; tél�
   en `hotwords` à Whisper, puis `apply_corrections` (table `transcribe.corrections` + rapprochement approximatif
   réservé aux noms ≥ 5 lettres, jamais aux sigles : « Mais » ≠ MAIF). Il oublie souvent les points (d'où `end_text`).
 - Le LLM cite parfois les bons mots avec un mauvais timestamp : `snap_to_quotes` cherche la citation près du
-  timestamp puis dans tout l'épisode (les mots font foi). La réponse brute est gardée dans `output/…/llm_raw.json`.
+  timestamp puis dans tout l'épisode (les mots font foi). La réponse brute est gardée dans `EPISODES/…/travail/llm_raw.json`.
 - Le master E20 d'AI Corner commence par un teaser déjà sous-titré (0–30 s) : à exclure des sélections
   (consigne dans guidelines.md + `--instructions`).
 - Le locuteur actif par heuristique bouche est peu fiable (plans larges 720p) : la vérité vient des tours de

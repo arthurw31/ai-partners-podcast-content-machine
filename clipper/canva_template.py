@@ -2,7 +2,7 @@
 
 Demande d'Arthur (09/10/2026) : l'équipe marketing fait les miniatures sur Canva ; l'export PPTX garde chaque élément
 en calque séparé (fond, cadres flous, cubes vides, logos, personnes détourées, bandeau) + les textes (police, taille).
-`import_pptx` range ces calques dans `brands/<m>/assets/thumbnail/` avec leurs positions (template.json) ;
+`import_pptx` range ces calques dans `MARQUES/<m>/assets/thumbnail/` avec leurs positions (template.json) ;
 `compose_template` refait la miniature à l'identique avec les photos et le logo d'un nouvel épisode.
 
 Ordre des calques attendu (celui du design de référence, dupliqué par l'équipe à chaque épisode) :

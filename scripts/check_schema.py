@@ -23,7 +23,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from render_schema import OUT, SRC, source_hash  # noqa: E402
 
 # commandes qui sont une étape du process (les autres : utilitaires, sous-étapes de `polish`, recours)
-PROCESS = ["rushes", "transcribe", "propose", "pick", "polish", "qa", "render", "posts", "episode-plan", "episode-render",
+PROCESS = ["livraison", "rushes", "transcribe", "propose", "pick", "polish", "qa", "render", "posts", "episode-plan", "episode-render",
            "titles", "thumbnail", "thumbnail-template", "outro", "carousel", "newsletter", "review"]
 HUMAN_GATES = ["titles --pick", "thumbnail --pick", "carousel --pick", "carousel --final", "newsletter --final"]
 

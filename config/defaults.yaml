@@ -1,8 +1,8 @@
 # ============================================================================
-# Valeurs par défaut du framework. Chaque marque (brands/<slug>/brand.yaml)
+# Valeurs par défaut du framework. Chaque marque (MARQUES/<slug>/brand.yaml)
 # surcharge ce fichier clé par clé (fusion profonde). Un preset de montage
 # (config/presets/<nom>.yaml) s'intercale entre les deux :
-#   defaults.yaml  <-  presets/<montage.preset>.yaml  <-  brands/<slug>/brand.yaml
+#   defaults.yaml  <-  presets/<montage.preset>.yaml  <-  MARQUES/<slug>/brand.yaml
 # ============================================================================
 
 name: "Podcast sans nom"
@@ -21,7 +21,7 @@ selection:
   max_duration: 60
   target_duration: 40
   # Un clip peut assembler plusieurs passages de l'épisode (montage thématique : accroche + développement).
-  # 1 = un seul passage continu ; 3-4 = style « monteur » (voir brands/ai-corner).
+  # 1 = un seul passage continu ; 3-4 = style « monteur » (voir MARQUES/ai-corner).
   max_segments: 1
   llm_backend: auto         # auto | anthropic | claude-cli
   llm_model: claude-sonnet-5
@@ -31,7 +31,7 @@ selection:
   # listés, une passe LLM par angle tourne EN PARALLÈLE (chacune ne cherche que des extraits de cet angle,
   # attention focalisée), puis les candidats sont dédoublonnés (passages qui se recouvrent) et un « jury »
   # (appel court, sans la transcription) choisit et ordonne les n clips finaux, variés en thèmes.
-  # Vide = une seule passe classique. Voir brands/ai-corner/brand.yaml pour un exemple.
+  # Vide = une seule passe classique. Voir MARQUES/ai-corner/brand.yaml pour un exemple.
   angles: []
   jury: true                # false = agrégation par score des monteurs, sans appel LLM supplémentaire
 
@@ -57,7 +57,7 @@ colors:
 
 # ----------------------------------------------------------------- fonts ---
 fonts:
-  # chemins relatifs à brands/<slug>/assets/ (ou brands/_template/assets/ en secours)
+  # chemins relatifs à MARQUES/<slug>/assets/ (ou MARQUES/_template/assets/ en secours)
   caption: "fonts/Montserrat-Italic[wght].ttf"
   caption_upright: "fonts/Montserrat[wght].ttf"
   display: "fonts/Montserrat[wght].ttf"
@@ -117,7 +117,7 @@ logo:
 
 # ------------------------------------------------------------ guest_logo ---
 # Logo de l'entreprise invitée (style shorts AI Partners : en haut à gauche, face au logo de la marque).
-# Fichier : brands/<slug>/assets/guests/<entreprise-en-slug>.svg|png (ex. guests/mendo.svg pour « Mendo »),
+# Fichier : MARQUES/<slug>/assets/guests/<entreprise-en-slug>.svg|png (ex. guests/mendo.svg pour « Mendo »),
 # ou clip["guest_logo"] dans clips.json.
 guest_logo:
   enabled: false
@@ -252,8 +252,8 @@ audio:
 
 # ----------------------------------------------------------- publication ---
 # Textes qui accompagnent chaque clip : post LinkedIn complet + description courte Reels/Shorts,
-# rédigés par le LLM à partir de brands/<slug>/posts.md (règles + posts déjà publiés = référence de ton).
-# Sortie : output/<marque>/<épisode>/posts/clip_NN_<titre>.md, et champs linkedin_post / short_description
+# rédigés par le LLM à partir de MARQUES/<slug>/posts.md (règles + posts déjà publiés = référence de ton).
+# Sortie : EPISODES/<marque>/<épisode>/travail/posts/clip_NN_<titre>.md, et champs linkedin_post / short_description
 # dans clips.json. `python -m clipper posts …` (aussi lancé par `run`).
 publication:
   enabled: true
