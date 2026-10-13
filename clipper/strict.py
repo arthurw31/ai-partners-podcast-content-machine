@@ -75,7 +75,9 @@ def edge_problems(segs: list[dict], wav: Path) -> list[dict]:
         if last:
             lvl = _level(wav, t - 1.0)
             nxt = _rms(wav, t, t + 0.12)
-            if lvl > 0 and len(nxt) and float(nxt.max()) > END_THR * lvl:
+            # … SEULEMENT si la voix est déjà retombée au point de coupe (sinon c'est la même voix qui continue, en plein mot :
+            # « productivi-té » — 13/10/2026, le test anti-régression l'a vu)
+            if lvl > 0 and len(nxt) and float(nxt.max()) > END_THR * lvl and end_ratio(wav, t, JOIN_HOLD) < JOIN_THR:
                 last = False
         hold, thr = (END_HOLD, END_THR) if last else (JOIN_HOLD, JOIN_THR)
         x = end_ratio(wav, t, hold)
