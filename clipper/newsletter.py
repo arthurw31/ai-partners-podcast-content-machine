@@ -343,3 +343,42 @@ def finalize(ep: Path, mail: dict, by: str = "", note: str = "") -> Path:
     rec = {"episode": mail["episode"], "validated_by": by, "validated_on": date.today().isoformat(), "note": note}
     (src / "newsletter_validee.json").write_text(json.dumps(rec, ensure_ascii=False, indent=1), encoding="utf-8")
     return final
+
+
+# ------------------------------------------------------------------------------------------------ version prête à l'envoi
+
+PAGES_BASE = "https://arthurw31.github.io/ai-partners-podcast-content-machine/newsletters"
+
+
+def send_ready(brand, ep: Path, mail: dict) -> dict:
+    """Version prête pour l'envoi par n8n depuis la boîte de Thomas (Arthur, 13/10/2026 : « on fait juste avec n8n et le mail
+    de Thomas » ; « que le destinataire voie le vrai rendu avec les images »).
+
+    - images copiées dans `docs/newsletters/<E>/` (publiées par GitHub Pages au prochain push) et liens ABSOLUS `https://`
+      dans le HTML : la boîte du destinataire les charge toute seule, il ne clique sur rien. Ne jamais supprimer le dossier
+      d'une newsletter envoyée (un vieux mail rouvert va rechercher ses images) ;
+    - « Bonjour {{prenom}}, » en tête et un lien « Se désinscrire » ({{lien_desinscription}}) en pied : remplacés par n8n ;
+    - le HTML est aussi publié (`docs/newsletters/<E>/email.html`) : n8n le lit à cette adresse, rien à copier à la main.
+    """
+    from .config import ROOT
+    d = ep / "newsletter"
+    src = d / "final" if (d / "final" / "email.html").exists() else d
+    e = str(mail.get("episode") or "E")
+    base = str(_cfg(brand).get("public_base_url") or PAGES_BASE).rstrip("/") + f"/{e}"
+    pub = ROOT / "docs" / "newsletters" / e
+    pub.mkdir(parents=True, exist_ok=True)
+    for img in sorted((src / "images").glob("*")) if (src / "images").exists() else []:
+        shutil.copy2(img, pub / img.name)
+    h = (src / "email.html").read_text(encoding="utf-8").replace('src="images/', f'src="{base}/')
+    hook = '<p style="margin:0 0 18px 0;font-weight:bold">'
+    h = h.replace(hook, '<p style="margin:0 0 14px 0">Bonjour {{prenom}},</p>\n ' + hook, 1)
+    foot = "AI Corner, le podcast d'AI Partners.</p>"
+    h = h.replace(foot, "AI Corner, le podcast d'AI Partners.<br>Vous recevez ce mail car vous êtes en contact avec AI "
+                        "Partners. <a href=\"{{lien_desinscription}}\" style=\"color:#8A93B2\">Se désinscrire</a></p>", 1)
+    out = d / "email_a_envoyer.html"
+    out.write_text(h, encoding="utf-8")
+    (pub / "email.html").write_text(h, encoding="utf-8")
+    subject = (src / "objet.txt").read_text(encoding="utf-8") if (src / "objet.txt").exists() else ""
+    m = re.search(r"Objet\s*:\s*(.+)", subject)
+    (pub / "objet.txt").write_text((m.group(1).strip() if m else mail.get("subject", "")) + "\n", encoding="utf-8")
+    return {"html": out, "public_html": f"{base}/email.html", "public_dir": pub, "images": sorted(p.name for p in pub.glob("*"))}

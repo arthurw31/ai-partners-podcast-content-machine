@@ -770,6 +770,13 @@ def cmd_newsletter(a: argparse.Namespace) -> None:
         out = finalize(ep, mail, a.by, a.note)
         console.print(f"[green]Mail validé[/green] -> {out} : email.html + images/ à importer dans l'outil d'envoi, objet.txt, email.txt")
         return
+    if a.envoi:
+        from .newsletter import send_ready
+        mail = json.loads((d / "contenu.json").read_text(encoding="utf-8"))
+        r = send_ready(brand, ep, mail)
+        console.print(f"[green]Prêt pour n8n[/green] -> {r['html']}\n  images publiées dans {r['public_dir']} (en ligne après "
+                      f"`git push`)\n  adresse du HTML pour n8n : {r['public_html']}")
+        return
     spec = load_spec(video)
     cj = ep / "clips.json"
     meta = json.loads(cj.read_text(encoding="utf-8")) if cj.exists() else {}
@@ -1518,6 +1525,7 @@ def main(argv: list[str] | None = None) -> None:
     sp.add_argument("--youtube-url", default="", help="lien de l'épisode publié sur YouTube (bouton + miniature cliquable)")
     sp.add_argument("--render", action="store_true", help="refait le rendu depuis newsletter/contenu.json (après retouche du texte)")
     sp.add_argument("--final", action="store_true", help="validation de l'équipe -> newsletter/final/ (refusé sans lien YouTube)")
+    sp.add_argument("--envoi", action="store_true", help="version prête pour n8n : images publiées (GitHub Pages), {{prenom}}, lien de désinscription")
     sp.add_argument("--by", default="", help="qui a validé (prénom)")
     sp.add_argument("--note", default="", help="précision pour la rédaction, ou remarque avec --final")
     sp.set_defaults(fn=cmd_newsletter)
