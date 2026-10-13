@@ -55,8 +55,8 @@ Toujours en MP4 (le Studio HyperFrames bugue chez Arthur) : `preview --mp4 --cli
 
 1. FAIT le 13/10/2026 : shorts 3, 4, 5 avec le process validé, rendus 1080p + outro -> `livrables/` (les 5 shorts E22
    sont livrés). Posts LinkedIn des shorts 1 à 5 à relire / régénérer (`posts --force`) si les passages ont changé.
-2. Teaser à reconstruire avec le nouveau son + validation de l'épisode complet (nouvelle liste de plans, fin logo) ->
-   rendu final 1080p.
+2. FAIT le 13/10/2026 : teaser reconstruit avec le nouveau son (synchro OK) + épisode complet rendu en 1080p
+   (`episode/E22_nicolas-comestaz_coty_episode.mp4`, 47 min, QA OK ; anciennes versions `_v3_0910`).
 3. FAIT le 12/10/2026 : titre validé par Arthur (proposition 4 de la 2e série : « AI Corner E22 | Réinventer ses processus
    métier pour intégrer vraiment l'IA »), miniature = même photo que la variante 1 avec ce titre (`miniatures/miniature_finale.jpg`),
    shorts 1 et 2 livrés avec l'outro définitive dans `livrables/`. Shorts 3–5 : `outro --only N` après leur rendu.
