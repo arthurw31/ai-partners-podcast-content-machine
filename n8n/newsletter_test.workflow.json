@@ -1,0 +1,212 @@
+{
+ "name": "AI Corner — test newsletter (envoi à soi-même)",
+ "nodes": [
+  {
+   "parameters": {},
+   "name": "Lancer le test",
+   "type": "n8n-nodes-base.manualTrigger",
+   "typeVersion": 1,
+   "position": [
+    0,
+    0
+   ]
+  },
+  {
+   "parameters": {
+    "assignments": {
+     "assignments": [
+      {
+       "id": "p-dest",
+       "name": "destinataire",
+       "value": "arthur@weareaipartners.com",
+       "type": "string"
+      },
+      {
+       "id": "p-prenom",
+       "name": "prenom",
+       "value": "Arthur",
+       "type": "string"
+      },
+      {
+       "id": "p-episode",
+       "name": "episode",
+       "value": "E22",
+       "type": "string"
+      },
+      {
+       "id": "p-base",
+       "name": "adresse_newsletters",
+       "value": "https://arthurw31.github.io/ai-partners-podcast-content-machine/newsletters",
+       "type": "string"
+      },
+      {
+       "id": "p-unsub",
+       "name": "lien_desinscription",
+       "value": "mailto:thomas@weareaipartners.com?subject=Me%20d%C3%A9sinscrire%20de%20la%20newsletter%20AI%20Corner",
+       "type": "string"
+      },
+      {
+       "id": "p-sender",
+       "name": "nom_expediteur",
+       "value": "Thomas Spitz",
+       "type": "string"
+      }
+     ]
+    },
+    "options": {}
+   },
+   "name": "Paramètres du test",
+   "type": "n8n-nodes-base.set",
+   "typeVersion": 3.5,
+   "position": [
+    224,
+    0
+   ]
+  },
+  {
+   "parameters": {
+    "url": "={{ $json.adresse_newsletters }}/{{ $json.episode }}/email.html",
+    "options": {
+     "response": {
+      "response": {
+       "responseFormat": "text",
+       "outputPropertyName": "html"
+      }
+     }
+    }
+   },
+   "name": "Lire le mail publié",
+   "type": "n8n-nodes-base.httpRequest",
+   "typeVersion": 4.5,
+   "position": [
+    448,
+    0
+   ]
+  },
+  {
+   "parameters": {
+    "url": "={{ $('Paramètres du test').item.json.adresse_newsletters }}/{{ $('Paramètres du test').item.json.episode }}/objet.txt",
+    "options": {
+     "response": {
+      "response": {
+       "responseFormat": "text",
+       "outputPropertyName": "objet"
+      }
+     }
+    }
+   },
+   "name": "Lire l'objet",
+   "type": "n8n-nodes-base.httpRequest",
+   "typeVersion": 4.5,
+   "position": [
+    672,
+    0
+   ]
+  },
+  {
+   "parameters": {
+    "jsCode": "const p = $('Paramètres du test').first().json;\nconst html = $('Lire le mail publié').first().json.html;\nconst objet = String($('Lire l'objet').first().json.objet || '').trim();\n// {{prenom}} et {{lien_desinscription}} sont des emplacements laissés dans le mail par la commande « newsletter --envoi »\nconst prenom = (p.prenom || '').trim();\nconst message = html\n  .split('Bonjour {{prenom}},').join(prenom ? 'Bonjour ' + prenom + ',' : 'Bonjour,')\n  .split('{{prenom}}').join(prenom)\n  .split('{{lien_desinscription}}').join(p.lien_desinscription);\nreturn [{ json: { destinataire: p.destinataire, objet, message, nom_expediteur: p.nom_expediteur } }];"
+   },
+   "name": "Personnaliser le mail",
+   "type": "n8n-nodes-base.code",
+   "typeVersion": 2,
+   "position": [
+    896,
+    0
+   ]
+  },
+  {
+   "parameters": {
+    "sendTo": "={{ $json.destinataire }}",
+    "subject": "={{ $json.objet }}",
+    "message": "={{ $json.message }}",
+    "options": {
+     "appendAttribution": false,
+     "senderName": "={{ $json.nom_expediteur }}"
+    }
+   },
+   "name": "Envoyer par Gmail",
+   "type": "n8n-nodes-base.gmail",
+   "typeVersion": 2.2,
+   "position": [
+    1120,
+    0
+   ]
+  },
+  {
+   "parameters": {
+    "content": "## Test d'envoi de la newsletter AI Corner\n1. Connecte le compte Google qui envoie (test : le tien ; plus tard : celui de Thomas) dans **Envoyer par Gmail**.\n2. Vérifie le destinataire dans **Paramètres du test**.\n3. Clique **Lancer le test** : le mail part UNE fois.\n\nLe mail et ses images sont lus sur GitHub Pages (`python -m clipper newsletter --envoi`). Pour un autre épisode : change seulement `episode`.",
+    "height": 224,
+    "width": 512,
+    "color": 4
+   },
+   "name": "Mode d'emploi",
+   "type": "n8n-nodes-base.stickyNote",
+   "typeVersion": 1,
+   "position": [
+    464,
+    -240
+   ]
+  }
+ ],
+ "connections": {
+  "Lancer le test": {
+   "main": [
+    [
+     {
+      "node": "Paramètres du test",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Paramètres du test": {
+   "main": [
+    [
+     {
+      "node": "Lire le mail publié",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Lire le mail publié": {
+   "main": [
+    [
+     {
+      "node": "Lire l'objet",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Lire l'objet": {
+   "main": [
+    [
+     {
+      "node": "Personnaliser le mail",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  },
+  "Personnaliser le mail": {
+   "main": [
+    [
+     {
+      "node": "Envoyer par Gmail",
+      "type": "main",
+      "index": 0
+     }
+    ]
+   ]
+  }
+ },
+ "settings": {
+  "executionOrder": "v1"
+ }
+}

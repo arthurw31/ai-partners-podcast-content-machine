@@ -99,6 +99,10 @@ relecteur Claude sans contexte`")
         NR -->|OK| N3["`**L'équipe valide le mail**
 (newsletter --final)`"]
         N3 -->|retouche| N2
+        N3 -->|validé| N4["`**newsletter --envoi**
+images en ligne, prénom, désinscription`"]
+        N4 --> N5["`**n8n : envoi Gmail**
+depuis la boîte de Thomas`"]
     end
 
     S7 --> L1(["`**5 shorts et 5 posts LinkedIn**`"])
@@ -109,8 +113,8 @@ relecteur Claude sans contexte`")
 teaser, chapitres, description`"])
     C5 --> L4(["`**Carrousel PDF**
 et sa description LinkedIn`"])
-    N3 --> L5(["`**Mail de Thomas**
-prêt à envoyer`"])
+    N5 --> L5(["`**Mail de Thomas**
+envoyé à la liste`"])
     E5 -.->|chapitres| N1
     M4 -.->|miniature| N2
     M4 --> L3(["`**Titre et miniature**

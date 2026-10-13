@@ -253,6 +253,15 @@ python -m clipper qa     --brand <marque> --input <fichier> --only N --render   
 - Envoie les MP4 de `livrables/` (pas `renders/`) avec SendUserFile, dans l'ordre ; colle pour chaque short le titre, la
   durée et son **post LinkedIn** prêt à copier ; donne le chemin du dossier.
 
+## Envoi de la newsletter : `newsletter --envoi` puis n8n (validé par Arthur le 13/10/2026)
+
+Après la validation du mail (`newsletter --final`) : `python -m clipper newsletter … --envoi` publie les images et le mail
+sur GitHub Pages (`docs/newsletters/<E>/`, à pousser avec git) avec « Bonjour {{prenom}}, » et un lien de désinscription.
+Envoi : workflow n8n « AI Corner — test newsletter » (export : `n8n/newsletter_test.workflow.json`) — paramètres
+(destinataire, prénom, épisode) -> lit le mail en ligne -> Gmail au nom de Thomas Spitz. Toujours un envoi de TEST à
+soi-même d'abord ; l'envoi à la liste (Sheet de contacts, paquets, compte de Thomas) est à construire : voir `n8n/README.md`.
+Ne jamais supprimer `docs/newsletters/<E>/` d'une newsletter envoyée.
+
 ## Livraison : `livraison` (Arthur, 13/10/2026 : « un dossier avec toutes les versions finales, à copier dans le Drive »)
 
 ```bash
