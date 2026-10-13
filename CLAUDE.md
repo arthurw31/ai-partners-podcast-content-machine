@@ -42,6 +42,19 @@ AI Partners Podcast Content Machine/
   vérifiés à l'octet, 28 jonctions `assets/` recréées, chemins absolus ET relatifs des JSON réécrits, tests 14/14 et QA
   identiques avant/après.
 
+## Envoi de la newsletter par n8n + Gmail (Arthur, 13/10/2026 : « on fait juste avec n8n et le mail de Thomas »)
+
+- `python -m clipper newsletter … --envoi` : copie les images dans `docs/newsletters/<E>/` (publiées par GitHub Pages au
+  push) et écrit `newsletter/email_a_envoyer.html` + `docs/newsletters/<E>/email.html` avec des liens ABSOLUS `https://…`
+  (le destinataire voit les images directement, sans cliquer), « Bonjour {{prenom}}, » et un lien « Se désinscrire »
+  ({{lien_desinscription}}). Trafic GitHub Pages négligeable (3 images ≈ 230 Ko ; Gmail met en cache). NE JAMAIS supprimer
+  le dossier d'une newsletter envoyée.
+- n8n (instance aipartners.app.n8n.cloud) : workflow « AI Corner — test newsletter (envoi à soi-même) » : paramètres
+  (destinataire, prénom, épisode) -> lit `email.html` et `objet.txt` sur GitHub Pages -> remplace les emplacements ->
+  Gmail (HTML, nom d'expéditeur « Thomas Spitz », sans mention n8n). Limites Google Workspace ≈ 2 000 mails / jour par
+  compte : pour la vraie liste, envoyer par paquets avec pause, contacts qui connaissent AI Partners, désinscription
+  respectée (risque principal = réputation du domaine weareaipartners.com, pas le volume).
+
 ## Règle de maintenance : le schéma suit le process (Arthur, 09/10/2026 : « mets à jour le schéma d'architecture à chaque fois
 qu'on modifie le process » ; précisé le même jour : « le schéma, c'est celui de GitHub, on met à jour que celui-là »)
 

@@ -144,9 +144,10 @@ def build(brand, video: Path, work: Path) -> tuple[Path, list[tuple[str, str, st
     nl = work / "newsletter"
     src = nl / "final" if (nl / "final").exists() else nl
     if (src / "email.html").exists():
-        for f in ("email.html", "email.txt", "objet.txt", "apercu.png"):
-            if (src / f).exists():
-                _copy(src / f, d4 / f, done)
+        for f in ("email.html", "email.txt", "objet.txt", "apercu.png", "email_a_envoyer.html"):
+            g = src / f if (src / f).exists() else nl / f
+            if g.exists():
+                _copy(g, d4 / f, done)
         for p in sorted((src / "images").glob("*")) if (src / "images").exists() else []:
             _copy(p, d4 / "images" / p.name, done)
         problems = []
