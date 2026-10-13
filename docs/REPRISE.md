@@ -53,14 +53,8 @@ Toujours en MP4 (le Studio HyperFrames bugue chez Arthur) : `preview --mp4 --cli
 
 ## Ce qui reste à faire (dans l'ordre probable)
 
-1. **EN COURS (12/10/2026, ~17 h, PC éteint pendant le traitement)** : `polish --only 3,4,5 --redo` lancé puis interrompu.
-   Reprise : `python -m clipper polish --brand ai-corner --input E22_nicolas-comestaz_coty.mp4 --only 3,4,5 --jobs 1`
-   (SANS `--redo` : les étapes déjà faites sont notées dans `checks` et sautées ; si un short semble incohérent, relancer
-   ce short seul avec `--redo`). Puis lire `qa/clip_0N.md`, regarder les planches et `qa/moments_0N_apercu.mp4`, renommer
-   les anciens `renders/clip_0N_*_9x16.mp4` (suffixe `_v1_avant-variante-B`), `render --only 3,4,5 --jobs 2`,
-   `qa --render --only 3,4,5`, `outro --only 3,4,5` -> `livrables/`. Liens à Arthur.
-   Shorts 3, 4, 5 avec le process validé : `polish --only 3,4,5 --redo`, regarder rapports / planches / moments à risque,
-   aperçus à Arthur, validation, `render`, `qa --render`, `outro`.
+1. FAIT le 13/10/2026 : shorts 3, 4, 5 avec le process validé, rendus 1080p + outro -> `livrables/` (les 5 shorts E22
+   sont livrés). Posts LinkedIn des shorts 1 à 5 à relire / régénérer (`posts --force`) si les passages ont changé.
 2. Teaser à reconstruire avec le nouveau son + validation de l'épisode complet (nouvelle liste de plans, fin logo) ->
    rendu final 1080p.
 3. FAIT le 12/10/2026 : titre validé par Arthur (proposition 4 de la 2e série : « AI Corner E22 | Réinventer ses processus

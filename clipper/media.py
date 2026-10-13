@@ -83,7 +83,27 @@ def rebuild_audio(clip_video: Path, audio_src: Path, pieces: list[tuple[float, f
         f = min(fade, d / 4)
         chains.append(f"[1:a]atrim=start={a:.5f}:duration={d:.5f},asetpts=PTS-STARTPTS,aresample=48000,"
                       f"afade=t=in:d={f:.4f},afade=t=out:st={max(0.0, d - f):.5f}:d={f:.4f}[a{j}]")
-    post = "loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000" if normalize else "anull"
+    post = "anull"
+    if normalize:
+        # loudnorm en DEUX passages (13/10/2026 : en un passage, un short de 19 s sortait à -17,6 LUFS) : mesure, puis
+        # correction linéaire exacte vers -16 LUFS
+        import json as _json
+        import re as _re
+        meas = ";".join(chains) + ";" + "".join(f"[a{j}]" for j in range(n)) +             f"concat=n={n}:v=0:a=1,loudnorm=I=-16:TP=-1.5:LRA=11:print_format=json[a]"
+        ms = clip_video.with_suffix(".measure.graph.txt")
+        ms.write_text(meas, encoding="utf-8")
+        r = subprocess.run([FFMPEG, "-hide_banner", "-v", "info", "-i", str(clip_video), "-i", str(audio_src),
+                            "-/filter_complex", str(ms), "-map", "[a]", "-f", "null", "-"], capture_output=True, text=True,
+                           encoding="utf-8", errors="replace")
+        ms.unlink(missing_ok=True)
+        m = _re.search(r"\{[^{}]*\"input_i\"[^{}]*\}", r.stderr)
+        if m:
+            v = _json.loads(m.group(0))
+            post = (f"loudnorm=I=-16:TP=-1.5:LRA=11:measured_I={v['input_i']}:measured_TP={v['input_tp']}:"
+                    f"measured_LRA={v['input_lra']}:measured_thresh={v['input_thresh']}:offset={v['target_offset']}:"
+                    f"linear=true,aresample=48000")
+        else:
+            post = "loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000"
     graph = ";".join(chains) + ";" + "".join(f"[a{j}]" for j in range(n)) + f"concat=n={n}:v=0:a=1,{post}[a]"
     script = clip_video.with_suffix(".audio.graph.txt")
     script.write_text(graph, encoding="utf-8")

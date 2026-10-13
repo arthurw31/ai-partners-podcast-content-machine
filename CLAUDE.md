@@ -554,6 +554,8 @@ vérification intransigeante qui règle ces problèmes »)
   (`strict._valley`). Fin dans une phrase enchaînée sans pause (« …ces réunions. ‖ Donc j'ai toujours… ») : prolonger
   jusqu'à la vraie pause (short 4 : « …la data, c'était une forme de pouvoir. »). Garder le PC éveillé pendant les longs
   traitements (`request_keep_awake`) : une mise en veille avait interrompu la chaîne la nuit du 12/10.
+  Volume : `rebuild_audio` fait un `loudnorm` en DEUX passages (mesure puis correction linéaire) — en un passage, le short 5
+  (19 s) sortait à -17,6 LUFS ; ne jamais lancer deux chaînes `polish`/`render` sur les mêmes shorts en même temps.
 - Pistes restantes de la recherche (si des défauts restent) : **Smart Turn v3** (pipecat-ai, BSD-2, ONNX
   8 Mo, français, ~12–100 ms CPU) = probabilité que l'orateur ait FINI sa phrase, d'après la prosodie, à chaque fin
   d'extrait ; **alignement forcé CTC** (wav2vec2 français `bofenghuang/asr-wav2vec2-ctc-french`, Apache-2.0, Viterbi en numpy,
