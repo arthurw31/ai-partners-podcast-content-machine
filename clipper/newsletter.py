@@ -128,6 +128,10 @@ def check(mail: dict, segments: list[dict]) -> list[dict]:
     for p in prog:
         if len(p.get("title", "").split()) > LIMITS["item_title_words"]:
             add("ATTENTION", f"titre du programme long : « {p['title']} »")
+    sizes = [len(p.get("text", "")) for p in prog]
+    if sizes and (max(sizes) > 175 or max(sizes) - min(sizes) > 30):
+        add("ATTENTION", f"textes du programme de longueurs trop différentes ({min(sizes)} à {max(sizes)} car., visé 150-170) : "
+                         "les 4 cartes ont la même taille, la plus longue impose sa hauteur")
     for ev in mail.get("evidence") or []:
         _, score = find_evidence(segments, ev.get("quote", ""), _num(ev.get("t")))
         if score < 0.6:

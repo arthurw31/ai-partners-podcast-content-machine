@@ -23,7 +23,7 @@ Train (Mailjet). Ce fichier est injecté tel quel dans le prompt de Claude (`cli
 4. Mot de Thomas : « Pour ce nouvel épisode d'AI Corner, j'ai le plaisir de recevoir … » + qui est l'invité (2 à 3
    phrases, d'après ce qu'il dit de lui) + l'angle de la conversation (1 phrase).
 5. Bouton « Regarder l'épisode ».
-6. « Au programme de cet épisode » : 4 points ; chacun = un titre court en gras (≤ 6 mots) + 1 phrase concrète. Ils
+6. « Au programme de cet épisode » : 4 points ; chacun = un titre court en gras (≤ 6 mots) + 1 phrase concrète de 150 à 170 caractères, de longueur à peu près égale (les 4 cartes du mail ont la même taille). Ils
    suivent les chapitres de l'épisode.
 7. Miniature YouTube cliquable (« Retrouvez l'épisode complet sur YouTube 👇 »).
 8. Mot de fin de Thomas (1 à 2 phrases) + signature « Thomas Spitz, CEO et fondateur d'AI Partners ».
