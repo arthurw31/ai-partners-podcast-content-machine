@@ -194,6 +194,8 @@ def make_images(brand, ep: Path, mail: dict, portraits_: dict, thumb: Path | Non
     duo = make_duo(d, mail, portraits_.get("host"), g, _shot, _fonts_css(brand), _uri)
     if duo:
         out["duo"] = duo
+    from .newsletter_templates import make_chrome
+    out.update(make_chrome(brand, d, mail, _shot, _fonts_css(brand), _uri, logo, _cfg(brand).get("platforms") or []))
     host = square_photo(portraits_.get("host"), d / "thomas.jpg")
     if host:
         out["host"] = host

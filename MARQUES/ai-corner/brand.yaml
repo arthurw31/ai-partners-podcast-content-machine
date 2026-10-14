@@ -200,6 +200,13 @@ newsletter:
   from_name: "Thomas Spitz"
   button: "REGARDER L'ÉPISODE"
   signature: "Thomas Spitz<br>CEO et fondateur d'AI Partners"
+  template: duo        # gabarit D1 « Duo » retenu par Arthur le 14/10/2026 (voir clipper/newsletter_templates.py)
+  # Bandeau du bas : liens vers l'ÉMISSION (la page de l'émission montre toujours le dernier épisode en tête), pas vers un épisode.
+  # Un logo officiel déposé dans assets/platforms/<nom>.png remplace l'icône dessinée.
+  platforms:
+    - {name: youtube, url: "https://www.youtube.com/playlist?list=PLeeolan_fqxdZbU5xZqEwo12pbqK3fH5N"}
+    - {name: spotify, url: "https://open.spotify.com/show/4chUmiipM4KiK4sEdL9BeP"}
+    - {name: ausha, url: "https://podcast.ausha.co/ai-partners-podcast"}
 
 # Teaser d'ouverture de l'épisode complet (commande episode, 07/10/2026) — calqué sur E20 MAIF : ~50 s de phrases fortes
 # sous-titrées, puis le logo AI Partners sur l'animation de la charte. Appliqué PAR-DESSUS la config ci-dessus.

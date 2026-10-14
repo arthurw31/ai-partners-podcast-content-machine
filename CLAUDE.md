@@ -286,6 +286,7 @@ newsletter dans ce style-là : un mail qui part direct de la part du founder »)
   mettre en haut aussi, avec l'invité ») : variantes du style `vedette` — `duo` (image Thomas + invité face à face), `ronds`
   (deux photos rondes puis miniature), `lettre` (le mail s'ouvre sur Thomas et son mot), `duo_nuit` ; `--template variantes` ->
   `planche_variantes.png`. Photos : `carousel.portraits` (cutouts `host` / `guest`, Thomas regarde à droite, l'invité à gauche).
+  **D1 « Duo » retenu** (Arthur, 14/10/2026 : « on part sur la D1 ») : `newsletter.template: duo` ; en-tête agrandi « AI Corner by [logo AI Partners] » (`entete.png`), bandeau du bas « Écoutez AI Corner sur votre plateforme préférée » avec logos cliquables YouTube / Spotify / Ausha (`newsletter.platforms` de brand.yaml : liens vers l'ÉMISSION, jamais vers un épisode, pour ne pas avoir à les redonner : la page de l'émission montre le dernier épisode en tête ; le bouton principal garde le lien YouTube exact de l'épisode). Logo officiel : `assets/platforms/<nom>.png` remplace l'icône dessinée.
 
 ## Relecture critique sans contexte : `review` (Arthur, 12/10/2026 : « un sous-agent qui n'a pas le contexte de la
 conversation principale, pour un regard neuf et plus critique ; un modèle assez performant » puis « attention à la
