@@ -187,6 +187,10 @@ def make_images(brand, ep: Path, mail: dict, portraits_: dict, thumb: Path | Non
               f"<div class='s'>Le podcast d'AI Partners · {html.escape(mail['episode'])}</div><div class='g'>{logo}</div></body></html>")
     out = {"banner": _shot(banner, 1200, 300, d / "bandeau.png")}
     g = portraits_.get("guest")
+    from .newsletter_templates import make_hero
+    hero = make_hero(brand, d, mail, g, _shot, _fonts_css(brand), _uri)
+    if hero:
+        out["hero"] = hero
     if g:
         size = 640
         bg = Image.new("RGB", (size, size))
@@ -224,8 +228,12 @@ def _p(text: str) -> str:
     return html.escape(text or "").replace("\n", "<br>")
 
 
-def email_html(brand, mail: dict, imgs: dict, title: str) -> str:
-    """HTML d'e-mail (tableaux, styles en ligne, 600 px) : images en chemins relatifs `images/…`, à téléverser dans l'outil."""
+def email_html(brand, mail: dict, imgs: dict, title: str, template: str = "classique") -> str:
+    """HTML d'e-mail (tableaux, styles en ligne, 600 px) : images en chemins relatifs `images/…`, à téléverser dans l'outil.
+    `template` : classique | nuit | heros | editorial | vedette (voir newsletter_templates.py)."""
+    from .newsletter_templates import BUILDERS, context
+    if template in BUILDERS:
+        return BUILDERS[template](context(_cfg(brand), mail, imgs, title))
     cfg = _cfg(brand)
     url = mail.get("youtube_url") or "#"
     font = "Helvetica, Arial, sans-serif"
@@ -261,7 +269,7 @@ def email_html(brand, mail: dict, imgs: dict, title: str) -> str:
   </td></tr></table>
 </td></tr>
 <tr><td style="padding:24px 40px 0 40px;font-family:{font};font-size:17px;line-height:1.6;color:{NAVY}">
- <p style="margin:0 0 18px 0;font-weight:bold">{_p(mail.get("hook"))}</p>
+ <!--HELLO--><p style="margin:0 0 18px 0;font-weight:bold">{_p(mail.get("hook"))}</p>
  <p style="margin:0">{_p(mail.get("intro"))}</p>
 </td></tr>
 <tr><td align="center">{btn}</td></tr>
@@ -277,7 +285,7 @@ def email_html(brand, mail: dict, imgs: dict, title: str) -> str:
  <p style="margin:0;font-weight:bold">{sig}</p>
 </td></tr>
 </table>
-<p style="font-family:{font};font-size:12px;color:#8A93B2;padding-top:16px">AI Corner, le podcast d'AI Partners.</p>
+<p style="font-family:{font};font-size:12px;color:#8A93B2;padding-top:16px">AI Corner, le podcast d'AI Partners.<!--FOOT--></p>
 </td></tr></table></body></html>"""
 
 
@@ -291,25 +299,65 @@ def email_text(brand, mail: dict) -> str:
             f"{mail.get('closing', '')}\n\n{sig}\n")
 
 
-def render(brand, ep: Path, mail: dict, portraits_: dict) -> dict:
-    d = ep / "newsletter"
-    d.mkdir(parents=True, exist_ok=True)
-    title, title_ok = episode_title(ep)
-    thumb, thumb_ok = thumbnail_image(ep)
-    imgs = make_images(brand, ep, mail, portraits_, thumb)
-    (d / "email.html").write_text(email_html(brand, mail, imgs, title), encoding="utf-8")
-    (d / "email.txt").write_text(email_text(brand, mail), encoding="utf-8")
-    (d / "objet.txt").write_text(f"Objet : {mail.get('subject', '')}\nTexte d'aperçu : {mail.get('preheader', '')}\n"
-                                 f"Expéditeur : {_cfg(brand).get('from_name') or 'Thomas Spitz'}\n", encoding="utf-8")
-    shot = _shot((d / "email.html").read_text(encoding="utf-8").replace('src="images/', f'src="{_uri(d / "images")}/'),
-                 680, 2600, d / "_apercu.png")
+def _preview(d: Path, page: str, out: Path) -> Path:
+    """Aperçu PNG du mail (images locales), recadré sur le contenu."""
+    shot = _shot(page.replace('src="images/', f'src="{_uri(d / "images")}/'), 680, 3000, d / "_apercu.png")
     im = Image.open(shot).convert("RGB")
     px = im.load()
     bottom = im.height - 1                                               # recadre le fond vide sous le mail
     while bottom > 0 and px[im.width // 2, bottom] == px[im.width // 2, im.height - 1]:
         bottom -= 1
-    im.crop((0, 0, im.width, min(im.height, bottom + 40))).save(d / "apercu.png")
+    im.crop((0, 0, im.width, min(im.height, bottom + 40))).save(out)
     shot.unlink()
+    return out
+
+
+def templates_sheet(brand, d: Path, names: list[str]) -> Path:
+    """Planche : les aperçus de tous les gabarits côte à côte (choix de l'équipe)."""
+    from .canva_template import font
+    from .newsletter_templates import TEMPLATES
+    w, pad, head = 440, 28, 74
+    ims = [Image.open(d / f"apercu_{n}.png").convert("RGB") for n in names]
+    ims = [i.resize((w, int(i.height * w / i.width)), Image.Resampling.LANCZOS) for i in ims]
+    sheet = Image.new("RGB", (pad + len(ims) * (w + pad), head + max(i.height for i in ims) + pad), (244, 246, 251))
+    dr = ImageDraw.Draw(sheet)
+    f = font(brand.assets_dir, "Montserrat", "Bold", 20)
+    for k, (n, im) in enumerate(zip(names, ims)):
+        x = pad + k * (w + pad)
+        dr.text((x, 24), TEMPLATES[n].split(" : ")[0], font=f, fill=(21, 29, 83))
+        sheet.paste(im, (x, head))
+    out = d / "planche_gabarits.png"
+    sheet.save(out)
+    return out
+
+
+def render(brand, ep: Path, mail: dict, portraits_: dict, template: str | None = None) -> dict:
+    """Rend le mail. `template` : un gabarit, ou « all » (tous, comparés sur `planche_gabarits.png`, sans toucher à
+    `email.html`). Sans valeur : `newsletter.template` de brand.yaml (« classique » par défaut)."""
+    from .newsletter_templates import TEMPLATES
+    d = ep / "newsletter"
+    d.mkdir(parents=True, exist_ok=True)
+    title, title_ok = episode_title(ep)
+    thumb, thumb_ok = thumbnail_image(ep)
+    imgs = make_images(brand, ep, mail, portraits_, thumb)
+    template = template or str(_cfg(brand).get("template") or "classique")
+    if template == "all":
+        names = list(TEMPLATES)
+        for n in names:
+            page = email_html(brand, mail, imgs, title, n)
+            (d / f"email_{n}.html").write_text(page, encoding="utf-8")
+            _preview(d, page, d / f"apercu_{n}.png")
+        sheet = templates_sheet(brand, d, names)
+        return {"preview": sheet, "html": d / "email_nuit.html", "images": imgs, "templates": names,
+                "notes": ["gabarits à comparer : choisir puis `newsletter --template <nom> --render`"]}
+    if template not in TEMPLATES:
+        raise SystemExit(f"Gabarit inconnu « {template} » : {', '.join(TEMPLATES)} ou all")
+    page = email_html(brand, mail, imgs, title, template)
+    (d / "email.html").write_text(page, encoding="utf-8")
+    (d / "email.txt").write_text(email_text(brand, mail), encoding="utf-8")
+    (d / "objet.txt").write_text(f"Objet : {mail.get('subject', '')}\nTexte d'aperçu : {mail.get('preheader', '')}\n"
+                                 f"Expéditeur : {_cfg(brand).get('from_name') or 'Thomas Spitz'}\n", encoding="utf-8")
+    _preview(d, page, d / "apercu.png")
     notes = []
     if not title_ok:
         notes.append("titre de l'épisode PROVISOIRE (pas encore validé : titles --pick)")
@@ -367,14 +415,20 @@ def send_ready(brand, ep: Path, mail: dict) -> dict:
     base = str(_cfg(brand).get("public_base_url") or PAGES_BASE).rstrip("/") + f"/{e}"
     pub = ROOT / "docs" / "newsletters" / e
     pub.mkdir(parents=True, exist_ok=True)
-    for img in sorted((src / "images").glob("*")) if (src / "images").exists() else []:
-        shutil.copy2(img, pub / img.name)
-    h = (src / "email.html").read_text(encoding="utf-8").replace('src="images/', f'src="{base}/')
-    hook = '<p style="margin:0 0 18px 0;font-weight:bold">'
-    h = h.replace(hook, '<p style="margin:0 0 14px 0">Bonjour {{prenom}},</p>\n ' + hook, 1)
-    foot = "AI Corner, le podcast d'AI Partners.</p>"
-    h = h.replace(foot, "AI Corner, le podcast d'AI Partners.<br>Vous recevez ce mail car vous êtes en contact avec AI "
-                        "Partners. <a href=\"{{lien_desinscription}}\" style=\"color:#8A93B2\">Se désinscrire</a></p>", 1)
+    h = (src / "email.html").read_text(encoding="utf-8")
+    for name in sorted(set(re.findall(r'src="images/([^"]+)"', h))):          # seulement les images du gabarit choisi
+        if (src / "images" / name).exists():
+            shutil.copy2(src / "images" / name, pub / name)
+    h = h.replace('src="images/', f'src="{base}/')
+    hello = '<p style="margin:0 0 14px 0;font-weight:bold">Bonjour {{prenom}},</p>'
+    unsub = ('<br>Vous recevez ce mail car vous êtes en contact avec AI Partners. '
+             '<a href="{{lien_desinscription}}" style="color:#8A93B2">Se désinscrire</a>')
+    if "<!--HELLO-->" in h:                       # tous les gabarits : marqueurs (newsletter_templates.py)
+        h = h.replace("<!--HELLO-->", hello, 1).replace("<!--FOOT-->", unsub, 1)
+    else:                                         # ancien HTML sans marqueurs
+        hook = '<p style="margin:0 0 18px 0;font-weight:bold">'
+        h = h.replace(hook, '<p style="margin:0 0 14px 0">Bonjour {{prenom}},</p>\n ' + hook, 1)
+        h = h.replace("AI Corner, le podcast d'AI Partners.</p>", "AI Corner, le podcast d'AI Partners." + unsub + "</p>", 1)
     out = d / "email_a_envoyer.html"
     out.write_text(h, encoding="utf-8")
     (pub / "email.html").write_text(h, encoding="utf-8")

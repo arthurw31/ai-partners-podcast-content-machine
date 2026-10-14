@@ -273,6 +273,16 @@ newsletter dans ce style-là : un mail qui part direct de la part du founder »)
   (provisoires sinon : signalé), la photo détourée de l'invité (`carousel.portraits`). Bandeau rendu par Chrome
   (`outro_bg.png` en `mix-blend-mode: screen` : son fond est noir). `--final` exige lien YouTube + titre + miniature.
 
+- **Gabarits du mail** (Arthur, 14/10/2026 : « améliorer le template des mails, plus dans la charte, plus de bleu foncé, propose-moi
+  plusieurs templates ») : `clipper/newsletter_templates.py` — `classique` (l'ancien), `nuit` (tout en bleu nuit), `heros`
+  (grande image bleue + photo de l'invité, comme la couverture des carrousels), `editorial` (titre XL, bande bleu foncé du
+  bouton, programme numéroté), `vedette` (miniature YouTube en tête, programme en 4 cartes). `newsletter --render --template
+  all` les rend tous avec le contenu réel (`apercu_<nom>.png`, `planche_gabarits.png`, sans toucher à `email.html`) ;
+  `--template <nom> --render` en fixe un ; `newsletter.template` de brand.yaml = défaut. Contraintes e-mail : tableaux, styles
+  en ligne, `bgcolor`, 600 px, Helvetica/Arial pour le TEXTE (Metropolis seulement dans les images : bandeau, héros), pas
+  d'italique ; marqueurs `<!--HELLO-->` et `<!--FOOT-->` remplacés à l'envoi par `send_ready` (« Bonjour {{prenom}} », « Se
+  désinscrire ») : tout nouveau gabarit les garde ; `send_ready` ne publie que les images utilisées par le gabarit choisi.
+
 ## Relecture critique sans contexte : `review` (Arthur, 12/10/2026 : « un sous-agent qui n'a pas le contexte de la
 conversation principale, pour un regard neuf et plus critique ; un modèle assez performant » puis « attention à la
 consommation de tokens »)
