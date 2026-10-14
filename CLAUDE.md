@@ -631,6 +631,24 @@ vérification intransigeante qui règle ces problèmes »)
   short 1, 1202,86–1203,85) n'est retirée ni par `ctc` (le verbatim l'aligne comme du texte) ni par `fillers` : la lire dans
   « Ce qu'on entend » du rapport et couper à la main. Après une retouche de `segments` : `build --only N --force` (sinon le
   contrôle de synchro compare un ancien son : « son différent de la source »).
+- **Retours d'Arthur sur les shorts E21 (14/10/2026)** — « Thomas coupe la parole à l'invité, il faut pas ; ça sert à rien de
+  mettre l'image et le son de Thomas qui acquiesce » ; « les phrases ont tendance à être coupées trop tôt et il y a un bruit de
+  bouche à la fin » ; « fais plus de boucles de vérification QA » ; « fais preuve de bon sens » :
+  - **Qui est à l'image** (épisode DÉJÀ MONTÉ : l'image vient du monteur, qui insère des plans de 1,5 s sur Thomas qui écoute) :
+    `strict.listener_shown` reconnaît le visage seul à l'écran (SFace vs `assets/host_face.jpg`, toutes les 0,25 s) et le
+    compare à qui parle (`work/diarized_words.json`) -> `qa` ÉCHEC « on voit Thomas pendant que l'invité parle » (cache
+    `qa/qa_image_NN.json`). Correction automatique seulement au bord d'un morceau ; au milieu, Claude recoupe À LA MAIN sur des
+    silences voisins (mots alignés + énergie), quitte à retirer la phrase entière : jamais trancher une phrase de l'invité.
+    E21 : plans de Thomas 1201,625 / 1216,625 / 1230,625 / 1482,625 (+1,5 s), retirés.
+  - **Rythme des raccords internes** (`strict.join_flow_problems` / `fix_join_flow`, étape de `polish` + chaque tour de boucle +
+    `qa`) : retrait < 0,35 s en pleine voix = recollé (« il y ‖ a », 0,14 s) ; fin de morceau en pleine voix sans « euh » tenu
+    derrière = fin de mot tranchée -> retrait court (< 0,5 s) recollé, retrait long (vraie hésitation, « ok ‖ bah… si », 1,47 s)
+    JAMAIS remis : la fin est prolongée jusqu'au creux qui finit le mot (sinon ATTENTION « à écouter »). `ctc` : retrait réel
+    ≥ 0,35 s (0,26 s passaient). `fillers` prenait les voyelles allongées de Quentin pour des « euh ».
+  - **Bruit de bouche** après la dernière voix (`strict.tail_noise` : son bref ≤ 0,08 s isolé dans la traîne) -> fin avancée
+    (`fix_tail_noise`), `qa` ÉCHEC sinon. E21 short 2 : claquement à 1503,58.
+  - Boucle de `polish` : **10 tours** (6 avant). Une réaction de l'invité (« ok, fine ») n'est pas une réaction vide : la garder.
+  - Aperçu avec l'outro pour la validation : `short_outro.append(apercu, outro_short/outro_9x16.mp4, …_avec_outro_apercu.mp4)`.
 - Pistes restantes de la recherche (si des défauts restent) : **Smart Turn v3** (pipecat-ai, BSD-2, ONNX
   8 Mo, français, ~12–100 ms CPU) = probabilité que l'orateur ait FINI sa phrase, d'après la prosodie, à chaque fin
   d'extrait ; **alignement forcé CTC** (wav2vec2 français `bofenghuang/asr-wav2vec2-ctc-french`, Apache-2.0, Viterbi en numpy,

@@ -92,6 +92,29 @@ def contact_sheet(media: Path, times: list[float], out: Path, width: int = 270) 
     return out
 
 
+def listener_runs(clip: dict, proj: Path, media: Path, work: Path) -> list[dict]:
+    """`strict.listener_shown` mis en cache (clé = coupes du clip + date du montage) : visage de celui qui écoute à l'image."""
+    from .config import Brand
+    from .ingest import host_reference
+    from .strict import listener_shown
+    ep = proj.parent.parent
+    dw = ep / "work" / "diarized_words.json"
+    if not dw.exists():
+        return []
+    key = json.dumps([[round(float(x["start"]), 3), round(float(x["end"]), 3)] for x in clip["segments"]]) + f"|{media.stat().st_mtime:.0f}"
+    cache = work / f"qa_image_{clip['index']:02d}.json"
+    c = json.loads(cache.read_text(encoding="utf-8")) if cache.exists() else {}
+    if c.get("key") == key:
+        return c["runs"]
+    try:
+        brand = Brand(ep.parents[1].name)
+    except Exception:  # noqa: BLE001
+        return []
+    runs = listener_shown(media, clip["segments"], json.loads(dw.read_text(encoding="utf-8")), host_reference(brand))
+    cache.write_text(json.dumps({"key": key, "runs": runs}, ensure_ascii=False), encoding="utf-8")
+    return runs
+
+
 def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: Path | None = None,
              work: Path | None = None) -> tuple[str, list[str]]:
     """Contrôle d'un short monté (et de son rendu / aperçu si `render`). Renvoie (statut global, lignes du rapport)."""
@@ -170,6 +193,20 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
     rows.append((FAIL if ep_ else OK, "bords de phrase (contrôle strict) : " + (
         "; ".join(f"{p['kind']} à {p['t']:.2f} coupée dans la voix ({int(p['ratio'] * 100)} % du niveau)" for p in ep_)
         + " -> `polish` corrige seul (fix_edges)" if ep_ else "toutes les fins retombées dans le silence, tous les débuts partent d'un silence")))
+    # 2 bis bis. rythme des raccords internes et fin du short (Arthur, 14/10/2026, short 2 E21 : « les phrases ont tendance à
+    # être coupées trop tôt et il y a un bruit de bouche à la fin »)
+    from .strict import join_flow_problems, tail_noise
+    jf = join_flow_problems(segs, wav)
+    hard = [p for p in jf if not p.get("extend")]
+    soft = [p for p in jf if p.get("extend")]   # longue hésitation retirée, collée au mot (aucun creux) : la coupe reste
+    rows.append((FAIL if hard else OK, "raccords internes (rythme) : " + ("; ".join(p["why"] for p in hard[:5]) + " -> `polish` recolle"
+                                                                           if hard else "aucune coupe inutile, aucune fin de mot tranchée")))
+    if soft:
+        rows.append((WARN, "raccords à écouter (hésitation collée au mot retirée, aucun creux pour couper) : "
+                     + "; ".join(f"{p['t']:.2f}" for p in soft[:5])))
+    tn = tail_noise(wav, float(segs[-1]["end"]))
+    rows.append((FAIL if tn else OK, "fin du short : " + (f"bruit de bouche à {tn['noise']:.2f}, après la dernière voix ({tn['voice_end']:.2f})"
+                                                          if tn else "rien après la dernière voix (ni claquement ni souffle)")))
     # 2 ter. la pensée est-elle FINIE ? (Smart Turn v3, intonation ; 12/10/2026) — fin du short : ÉCHEC sous 0,5 ;
     # fins internes : ATTENTION (le vote est moins sûr au milieu d'une réponse)
     try:
@@ -210,6 +247,14 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
         sp = sync_problems(src_av, segs, a_src, dly, int(cfg.fps))
         rows.append((FAIL if sp else OK, "son du montage : " + ("; ".join(sp[:6]) + " (rebuild : build --only N --force)" if sp
                                                             else "chaque morceau exactement à sa place (± 15 ms)")))
+        if not spec:   # épisode DÉJÀ MONTÉ : l'image vient du monteur -> qui est à l'image ? (Arthur, 14/10/2026, short 1 E21)
+            lr = listener_runs(clip, proj, src_av, work)
+            if not lr:
+                rows.append((OK, "image : on voit toujours celui qui parle (jamais l'autre qui écoute ou réagit seul à l'écran)"))
+            for r_ in lr:
+                rows.append((FAIL, f"image : on voit {'Thomas' if r_['shown'] == 'host' else 'l invité'} pendant que "
+                                   f"{'l invité' if r_['shown'] == 'host' else 'Thomas'} parle ({r_['t0']:.1f}–{r_['t1']:.1f} s du short, "
+                                   f"{r_['abs0']:.2f}–{r_['abs1']:.2f} dans l'épisode) : retirer (couper sur des silences voisins)"))
     if html.exists():
         cp = caption_problems(html.read_text(encoding="utf-8"))
         rows.append((FAIL if cp else OK, "sous-titres à l'écran : " + ("; ".join(cp[:6]) if cp else

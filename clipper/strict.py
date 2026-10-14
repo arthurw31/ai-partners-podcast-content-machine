@@ -423,7 +423,7 @@ def ctc_hesitations(segs: list[dict], words: list[dict], wav: Path, cfg=None, mi
         cuts = []
         for x, y in zip(al, al[1:]):
             g0, g1 = x["e"] + pad_end, y["s"] - pad_start
-            if g1 - g0 < min_gap - pad_end - pad_start:
+            if g1 - g0 < min_gap:          # retrait réel ≥ min_gap (avant le 14/10 : 0,26 s acceptées, « tu ‖ donnes »)
                 continue
             r = _rms(wav, g0, g1)
             lvl = _level(wav, (g0 + g1) / 2)
@@ -467,3 +467,223 @@ def ctc_hesitations(segs: list[dict], words: list[dict], wav: Path, cfg=None, mi
                 n.pop("start_text", None)
             out.append(n)
     return out, log
+
+
+# ----------------------------------------------------------------------------------------------- fluidité des raccords internes
+# Arthur, 14/10/2026 (short 2 E21) : « les phrases ont tendance à être coupées trop tôt ». Mesure : 5 raccords sur 10 tombaient
+# en PLEINE VOIX (« il y ‖ a », retrait de 0,14 s ; « aborder ‖ assez », la voix continuait 0,3 s après la coupe) : `fillers`
+# prenait l'allongement naturel d'une voyelle pour un « euh », et l'étape `ctc` acceptait des retraits de 0,26 s. Bon sens de
+# monteur : on ne coupe au milieu d'une phrase que pour retirer une VRAIE hésitation, et jamais en tranchant la fin d'un mot.
+
+MIN_CUT = 0.35        # retrait plus court : aucun gain de rythme, seulement le risque d'une coupe audible -> recollé
+VOICE_CUT = 0.30      # voix au point de coupe (fraction du niveau de parole) au-delà de laquelle le mot est encore en cours
+
+
+def _flux(wav: Path, a: float, b: float) -> np.ndarray:
+    S, _e = _spec(wav, a, b)
+    return np.r_[0, np.sqrt(((S[1:] - S[:-1]) ** 2).mean(1))] if len(S) > 1 else np.zeros(0)
+
+
+def _steady_after(wav: Path, t: float, span: float = 0.10) -> bool:
+    """Juste après t, un son TENU (spectre stable : « euh » / « hmm ») plutôt qu'une fin de mot (détente, consonne) ?"""
+    f = _flux(wav, t - 0.25, t + span + 0.03)
+    if len(f) < 12:
+        return False
+    after = f[-int(span / 0.01):]
+    return float(np.median(after)) <= float(np.percentile(f, 40))
+
+
+def join_flow_problems(segs: list[dict], wav: Path) -> list[dict]:
+    """Raccords internes (deux morceaux d'un même passage, ≤ 3 s d'écart dans la source) qui cassent le rythme :
+    [{k, why, t}] (k = morceau AVANT le raccord). Raisons : retrait < MIN_CUT ; fin du morceau en pleine voix sans « euh »
+    tenu derrière (fin de mot tranchée) ; fin ET début en pleine voix sur un retrait court (coupe dans une voix continue)."""
+    out = []
+    for k in range(len(segs) - 1):
+        a, b = segs[k], segs[k + 1]
+        e, s = float(a["end"]), float(b["start"])
+        gap = s - e
+        if gap < -0.01 or gap > 3.0:
+            continue
+        er, sr = end_ratio(wav, e, 0.04), start_ratio(wav, s, 0.04)
+        if gap < MIN_CUT and (er > VOICE_CUT or sr > VOICE_CUT):   # court ET dans la voix (un « euh » court coupé
+            # proprement dans des silences reste : 1224,19–1224,52 short 1 E21)
+            out.append({"k": k, "t": e, "why": f"retrait de {gap:.2f} s seulement (< {MIN_CUT} s) en pleine voix à {e:.2f} : coupe inutile"})
+            continue
+        if er > VOICE_CUT and not _steady_after(wav, e):
+            # long retrait (vraie hésitation : « ok ‖ bah… si », 1,47 s) : on PROLONGE la fin jusqu'au creux qui finit le mot
+            # plutôt que de remettre l'hésitation ; retrait court : recollé
+            out.append({"k": k, "t": e, "extend": gap >= 0.5,
+                        "why": f"fin de mot tranchée à {e:.2f} (voix à {int(er * 100)} %, pas de « euh » derrière)"})
+        elif er > VOICE_CUT and sr > VOICE_CUT and gap < 0.5:
+            out.append({"k": k, "t": e, "why": f"coupe dans une voix continue à {e:.2f}–{s:.2f} ({gap:.2f} s retirées)"})
+    return out
+
+
+def _word_end_after(wav: Path, t: float, limit: float) -> float | None:
+    """Fin réelle du mot tranché : première trame après t (avant `limit`) où la voix passe sous VOICE_CUT et y reste 2 trames,
+    + 0,04 s de détente."""
+    lvl = _level(wav, t)
+    r = _rms(wav, t, limit)
+    if lvl <= 0 or len(r) < 3:
+        return None
+    for i in range(1, len(r) - 1):
+        if (r[i:i + 2] < VOICE_CUT * lvl).all():
+            return round(min(limit, t + i * FRAME + 0.04), 3)
+    return None
+
+
+def fix_join_flow(segs: list[dict], wav: Path) -> tuple[list[dict], list[str]]:
+    """Recolle les morceaux des raccords signalés par `join_flow_problems` : le retrait est annulé, la phrase redevient entière
+    (toujours possible, toujours sûr : c'est le son d'origine)."""
+    segs = [dict(s) for s in segs]
+    log = []
+    for p in sorted(join_flow_problems(segs, wav), key=lambda p: -p["k"]):
+        k = p["k"]
+        a, b = segs[k], segs[k + 1]
+        if p.get("extend"):
+            # retrait long = une vraie hésitation retirée par `fillers` / `ctc` (aucun mot perdu, déjà vérifié) : on ne la
+            # remet JAMAIS ; on prolonge la fin jusqu'au creux qui finit le mot, sinon on laisse la coupe (écoute de `qa`)
+            nt = _word_end_after(wav, float(a["end"]), min(float(a["end"]) + 0.45, float(b["start"]) - 0.1))
+            if nt and nt > float(a["end"]) + 0.01:
+                segs[k] = dict(a, end=nt, duration=round(nt - float(a["start"]), 3))
+                log.append(f"fin du mot gardée : {float(a['end']):.2f} -> {nt:.2f} ({p['why']})")
+            continue
+        segs[k] = dict(a, end=b["end"], duration=round(float(b["end"]) - float(a["start"]), 3),
+                       **({"end_text": b["end_text"]} if b.get("end_text") else {}))
+        del segs[k + 1]
+        log.append(f"raccord recollé ({p['why']})")
+    return segs, log
+
+
+# ----------------------------------------------------------------------------------------------- bruit de bouche en fin de short
+# Arthur, 14/10/2026 (short 2 E21) : « il y a un bruit de bouche à la fin ». La respiration gardée après le dernier mot
+# (`pad_end`, jusqu'à 0,35 s) contenait un claquement de lèvres (1503,59 : 30 ms isolées dans le silence).
+
+def tail_noise(wav: Path, t: float, look: float = 1.0) -> dict | None:
+    """Dans la traîne finale (entre la fin de la voix et la coupe t) : un son bref et isolé (≤ 0,08 s, séparé de la voix par
+    ≥ 0,06 s de silence) = bruit de bouche. Renvoie {voice_end, noise, end} (end = coupe conseillée) ou None."""
+    lvl = _level(wav, t - 1.0)
+    r = _rms(wav, t - look, t)
+    if lvl <= 0 or len(r) < 10:
+        return None
+    on = r > END_THR * lvl
+    ve, run = None, 0
+    for i, v in enumerate(on):   # fin de la voix = dernière trame d'une suite d'au moins 5 trames (0,1 s) de son
+        run = run + 1 if v else 0
+        if run >= 5:
+            ve = i
+    if ve is None:
+        return None
+    for i in range(ve + 2, len(on)):
+        if on[i]:
+            j = i
+            while j < len(on) and on[j]:
+                j += 1
+            if j - i <= 4 and i - ve >= 3:
+                v_end = t - look + (ve + 1) * FRAME
+                n_t = t - look + i * FRAME
+                return {"voice_end": round(v_end, 3), "noise": round(n_t, 3),
+                        "end": round(max(v_end + 0.06, min(v_end + 0.15, n_t - 0.02)), 3)}
+            break
+    return None
+
+
+def fix_tail_noise(segs: list[dict], wav: Path) -> tuple[list[dict], list[str]]:
+    segs = [dict(s) for s in segs]
+    p = tail_noise(wav, float(segs[-1]["end"]))
+    if not p:
+        return segs, []
+    segs[-1]["end"] = p["end"]
+    segs[-1]["duration"] = round(p["end"] - float(segs[-1]["start"]), 3)
+    return segs, [f"bruit de bouche à {p['noise']:.2f} après la dernière voix -> fin du short à {p['end']:.2f}"]
+
+
+# ----------------------------------------------------------------------------------------------- qui est à l'image (épisode déjà monté)
+# Arthur, 14/10/2026 (short 1 E21) : « vers le début, Thomas coupe la parole à l'invité, il faut pas ; et ça sert à rien de
+# mettre l'image et le son de Thomas qui acquiesce ». Dans un épisode DÉJÀ MONTÉ, l'image vient du montage du monteur : quand
+# Thomas réagit, le plan passe sur lui (short 1 : 6,9–7,8 s, l'invité parle encore). Le son « hmm » est retiré par `ctc` ;
+# l'IMAGE de celui qui écoute, rien ne la voyait. On reconnaît le visage à l'image (SFace, comme `rushes`).
+
+def listener_shown(clip_media: Path, segs: list[dict], words: list[dict], host_ref, step: float = 0.25,
+                   min_run: float = 0.3) -> list[dict]:
+    """Moments où le visage SEUL à l'image est celui de la personne qui ÉCOUTE (ou qui coupe la parole par-dessus l'autre).
+    `clip_media` = vidéo du montage (assets/source.mp4, temps du clip) ; `words` avec `spk` (diarized_words.json).
+    Renvoie [{t0, t1, abs0, abs1, k, shown, speaking}] (temps du clip, temps source, morceau)."""
+    from .ingest import _faces, _frame, embedding
+    if host_ref is None or not words or not any("spk" in w for w in words):
+        return []
+    spans, acc = [], 0.0
+    for k, s in enumerate(segs):
+        d = float(s["end"]) - float(s["start"])
+        spans.append((acc, acc + d, k, float(s["start"])))
+        acc += d
+    ws = sorted((w for w in words if "spk" in w), key=lambda w: w["s"])
+    starts = np.array([w["s"] for w in ws])
+
+    def speaker(ts: float) -> str | None:
+        i = int(np.searchsorted(starts, ts))
+        for j in (i - 1, i):
+            if 0 <= j < len(ws) and ws[j]["s"] - 0.15 <= ts <= ws[j]["e"] + 0.15:
+                return ws[j]["spk"]
+        return None
+
+    marks = []
+    t = step / 2
+    while t < acc:
+        sp = next((x for x in spans if x[0] <= t < x[1]), None)
+        if sp is None:
+            break
+        ts = sp[3] + (t - sp[0])
+        talk = speaker(ts)
+        bad = None
+        if talk:
+            img = _frame(clip_media, t, 960)
+            fs = _faces(img) if img is not None else []
+            if len(fs) == 1:          # gros plan : une seule personne (le plan large montre les deux : rien à dire)
+                sim = float(embedding(img, fs[0]) @ host_ref)
+                shown = "host" if sim > 0.45 else ("guest" if sim < 0.3 else None)
+                bad = shown if shown and shown != talk else None
+        marks.append((t, ts, sp[2], bad, talk))
+        t += step
+    out, cur = [], None
+    for t, ts, k, bad, talk in marks + [(acc, 0.0, -1, None, None)]:
+        if bad and cur and cur["k"] == k and cur["shown"] == bad:
+            cur["t1"], cur["abs1"] = t + step / 2, ts + step / 2
+            continue
+        if cur and cur["t1"] - cur["t0"] >= min_run:
+            out.append(cur)
+        cur = {"t0": t - step / 2, "t1": t + step / 2, "abs0": ts - step / 2, "abs1": ts + step / 2, "k": k,
+               "shown": bad, "speaking": talk} if bad else None
+    return out
+
+
+def fix_listener_shown(segs: list[dict], runs: list[dict], min_piece: float = 0.4) -> tuple[list[dict], list[str], list[str]]:
+    """Retire du montage le moment où l'on voit celui qui écoute : au bord d'un morceau, le morceau est raccourci (la
+    correction des bords de phrase recale ensuite la coupe dans un silence) ; au milieu, il est coupé en deux autour."""
+    segs = [dict(s) for s in segs]
+    done, left = [], []
+    for r in sorted(runs, key=lambda r: -r["abs0"]):
+        # morceau retrouvé par le temps SOURCE (les indices changent quand d'autres corrections recollent des morceaux)
+        k = next((i for i, x in enumerate(segs) if float(x["start"]) - 0.05 <= (r["abs0"] + r["abs1"]) / 2 <= float(x["end"]) + 0.05), None)
+        if k is None:
+            continue
+        s = segs[k]
+        a, b = float(s["start"]), float(s["end"])
+        x0, x1 = max(a, r["abs0"] - 0.05), min(b, r["abs1"] + 0.05)
+        who = "Thomas" if r["shown"] == "host" else "l'invité"
+        # bon sens (14/10/2026) : couper au MILIEU d'un morceau trancherait une phrase de l'invité -> jamais automatique ; Claude
+        # choisit à la main les coupes sur des silences voisins (quitte à retirer la phrase entière), d'après les mots alignés
+        if x0 - a >= min_piece and b - x1 >= min_piece or x0 - a < min_piece and b - x1 < min_piece:
+            left.append(f"{r['t0']:.1f}–{r['t1']:.1f} s : on voit {who} pendant que l'autre parle ({r['abs0']:.2f}–{r['abs1']:.2f}, "
+                        f"morceau {k + 1}) -> recouper à la main sur des silences voisins")
+            continue
+        if x0 - a < min_piece:
+            segs[k] = dict(s, start=round(x1, 3))
+            segs[k].pop("start_text", None)
+        else:
+            segs[k] = dict(s, end=round(x0, 3))
+            segs[k].pop("end_text", None)
+        done.append(f"{r['t0']:.1f}–{r['t1']:.1f} s : on voyait {who} pendant que l'autre parle ({r['abs0']:.2f}–{r['abs1']:.2f}) -> retiré")
+    for s in segs:
+        s["duration"] = round(float(s["end"]) - float(s["start"]), 3)
+    return segs, done, left

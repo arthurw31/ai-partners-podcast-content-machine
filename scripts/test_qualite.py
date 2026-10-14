@@ -187,6 +187,65 @@ def test_repetition_retiree():
     assert len(out) == 2 and 1397.0 < out[0]["end"] < 1397.2 and 1397.9 < out[1]["start"] < 1398.15, out
 
 
+E21 = ROOT / "EPISODES" / "ai-corner" / "E21_quentin-amaudry_mendo"
+E21_WAV = E21 / "travail" / "work" / "audio16k.wav"
+E21_MP4 = E21 / "rushs" / "E21_quentin-amaudry_mendo.mp4"
+
+
+def _e21():
+    if not E21_WAV.exists():
+        raise _Skip("audio E21 absent")
+    return E21_WAV
+
+
+def test_retrait_trop_court_ou_fin_de_mot_tranchee_recolle():
+    """14/10/2026 short 2 E21 « les phrases ont tendance à être coupées trop tôt » : « il y ‖ a » (0,14 s retirées en
+    pleine voix) et « …mais il ‖ se trouve » (la voix continuait 0,25 s après la coupe)."""
+    from clipper.strict import fix_join_flow, join_flow_problems
+    wav = _e21()
+    segs = [{"start": 1459.63, "end": 1460.28}, {"start": 1460.42, "end": 1462.26},
+            {"start": 1488.485, "end": 1499.095}, {"start": 1499.526, "end": 1503.76}]
+    why = " ".join(p["why"] for p in join_flow_problems(segs, wav))
+    assert "1460.28" in why and ("1499.09" in why or "1499.10" in why), why
+    out, _ = fix_join_flow(segs, wav)
+    assert len(out) == 2, out
+
+
+def test_raccord_euh_propre_garde():
+    """Contre-épreuve : un vrai retrait de « euh » (short 2 E21, 1473,14 -> 1473,95, coupe dans le silence) reste."""
+    from clipper.strict import join_flow_problems
+    wav = _e21()
+    assert not join_flow_problems([{"start": 1462.79, "end": 1473.14}, {"start": 1473.95, "end": 1476.45}], wav)
+
+
+def test_bruit_de_bouche_en_fin_de_short():
+    """14/10/2026 short 2 E21 « il y a un bruit de bouche à la fin » : claquement à 1503,58 après « …dans des agents »."""
+    from clipper.strict import tail_noise
+    p = tail_noise(_e21(), 1503.76)
+    assert p and 1503.5 < p["noise"] < 1503.65 and p["end"] < p["noise"], p
+
+
+def test_thomas_a_l_image_pendant_que_l_invite_parle():
+    """14/10/2026 short 1 E21 « Thomas coupe la parole à l'invité ; ça sert à rien de mettre l'image et le son de Thomas qui
+    acquiesce » : plan de Thomas 1201,625–1203,125 (montage du monteur) pendant « …de tes employés »."""
+    import json
+
+    from clipper.ingest import host_reference
+    from clipper.strict import listener_shown
+    _e21()
+    if not E21_MP4.exists():
+        raise _Skip("vidéo E21 absente")
+    import subprocess
+    import tempfile
+    words = json.loads((E21 / "travail" / "work" / "diarized_words.json").read_text(encoding="utf-8"))
+    cut = Path(tempfile.gettempdir()) / "test_e21_1199.mp4"   # le montage d'un « clip » = 1199–1204 de l'épisode
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", "1199", "-t", "5", "-i", str(E21_MP4), "-an", "-c:v", "libx264",
+                    "-crf", "18", str(cut)], check=True)
+    runs = listener_shown(cut, [{"start": 1199.0, "end": 1204.0}], words, host_reference(Brand("ai-corner")), step=0.25)
+    hit = [r for r in runs if r["abs0"] < 1203.0 and r["abs1"] > 1201.8]
+    assert hit and hit[0]["shown"] == "host", [(r["abs0"], r["abs1"], r["shown"]) for r in runs if r["abs1"] > 1199][:5]
+
+
 class _Skip(Exception):
     pass
 
