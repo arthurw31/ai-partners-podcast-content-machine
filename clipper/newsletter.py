@@ -219,6 +219,8 @@ def make_images(brand, ep: Path, mail: dict, portraits_: dict, thumb: Path | Non
         flat.save(out["guest"], quality=90)
     if thumb:
         im = Image.open(thumb).convert("RGB").resize((1200, 675), Image.Resampling.LANCZOS)
+        out["thumb_plain"] = d / "miniature_sans_play.jpg"                 # en-tête du gabarit « duo » : la même miniature, sans le bouton
+        im.save(out["thumb_plain"], quality=90)
         ov = Image.new("RGBA", im.size, (0, 0, 0, 0))
         dr = ImageDraw.Draw(ov)
         cx, cy, r = 600, 338, 74

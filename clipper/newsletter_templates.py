@@ -294,14 +294,17 @@ def _grid(cards: list, dark: bool = False) -> str:
     bg, num, tt, tx = (NAVY_MID, BLUE_SKY, "#FFFFFF", "#C9D3F5") if dark else (LIGHT, BLUE, NAVY, NAVY_MID)
 
     def card(k, p):
-        return (f'<td class="col" width="50%" valign="top" style="padding:0 6px 12px 6px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
-                f'<td bgcolor="{bg}" style="border-radius:14px;padding:16px 16px 18px 16px;font-family:{FONT};font-size:14px;line-height:1.5;color:{tx}">'
-                f'<div style="font-size:22px;font-weight:bold;color:{num};padding-bottom:6px">{k:02d}</div>'
-                f'<strong style="color:{tt};font-size:16px;line-height:1.3">{esc(p.get("title"))}</strong><br>{esc(p.get("text"))}</td></tr></table></td>')
+        # la carte EST la cellule : deux cellules d'une même ligne ont toujours la même hauteur, dans tous les clients mail
+        return (f'<td class="col" width="49%" bgcolor="{bg}" valign="top" style="border-radius:14px;padding:16px 16px 18px 16px;font-family:{FONT};'
+                f'font-size:14px;line-height:1.5;color:{tx}"><div style="font-size:22px;font-weight:bold;color:{num};padding-bottom:6px">{k:02d}</div>'
+                f'<strong style="color:{tt};font-size:16px;line-height:1.3">{esc(p.get("title"))}</strong><br>{esc(p.get("text"))}</td>')
+    gap = '<td class="col" width="2%" style="font-size:0;line-height:0">&nbsp;</td>'
     cards = list(cards)[:4]
-    return "".join("<tr>" + card(i + 1, cards[i]) + (card(i + 2, cards[i + 1]) if i + 1 < len(cards) else '<td class="col" width="50%"></td>') + "</tr>"
-                   for i in range(0, len(cards), 2))
-
+    rows = []
+    for i in range(0, len(cards), 2):
+        right = card(i + 2, cards[i + 1]) if i + 1 < len(cards) else '<td class="col" width="49%"></td>'
+        rows.append("<tr>" + card(i + 1, cards[i]) + gap + right + "</tr>")
+    return '<tr><td height="12" colspan="3" style="font-size:0;line-height:0">&nbsp;</td></tr>'.join(rows)
 
 def _topbar(c: dict) -> str:
     return (f'<tr><td bgcolor="{NAVY}" class="pad" style="padding:18px 40px;font-family:{FONT}"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
@@ -310,9 +313,10 @@ def _topbar(c: dict) -> str:
 
 
 def _duo_hero(c: dict) -> str:
-    if not c["img"].get("duo"):
+    key = "thumb_plain" if c["img"].get("thumb_plain") else "duo"
+    if not c["img"].get(key):
         return ""
-    return (f'<tr><td><a href="{esc(c["url"])}"><img src="{c["rel"]("duo")}" width="600" alt="{esc(c["host_name"])} et {esc(c["guest"])}" '
+    return (f'<tr><td><a href="{esc(c["url"])}"><img src="{c["rel"](key)}" width="600" alt="{esc(c["host_name"])} et {esc(c["guest"])}" '
             f'style="display:block;width:100%;max-width:600px"></a></td></tr>')
 
 
@@ -394,26 +398,11 @@ def make_chrome(brand, d: Path, mail: dict, shot, fonts_css: str, uri, logo_svg:
     out["plat_title"] = shot(title, 1200, 300, d / "plateformes_titre.png")
     for p in platforms:
         key = (p.get("name") or "").lower()
-        label = p.get("label") or PLATFORM_LABELS.get(key, p.get("name") or key)
-        c1, c2, fg = _TILES.get(key, ("#FFFFFF", "#E7E3F7", None))
-        pg = (f"<html><head><meta charset='utf-8'><style>{fonts_css}*{{margin:0;box-sizing:border-box}}body{{width:360px;height:380px;background:{BAND_BG};"
-              f"font-family:M,Arial;position:relative;overflow:hidden}}"
-              f".card{{position:absolute;left:16px;top:10px;right:16px;bottom:26px;border-radius:40px;"
-              f"background:linear-gradient(160deg,rgba(255,255,255,.20) 0%,rgba(255,255,255,.07) 45%,rgba(255,255,255,.04) 100%);"
-              f"border:2px solid rgba(255,255,255,.28);box-shadow:0 8px 14px rgba(6,10,50,.30),inset 0 2px 0 rgba(255,255,255,.35)}}"
-              f".tile{{position:absolute;left:100px;top:44px;width:160px;height:160px;border-radius:38px;padding:34px;"
-              f"background:linear-gradient(155deg,{c1} 0%,{c2} 100%);box-shadow:0 16px 28px rgba(5,10,45,.55),inset 0 3px 0 rgba(255,255,255,.55),"
-              f"inset 0 -6px 12px rgba(0,0,0,.18);overflow:hidden}}"
-              f".tile.full{{padding:0}}"
-              f".tile:after{{content:'';position:absolute;left:0;right:0;top:0;height:52%;background:linear-gradient(rgba(255,255,255,.42),rgba(255,255,255,.04));"
-              f"border-radius:38px 38px 60% 60%/38px 38px 24px 24px}}"
-              f".n{{position:absolute;left:0;right:0;top:226px;text-align:center;color:#fff;font-weight:800;font-size:44px}}"
-              f".b{{position:absolute;left:0;right:0;top:288px;text-align:center}}.b span{{display:inline-block;background:{BLUE};color:#fff;"
-              f"font-weight:700;font-size:24px;letter-spacing:.08em;padding:9px 26px;border-radius:999px;text-transform:uppercase}}"
-              f"</style></head><body><div class='card'></div>"
-              f"<div class='tile {'full' if key == 'ausha' else ''}'>{_glyph(brand, key, fg, uri)}</div>"
-              f"<div class='n'>{esc(label)}</div><div class='b'><span>Écouter ▸</span></div></body></html>")
-        out[f"plat_{key}"] = shot(pg, 360, 380, d / f"plateforme_{key}.png")
+        color = _TILES.get(key, ("", "", None))[0] if False else {"youtube": "#FF0000", "spotify": "#1DB954"}.get(key)
+        pg = (f"<html><head><meta charset='utf-8'><style>*{{margin:0;box-sizing:border-box}}body{{width:240px;height:240px;background:{BAND_BG};"
+              f"position:relative;overflow:hidden}}.t{{position:absolute;left:20px;top:16px;width:200px;height:200px;border-radius:50px;background:#fff;"
+              f"padding:42px;box-shadow:0 6px 14px rgba(5,10,45,.35)}}</style></head><body><div class='t'>{_glyph(brand, key, color, uri)}</div></body></html>")
+        out[f"plat_{key}"] = shot(pg, 240, 240, d / f"plateforme_{key}.png")
     return out
 
 
@@ -433,12 +422,12 @@ def _platforms(c: dict) -> str:
     def cell(p):
         key = (p["name"] or "").lower()
         label = p.get("label") or PLATFORM_LABELS.get(key, p["name"])
-        return (f'<td align="center" valign="top" width="33%" style="padding:0 3px"><a href="{esc(p["url"])}" style="text-decoration:none">'
-                f'<img src="{c["rel"]("plat_" + key)}" width="172" alt="Écouter AI Corner sur {esc(label)}" '
-                f'style="display:block;width:100%;max-width:172px;height:auto;border:0"></a></td>')
+        return (f'<td align="center" valign="middle" width="96" style="padding:0 8px"><a href="{esc(p["url"])}" style="text-decoration:none">'
+                f'<img src="{c["rel"]("plat_" + key)}" width="80" height="80" alt="{esc(label)}" '
+                f'style="display:block;width:80px;height:80px;border:0"></a></td>')
     return (f'<tr><td bgcolor="{BAND_BG}"><img src="{c["rel"]("plat_title")}" width="600" alt="Écoutez AI Corner partout" '
             f'style="display:block;width:100%;max-width:600px"></td></tr>'
-            f'<tr><td bgcolor="{BAND_BG}" align="center" style="padding:0 14px 34px 14px"><table role="presentation" width="100%" cellpadding="0" '
+            f'<tr><td bgcolor="{BAND_BG}" align="center" style="padding:0 14px 38px 14px"><table role="presentation" align="center" cellpadding="0" '
             f'cellspacing="0"><tr>{"".join(cell(p) for p in items)}</tr></table></td></tr>')
 
 
