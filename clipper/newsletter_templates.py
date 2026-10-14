@@ -346,18 +346,28 @@ def _text_block(c: dict, dark: bool = False, hook: bool = True) -> str:
 # ---------------------------------------------------------------------------------------------------------------
 
 PLATFORM_LABELS = {"youtube": "YouTube", "spotify": "Spotify", "ausha": "Ausha"}
-_ICONS = {
-    "youtube": ("<svg viewBox='0 0 100 100'><rect x='0' y='14' width='100' height='72' rx='22' fill='#FF0000'/>"
-                "<path d='M40 33 L70 50 L40 67 Z' fill='#fff'/></svg>"),
-    "spotify": ("<svg viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='#1DB954'/>"
-                "<g fill='none' stroke='#0B1020' stroke-width='7' stroke-linecap='round'>"
-                "<path d='M22 36 Q50 27 78 41'/><path d='M26 52 Q50 44 74 56'/><path d='M30 67 Q50 60 70 69'/></g></svg>"),
-}
+BAND_BG = NAVY_MID                       # fond du bandeau du bas : les images s'y fondent
+# Tuile « icône d'appli » (dégradé de la marque, reflet en haut) : couleur du dégradé, couleur du logo
+_TILES = {"youtube": ("#FF3B30", "#C4000A", "#FFFFFF"), "spotify": ("#2EE06F", "#14A046", "#0B1020"),
+          "ausha": ("#FFFFFF", "#E7E3F7", None)}
+
+
+def _glyph(brand, key: str, color: str | None, uri) -> str:
+    """Vrai logo de la plateforme : `assets/platforms/<nom>.svg` (Simple Icons : YouTube, Spotify) ou `<nom>_favicon.png`
+    (Ausha : favicon officiel du site), à défaut le nom en texte."""
+    d = brand.assets_dir / "platforms"
+    svg = d / f"{key}.svg"
+    if svg.exists():
+        return svg.read_text(encoding="utf-8").replace("<svg ", f"<svg fill='{color or '#000'}' style='width:100%;height:100%' ", 1)
+    for f in (d / f"{key}.png", d / f"{key}_favicon.png"):
+        if f.exists():
+            return f"<img src='{uri(f)}' style='width:100%;height:100%;object-fit:contain;display:block'>"
+    return f"<div style='font-weight:800;font-size:40px;color:{NAVY};text-align:center;line-height:150px'>{esc(key)}</div>"
 
 
 def make_chrome(brand, d: Path, mail: dict, shot, fonts_css: str, uri, logo_svg: str, platforms: list) -> dict:
-    """Images du D1 : en-tête (AI Corner by logo AI Partners) et une icône par plateforme (fond bleu nuit, 256 px).
-    Un logo officiel déposé dans `assets/platforms/<nom>.png|svg` remplace l'icône dessinée ici."""
+    """Images du D1 : en-tête (AI Corner by logo AI Partners), titre du bandeau du bas, et une carte par plateforme
+    (tuile d'appli brillante + nom + « Écouter », cliquable en entier)."""
     out = {}
     page = (f"<html><head><meta charset='utf-8'><style>{fonts_css}*{{margin:0}}body{{width:1200px;height:270px;background:{NAVY};"
             f"font-family:M,Arial;overflow:hidden;position:relative}}"
@@ -372,18 +382,38 @@ def make_chrome(brand, d: Path, mail: dict, shot, fonts_css: str, uri, logo_svg:
             f"<div class='k'>AI <b>Corner</b></div><div class='by'><span>by</span>{logo_svg}</div>"
             f"<div class='pill'>Nouvel épisode · {esc(mail['episode'])}</div></body></html>")
     out["header"] = shot(page, 1200, 270, d / "entete.png")
+    title = (f"<html><head><meta charset='utf-8'><style>{fonts_css}*{{margin:0}}body{{width:1200px;height:300px;overflow:hidden;position:relative;"
+             f"background:radial-gradient(ellipse 70% 120% at 85% 0%,{BLUE} 0%,rgba(37,138,243,0) 70%),{BAND_BG};font-family:M,Arial}}"
+             f".m{{position:absolute;left:-60px;top:-140px;width:1000px;opacity:.55;mix-blend-mode:screen}}"
+             f"h1{{position:absolute;left:0;right:0;top:78px;text-align:center;color:#fff;font-weight:800;font-size:60px;letter-spacing:-.01em}}"
+             f"p{{position:absolute;left:0;right:0;top:170px;text-align:center;color:#C9D3F5;font-size:30px}}"
+             f".fade{{position:absolute;left:0;right:0;bottom:0;height:90px;background:linear-gradient(rgba(29,44,118,0),{BAND_BG})}}"
+             f"</style></head><body><img class='m' src='{uri(brand.asset('outro_bg.png'))}'>"
+             f"<h1>Écoutez <span style='color:{BLUE_SKY}'>AI Corner</span> partout</h1>"
+             f"<p>Tous les épisodes, à écouter ou à regarder où vous voulez</p><div class='fade'></div></body></html>")
+    out["plat_title"] = shot(title, 1200, 300, d / "plateformes_titre.png")
     for p in platforms:
         key = (p.get("name") or "").lower()
-        custom = next((f for ext in ("png", "svg", "jpg") if (f := brand.assets_dir / "platforms" / f"{key}.{ext}").exists()), None)
-        if custom:
-            inner = f"<img src='{uri(custom)}' style='width:100%;height:100%;object-fit:contain'>"
-        else:
-            inner = _ICONS.get(key) or (f"<div style='width:100%;height:100%;border-radius:28px;background:#fff;color:{NAVY};display:flex;"
-                                        f"align-items:center;justify-content:center;font-weight:800;font-size:60px'>{esc(key)}</div>")
-        pg = (f"<html><head><meta charset='utf-8'><style>{fonts_css}*{{margin:0}}body{{width:256px;height:256px;background:{NAVY_MID};"
-              f"display:flex;align-items:center;justify-content:center;font-family:M,Arial}}.i{{width:200px;height:200px}}"
-              f".i svg{{width:100%;height:100%;display:block}}</style></head><body><div class='i'>{inner}</div></body></html>")
-        out[f"plat_{key}"] = shot(pg, 256, 256, d / f"plateforme_{key}.png")
+        label = p.get("label") or PLATFORM_LABELS.get(key, p.get("name") or key)
+        c1, c2, fg = _TILES.get(key, ("#FFFFFF", "#E7E3F7", None))
+        pg = (f"<html><head><meta charset='utf-8'><style>{fonts_css}*{{margin:0;box-sizing:border-box}}body{{width:360px;height:380px;background:{BAND_BG};"
+              f"font-family:M,Arial;position:relative;overflow:hidden}}"
+              f".card{{position:absolute;left:16px;top:10px;right:16px;bottom:26px;border-radius:40px;"
+              f"background:linear-gradient(160deg,rgba(255,255,255,.20) 0%,rgba(255,255,255,.07) 45%,rgba(255,255,255,.04) 100%);"
+              f"border:2px solid rgba(255,255,255,.28);box-shadow:0 8px 14px rgba(6,10,50,.30),inset 0 2px 0 rgba(255,255,255,.35)}}"
+              f".tile{{position:absolute;left:100px;top:44px;width:160px;height:160px;border-radius:38px;padding:34px;"
+              f"background:linear-gradient(155deg,{c1} 0%,{c2} 100%);box-shadow:0 16px 28px rgba(5,10,45,.55),inset 0 3px 0 rgba(255,255,255,.55),"
+              f"inset 0 -6px 12px rgba(0,0,0,.18);overflow:hidden}}"
+              f".tile.full{{padding:0}}"
+              f".tile:after{{content:'';position:absolute;left:0;right:0;top:0;height:52%;background:linear-gradient(rgba(255,255,255,.42),rgba(255,255,255,.04));"
+              f"border-radius:38px 38px 60% 60%/38px 38px 24px 24px}}"
+              f".n{{position:absolute;left:0;right:0;top:226px;text-align:center;color:#fff;font-weight:800;font-size:44px}}"
+              f".b{{position:absolute;left:0;right:0;top:288px;text-align:center}}.b span{{display:inline-block;background:{BLUE};color:#fff;"
+              f"font-weight:700;font-size:24px;letter-spacing:.08em;padding:9px 26px;border-radius:999px;text-transform:uppercase}}"
+              f"</style></head><body><div class='card'></div>"
+              f"<div class='tile {'full' if key == 'ausha' else ''}'>{_glyph(brand, key, fg, uri)}</div>"
+              f"<div class='n'>{esc(label)}</div><div class='b'><span>Écouter ▸</span></div></body></html>")
+        out[f"plat_{key}"] = shot(pg, 360, 380, d / f"plateforme_{key}.png")
     return out
 
 
@@ -395,22 +425,21 @@ def _header(c: dict) -> str:
 
 
 def _platforms(c: dict) -> str:
-    """Bandeau d'appel à l'action : écouter AI Corner sur YouTube, Spotify, Ausha (logos cliquables vers l'émission)."""
-    items = [p for p in c.get("platforms") or [] if p.get("url")]
-    if not items:
+    """Bandeau d'appel à l'action : écouter AI Corner sur YouTube, Spotify, Ausha (cartes cliquables vers l'émission)."""
+    items = [p for p in c.get("platforms") or [] if p.get("url") and c["img"].get("plat_" + (p.get("name") or "").lower())]
+    if not items or not c["img"].get("plat_title"):
         return ""
 
     def cell(p):
-        key = (p.get("name") or "").lower()
-        label = p.get("label") or PLATFORM_LABELS.get(key, p.get("name"))
-        img = (f'<img src="{c["rel"]("plat_" + key)}" width="68" height="68" alt="{esc(label)}" style="display:block;margin:0 auto;width:68px;height:68px">'
-               if c["img"].get("plat_" + key) else "")
-        return (f'<td align="center" valign="top" style="padding:0 6px"><a href="{esc(p["url"])}" style="text-decoration:none">{img}'
-                f'<div style="font-family:{FONT};font-size:14px;font-weight:bold;color:#FFFFFF;padding-top:8px">{esc(label)}</div></a></td>')
-    return (f'<tr><td bgcolor="{NAVY_MID}" align="center" class="pad" style="padding:30px 30px 32px 30px;font-family:{FONT}">'
-            f'<div style="font-size:21px;font-weight:bold;color:#FFFFFF;line-height:1.3">Écoutez AI Corner sur votre plateforme préférée</div>'
-            f'<div style="font-size:14px;color:#9DB8FF;padding:8px 0 22px 0">Tous les épisodes, à écouter ou à regarder où vous voulez.</div>'
-            f'<table role="presentation" cellpadding="0" cellspacing="0"><tr>{"".join(cell(p) for p in items)}</tr></table></td></tr>')
+        key = (p["name"] or "").lower()
+        label = p.get("label") or PLATFORM_LABELS.get(key, p["name"])
+        return (f'<td align="center" valign="top" width="33%" style="padding:0 3px"><a href="{esc(p["url"])}" style="text-decoration:none">'
+                f'<img src="{c["rel"]("plat_" + key)}" width="172" alt="Écouter AI Corner sur {esc(label)}" '
+                f'style="display:block;width:100%;max-width:172px;height:auto;border:0"></a></td>')
+    return (f'<tr><td bgcolor="{BAND_BG}"><img src="{c["rel"]("plat_title")}" width="600" alt="Écoutez AI Corner partout" '
+            f'style="display:block;width:100%;max-width:600px"></td></tr>'
+            f'<tr><td bgcolor="{BAND_BG}" align="center" style="padding:0 14px 34px 14px"><table role="presentation" width="100%" cellpadding="0" '
+            f'cellspacing="0"><tr>{"".join(cell(p) for p in items)}</tr></table></td></tr>')
 
 
 def duo(c: dict) -> str:
@@ -504,11 +533,20 @@ BUILDERS = {"nuit": nuit, "heros": heros, "editorial": editorial, "vedette": ved
 VARIANTES = ["vedette", "duo", "ronds", "lettre", "duo_nuit"]
 
 
+def default_url(brand_cfg: dict, mail: dict) -> str:
+    """Lien du bouton et de la miniature : l'épisode si on a son lien, sinon la playlist YouTube de l'émission
+    (Arthur, 14/10/2026 : « pour YouTube, le lien vers la playlist, comme ça on n'a pas à donner le lien de l'épisode à chaque fois »)."""
+    if mail.get("youtube_url"):
+        return mail["youtube_url"]
+    yt = next((p.get("url") for p in brand_cfg.get("platforms") or [] if (p.get("name") or "").lower() == "youtube"), "")
+    return yt or "#"
+
+
 def context(brand_cfg: dict, mail: dict, imgs: dict, title: str) -> dict:
     return {"subject": mail.get("subject", ""), "preheader": mail.get("preheader", ""), "episode": mail.get("episode", ""),
             "guest": mail.get("guest", ""), "role": mail.get("role", ""), "theme": mail.get("theme", ""),
             "hook": mail.get("hook", ""), "intro": mail.get("intro", ""), "closing": mail.get("closing", ""),
-            "program": mail.get("program") or [], "url": mail.get("youtube_url") or "#", "title": title, "img": imgs,
+            "program": mail.get("program") or [], "url": default_url(brand_cfg, mail), "title": title, "img": imgs,
             "button": brand_cfg.get("button") or "REGARDER L'ÉPISODE", "platforms": brand_cfg.get("platforms") or [],
             "host_name": brand_cfg.get("from_name") or "Thomas Spitz", "host_role": brand_cfg.get("host_role") or "CEO d'AI Partners",
             "sig": brand_cfg.get("signature") or "Thomas Spitz<br>CEO et fondateur d'AI Partners",

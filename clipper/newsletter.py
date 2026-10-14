@@ -141,8 +141,6 @@ def check(mail: dict, segments: list[dict]) -> list[dict]:
         d = re.sub(r"[  .,]", "", num)
         if len(d) >= 2 and d not in full:
             add("ÉCHEC", f"chiffre « {num} » absent de la transcription")
-    if not mail.get("youtube_url"):
-        add("ATTENTION", "lien YouTube de l'épisode manquant (`newsletter --youtube-url …` une fois l'épisode publié)")
     return out
 
 
@@ -243,7 +241,8 @@ def email_html(brand, mail: dict, imgs: dict, title: str, template: str = "class
     if template in BUILDERS:
         return BUILDERS[template](context(_cfg(brand), mail, imgs, title))
     cfg = _cfg(brand)
-    url = mail.get("youtube_url") or "#"
+    from .newsletter_templates import default_url
+    url = default_url(cfg, mail)
     font = "Helvetica, Arial, sans-serif"
     sig = cfg.get("signature") or "Thomas Spitz<br>CEO et fondateur d'AI Partners"
     rel = lambda k: f"images/{imgs[k].name}" if imgs.get(k) else ""       # noqa: E731
@@ -300,7 +299,8 @@ def email_html(brand, mail: dict, imgs: dict, title: str, template: str = "class
 def email_text(brand, mail: dict) -> str:
     cfg = _cfg(brand)
     sig = (cfg.get("signature") or "Thomas Spitz<br>CEO et fondateur d'AI Partners").replace("<br>", "\n")
-    url = mail.get("youtube_url") or "<lien YouTube>"
+    from .newsletter_templates import default_url
+    url = default_url(cfg, mail)
     prog = "\n".join(f"- {p.get('title', '')} : {p.get('text', '')}" for p in mail.get("program") or [])
     return (f"{mail['guest']} ({mail.get('role', '')})\n{mail.get('theme', '')}\n\n{mail.get('hook', '')}\n\n"
             f"{mail.get('intro', '')}\n\nRegarder l'épisode : {url}\n\nAu programme de cet épisode\n{prog}\n\n"
@@ -385,8 +385,6 @@ def save(ep: Path, mail: dict, segments: list[dict]) -> Path:
 
 
 def finalize(ep: Path, mail: dict, by: str = "", note: str = "") -> Path:
-    if not mail.get("youtube_url"):
-        raise SystemExit("Pas de lien YouTube : `newsletter --youtube-url <lien>` une fois l'épisode publié, puis --final")
     title_ok, thumb_ok = episode_title(ep)[1], thumbnail_image(ep)[1]
     if not (title_ok and thumb_ok):
         raise SystemExit("Titre ou miniature encore provisoires : `titles --pick` et `thumbnail --pick` d'abord, puis --render")
