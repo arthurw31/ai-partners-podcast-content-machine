@@ -98,7 +98,7 @@ def shell(c: dict, outer_bg: str, body: str, footer_bg: str, footer_fg: str, car
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">
 <title>{esc(c["subject"])}</title>
-<style>@media (max-width:480px){{.col{{display:block!important;width:100%!important}}.pad{{padding-left:22px!important;padding-right:22px!important}}}}</style></head>
+<style>@media (max-width:600px){{.col{{display:block!important;width:100%!important;box-sizing:border-box!important}}.pad{{padding-left:22px!important;padding-right:22px!important}}.card{{display:block!important;width:100%!important;height:auto!important;margin:0 0 12px 0!important}}}}</style></head>
 <body style="margin:0;padding:0;background:{outer_bg}">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">{esc(c["preheader"])}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="{outer_bg}"><tr><td align="center" style="padding:24px 12px">
@@ -299,20 +299,16 @@ def _grid(cards: list, dark: bool = False) -> str:
         return 39 + 21 * math.ceil(len(p.get("title") or "") / 29) + 21 * math.ceil(len(p.get("text") or "") / 34)
 
     # les 4 cartes ont la MÊME hauteur (Arthur, 14/10/2026), quelle que soit la quantité de texte : minimum commun, jamais rogné
-    h = max((need(p) for p in list(cards)[:4]), default=0) + 4
+    h = max((need(p) for p in list(cards)[:4]), default=0) + 38
 
     def card(k, p):
-        # la carte EST la cellule : deux cellules d'une même ligne ont toujours la même hauteur, dans tous les clients mail
-        return (f'<td class="col" width="49%" height="{h}" bgcolor="{bg}" valign="top" style="height:{h}px;border-radius:14px;padding:16px 16px 18px 16px;font-family:{FONT};'
+        # carte = bloc « inline-block » (2 par ligne, empilées sur téléphone par .card) ; les cellules de tableau passées en
+        # display:block débordaient du mail sur téléphone (14/10/2026)
+        return (f'<div class="card" style="display:inline-block;vertical-align:top;width:48.5%;margin:0 .75% 12px .75%;box-sizing:border-box;'
+                f'background-color:{bg};border-radius:14px;padding:16px 16px 18px 16px;height:{h}px;text-align:left;font-family:{FONT};'
                 f'font-size:14px;line-height:1.5;color:{tx}"><div style="font-size:22px;font-weight:bold;color:{num};padding-bottom:6px">{k:02d}</div>'
-                f'<strong style="color:{tt};font-size:16px;line-height:1.3">{esc(p.get("title"))}</strong><br>{esc(p.get("text"))}</td>')
-    gap = '<td class="col" width="2%" style="font-size:0;line-height:0">&nbsp;</td>'
-    cards = list(cards)[:4]
-    rows = []
-    for i in range(0, len(cards), 2):
-        right = card(i + 2, cards[i + 1]) if i + 1 < len(cards) else '<td class="col" width="49%"></td>'
-        rows.append("<tr>" + card(i + 1, cards[i]) + gap + right + "</tr>")
-    return '<tr><td height="12" colspan="3" style="font-size:0;line-height:0">&nbsp;</td></tr>'.join(rows)
+                f'<strong style="color:{tt};font-size:16px;line-height:1.3">{esc(p.get("title"))}</strong><br>{esc(p.get("text"))}</div>')
+    return ('<tr><td style="font-size:0;line-height:0">' + "".join(card(i + 1, p) for i, p in enumerate(list(cards)[:4])) + "</td></tr>")
 
 def _topbar(c: dict) -> str:
     return (f'<tr><td bgcolor="{NAVY}" class="pad" style="padding:18px 40px;font-family:{FONT}"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
