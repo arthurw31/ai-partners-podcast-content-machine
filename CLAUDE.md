@@ -625,6 +625,12 @@ vérification intransigeante qui règle ces problèmes »)
   traitements (`request_keep_awake`) : une mise en veille avait interrompu la chaîne la nuit du 12/10.
   Volume : `rebuild_audio` fait un `loudnorm` en DEUX passages (mesure puis correction linéaire) — en un passage, le short 5
   (19 s) sortait à -17,6 LUFS ; ne jamais lancer deux chaînes `polish`/`render` sur les mêmes shorts en même temps.
+- E21 (épisode déjà monté, 1080p, 14/10/2026) : la transcription du 05/10 a des horodatages décalés de 0,3 à 0,5 s par
+  rapport au son -> les coupes faites à la main se placent sur l'ÉNERGIE du micro (`work/audio16k.wav`, creux réels), pas sur
+  les mots de Whisper. Une phrase dite dans un blanc et absente de la transcription normale (« C'était le début, en fait »,
+  short 1, 1202,86–1203,85) n'est retirée ni par `ctc` (le verbatim l'aligne comme du texte) ni par `fillers` : la lire dans
+  « Ce qu'on entend » du rapport et couper à la main. Après une retouche de `segments` : `build --only N --force` (sinon le
+  contrôle de synchro compare un ancien son : « son différent de la source »).
 - Pistes restantes de la recherche (si des défauts restent) : **Smart Turn v3** (pipecat-ai, BSD-2, ONNX
   8 Mo, français, ~12–100 ms CPU) = probabilité que l'orateur ait FINI sa phrase, d'après la prosodie, à chaque fin
   d'extrait ; **alignement forcé CTC** (wav2vec2 français `bofenghuang/asr-wav2vec2-ctc-french`, Apache-2.0, Viterbi en numpy,
