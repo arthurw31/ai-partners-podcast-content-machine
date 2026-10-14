@@ -187,10 +187,16 @@ def make_images(brand, ep: Path, mail: dict, portraits_: dict, thumb: Path | Non
               f"<div class='s'>Le podcast d'AI Partners · {html.escape(mail['episode'])}</div><div class='g'>{logo}</div></body></html>")
     out = {"banner": _shot(banner, 1200, 300, d / "bandeau.png")}
     g = portraits_.get("guest")
-    from .newsletter_templates import make_hero
+    from .newsletter_templates import make_duo, make_hero, square_photo
     hero = make_hero(brand, d, mail, g, _shot, _fonts_css(brand), _uri)
     if hero:
         out["hero"] = hero
+    duo = make_duo(d, mail, portraits_.get("host"), g, _shot, _fonts_css(brand), _uri)
+    if duo:
+        out["duo"] = duo
+    host = square_photo(portraits_.get("host"), d / "thomas.jpg")
+    if host:
+        out["host"] = host
     if g:
         size = 640
         bg = Image.new("RGB", (size, size))
@@ -312,7 +318,7 @@ def _preview(d: Path, page: str, out: Path) -> Path:
     return out
 
 
-def templates_sheet(brand, d: Path, names: list[str]) -> Path:
+def templates_sheet(brand, d: Path, names: list[str], name: str = "planche_gabarits.png") -> Path:
     """Planche : les aperçus de tous les gabarits côte à côte (choix de l'équipe)."""
     from .canva_template import font
     from .newsletter_templates import TEMPLATES
@@ -326,7 +332,7 @@ def templates_sheet(brand, d: Path, names: list[str]) -> Path:
         x = pad + k * (w + pad)
         dr.text((x, 24), TEMPLATES[n].split(" : ")[0], font=f, fill=(21, 29, 83))
         sheet.paste(im, (x, head))
-    out = d / "planche_gabarits.png"
+    out = d / name
     sheet.save(out)
     return out
 
@@ -341,13 +347,14 @@ def render(brand, ep: Path, mail: dict, portraits_: dict, template: str | None =
     thumb, thumb_ok = thumbnail_image(ep)
     imgs = make_images(brand, ep, mail, portraits_, thumb)
     template = template or str(_cfg(brand).get("template") or "classique")
-    if template == "all":
-        names = list(TEMPLATES)
+    if template in ("all", "variantes"):
+        from .newsletter_templates import VARIANTES
+        names = list(TEMPLATES) if template == "all" else list(VARIANTES)
         for n in names:
             page = email_html(brand, mail, imgs, title, n)
             (d / f"email_{n}.html").write_text(page, encoding="utf-8")
             _preview(d, page, d / f"apercu_{n}.png")
-        sheet = templates_sheet(brand, d, names)
+        sheet = templates_sheet(brand, d, names, "planche_gabarits.png" if template == "all" else "planche_variantes.png")
         return {"preview": sheet, "html": d / "email_nuit.html", "images": imgs, "templates": names,
                 "notes": ["gabarits à comparer : choisir puis `newsletter --template <nom> --render`"]}
     if template not in TEMPLATES:

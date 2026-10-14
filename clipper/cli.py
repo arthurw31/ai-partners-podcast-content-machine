@@ -1524,7 +1524,7 @@ def main(argv: list[str] | None = None) -> None:
     sp.add_argument("--role", default="", help="rôle de l'invité (défaut : clips.json, guest_role)")
     sp.add_argument("--youtube-url", default="", help="lien de l'épisode publié sur YouTube (bouton + miniature cliquable)")
     sp.add_argument("--render", action="store_true", help="refait le rendu depuis newsletter/contenu.json (après retouche du texte)")
-    sp.add_argument("--template", default="", help="gabarit : classique | nuit | heros | editorial | vedette | all (compare tous les gabarits)")
+    sp.add_argument("--template", default="", help="gabarit : classique | nuit | heros | editorial | vedette | duo | ronds | lettre | duo_nuit | all (compare tous) | variantes (le style vedette et ses 4 variantes)")
     sp.add_argument("--final", action="store_true", help="validation de l'équipe -> newsletter/final/ (refusé sans lien YouTube)")
     sp.add_argument("--envoi", action="store_true", help="version prête pour n8n : images publiées (GitHub Pages), {{prenom}}, lien de désinscription")
     sp.add_argument("--by", default="", help="qui a validé (prénom)")

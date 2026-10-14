@@ -282,6 +282,10 @@ newsletter dans ce style-là : un mail qui part direct de la part du founder »)
   en ligne, `bgcolor`, 600 px, Helvetica/Arial pour le TEXTE (Metropolis seulement dans les images : bandeau, héros), pas
   d'italique ; marqueurs `<!--HELLO-->` et `<!--FOOT-->` remplacés à l'envoi par `send_ready` (« Bonjour {{prenom}} », « Se
   désinscrire ») : tout nouveau gabarit les garde ; `send_ready` ne publie que les images utilisées par le gabarit choisi.
+  **Thomas en haut** (Arthur, 14/10/2026 : « comme le mail part de Thomas, les gens vont lire s'ils voient Thomas au début ; il faut le
+  mettre en haut aussi, avec l'invité ») : variantes du style `vedette` — `duo` (image Thomas + invité face à face), `ronds`
+  (deux photos rondes puis miniature), `lettre` (le mail s'ouvre sur Thomas et son mot), `duo_nuit` ; `--template variantes` ->
+  `planche_variantes.png`. Photos : `carousel.portraits` (cutouts `host` / `guest`, Thomas regarde à droite, l'invité à gauche).
 
 ## Relecture critique sans contexte : `review` (Arthur, 12/10/2026 : « un sous-agent qui n'a pas le contexte de la
 conversation principale, pour un regard neuf et plus critique ; un modèle assez performant » puis « attention à la
