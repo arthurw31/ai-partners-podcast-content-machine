@@ -121,3 +121,7 @@ Annonce d'un nouvel épisode (« New AI Corner episode with <Entreprise> is now 
 4–5 puces ▪️ + « The core idea: … ») ou post « preview » (« 🎙️ Missed our latest AI Corner episode? Here's a
 preview. » + « Together, they explore: » et puces •). Ces formats servent à annoncer l'épisode entier, pas à
 accompagner un short.
+
+## Ponctuation
+
+Jamais de tiret cadratin « — » ni demi-cadratin « – » (Arthur, 14/10/2026 : « ça fait bizarre »). Une virgule, deux-points, des parenthèses ou deux phrases.

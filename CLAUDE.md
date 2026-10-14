@@ -772,6 +772,12 @@ mots des fois, faudrait une sorte de boucle de double check »)
 - Limite connue : un « euh » collé au mot suivant (aucun creux entre les deux) n'est pas retiré.
 - Vérifier à l'oreille les raccords (l'agent ne peut pas écouter) : le dire à Arthur avec les instants.
 
+## Jamais de tiret cadratin (Arthur, 14/10/2026 : « ne jamais mettre le tiret que Claude met tout le temps, ça fait bizarre »)
+
+Dans TOUT texte écrit pour l'équipe ou le public (mails, posts, carrousels, titres, descriptions, messages) : pas de « — » ni de
+« – » ; virgule, deux-points, parenthèses ou deux phrases. Appliqué en code (`llm._no_dash` nettoie chaque réponse JSON du modèle)
+et dans les briefs de `MARQUES/<marque>/` (rubrique « Ponctuation »). Les tirets « - » des mots composés restent.
+
 ## Retours d'Arthur = améliorations du process
 
 Chaque modification demandée par Arthur se généralise : la traduire en réglage de marque/preset ou en code, la noter ici

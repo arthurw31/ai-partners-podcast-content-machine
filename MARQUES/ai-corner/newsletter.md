@@ -31,3 +31,7 @@ Train (Mailjet). Ce fichier est injecté tel quel dans le prompt de Claude (`cli
 ## À éviter
 
 (à compléter avec les retours de l'équipe)
+
+## Ponctuation
+
+Jamais de tiret cadratin « — » ni demi-cadratin « – » (Arthur, 14/10/2026 : « ça fait bizarre »). Une virgule, deux-points, des parenthèses ou deux phrases.

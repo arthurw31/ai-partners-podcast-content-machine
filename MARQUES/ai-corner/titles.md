@@ -84,3 +84,7 @@ une TENSION (un risque, une surprise, une idée reçue renversée), comme « Com
 
 Règles qui en découlent : pas de fait interne présenté comme un titre, pas de jargon seul, pas de liste séparée par des
 virgules, pas de « selon <entreprise> », pas de nom d'invité, un seul sujet par titre.
+
+## Ponctuation
+
+Jamais de tiret cadratin « — » ni demi-cadratin « – » (Arthur, 14/10/2026 : « ça fait bizarre »). Une virgule, deux-points, des parenthèses ou deux phrases.

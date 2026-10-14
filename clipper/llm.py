@@ -20,6 +20,18 @@ from rich.console import Console
 console = Console()
 
 
+def _no_dash(obj):
+    """Jamais de tiret cadratin ni demi-cadratin dans les textes écrits (Arthur, 14/10/2026 : « ça fait bizarre ») :
+    « a — b » devient « a, b »."""
+    if isinstance(obj, str):
+        return re.sub(r"\s*[—–]\s*", ", ", obj)
+    if isinstance(obj, list):
+        return [_no_dash(x) for x in obj]
+    if isinstance(obj, dict):
+        return {k: _no_dash(v) for k, v in obj.items()}
+    return obj
+
+
 def _extract_json(text: str) -> dict:
     """Récupère le premier objet JSON d'une réponse (tolère les ```json ... ```)."""
     text = text.strip()
@@ -30,7 +42,7 @@ def _extract_json(text: str) -> dict:
     end = text.rfind("}")
     if start == -1 or end == -1:
         raise ValueError(f"Pas de JSON dans la réponse du modèle :\n{text[:800]}")
-    return json.loads(text[start:end + 1])
+    return _no_dash(json.loads(text[start:end + 1]))
 
 
 def pick_backend(preferred: str = "auto") -> str:
