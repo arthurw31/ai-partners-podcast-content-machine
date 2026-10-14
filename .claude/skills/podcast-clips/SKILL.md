@@ -345,9 +345,21 @@ le mail « Nostra » d'On Train. Mis en page, en français, vouvoiement. Brief :
    REGARDE `apercu.png` (bandeau, photo, miniature) avant de l'envoyer à Arthur. Titre ou miniature encore provisoires :
    le dire.
 2. Retouche : `newsletter/contenu.json`, puis `newsletter … --render` (sans nouvel appel à Claude).
-3. Une fois l'épisode publié : `newsletter … --youtube-url <lien> --render`, puis après validation de l'équipe
-   `newsletter … --final --by <prénom>` -> `newsletter/final/` (HTML + images à importer dans l'outil d'envoi, objet,
-   version texte). `--final` refuse sans lien YouTube, sans titre validé ou sans miniature choisie.
+3. Après validation de l'équipe : `newsletter … --final --by <prénom>` -> `newsletter/final/` (HTML + images, objet, version
+   texte). `--final` refuse sans titre validé ou sans miniature choisie. Le bouton et la miniature cliquable mènent par défaut
+   à la **playlist YouTube** de l'émission (`newsletter.platforms` de brand.yaml) : aucun lien d'épisode à fournir
+   (`--youtube-url <lien>` reste possible pour un lien précis).
+4. **Gabarit fixé : `duo`** (D1, choisi par Arthur le 14/10/2026 ; `newsletter.template` de brand.yaml) — en-tête « AI Corner
+   by [logo AI Partners] », image du haut = miniature SANS bouton play, titre + « Thomas Spitz reçoit … », accroche, bouton
+   bleu nuit, 4 cartes « Au programme » de MÊME taille (textes de 150 à 170 caractères, de longueur égale : consigne du brief
+   + contrôle), miniature avec play, mot de fin, bandeau « Écoutez AI Corner partout » (logos YouTube / Spotify / Ausha
+   cliquables vers l'émission), largeur 680 px. Autres gabarits : `--template all|variantes` (comparaison). Épisode DÉJÀ
+   publié sans rushs multicam (E21) : pas de photos détourées, le gabarit `duo` n'en a pas besoin (miniature `miniature_finale.jpg`).
+5. Faits « non retrouvés » par le contrôle alors qu'ils sont dits : citation de preuve trop longue -> la raccourcir à une
+   phrase exacte de la transcription (`evidence` de `contenu.json`), vérifier à la main l'horodatage, puis `--render`.
+6. **Test d'envoi** : `newsletter … --envoi` (images + HTML sur GitHub Pages, `docs/newsletters/<E>/`), `git push`, attendre la
+   mise en ligne (~1 min), puis workflow n8n « AI Corner — test newsletter » (paramètre `episode`) -> mail à soi-même ; vérifier sur
+   PC ET téléphone (app Gmail) : images sans clic, 3 logos et bouton cliquables, cartes empilées sans débordement.
 
 ## Retouches courantes
 
