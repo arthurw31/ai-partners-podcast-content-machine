@@ -2,7 +2,7 @@
 et que ça fasse mieux, plus de bleu foncé, propose-moi plusieurs templates pour que je voie mieux ce qu'on peut faire »).
 
 Un gabarit = une fonction (c: dict de contenu) -> HTML d'e-mail. Contraintes d'un e-mail (Gmail, Outlook, Apple Mail) :
-tableaux, styles EN LIGNE, `bgcolor` en plus des fonds CSS, 600 px, Helvetica/Arial (une police web comme Metropolis n'est pas
+tableaux, styles EN LIGNE, `bgcolor` en plus des fonds CSS, 680 px, Helvetica/Arial (une police web comme Metropolis n'est pas
 chargée par la plupart des boîtes : le texte du mail reste en Helvetica ; Metropolis n'existe que DANS les images : bandeau,
 héros), images avec texte alternatif, pas d'italique, et une version qui reste lisible images bloquées.
 
@@ -85,7 +85,7 @@ def button(c: dict, bg: str = BLUE, fg: str = "#FFFFFF", margin: str = "28px aut
             f'font-size:16px;font-weight:bold;color:{fg};text-decoration:none;letter-spacing:.04em">{esc(c["button"])} ▶</a></td></tr></table>')
 
 
-def youtube(c: dict, radius: int = 14, max_w: int = 552) -> str:
+def youtube(c: dict, radius: int = 14, max_w: int = 632) -> str:
     if not c["img"].get("youtube"):
         return ""
     return (f'<a href="{esc(c["url"])}"><img src="{c["rel"]("youtube")}" width="{max_w}" alt="{esc(c["title"])}" '
@@ -93,7 +93,7 @@ def youtube(c: dict, radius: int = 14, max_w: int = 552) -> str:
 
 
 def shell(c: dict, outer_bg: str, body: str, footer_bg: str, footer_fg: str, card_bg: str = "#FFFFFF") -> str:
-    """Document complet : texte d'aperçu caché, carte centrale de 600 px, pied de page avec le marqueur d'envoi."""
+    """Document complet : texte d'aperçu caché, carte centrale de 680 px, pied de page avec le marqueur d'envoi."""
     return f"""<!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">
@@ -102,7 +102,7 @@ def shell(c: dict, outer_bg: str, body: str, footer_bg: str, footer_fg: str, car
 <body style="margin:0;padding:0;background:{outer_bg}">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">{esc(c["preheader"])}</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="{outer_bg}"><tr><td align="center" style="padding:24px 12px">
-<table role="presentation" width="600" cellpadding="0" cellspacing="0" bgcolor="{card_bg}" style="width:100%;max-width:600px;border-radius:16px;overflow:hidden">
+<table role="presentation" width="680" cellpadding="0" cellspacing="0" bgcolor="{card_bg}" style="width:100%;max-width:680px;border-radius:16px;overflow:hidden">
 {body}
 <tr><td bgcolor="{footer_bg}" class="pad" style="padding:22px 40px;font-family:{FONT};font-size:12px;line-height:1.6;color:{footer_fg}">AI Corner, le podcast d'AI Partners.<!--FOOT--></td></tr>
 </table></td></tr></table></body></html>"""
@@ -126,7 +126,7 @@ def nuit(c: dict) -> str:
         f'<span style="color:{BLUE_SKY};font-weight:bold;font-size:18px">{k:02d}</span>&nbsp; '
         f'<strong style="color:#FFFFFF;font-size:16px">{esc(p.get("title"))}</strong><br>{esc(p.get("text"))}</td></tr>'
         f'<tr><td height="10" style="font-size:0;line-height:0">&nbsp;</td></tr>' for k, p in enumerate(c["program"], 1))
-    body = f"""<tr><td><img src="{c["rel"]("banner")}" width="600" alt="AI Corner, le podcast d'AI Partners" style="display:block;width:100%;max-width:600px"></td></tr>
+    body = f"""<tr><td><img src="{c["rel"]("banner")}" width="680" alt="AI Corner, le podcast d'AI Partners" style="display:block;width:100%;max-width:680px"></td></tr>
 <tr><td bgcolor="{NAVY}" class="pad" style="padding:36px 40px 8px 40px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
  <td class="col" width="150" valign="top">{guest}</td>
  <td class="col" valign="middle" style="padding-left:24px;font-family:{FONT}">
@@ -150,8 +150,8 @@ def nuit(c: dict) -> str:
 # ---------------------------------------------------------------------------------------------------------------
 
 def heros(c: dict) -> str:
-    top = (f'<tr><td><a href="{esc(c["url"])}"><img src="{c["rel"]("hero")}" width="600" alt="AI Corner {esc(c["episode"])} : {esc(c["theme"])}" '
-           f'style="display:block;width:100%;max-width:600px"></a></td></tr>' if c["img"].get("hero")
+    top = (f'<tr><td><a href="{esc(c["url"])}"><img src="{c["rel"]("hero")}" width="680" alt="AI Corner {esc(c["episode"])} : {esc(c["theme"])}" '
+           f'style="display:block;width:100%;max-width:680px"></a></td></tr>' if c["img"].get("hero")
            else f'<tr><td bgcolor="{BLUE_DARK}" style="padding:48px 40px;font-family:{FONT};font-size:30px;font-weight:bold;color:#FFFFFF">{esc(c["theme"])}</td></tr>')
     rows = "".join(
         f'<tr><td bgcolor="{LIGHT}" style="border-left:4px solid {BLUE};border-radius:0 12px 12px 0;padding:14px 18px;font-family:{FONT};'
@@ -224,8 +224,8 @@ def vedette(c: dict) -> str:
                 f'<strong style="color:{NAVY};font-size:16px;line-height:1.3">{esc(p.get("title"))}</strong><br>{esc(p.get("text"))}</td></tr></table></td>')
     grid = "".join("<tr>" + card(i + 1, cards[i]) + (card(i + 2, cards[i + 1]) if i + 1 < len(cards) else '<td class="col" width="50%"></td>') + "</tr>"
                    for i in range(0, len(cards), 2))
-    thumb = (f'<tr><td><a href="{esc(c["url"])}"><img src="{c["rel"]("youtube")}" width="600" alt="{esc(c["title"])}" '
-             f'style="display:block;width:100%;max-width:600px"></a></td></tr>' if c["img"].get("youtube") else "")
+    thumb = (f'<tr><td><a href="{esc(c["url"])}"><img src="{c["rel"]("youtube")}" width="680" alt="{esc(c["title"])}" '
+             f'style="display:block;width:100%;max-width:680px"></a></td></tr>' if c["img"].get("youtube") else "")
     body = f"""<tr><td bgcolor="{NAVY}" class="pad" style="padding:18px 40px;font-family:{FONT}"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
  <td style="font-size:18px;font-weight:bold;color:#FFFFFF">AI <span style="color:{BLUE_SKY}">Corner</span></td>
  <td align="right" style="font-size:11px;color:#9DB8FF;letter-spacing:.14em;text-transform:uppercase">Nouvel épisode · {esc(c["episode"])}</td></tr></table></td></tr>
@@ -295,8 +295,8 @@ def _grid(cards: list, dark: bool = False) -> str:
 
     import math
 
-    def need(p):   # hauteur estimée d'une carte (261 px de large, 229 utiles) : numéro + titre (16 px gras) + texte (14 px)
-        return 39 + 21 * math.ceil(len(p.get("title") or "") / 25) + 21 * math.ceil(len(p.get("text") or "") / 29)
+    def need(p):   # hauteur estimée d'une carte (300 px de large, 268 utiles) : numéro + titre (16 px gras) + texte (14 px)
+        return 39 + 21 * math.ceil(len(p.get("title") or "") / 29) + 21 * math.ceil(len(p.get("text") or "") / 34)
 
     # les 4 cartes ont la MÊME hauteur (Arthur, 14/10/2026), quelle que soit la quantité de texte : minimum commun, jamais rogné
     h = max((need(p) for p in list(cards)[:4]), default=0) + 4
@@ -324,8 +324,8 @@ def _duo_hero(c: dict) -> str:
     key = "thumb_plain" if c["img"].get("thumb_plain") else "duo"
     if not c["img"].get(key):
         return ""
-    return (f'<tr><td><a href="{esc(c["url"])}"><img src="{c["rel"](key)}" width="600" alt="{esc(c["host_name"])} et {esc(c["guest"])}" '
-            f'style="display:block;width:100%;max-width:600px"></a></td></tr>')
+    return (f'<tr><td><a href="{esc(c["url"])}"><img src="{c["rel"](key)}" width="680" alt="{esc(c["host_name"])} et {esc(c["guest"])}" '
+            f'style="display:block;width:100%;max-width:680px"></a></td></tr>')
 
 
 def _thumb(c: dict, label: str = "") -> str:
@@ -333,8 +333,8 @@ def _thumb(c: dict, label: str = "") -> str:
         return ""
     lab = (f'<tr><td align="center" style="padding:6px 24px 14px 24px;font-family:{FONT};font-size:16px;font-weight:bold;color:{label}">'
            f"Retrouvez l'épisode complet sur YouTube 👇</td></tr>") if label else ""
-    return (lab + f'<tr><td><a href="{esc(c["url"])}"><img src="{c["rel"]("youtube")}" width="600" alt="{esc(c["title"])}" '
-            f'style="display:block;width:100%;max-width:600px"></a></td></tr>')
+    return (lab + f'<tr><td><a href="{esc(c["url"])}"><img src="{c["rel"]("youtube")}" width="680" alt="{esc(c["title"])}" '
+            f'style="display:block;width:100%;max-width:680px"></a></td></tr>')
 
 
 def _title_band(c: dict, with_names: bool = True) -> str:
@@ -417,8 +417,8 @@ def make_chrome(brand, d: Path, mail: dict, shot, fonts_css: str, uri, logo_svg:
 def _header(c: dict) -> str:
     if not c["img"].get("header"):
         return _topbar(c)
-    return (f'<tr><td bgcolor="{NAVY}"><img src="{c["rel"]("header")}" width="600" alt="AI Corner by AI Partners · {esc(c["episode"])}" '
-            f'style="display:block;width:100%;max-width:600px"></td></tr>')
+    return (f'<tr><td bgcolor="{NAVY}"><img src="{c["rel"]("header")}" width="680" alt="AI Corner by AI Partners · {esc(c["episode"])}" '
+            f'style="display:block;width:100%;max-width:680px"></td></tr>')
 
 
 def _platforms(c: dict) -> str:
@@ -433,8 +433,8 @@ def _platforms(c: dict) -> str:
         return (f'<td align="center" valign="middle" width="96" style="padding:0 8px"><a href="{esc(p["url"])}" style="text-decoration:none">'
                 f'<img src="{c["rel"]("plat_" + key)}" width="80" height="80" alt="{esc(label)}" '
                 f'style="display:block;width:80px;height:80px;border:0"></a></td>')
-    return (f'<tr><td bgcolor="{BAND_BG}"><img src="{c["rel"]("plat_title")}" width="600" alt="Écoutez AI Corner partout" '
-            f'style="display:block;width:100%;max-width:600px"></td></tr>'
+    return (f'<tr><td bgcolor="{BAND_BG}"><img src="{c["rel"]("plat_title")}" width="680" alt="Écoutez AI Corner partout" '
+            f'style="display:block;width:100%;max-width:680px"></td></tr>'
             f'<tr><td bgcolor="{BAND_BG}" align="center" style="padding:0 14px 38px 14px"><table role="presentation" align="center" cellpadding="0" '
             f'cellspacing="0"><tr>{"".join(cell(p) for p in items)}</tr></table></td></tr>')
 
