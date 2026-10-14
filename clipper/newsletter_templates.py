@@ -445,7 +445,7 @@ def duo(c: dict) -> str:
 {_duo_hero(c)}
 {_title_band(c)}
 {_text_block(c)}
-<tr><td align="center">{button(c)}</td></tr>
+<tr><td align="center">{button(c, bg=NAVY)}</td></tr>
 <tr><td class="pad" style="padding:6px 34px 0 34px;font-family:{FONT}">
  <div style="font-size:20px;font-weight:bold;color:{NAVY};padding:0 6px 14px 6px">Au programme de cet épisode</div>
  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{_grid(c["program"])}</table></td></tr>
