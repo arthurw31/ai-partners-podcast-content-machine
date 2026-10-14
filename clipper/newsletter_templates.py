@@ -293,9 +293,17 @@ def _grid(cards: list, dark: bool = False) -> str:
     """Programme en cartes, 2 par ligne (empilées sur téléphone)."""
     bg, num, tt, tx = (NAVY_MID, BLUE_SKY, "#FFFFFF", "#C9D3F5") if dark else (LIGHT, BLUE, NAVY, NAVY_MID)
 
+    import math
+
+    def need(p):   # hauteur estimée d'une carte (261 px de large, 229 utiles) : numéro + titre (16 px gras) + texte (14 px)
+        return 39 + 21 * math.ceil(len(p.get("title") or "") / 25) + 21 * math.ceil(len(p.get("text") or "") / 29)
+
+    # les 4 cartes ont la MÊME hauteur (Arthur, 14/10/2026), quelle que soit la quantité de texte : minimum commun, jamais rogné
+    h = max((need(p) for p in list(cards)[:4]), default=0) + 4
+
     def card(k, p):
         # la carte EST la cellule : deux cellules d'une même ligne ont toujours la même hauteur, dans tous les clients mail
-        return (f'<td class="col" width="49%" bgcolor="{bg}" valign="top" style="border-radius:14px;padding:16px 16px 18px 16px;font-family:{FONT};'
+        return (f'<td class="col" width="49%" height="{h}" bgcolor="{bg}" valign="top" style="height:{h}px;border-radius:14px;padding:16px 16px 18px 16px;font-family:{FONT};'
                 f'font-size:14px;line-height:1.5;color:{tx}"><div style="font-size:22px;font-weight:bold;color:{num};padding-bottom:6px">{k:02d}</div>'
                 f'<strong style="color:{tt};font-size:16px;line-height:1.3">{esc(p.get("title"))}</strong><br>{esc(p.get("text"))}</td>')
     gap = '<td class="col" width="2%" style="font-size:0;line-height:0">&nbsp;</td>'
