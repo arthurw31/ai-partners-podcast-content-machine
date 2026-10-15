@@ -80,11 +80,20 @@ def make_hero(brand, d: Path, mail: dict, guest_png: Path | None, shot, fonts_cs
 # ---------------------------------------------------------------------------------------------------------------
 
 def button(c: dict, bg: str = BLUE, fg: str = "#FFFFFF", margin: str = "28px auto") -> str:
-    icon = (f'<img src="{c["rel"]("btn_play")}" width="24" height="24" alt="" style="vertical-align:middle;border:0;margin:-3px 0 0 10px">'
-            if c["img"].get("btn_play") else " ▶")
-    return (f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:{margin}"><tr><td bgcolor="{bg}" '
-            f'style="border-radius:999px"><a href="{esc(c["url"])}" style="display:inline-block;padding:14px 32px 14px 36px;font-family:{FONT};'
-            f'font-size:16px;font-weight:bold;color:{fg};text-decoration:none;letter-spacing:.04em">{esc(c["button"])}{icon}</a></td></tr></table>')
+    """Bouton pilule : texte + pastille « lecture » dans deux cellules alignées au milieu (un `vertical-align` sur l'image se
+    décalait dans Gmail : « le nouveau emoji play est mal cadré », Arthur, 15/10/2026)."""
+    href, font = esc(c["url"]), f"font-family:{FONT};font-size:16px;font-weight:bold;letter-spacing:.04em"
+    if not c["img"].get("btn_play"):
+        return (f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:{margin}"><tr><td bgcolor="{bg}" '
+                f'style="border-radius:999px"><a href="{href}" style="display:inline-block;padding:16px 36px;{font};color:{fg};'
+                f'text-decoration:none">{esc(c["button"])} ▶</a></td></tr></table>')
+    return (f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:{margin}"><tr><td bgcolor="{bg}" style="border-radius:999px">'
+            f'<table role="presentation" cellpadding="0" cellspacing="0"><tr>'
+            f'<td valign="middle" style="padding:16px 12px 16px 36px;line-height:1"><a href="{href}" style="{font};color:{fg};text-decoration:none">'
+            f'{esc(c["button"])}</a></td>'
+            f'<td valign="middle" width="24" style="padding:0 30px 0 0;line-height:0;font-size:0"><a href="{href}" style="text-decoration:none">'
+            f'<img src="{c["rel"]("btn_play")}" width="24" height="24" alt="" style="display:block;width:24px;height:24px;border:0"></a></td>'
+            f'</tr></table></td></tr></table>')
 
 
 def youtube(c: dict, radius: int = 14, max_w: int = 632) -> str:
