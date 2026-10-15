@@ -399,22 +399,17 @@ def _text_block(c: dict, dark: bool = False, hook: bool = True) -> str:
 
 def _booking(c: dict) -> str:
     """Appel à l'action : réserver un échange avec Thomas (agenda de prise de rendez-vous), avant le bandeau des plateformes.
-    Arthur, 15/10/2026 : « ça ne donne pas envie de cliquer » -> bloc bleu nuit avec la photo de Thomas, une promesse concrète,
-    un gros bouton bleu contrasté et la durée ; sobre (pas d'emoji), ton de conseil."""
+    Arthur, 15/10/2026 : on garde le bloc clair d'origine (une version bleu nuit avec photo a été refusée), avec le bouton en bleu
+    nuit, comme « Regarder l'épisode »."""
     b = c.get("booking") or {}
     if not b.get("url"):
         return ""
-    photo = (f'<img src="{c["rel"]("host_round")}" width="84" height="84" alt="{esc(c["host_name"])}" style="display:block;margin:0 auto 16px auto;'
-             f'width:84px;height:84px;border-radius:42px;border:3px solid {BLUE}">') if c["img"].get("host_round") else ""
-    note = f'<div style="font-size:13px;color:#9DB8FF;padding-top:14px">{esc(b["note"])}</div>' if b.get("note") else ""
-    return (f'<tr><td bgcolor="{NAVY}" align="center" class="pad" style="padding:40px 40px 42px 40px;font-family:{FONT}">{photo}'
-            f'<div style="font-size:13px;font-weight:bold;letter-spacing:.14em;text-transform:uppercase;color:{BLUE_SKY};padding-bottom:10px">'
-            f'{esc(b.get("kicker") or "Échangeons")}</div>'
-            f'<div style="font-size:26px;font-weight:bold;color:#FFFFFF;line-height:1.25">{esc(b.get("title") or "")}</div>'
-            f'<div style="font-size:16px;line-height:1.6;color:#DCE3F7;padding-top:12px;max-width:480px">{esc(b.get("text") or "")}</div>'
-            f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:26px auto 0 auto"><tr><td bgcolor="{BLUE}" style="border-radius:999px">'
-            f'<a href="{esc(b["url"])}" style="display:inline-block;padding:18px 40px;font-family:{FONT};font-size:17px;font-weight:bold;'
-            f'color:#FFFFFF;text-decoration:none;letter-spacing:.02em">{esc(b.get("button") or "Réserver un échange")} &rarr;</a></td></tr></table>{note}</td></tr>')
+    return (f'<tr><td bgcolor="{LIGHT}" align="center" class="pad" style="padding:34px 40px 36px 40px;font-family:{FONT}">'
+            f'<div style="font-size:22px;font-weight:bold;color:{NAVY};line-height:1.3">{esc(b.get("title") or "")}</div>'
+            f'<div style="font-size:16px;line-height:1.55;color:{NAVY_MID};padding-top:8px">{esc(b.get("text") or "")}</div>'
+            f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:22px auto 0 auto"><tr><td bgcolor="{NAVY}" style="border-radius:999px">'
+            f'<a href="{esc(b["url"])}" style="display:inline-block;padding:16px 34px;font-family:{FONT};font-size:16px;font-weight:bold;'
+            f'color:#FFFFFF;text-decoration:none;letter-spacing:.02em">{esc(b.get("button") or "Réserver un échange")}</a></td></tr></table></td></tr>')
 
 
 # ---------------------------------------------------------------------------------------------------------------

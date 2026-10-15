@@ -204,11 +204,9 @@ newsletter:
   signature: "Thomas Spitz<br>CEO et fondateur d'AI Partners"
   # Appel à l'action avant le bandeau des plateformes (Arthur, 15/10/2026 : « un call to action vers le calendly de Thomas »)
   booking:
-    kicker: "Et pour votre entreprise ?"
     title: "Vos équipes testent l'IA. Et après ?"
-    text: "Passons de l'expérimentation à l'impact : 30 minutes avec moi pour faire le point sur votre situation et voir par où commencer."
-    button: "Réserver 30 minutes avec Thomas"
-    note: "Directement dans mon agenda, au créneau qui vous arrange."
+    text: "Passons de l'expérimentation à l'impact : 30 minutes avec moi pour en parler."
+    button: "Réserver un échange avec Thomas"
     url: "https://calendar.google.com/calendar/appointments/schedules/AcZssZ0_yeSZr-eANdqFosuQLg2jE2smXxRU-eIMCXBA0WC3CynV7uSHwNeGX8FK-0MHDtpLcNiC4f9_?gv=true"
   template: duo        # gabarit D1 « Duo » retenu par Arthur le 14/10/2026 (voir clipper/newsletter_templates.py)
   # Bandeau du bas : liens vers l'ÉMISSION (la page de l'émission montre toujours le dernier épisode en tête), pas vers un épisode.
