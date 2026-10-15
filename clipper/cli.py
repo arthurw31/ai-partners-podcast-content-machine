@@ -1241,7 +1241,9 @@ def _polish_review(a: argparse.Namespace, brand, ep: Path, shorts: list[int]) ->
         try:
             res = review(brand, ep, "short", n)
         except Exception as e:  # noqa: BLE001  (limite d'abonnement, CLI indisponible : le reste du process continue)
-            console.print(f"[yellow]#{n} relecture impossible : {e}[/yellow]")
+            why = ("limite de l'abonnement Claude atteinte (429) : relancer plus tard `python -m clipper review --only "
+                   f"{n}`" if "429" in str(e) else str(e)[:300])
+            console.print(f"[yellow]#{n} relecture impossible : {why}[/yellow]")
             continue
         color = {"OK": "green", "ATTENTION": "yellow"}.get(res["verdict"], "red")
         console.print(f"[{color}]#{n} {res['verdict']}[/{color}] : {len(res['issues'])} défaut(s) -> qa/review_short_{n:02d}.md")
