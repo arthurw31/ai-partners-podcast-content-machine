@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Content Machine · schéma v2</title>
+<!-- Schéma v2 (Arthur, 15/10/2026) : vue d'ensemble synthétique, un clic sur un process ouvre son détail.
+     Tout le contenu vient de process.js : rien à modifier ici quand une étape change.
+     Validé par Arthur le 15/10/2026 : c'est LE schéma du process (README, GitHub Pages). Ancien schéma Mermaid archivé dans ../ancien/.
+     Mise à jour : CLAUDE.md, « Règle de maintenance : le schéma suit le process ». -->
+<style>
+@font-face { font-family: "Metropolis"; src: url("fonts/Metropolis-Regular.ttf"); font-weight: 400; }
+@font-face { font-family: "Metropolis"; src: url("fonts/Metropolis-Bold.ttf"); font-weight: 700; }
+@font-face { font-family: "Metropolis"; src: url("fonts/Metropolis-ExtraBold.ttf"); font-weight: 800; }
+/* Mêmes codes couleur que le schéma v1 : violet = Claude, orange = l'équipe, vert = entrées et livrables, blanc = calcul automatique */
+:root {
+  --navy: #151D53; --blue: #258AF3; --bg: #F4F6FB; --surface: #FFFFFF; --line: #E1E6F0; --muted: #5B6680;
+  --claude-bg: #F1F0FF; --claude-bd: #7B6CF6; --claude-tx: #2B2366;
+  --team-bg: #FFF4E6;   --team-bd: #F08C00;   --team-tx: #5C2C06;
+  --out-bg: #E8F8F0;    --out-bd: #12A26B;    --out-tx: #0B3B29;
+  --auto-bg: #FFFFFF;   --auto-bd: #C5CDE0;   --auto-tx: #151D53;
+  --dep: #F08C00;
+  --font: "Metropolis", "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--navy); font-family: var(--font); }
+body { min-height: 100vh; }
+header.top { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 16px; padding: 14px 20px;
+             background: var(--navy); color: #fff; }
+header.top h1 { margin: 0; font-size: 17px; font-weight: 800; white-space: nowrap; }
+header.top h1 b { color: var(--blue); }
+header.top .crumb { flex: 1; min-width: 0; font-size: 14px; color: #C9D3F5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+header.top .crumb button { background: none; border: 0; color: #fff; font: inherit; cursor: pointer; padding: 0; text-decoration: underline; }
+header.top a { color: #C9D3F5; font-size: 13px; white-space: nowrap; }
+main { max-width: 1180px; margin: 0 auto; padding: 24px 16px 60px; }
+
+/* ---------- vue d'ensemble ---------- */
+.intro { display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: flex-end; justify-content: space-between; margin-bottom: 22px; }
+.intro p { margin: 0; max-width: 62ch; font-size: 17px; line-height: 1.5; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; padding: 5px 10px; border-radius: 999px; border: 1.5px solid; white-space: nowrap; }
+.chip.claude { background: var(--claude-bg); border-color: var(--claude-bd); color: var(--claude-tx); }
+.chip.equipe { background: var(--team-bg); border-color: var(--team-bd); color: var(--team-tx); }
+.chip.auto   { background: var(--auto-bg); border-color: var(--auto-bd); color: var(--auto-tx); }
+.chip.livrable, .chip.entree { background: var(--out-bg); border-color: var(--out-bd); color: var(--out-tx); }
+.chip.dep { background: #fff; border: 1.5px dashed var(--dep); color: var(--team-tx); }
+
+.flow { display: flex; flex-direction: column; align-items: center; }
+.pill { border-radius: 999px; padding: 12px 22px; background: var(--out-bg); border: 1.5px solid var(--out-bd); color: var(--out-tx); text-align: center; font-size: 14px; }
+.pill b { display: block; font-size: 15px; }
+.down { width: 2px; height: 26px; background: #9AA6BF; position: relative; }
+.down::after { content: ""; position: absolute; left: -5px; bottom: -2px; border: 6px solid transparent; border-top-color: #9AA6BF; border-bottom: 0; }
+.fan { width: 100%; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; position: relative; padding-top: 18px; }
+.fan::before { content: ""; position: absolute; top: 0; left: 10%; right: 10%; height: 2px; background: #9AA6BF; }
+.fan.out { padding-top: 0; padding-bottom: 18px; }
+.fan.out::before { top: auto; bottom: 0; }
+.fan > .card::before { content: ""; position: absolute; left: 50%; top: -18px; width: 2px; height: 18px; background: #9AA6BF; }
+.fan.out > .card::before { display: none; }
+.fan > .card::after { content: ""; position: absolute; left: 50%; bottom: -20px; width: 2px; height: 20px; background: #9AA6BF; }
+
+.card { position: relative; text-align: left; font: inherit; color: inherit; cursor: pointer; background: var(--surface); border: 1.5px solid var(--line);
+        border-radius: 18px; padding: 16px 16px 14px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 4px 14px rgba(21,29,83,.06);
+        transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; min-width: 0; }
+.card:hover, .card:focus-visible { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(21,29,83,.14); border-color: var(--blue); outline: none; }
+.card .num { font-size: 12px; font-weight: 800; letter-spacing: .12em; color: var(--blue); text-transform: uppercase; }
+.card h2 { margin: 0; font-size: 19px; font-weight: 800; line-height: 1.15; text-wrap: balance; }
+.card p { margin: 0; flex: 1; font-size: 13.5px; line-height: 1.45; color: var(--muted); }
+.card .meta { display: flex; flex-wrap: wrap; gap: 6px; }
+.card .deliv { font-size: 12.5px; font-weight: 700; color: var(--out-tx); background: var(--out-bg); border-radius: 10px; padding: 7px 9px; line-height: 1.3; }
+.card .time { font-size: 12.5px; color: var(--muted); }
+.card .open { font-size: 12.5px; font-weight: 700; color: var(--blue); }
+.status { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+.status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #12A26B; flex: none; }
+.status.wait::before { background: #F08C00; }
+.status.wip::before { background: #7B6CF6; }
+.wide { width: min(520px, 100%); }
+
+.fulltile { margin: 30px auto 0; display: flex; align-items: center; gap: 16px; width: min(640px, 100%); text-align: left; font: inherit; color: inherit;
+            cursor: pointer; background: var(--surface); border: 1.5px dashed var(--dep); border-radius: 18px; padding: 16px 18px;
+            transition: transform .18s ease, box-shadow .18s ease; }
+.fulltile:hover, .fulltile:focus-visible { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(21,29,83,.14); outline: none; }
+.fulltile b { display: block; font-size: 17px; font-weight: 800; }
+.fulltile small { display: block; font-size: 13.5px; color: var(--muted); line-height: 1.4; margin-top: 3px; }
+.fulltile .go { margin-left: auto; font-size: 22px; font-weight: 800; color: var(--blue); }
+.fulltile .ic { flex: none; display: grid; grid-template-columns: repeat(5, 8px); gap: 4px; align-items: end; }
+.fulltile .ic i { display: block; width: 8px; border-radius: 3px; background: var(--claude-bd); }
+.fulltile .ic i:nth-child(1) { height: 34px; } .fulltile .ic i:nth-child(2) { height: 26px; background: var(--team-bd); }
+.fulltile .ic i:nth-child(3) { height: 38px; background: #9AA6BF; } .fulltile .ic i:nth-child(4) { height: 22px; background: var(--out-bd); }
+.fulltile .ic i:nth-child(5) { height: 30px; }
+
+/* ---------- schéma complet ---------- */
+.fullwrap { overflow: auto; padding: 22px 16px 60px; }
+.board { position: relative; min-width: 1120px; max-width: 1500px; margin: 0 auto; display: flex; flex-direction: column; gap: 26px; }
+.board svg.deps { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; z-index: 3; }
+.board svg.deps path.dep { fill: none; stroke: var(--dep); stroke-width: 2.2; stroke-dasharray: 7 6; }
+.fs.dsrc, .fs.dtgt { outline: 2px dashed var(--dep); outline-offset: 2px; }
+.fs .d { color: var(--dep); font-weight: 800; }
+.lane { background: rgba(255,255,255,.55); border: 1.5px solid var(--line); border-radius: 18px; padding: 12px; min-width: 0; }
+.lane > header { display: flex; align-items: baseline; gap: 8px; margin: 2px 4px 10px; }
+.lane > header b { font-size: 15px; font-weight: 800; }
+.lane > header small { white-space: nowrap; font-size: 11px; font-weight: 800; letter-spacing: .12em; color: var(--blue); text-transform: uppercase; }
+.lane.row .fsteps { flex-direction: row; flex-wrap: wrap; align-items: stretch; }
+.lane.row .fs { flex: 1 1 180px; }
+.lanes { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 30px; align-items: start; }
+.fsteps { display: flex; flex-direction: column; gap: 8px; }
+.fs { text-align: left; font: inherit; cursor: pointer; border: 1.5px solid var(--auto-bd); background: var(--auto-bg); color: var(--auto-tx);
+      border-radius: 11px; padding: 7px 9px; font-size: 12.5px; font-weight: 700; line-height: 1.3; display: flex; gap: 6px; align-items: baseline; }
+.fs:hover, .fs:focus-visible { box-shadow: 0 6px 16px rgba(21,29,83,.14); outline: none; }
+.fs .n { opacity: .55; font-weight: 800; font-variant-numeric: tabular-nums; }
+.fs .g { margin-left: auto; font-size: 12px; opacity: .8; }
+.fs.claude { background: var(--claude-bg); border-color: var(--claude-bd); color: var(--claude-tx); }
+.fs.equipe { background: var(--team-bg); border-color: var(--team-bd); color: var(--team-tx); }
+.fs.livrable, .fs.entree { background: var(--out-bg); border-color: var(--out-bd); color: var(--out-tx); border-radius: 999px; }
+.fulllegend { display: flex; flex-wrap: wrap; gap: 8px; max-width: 1500px; margin: 0 auto 16px; min-width: 1120px; }
+
+/* ---------- détail d'un process ---------- */
+#detail { position: fixed; inset: 0; z-index: 30; background: var(--bg); overflow: auto; }
+#detail[hidden] { display: none; }
+#detail.opening { transition: clip-path .42s cubic-bezier(.2,.8,.2,1); }
+.dhead { position: sticky; top: 0; z-index: 2; background: var(--navy); color: #fff; padding: 14px 20px; display: flex; gap: 14px; align-items: center; }
+.dhead button.back { background: #fff; color: var(--navy); border: 0; border-radius: 999px; padding: 9px 16px; font: 700 14px var(--font); cursor: pointer; white-space: nowrap; }
+.dhead .t { min-width: 0; }
+.dhead .t small { display: block; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: #9DB8FF; font-weight: 700; }
+.dhead .t h2 { margin: 2px 0 0; font-size: 20px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dbody { max-width: 1180px; margin: 0 auto; padding: 22px 16px 60px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 420px); gap: 24px; align-items: start; }
+.dsum { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; }
+.dsum .row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+.dsum .time { font-size: 13.5px; color: var(--muted); }
+.dsum p { margin: 0; flex: 1 1 100%; font-size: 16px; line-height: 1.5; color: var(--muted); max-width: 75ch; }
+.steps { display: flex; flex-direction: column; gap: 0; position: relative; }
+.steps svg.loops { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.steps svg.loops g.lp > path { fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; transition: opacity .15s, stroke-width .15s; }
+.steps svg.loops .tag rect { stroke-width: 1.5; }
+.steps svg.loops .tag text { font: 700 11.5px var(--font); }
+.steps.focus svg.loops g.lp { opacity: .18; }
+.steps.focus svg.loops g.lp.on { opacity: 1; }
+.steps.focus svg.loops g.lp.on > path { stroke-width: 3.4; }
+.step.gate { border-width: 2.5px; }
+.step .gatechip { grid-column: 2; justify-self: start; margin-top: 4px; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+                  border-radius: 999px; padding: 2px 8px; border: 1.5px solid currentColor; opacity: .85; }
+.link.ok { height: 30px; position: relative; }
+.link.ok::after { content: "OK ✓"; position: absolute; left: 12px; top: 6px; font: 800 11px var(--font); color: var(--out-tx);
+                  background: var(--out-bg); border: 1.5px solid var(--out-bd); border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
+.step { text-align: left; font: inherit; cursor: pointer; border-radius: 14px; border: 1.5px solid; padding: 12px 14px; display: grid;
+        grid-template-columns: 30px minmax(0, 1fr); gap: 2px 10px; background: var(--auto-bg); border-color: var(--auto-bd); color: var(--auto-tx);
+        transition: box-shadow .15s ease, transform .15s ease; }
+.step:hover, .step:focus-visible { box-shadow: 0 8px 20px rgba(21,29,83,.12); outline: none; transform: translateX(3px); }
+.step.sel { box-shadow: 0 0 0 3px var(--blue); }
+.step.claude { background: var(--claude-bg); border-color: var(--claude-bd); color: var(--claude-tx); }
+.step.equipe { background: var(--team-bg); border-color: var(--team-bd); color: var(--team-tx); }
+.step.livrable, .step.entree { background: var(--out-bg); border-color: var(--out-bd); color: var(--out-tx); border-radius: 999px; }
+.step .n { grid-row: 1 / span 2; font-weight: 800; font-size: 15px; opacity: .55; padding-top: 1px; font-variant-numeric: tabular-nums; }
+.step .who { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; opacity: .75; }
+.step .h { font-size: 16px; font-weight: 800; line-height: 1.25; }
+.step .s { grid-column: 2; font-size: 13.5px; line-height: 1.45; opacity: .85; }
+.link { width: 2px; height: 16px; background: #9AA6BF; margin-left: 28px; }
+.loop { display: none; }
+
+.panel { position: sticky; top: 84px; background: var(--surface); border: 1.5px solid var(--line); border-radius: 18px; padding: 18px 18px 20px;
+         box-shadow: 0 6px 20px rgba(21,29,83,.07); display: flex; flex-direction: column; gap: 14px; max-height: calc(100vh - 110px); overflow: auto; }
+.panel h3 { margin: 0; font-size: 19px; font-weight: 800; line-height: 1.2; text-wrap: balance; }
+.panel .lead { margin: 0; font-size: 14.5px; line-height: 1.5; color: var(--muted); }
+.panel section { display: flex; flex-direction: column; gap: 6px; }
+.panel section > b { font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--blue); }
+.panel ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 5px; font-size: 14px; line-height: 1.45; }
+.panel code { font-family: var(--mono); font-size: 12.5px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px;
+              display: block; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--navy); }
+.panel .files { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.panel .hint { font-size: 12.5px; color: var(--muted); }
+details.tech { border-top: 1px solid var(--line); padding-top: 10px; }
+details.tech summary { cursor: pointer; font-weight: 700; font-size: 13.5px; color: var(--navy); }
+details.tech[open] summary { margin-bottom: 10px; }
+.why { font-size: 13px; color: var(--team-tx); background: var(--team-bg); border-radius: 10px; padding: 8px 10px; line-height: 1.45; }
+
+@media (max-width: 980px) {
+  .fan { grid-template-columns: repeat(2, minmax(0, 1fr)); padding-top: 0; }
+  .fan::before, .fan > .card::before, .fan > .card::after { display: none; }
+  .fan.out { padding-bottom: 0; }
+  .fan .card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .flow .down.mid { display: block; }
+  .dbody { grid-template-columns: minmax(0, 1fr); }
+  .panel { position: static; max-height: none; }
+}
+@media (max-width: 560px) {
+  .fan { grid-template-columns: minmax(0, 1fr); }
+  header.top a { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { #detail.opening { transition: none; } .card, .step { transition: none; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Content Machine · <b>process</b></h1>
+  <div class="crumb" id="crumb">Vue d'ensemble</div>
+  <a href="../ancien/">Ancien schéma</a>
+</header>
+<main id="overview"></main>
+<div id="detail" hidden></div>
+
+<script src="process.js"></script>
+<script>
+(() => {
+  const P = window.PROCESS;
+  const $ = (h) => { const t = document.createElement("template"); t.innerHTML = h.trim(); return t.content.firstElementChild; };
+  const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const WHO = { claude: "Claude", equipe: "L'équipe", auto: "Automatique", livrable: "Livrable", entree: "Entrée" };
+  const byId = Object.fromEntries(P.processes.map((p) => [p.id, p]));
+  const count = (p, a) => p.steps.filter((s) => s.actor === a).length;
+  const MS = P.milestones || [];
+
+
+  /* ---------- vue d'ensemble ---------- */
+  function card(p) {
+    const nC = count(p, "claude"), nE = count(p, "equipe");
+    return `<button class="card${p.group !== "main" ? " wide" : ""}" data-id="${p.id}" aria-label="Ouvrir le détail : ${esc(p.title)}">
+      <span class="num">Process ${p.num}</span>
+      <h2>${esc(p.title)}</h2>
+      <p>${esc(p.pitch)}</p>
+      <div class="meta">
+        ${nC ? `<span class="chip claude">Claude · ${nC}</span>` : ""}
+        ${nE ? `<span class="chip equipe">Équipe · ${nE} ${nE > 1 ? "validations" : "validation"}</span>` : ""}
+      </div>
+      <div class="deliv">→ ${esc(p.deliverable)}</div>
+      <span class="time">⏱ ${esc(p.duration)}</span>
+      <span class="status ${p.status.level}">${esc(p.status.text)}</span>
+      <span class="open">Voir le détail →</span>
+    </button>`;
+  }
+  function overview() {
+    const main = P.processes.filter((p) => p.group === "main");
+    const start = P.processes.find((p) => p.group === "start"), end = P.processes.find((p) => p.group === "end");
+    const tot = (a) => P.processes.reduce((n, p) => n + count(p, a), 0);
+    document.getElementById("overview").innerHTML = `
+      <div class="intro">
+        <p>${esc(P.tagline)} Cliquez sur un process pour ouvrir son détail.</p>
+        <div class="legend">
+          <span class="chip claude">Claude écrit ou juge · ${tot("claude")} étapes</span>
+          <span class="chip equipe">L'équipe choisit ou valide · ${tot("equipe")} fois</span>
+          <span class="chip auto">Calcul automatique · ${tot("auto")} étapes</span>
+          <span class="chip livrable">Entrées et livrables</span>
+        </div>
+      </div>
+      <div class="flow">
+        <div class="pill"><b>${esc(P.input.title)}</b>${esc(P.input.text)}</div>
+        <div class="down"></div>
+        ${card(start)}
+        <div class="down"></div>
+        <div class="fan">${main.map(card).join("")}</div>
+        <div class="fan out" aria-hidden="true"></div>
+        <div class="down"></div>
+        ${card(end)}
+      </div>
+      <button class="fulltile" id="fulltile"><span class="ic" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i></span>
+        <span><b>Voir le schéma complet</b><small>Tous les process côte à côte, étape par étape, avec les dépendances entre eux en pointillés.</small></span>
+        <span class="go">→</span></button>`;
+    document.getElementById("fulltile").addEventListener("click", (e) => go("tout", e.currentTarget));
+    document.querySelectorAll(".card").forEach((b) => b.addEventListener("click", () => go(b.dataset.id, b)));
+  }
+
+  /* ---------- détail ---------- */
+  let current = null;
+  function panelProcess(p) {
+    return `<h3>${esc(p.title)}</h3><p class="lead">${esc(p.summary)}</p>
+      <section><b>Livrable</b><div>${esc(p.deliverable)}</div></section>
+      <section><b>Durée</b><div>${esc(p.duration)}</div></section>
+      <section><b>Où on en est</b><div><span class="status ${p.status.level}">${esc(p.status.text)}</span></div></section>
+      ${p.improve ? `<section><b>Points ouverts</b><ul>${p.improve.map((u) => `<li>${esc(u)}</li>`).join("")}</ul></section>` : ""}
+      <p class="hint">Cliquez sur une étape pour voir comment elle fonctionne.</p>`;
+  }
+  function panelStep(p, s, i) {
+    const list = (t, a) => a && a.length ? `<section><b>${t}</b><ul>${a.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></section>` : "";
+    const tech = s.cmd || (s.files && s.files.length);
+    return `<span class="chip ${s.actor}" style="align-self:flex-start">${WHO[s.actor]}</span>
+      <h3>${i + 1}. ${esc(s.title)}</h3>${s.short ? `<p class="lead">${esc(s.short)}</p>` : ""}
+      ${list("Comment ça marche", s.details)}
+      ${list("Ce qui est vérifié", s.checks)}
+      ${s.loop ? `<section><b>Boucle</b><div>↺ ${esc(s.loop.label)} (étape ${s.loop.to + 1})</div></section>` : ""}
+      ${s.duration ? `<section><b>Durée</b><div>${esc(s.duration)}</div></section>` : ""}
+      ${s.origin ? `<div class="why">${esc(s.origin)}</div>` : ""}
+      ${tech ? `<details class="tech" open><summary>Côté technique</summary>
+        ${s.cmd ? `<code>${esc(s.cmd)}</code>` : ""}
+        ${s.files ? `<div class="files">${s.files.map(esc).join("<br>")}</div>` : ""}</details>` : ""}
+      <p class="hint"><a href="#${p.id}" data-reset>← Résumé du process</a></p>`;
+  }
+  function detail(p) {
+    const el = document.getElementById("detail");
+    const steps = p.steps.map((s, i) => `
+      ${i ? `<div class="link${p.steps[i - 1].loop ? " ok" : ""}"></div>` : ""}
+      <button class="step ${s.actor}${s.loop ? " gate" : ""}" data-i="${i}"><span class="n">${i + 1}</span><span class="who">${WHO[s.actor]}</span>
+        <span class="h">${esc(s.title)}</span>${s.short ? `<span class="s">${esc(s.short)}</span>` : ""}
+        ${s.loop ? `<span class="gatechip">◆ point de contrôle</span>` : ""}</button>
+      ${s.loop ? `<div class="loop">${esc(s.loop.label)} (étape ${s.loop.to + 1})</div>` : ""}`).join("");
+    const nC = count(p, "claude"), nE = count(p, "equipe"), nA = count(p, "auto");
+    el.innerHTML = `
+      <div class="dhead"><button class="back" id="back">← Vue d'ensemble</button>
+        <div class="t"><small>Process ${p.num}</small><h2>${esc(p.title)}</h2></div></div>
+      <div class="dbody">
+        <div class="dsum"><p>${esc(p.pitch)}</p>
+          <div class="row"><span class="chip claude">Claude · ${nC}</span><span class="chip equipe">Équipe · ${nE}</span><span class="chip auto">Automatique · ${nA}</span>
+          <span class="time">⏱ ${esc(p.duration)}</span><span class="status ${p.status.level}">${esc(p.status.text)}</span></div></div>
+        <div class="steps">${steps}</div>
+        <aside class="panel" id="panel">${panelProcess(p)}</aside>
+      </div>`;
+    el.querySelector("#back").onclick = () => { location.hash = ""; };
+    drawLoops(el, p);
+    el.querySelectorAll(".step").forEach((b) => b.addEventListener("click", () => {
+      el.querySelectorAll(".step.sel").forEach((x) => x.classList.remove("sel"));
+      b.classList.add("sel");
+      const stepsBox = el.querySelector(".steps"), lp = stepsBox.querySelectorAll("g.lp");
+      lp.forEach((g) => g.classList.toggle("on", g.dataset.from === b.dataset.i));
+      stepsBox.classList.toggle("focus", [...lp].some((g) => g.dataset.from === b.dataset.i));
+      const panel = el.querySelector("#panel");
+      panel.innerHTML = panelStep(p, p.steps[+b.dataset.i], +b.dataset.i);
+      panel.querySelector("[data-reset]").onclick = (e) => { e.preventDefault(); b.classList.remove("sel"); panel.innerHTML = panelProcess(p); };
+      if (window.innerWidth <= 980) panel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }));
+    el.querySelectorAll("[data-jump]").forEach((b) => b.addEventListener("click", () => { location.hash = b.dataset.jump; }));
+  }
+
+  /* schéma complet : tous les process côte à côte ; dépendances (P.milestones) en pointillés orange. L'ordre des colonnes met
+     « Titre puis miniature » au milieu, entre les process qu'il débloque, pour que les pointillés traversent le moins possible. */
+  const FULL_ORDER = ["shorts", "episode", "titre", "mail", "carrousel"];
+  function full() {
+    const el = document.getElementById("detail");
+    const MS = P.milestones || [];
+    const src = (p, i) => MS.find((m) => m.from.proc === p.id && m.from.step === i);
+    const tgt = (p, i) => MS.find((m) => m.unlocks.some((u) => u.proc === p.id && u.step === i));
+    const fs = (p) => p.steps.map((s, i) => {
+      const a = src(p, i), b = tgt(p, i);
+      const tip = a ? `${a.title} : débloque ${a.unlocks.map((u) => u.what).join(", ")}` : b ? `Attend : ${b.title} (${byId[b.from.proc].title})` : s.short;
+      return `<button class="fs ${s.actor}${a ? " dsrc" : ""}${b ? " dtgt" : ""}" data-p="${p.id}" data-i="${i}" title="${esc(tip)}">
+        <span class="n">${i + 1}</span><span>${esc(s.title)}</span>${a ? '<span class="g d">◆</span>' : b ? '<span class="g d">⏸</span>' : s.loop ? '<span class="g" title="Point de contrôle avec retour en arrière">↺</span>' : ""}</button>`;
+    }).join("");
+    const lane = (p, row) => `<section class="lane${row ? " row" : ""}"><header><small>Process ${p.num}</small><b>${esc(p.title)}</b></header>
+        <div class="fsteps">${fs(p)}</div></section>`;
+    const start = P.processes.find((p) => p.group === "start"), end = P.processes.find((p) => p.group === "end");
+    el.innerHTML = `
+      <div class="dhead"><button class="back" id="back">← Vue d'ensemble</button>
+        <div class="t"><small>Tous les process</small><h2>Schéma complet</h2></div></div>
+      <div class="fullwrap">
+        <div class="fulllegend"><span class="chip claude">Claude</span><span class="chip equipe">L'équipe</span><span class="chip auto">Automatique</span>
+          <span class="chip livrable">Entrées et livrables</span><span class="chip auto">↺ point de contrôle</span>
+          <span class="chip dep">◆ - - → ⏸ une validation de l'équipe débloque une étape ailleurs</span><span class="time" style="align-self:center">Cliquez sur une étape pour l'ouvrir.</span></div>
+        <div class="board">${lane(start, true)}<div class="lanes">${FULL_ORDER.map((id) => lane(byId[id])).join("")}</div>${lane(end, true)}</div>
+      </div>`;
+    el.querySelector("#back").onclick = () => { location.hash = ""; };
+    el.querySelectorAll(".fs").forEach((b) => b.addEventListener("click", () => { location.hash = `${b.dataset.p}:${b.dataset.i}`; }));
+    const board = el.querySelector(".board");
+    const draw = () => {
+      board.querySelector("svg.deps")?.remove();
+      const ns = "http://www.w3.org/2000/svg", R = board.getBoundingClientRect();
+      const box = (proc, i) => { const r = board.querySelector(`.fs[data-p="${proc}"][data-i="${i}"]`).getBoundingClientRect();
+        return { l: r.left - R.left, r: r.right - R.left, t: r.top - R.top, b: r.bottom - R.top, y: (r.top + r.bottom) / 2 - R.top }; };
+      const svg = document.createElementNS(ns, "svg");
+      svg.setAttribute("class", "deps"); svg.setAttribute("width", board.scrollWidth); svg.setAttribute("height", board.scrollHeight);
+      let html = `<defs><marker id="dh" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#F08C00"/></marker></defs>`;
+      const lanes = [...board.querySelectorAll(".lanes > .lane")].map((l) => { const r = l.getBoundingClientRect();
+        return { l: r.left - R.left, r: r.right - R.left, b: r.bottom - R.top }; });
+      const col = (proc) => FULL_ORDER.indexOf(proc);
+      const gut = (c, side) => side < 0 ? (lanes[c - 1].r + lanes[c].l) / 2 : (lanes[c].r + lanes[c + 1].l) / 2;  // couloir à gauche / à droite
+      const round = (pts) => {                                     // polyligne à angles arrondis
+        let d = `M${pts[0][0]},${pts[0][1]}`;
+        for (let k = 1; k < pts.length - 1; k++) {
+          const [x0, y0] = pts[k - 1], [x, y] = pts[k], [x1, y1] = pts[k + 1], r = 9;
+          const ax = x - Math.sign(x - x0) * Math.min(r, Math.abs(x - x0) / 2), ay = y - Math.sign(y - y0) * Math.min(r, Math.abs(y - y0) / 2);
+          const bx = x + Math.sign(x1 - x) * Math.min(r, Math.abs(x1 - x) / 2), by = y + Math.sign(y1 - y) * Math.min(r, Math.abs(y1 - y) / 2);
+          d += ` L${ax},${ay} Q${x},${y} ${bx},${by}`;
+        }
+        return d + ` L${pts[pts.length - 1][0]},${pts[pts.length - 1][1]}`;
+      };
+      let n = 0;
+      (P.milestones || []).forEach((m) => {
+        const a = box(m.from.proc, m.from.step), cs = col(m.from.proc);
+        m.unlocks.forEach((u) => {
+          const t = box(u.proc, u.step), ct = col(u.proc), dir = ct < cs ? -1 : 1, off = (n++ % 3 - 1) * 5;
+          const xs = dir < 0 ? a.l : a.r, xt = dir < 0 ? t.r + 3 : t.l - 3;
+          const g1 = gut(cs, dir) + off, pts = [[xs, a.y], [g1, a.y]];
+          if (Math.abs(ct - cs) > 1) {                              // passe sous les colonnes intermédiaires
+            const mids = dir < 0 ? lanes.slice(ct + 1, cs) : lanes.slice(cs + 1, ct);
+            const yb = Math.max(...mids.map((l) => l.b)) + 14 + off, g2 = gut(ct, -dir) + off;
+            pts.push([g1, yb], [g2, yb], [g2, t.y]);
+          } else pts.push([g1, t.y]);
+          pts.push([xt, t.y]);
+          html += `<path class="dep" d="${round(pts)}" marker-end="url(#dh)"/>`;
+        });
+      });
+      svg.innerHTML = html;
+      board.prepend(svg);
+    };
+    requestAnimationFrame(draw);
+    new ResizeObserver(draw).observe(board);
+  }
+
+  /* boucles de correction : une flèche par boucle, qui part de l'étape de contrôle et remonte jusqu'à l'étape où l'on revient,
+     chacune dans sa voie à droite des étapes ; couleur = qui renvoie (contrôle automatique, Claude ou l'équipe) */
+  const LOOPC = { auto: ["#E5484D", "#FDECEC", "#8A1C1F"], claude: ["#7B6CF6", "#F1F0FF", "#2B2366"], equipe: ["#F08C00", "#FFF4E6", "#5C2C06"] };
+  function drawLoops(el, p) {
+    const box = el.querySelector(".steps");
+    const loops = p.steps.map((s, i) => s.loop ? { from: i, to: s.loop.to, label: s.loop.label, actor: s.actor } : null).filter(Boolean);
+    if (!loops.length) return;
+    // la boucle la plus courte au plus près des étapes, les plus longues à l'extérieur
+    loops.sort((a, b) => (a.from - a.to) - (b.from - b.to) || a.from - b.from);
+    const draw = () => {
+      const narrow = box.parentElement.clientWidth < 640;
+      const LANE = narrow ? 16 : 26, GAP = narrow ? 12 : 18, TAGS = narrow ? 104 : 140;
+      box.style.paddingRight = (GAP + loops.length * LANE + TAGS) + "px";
+      box.querySelector("svg.loops")?.remove();
+      const btn = [...box.querySelectorAll(".step")];
+      const W = box.clientWidth, H = box.scrollHeight;
+      const right = btn[0].offsetLeft + btn[0].offsetWidth;
+      const ns = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(ns, "svg");
+      svg.setAttribute("class", "loops"); svg.setAttribute("width", W); svg.setAttribute("height", H);
+      svg.innerHTML = `<defs>${Object.entries(LOOPC).map(([k, c]) => `<marker id="ah-${k}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="4.5" markerHeight="4.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${c[0]}"/></marker>`).join("")}</defs>`;
+      loops.forEach((l, k) => {
+        const a = btn[l.from], b = btn[l.to], c = LOOPC[l.actor] || LOOPC.auto;
+        const y1 = a.offsetTop + a.offsetHeight / 2, y2 = b.offsetTop + b.offsetHeight / 2;
+        const x = right + GAP + k * LANE, r = 10;
+        const same = loops.filter((m) => m.to === l.to), si = same.indexOf(l);
+        const yo = (si - (same.length - 1) / 2) * 12;   // plusieurs boucles vers la même étape : arrivées étagées
+        const d = `M${right + 2},${y1} H${x - r} Q${x},${y1} ${x},${y1 - r} V${y2 + yo + r} Q${x},${y2 + yo} ${x - r},${y2 + yo} H${right + 6}`;
+        const g = document.createElementNS(ns, "g");
+        g.setAttribute("class", "lp"); g.dataset.from = l.from;
+        const text = l.label.split(" : ")[0];
+        const tw = Math.round(text.length * 6.4 + 34), ty = (y1 + y2) / 2, tx = right + GAP + (loops.length - 1) * LANE + 10;
+        g.innerHTML = `<path d="${d}" stroke="${c[0]}" marker-end="url(#ah-${l.actor in LOOPC ? l.actor : "auto"})"/>
+          <path d="M${x},${ty} H${tx}" stroke="${c[0]}" stroke-dasharray="2 4" style="stroke-width:1.5"/><g class="tag" transform="translate(${tx},${ty - 11})"><rect width="${tw}" height="22" rx="11" fill="${c[1]}" stroke="${c[0]}"/>
+          <text x="10" y="15" fill="${c[2]}">↺ ${esc(text)}</text></g>`;
+        svg.appendChild(g);
+      });
+      box.prepend(svg);
+    };
+    draw();
+    new ResizeObserver(draw).observe(box);
+  }
+
+  /* la case s'ouvre : le détail part du rectangle de la carte cliquée et s'agrandit en plein écran */
+  let origin = null;
+  function go(id, fromEl) { origin = fromEl ? fromEl.getBoundingClientRect() : null; location.hash = id; }
+  function route() {
+    const [id, stepNo] = location.hash.slice(1).split(":"), p = byId[id], el = document.getElementById("detail");
+    const crumb = document.getElementById("crumb");
+    if (!p && id !== "tout") {
+      el.hidden = true; current = null; document.body.style.overflow = "";
+      crumb.textContent = "Vue d'ensemble"; return;
+    }
+    if (p) detail(p); else full();
+    current = id; el.scrollTop = 0;
+    crumb.innerHTML = `<button id="home">Vue d'ensemble</button> › ${esc(p ? p.title : "Schéma complet")}`;
+    crumb.querySelector("#home").onclick = () => { location.hash = ""; };
+    el.hidden = false; document.body.style.overflow = "hidden";
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (origin && !reduce) {
+      const r = origin, W = innerWidth, H = innerHeight;
+      el.classList.remove("opening");
+      el.style.clipPath = `inset(${r.top}px ${W - r.right}px ${H - r.bottom}px ${r.left}px round 18px)`;
+      requestAnimationFrame(() => requestAnimationFrame(() => { el.classList.add("opening"); el.style.clipPath = "inset(0 0 0 0 round 0)"; }));
+    } else { el.classList.remove("opening"); el.style.clipPath = "none"; }
+    origin = null;
+    if (stepNo !== undefined) {           // lien vers une étape précise : on l'ouvre et on la montre
+      const b = el.querySelector(`.step[data-i="${+stepNo}"]`);
+      if (b) { b.click(); setTimeout(() => b.scrollIntoView({ behavior: "smooth", block: "center" }), 60); }
+    }
+  }
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && current) location.hash = ""; });
+  window.addEventListener("hashchange", route);
+  overview(); route();
+})();
+</script>
+</body>
+</html>

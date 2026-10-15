@@ -389,5 +389,5 @@ le mail « Nostra » d'On Train. Mis en page, en français, vouvoiement. Brief :
 - Un retour de l'utilisateur sur le style qui vaut pour la suite (« moins de coupes », « logos plus grands »)
   se règle dans la config de la marque ou le preset, pas seulement sur ce short — et se note dans CLAUDE.md.
 - Toute modification du PROCESS (étape ajoutée, retirée, déplacée, nouvelle validation, nouvelle dépendance) : mets à
-  jour le schéma de GitHub (`docs/schema.mmd` puis `python scripts/render_schema.py`, `docs/ARCHITECTURE.md`), ce skill,
+  jour le schéma de GitHub (`docs/v2/process.js` puis `python scripts/render_schema.py`, `docs/ARCHITECTURE.md`), ce skill,
   lance `python scripts/check_schema.py`, puis pousse (CLAUDE.md, « Règle de maintenance »).

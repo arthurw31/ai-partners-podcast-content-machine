@@ -19,15 +19,21 @@ Deux façons de l'utiliser :
 
 ## Vue d'ensemble : des rushs du tournage à tous les livrables
 
-![Légende du schéma : violet = Claude rédige ou choisit, orange = l'équipe décide, blanc = automatique, vert = livrable ; flèche pleine = étape suivante, pointillés orange = attend une autre colonne](docs/schema_legende.svg)
+**🔍 [Ouvrir le schéma interactif](https://arthurw31.github.io/ai-partners-podcast-content-machine/)** (ou cliquer sur l'image) :
+la vue d'ensemble ci-dessous ; un clic sur un process ouvre son détail (chaque étape, qui la fait, ce qui est vérifié, les
+boucles de correction, la commande et les fichiers) ; la case « Voir le schéma complet » montre tous les process côte à côte
+avec leurs dépendances en pointillés.
 
-**🔍 [Ouvrir le schéma interactif](https://arthurw31.github.io/ai-partners-podcast-content-machine/)** (ou cliquer dessus) : zoom à la molette
-ou au pincement, déplacement en glissant, net à tout zoom. Version image seule :
-[schema.svg](https://raw.githubusercontent.com/arthurw31/ai-partners-podcast-content-machine/main/docs/schema.svg).
+[![Schéma du process : des rushs du tournage à tous les livrables](docs/v2/apercu.png)](https://arthurw31.github.io/ai-partners-podcast-content-machine/)
 
-[![Schéma du process : des rushs du tournage à tous les livrables](docs/schema.svg)](https://arthurw31.github.io/ai-partners-podcast-content-machine/)
+<details><summary>Schéma complet (tous les process et leurs dépendances)</summary>
 
-<sub>Source du schéma : [docs/schema.mmd](docs/schema.mmd) (Mermaid). L'image est régénérée par `python scripts/render_schema.py` (un schéma Mermaid dessiné en direct par GitHub ne s'affiche pas dans tous les navigateurs).</sub>
+[![Schéma complet : les 7 process étape par étape, dépendances en pointillés orange](docs/v2/schema_complet.png)](https://arthurw31.github.io/ai-partners-podcast-content-machine/v2/#tout)
+
+</details>
+
+<sub>Source unique du schéma : [docs/v2/process.js](docs/v2/process.js). Les images sont régénérées par `python scripts/render_schema.py` ;
+l'ancien schéma Mermaid est archivé dans [docs/ancien/](docs/ancien/).</sub>
 
 Aucune vidéo finale n'est rendue sans validation sur un aperçu.
 

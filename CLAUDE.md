@@ -58,32 +58,55 @@ AI Partners Podcast Content Machine/
 ## Règle de maintenance : le schéma suit le process (Arthur, 09/10/2026 : « mets à jour le schéma d'architecture à chaque fois
 qu'on modifie le process » ; précisé le même jour : « le schéma, c'est celui de GitHub, on met à jour que celui-là »)
 
-Le SEUL schéma à tenir à jour est celui de GitHub, affiché par la « Vue d'ensemble » du [README](README.md). La page partagée
-publiée en plus (artifact, docs/schema.html) a été supprimée : ne pas la recréer. Le schéma est une IMAGE (`docs/schema.svg`)
-générée depuis la source Mermaid [docs/schema.mmd](docs/schema.mmd) : le même schéma en Mermaid direct affichait chez Arthur
-« Unable to render rich display — Cannot read properties of undefined (reading 'render') » (09/10/2026), alors qu'il se
-dessinait sans erreur avec Mermaid 10.0 à 12.1 et sur GitHub dans un autre navigateur. Dans les libellés, jamais de ligne
-qui commence par « + » après `<br/>` : en image, elle est prise pour une puce et effacée.
-Habillage (Arthur, 12/10/2026 : « les formes sont un peu vieillottes et moches, garde la même structure ») : thème Mermaid
-`base`, police Metropolis EMBARQUÉE dans le SVG (GitHub l'affiche comme une image : aucune police externe), cartes
-arrondies (Claude = `("…")` violet, humain = orange, entrée et livrables = pastilles `(["…"])` vertes), colonnes sur fond
-gris clair, dépendances entre colonnes en pointillés orange (`EXTRA_CSS` de `render_schema.py`). Pas d'hexagone ni de cylindre.
-Libellés COURTS (Arthur, 12/10/2026 : « trop de texte, écris seulement ce qui est important, éléments importants en gras ») :
-libellé Markdown de Mermaid ``"`**commande ou action**\nune ligne d'explication`"`` ; le détail va dans ARCHITECTURE.md et
-le skill, pas dans le schéma ; libellés de flèches de 1 à 3 mots.
-Légende = `docs/schema_legende.svg` (même script). Schéma interactif (Arthur, 12/10/2026 : « zoomer sans déformer la page ») :
-GitHub Pages sur `docs/` -> https://arthurw31.github.io/ai-partners-podcast-content-machine/ (`docs/index.html` lit `schema.svg` : rien à
-mettre à jour, le push suffit ; `docs/.nojekyll`). Ce n'est PAS l'ancienne page artifact supprimée.
-À CHAQUE modification du process (nouvelle commande, étape ajoutée, retirée ou déplacée, nouvelle validation humaine, nouveau
-livrable), dans le MÊME commit :
-1. `docs/schema.mmd` (les étapes citent leur commande), puis `python scripts/render_schema.py` (Chrome sans fenêtre,
-   Mermaid 11.4.1 figé, ~15 s) et REGARDER l'image ;
-2. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (liste « commandes » du bloc cli.py, tableau des briques, parcours des fichiers) ;
-3. lancer `python scripts/check_schema.py` : il échoue si une commande du CLI manque dans ARCHITECTURE, si une étape du
-   process (liste `PROCESS` du script) ou une validation humaine manque dans le schéma, ou si l'image n'a pas été
-   régénérée depuis la source (empreinte). Une nouvelle étape du process s'ajoute aussi à `PROCESS` dans le script ;
-4. pousser sur GitHub (c'est ce que l'équipe lit) après avoir vérifié `git show --stat` (seulement les fichiers de la
-   modification, aucun modèle .onnx), puis regarder le rendu sur github.com.
+Le SEUL schéma à tenir à jour est celui de GitHub : la « Vue d'ensemble » du [README](README.md) et sa page interactive
+https://arthurw31.github.io/ai-partners-podcast-content-machine/ (GitHub Pages sur `docs/`, qui redirige vers `docs/v2/`).
+
+**Schéma v2** (Arthur, 15/10/2026 : « le schéma du dessus, c'est l'explication globale, et quand on clique sur un framework, par
+exemple celui de la création des shorts, on a tout le détail » ; « c'est niquel, remplace l'ancien schéma dans le README ») :
+- **Vue d'ensemble** : rushs -> Préparation -> les 5 process côte à côte -> Livraison. Chaque carte dit ce qu'on produit, qui fait
+  quoi (nombre d'étapes Claude / de validations de l'équipe), la durée et où on en est. Rien d'autre (Arthur a refusé les
+  dépendances affichées sur la vue d'ensemble et dans les détails : « ça complexifie »).
+- **Clic sur une carte** = la case s'ouvre (animation depuis la carte) sur le détail du process : les étapes dans l'ordre, colorées
+  par acteur ; les **boucles de correction dessinées** (Arthur : « fais apparaître les boucles de rétroaction de manière plus
+  visuelle ») : une flèche par boucle, de l'étape de contrôle (◆ point de contrôle, bord épais) vers l'étape où l'on revient, dans
+  sa voie à droite, couleur = qui renvoie (rouge = contrôle automatique, violet = relecteur Claude, orange = l'équipe), étiquette
+  « ↺ à corriger » ; « OK ✓ » sur la suite normale. Volet de droite : résumé, livrable, durée, état, **points ouverts** (ce qui
+  reste à améliorer) ; clic sur une étape : comment ça marche, ce qui est vérifié, pourquoi (retour d'Arthur daté), et un
+  « côté technique » (commande, fichiers).
+- **Case « Voir le schéma complet »** (`#tout`) : tous les process côte à côte, étape par étape, et les **dépendances en
+  pointillés orange** (Arthur : « un énorme diagramme en parallèle avec les lignes en pointillé ; on irait sur ce schéma
+  seulement pour voir les dépendances ») : elles passent par les couloirs entre les colonnes, jamais sur une étape ; ◆ sur la
+  validation de l'équipe qui débloque, ⏸ sur l'étape débloquée. Colonnes dans l'ordre `FULL_ORDER` de index.html (« Titre puis
+  miniature » au milieu, entre les process qu'il débloque).
+- Liens directs : `#shorts` (un process), `#shorts:10` (une étape, numérotée à partir de 0), `#tout`.
+- Style = codes du v1 : violet Claude, orange équipe, blanc calcul automatique, vert entrées et livrables, police Metropolis
+  (`docs/v2/fonts/`). Jamais de tiret cadratin dans les textes.
+
+**Fichiers** : `docs/v2/process.js` = SEULE source du contenu ; `docs/v2/index.html` = la page qui dessine tout depuis process.js
+(on n'y touche pas quand le process change) ; `docs/v2/apercu.png` + `schema_complet.png` = images du README (GitHub n'exécute
+pas de page dans un README) ; `docs/v2/images.sha256` = empreinte des sources. Ancien schéma Mermaid (`schema.mmd`, `schema.svg`,
+page zoomable du 12/10) archivé dans `docs/ancien/`, plus mis à jour.
+
+**Format de process.js** : `processes[]` = { id, num, title, group ("start" | "main" | "end"), pitch (1 phrase pour la carte),
+deliverable, duration, status { level "ok" | "wait" | "wip", text }, summary, improve [points ouverts], steps[] } ; chaque étape =
+{ actor ("claude" | "equipe" | "auto" | "entree" | "livrable"), title, short, details [], checks [], cmd, files [], duration,
+origin (retour d'Arthur daté), loop { to: numéro de l'étape où l'on revient, À PARTIR DE 0, label: "à corriger : …" } }.
+`milestones[]` = dépendances : { title, from { proc, step } (une validation de l'équipe), unlocks [{ proc, step, what }] }.
+
+À CHAQUE modification du process (nouvelle commande, étape ajoutée, retirée ou déplacée, nouvelle validation humaine, nouvelle
+boucle, nouvelle dépendance, nouveau livrable, retour d'Arthur qui change une étape), dans le MÊME commit :
+1. `docs/v2/process.js` : l'étape (acteur, phrase courte, détails, contrôles, commande, fichiers, retour d'Arthur daté), sa boucle,
+   ses dépendances ; « status » et « improve » du process si l'état change (ex. « envoi à la liste à construire » -> fait) ;
+2. `python scripts/render_schema.py` (Chrome sans fenêtre, ~10 s) puis REGARDER `docs/v2/apercu.png` et `schema_complet.png`
+   (et la page : `python -m http.server 8765` dans `docs/`, puis http://127.0.0.1:8765/v2/) ;
+3. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) (liste « commandes » du bloc cli.py, tableau des briques, parcours des fichiers) ;
+4. `python scripts/check_schema.py` : il échoue si une commande du CLI manque dans ARCHITECTURE, si une étape du process (liste
+   `PROCESS` du script) ou une validation humaine (`HUMAN_GATES`) n'est pas citée dans process.js, si process.js est incohérent
+   (acteur inconnu, boucle qui ne revient pas en arrière, dépendance vers une étape absente ou qui ne part pas d'une validation de
+   l'équipe), si le README n'affiche plus l'image ou si les images sont périmées. Une nouvelle étape du process s'ajoute aussi à
+   `PROCESS` dans le script ;
+5. pousser sur GitHub (c'est ce que l'équipe lit) après avoir vérifié `git show --stat` (seulement les fichiers de la
+   modification, aucun modèle .onnx), puis regarder la page publiée (~1 min après le push).
 Puis noter la demande et sa date dans la section concernée de ce fichier.
 
 ## Point d'entrée utilisateur
