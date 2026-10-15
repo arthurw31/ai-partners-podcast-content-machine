@@ -80,14 +80,24 @@ def make_hero(brand, d: Path, mail: dict, guest_png: Path | None, shot, fonts_cs
 # ---------------------------------------------------------------------------------------------------------------
 
 def edge(bg: str, k: float = 0.55) -> str:
-    """Couleur de la tranche d'un bouton : le fond assombri."""
-    return "#" + "".join(f"{int(int(bg[n:n + 2], 16) * k):02X}" for n in (1, 3, 5))
+    """Couleur de la tranche d'un bouton : le fond assombri ; pour un fond déjà très sombre (bleu nuit), la tranche est plus CLAIRE
+    (une tranche presque noire passait pour « un rectangle noir sous le bouton » chez la marketing, 15/10/2026)."""
+    rgb = [int(bg[n:n + 2], 16) for n in (1, 3, 5)]
+    if sum(rgb) / 3 < 70:
+        return "#" + "".join(f"{int(v + (255 - v) * 0.22):02X}" for v in rgb)
+    return "#" + "".join(f"{int(v * k):02X}" for v in rgb)
 
 
-def solid(bg: str) -> str:
-    """Bouton en relief discret (Arthur, 15/10/2026 : « des boutons plus en 3D pour qu'on capte que ce sont des boutons, sans que ça
-    fasse trop ») : tranche plus sombre dessous (bordure basse) + ombre légère ; compatible Gmail / Outlook (bordure, pas de dégradé)."""
-    return (f"border-radius:999px;border-bottom:4px solid {edge(bg)};box-shadow:0 4px 8px rgba(10,15,51,.22)")
+def pill_open(bg: str, margin: str) -> str:
+    """Début d'un bouton pilule en relief discret : une pastille plus sombre (la « tranche ») dépasse de 4 px sous la pastille du bouton.
+    Ni `box-shadow` ni `border-bottom` : dans le mail test de la marketing (HubSpot, 15/10/2026) ils s'affichaient en « rectangle noir
+    sous le bouton »."""
+    return (f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:{margin}"><tr><td bgcolor="{edge(bg)}" '
+            f'style="border-radius:999px;padding:0 0 4px 0"><table role="presentation" cellpadding="0" cellspacing="0"><tr>'
+            f'<td bgcolor="{bg}" style="border-radius:999px">')
+
+
+PILL_CLOSE = "</td></tr></table></td></tr></table>"
 
 
 def button(c: dict, bg: str = BLUE, fg: str = "#FFFFFF", margin: str = "28px auto") -> str:
@@ -98,13 +108,13 @@ def button(c: dict, bg: str = BLUE, fg: str = "#FFFFFF", margin: str = "28px aut
         return (f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:{margin}"><tr><td bgcolor="{bg}" '
                 f'style="border-radius:999px"><a href="{href}" style="display:inline-block;padding:16px 36px;{font};color:{fg};'
                 f'text-decoration:none">{esc(c["button"])} ▶</a></td></tr></table>')
-    return (f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:{margin}"><tr><td bgcolor="{bg}" style="{solid(bg)}">'
+    return (pill_open(bg, margin) +
             f'<table role="presentation" cellpadding="0" cellspacing="0"><tr>'
             f'<td valign="middle" style="padding:16px 12px 16px 36px;line-height:1"><a href="{href}" style="{font};color:{fg};text-decoration:none">'
             f'{esc(c["button"])}</a></td>'
             f'<td valign="middle" width="24" style="padding:0 30px 0 0;line-height:0;font-size:0"><a href="{href}" style="text-decoration:none">'
             f'<img src="{c["rel"]("btn_play")}" width="24" height="24" alt="" style="display:block;width:24px;height:24px;border:0"></a></td>'
-            f'</tr></table></td></tr></table>')
+            f'</tr></table>' + PILL_CLOSE)
 
 
 def youtube(c: dict, radius: int = 14, max_w: int = 632) -> str:
@@ -418,9 +428,9 @@ def _booking(c: dict) -> str:
     return (f'<tr><td bgcolor="{LIGHT}" align="center" class="pad" style="padding:34px 40px 36px 40px;font-family:{FONT}">'
             f'<div style="font-size:22px;font-weight:bold;color:{NAVY};line-height:1.3">{esc(b.get("title") or "")}</div>'
             f'<div style="font-size:16px;line-height:1.55;color:{NAVY_MID};padding-top:8px">{esc(b.get("text") or "")}</div>'
-            f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:22px auto 0 auto"><tr><td bgcolor="{NAVY}" style="{solid(NAVY)}">'
+            + pill_open(NAVY, "22px auto 0 auto") +
             f'<a href="{esc(b["url"])}" style="display:inline-block;padding:16px 34px;font-family:{FONT};font-size:16px;font-weight:bold;'
-            f'color:#FFFFFF;text-decoration:none;letter-spacing:.02em">{esc(b.get("button") or "Réserver un échange")}</a></td></tr></table></td></tr>')
+            f'color:#FFFFFF;text-decoration:none;letter-spacing:.02em">{esc(b.get("button") or "Réserver un échange")}</a>' + PILL_CLOSE + '</td></tr>')
 
 
 # ---------------------------------------------------------------------------------------------------------------
