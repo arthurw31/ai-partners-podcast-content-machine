@@ -318,7 +318,7 @@ def email_text(brand, mail: dict) -> str:
 
 def _preview(d: Path, page: str, out: Path) -> Path:
     """Aperçu PNG du mail (images locales), recadré sur le contenu."""
-    shot = _shot(page.replace('src="images/', f'src="{_uri(d / "images")}/'), 760, 3000, d / "_apercu.png")
+    shot = _shot(page.replace('src="images/', f'src="{_uri(d / "images")}/'), 760, 4600, d / "_apercu.png")
     im = Image.open(shot).convert("RGB")
     px = im.load()
     bottom = im.height - 1                                               # recadre le fond vide sous le mail
