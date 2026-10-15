@@ -301,12 +301,15 @@ def _grid(cards: list, dark: bool = False) -> str:
     # les 4 cartes ont la MÊME hauteur (Arthur, 14/10/2026), quelle que soit la quantité de texte : minimum commun, jamais rogné
     h = max((need(p) for p in list(cards)[:4]), default=0) + 38
 
+    def emo(p):   # emoji de la carte (Arthur, 15/10/2026 : « sur la partie 4 carrés rajouter des emojis »)
+        return f'&nbsp;&nbsp;<span style="font-size:22px">{esc(p["emoji"])}</span>' if p.get("emoji") else ""
+
     def card(k, p):
         # carte = bloc « inline-block » (2 par ligne, empilées sur téléphone par .card) ; les cellules de tableau passées en
         # display:block débordaient du mail sur téléphone (14/10/2026)
         return (f'<div class="card" style="display:inline-block;vertical-align:top;width:48.5%;margin:0 .75% 12px .75%;box-sizing:border-box;'
                 f'background-color:{bg};border-radius:14px;padding:16px 16px 18px 16px;height:{h}px;text-align:left;font-family:{FONT};'
-                f'font-size:14px;line-height:1.5;color:{tx}"><div style="font-size:22px;font-weight:bold;color:{num};padding-bottom:6px">{k:02d}</div>'
+                f'font-size:14px;line-height:1.5;color:{tx}"><div style="font-size:22px;font-weight:bold;color:{num};padding-bottom:6px">{k:02d}{emo(p)}</div>'
                 f'<strong style="color:{tt};font-size:16px;line-height:1.3">{esc(p.get("title"))}</strong><br>{esc(p.get("text"))}</div>')
     return ('<tr><td style="font-size:0;line-height:0">' + "".join(card(i + 1, p) for i, p in enumerate(list(cards)[:4])) + "</td></tr>")
 
@@ -340,12 +343,43 @@ def _title_band(c: dict, with_names: bool = True) -> str:
             f'<div style="font-size:28px;font-weight:bold;color:#FFFFFF;line-height:1.2">{esc(c["theme"])}</div>{names}</td></tr>')
 
 
+def _hook_html(c: dict, dark: bool = False) -> str:
+    """Accroche lisible (Arthur, 15/10/2026 : « modifier la mise en forme au début sur les questions pour que ce soit plus lisible ») :
+    la ou les QUESTIONS dans un encart à filet bleu, en gros ; le reste de l'accroche en texte normal juste dessous."""
+    import re
+    text = str(c.get("hook") or "").strip()
+    sents = [x for x in re.split(r"(?<=[?!.])\s+", text) if x]
+    k = max((i for i, x in enumerate(sents) if x.endswith("?")), default=-1)
+    q, rest = " ".join(sents[:k + 1]), " ".join(sents[k + 1:])
+    if not q:
+        q, rest = text, ""
+    fg, box, line = ("#FFFFFF", NAVY_MID, BLUE_SKY) if dark else (NAVY, LIGHT, BLUE)
+    out = (f'<div style="margin:0 0 16px 0;padding:18px 22px;background-color:{box};border-left:5px solid {line};border-radius:10px;'
+           f'font-size:22px;line-height:1.35;font-weight:bold;color:{fg}">{para(q)}</div>')
+    if rest:
+        out += f'<p style="margin:0 0 16px 0;font-size:17px;line-height:1.6;color:{"#DCE3F7" if dark else NAVY_MID}">{para(rest)}</p>'
+    return out
+
+
 def _text_block(c: dict, dark: bool = False, hook: bool = True) -> str:
-    fg, strong = ("#DCE3F7", "#FFFFFF") if dark else (NAVY_MID, NAVY)
+    fg = "#DCE3F7" if dark else NAVY_MID
     bg = NAVY if dark else "#FFFFFF"
-    h = (f'<p style="margin:0 0 16px 0;font-weight:bold;color:{strong};font-size:20px;line-height:1.45">{para(c["hook"])}</p>' if hook else "")
+    h = _hook_html(c, dark) if hook and c.get("hook") else ""
     return (f'<tr><td bgcolor="{bg}" class="pad" style="padding:30px 40px 0 40px;font-family:{FONT};font-size:17px;line-height:1.6;color:{fg}">'
             f'<!--HELLO-->{h}<p style="margin:0">{para(c["intro"])}</p></td></tr>')
+
+
+def _booking(c: dict) -> str:
+    """Appel à l'action : réserver un échange avec Thomas (agenda de prise de rendez-vous), avant le bandeau des plateformes."""
+    b = c.get("booking") or {}
+    if not b.get("url"):
+        return ""
+    return (f'<tr><td bgcolor="{LIGHT}" align="center" class="pad" style="padding:34px 40px 36px 40px;font-family:{FONT}">'
+            f'<div style="font-size:22px;font-weight:bold;color:{NAVY};line-height:1.3">{esc(b.get("title") or "")}</div>'
+            f'<div style="font-size:16px;line-height:1.55;color:{NAVY_MID};padding-top:8px">{esc(b.get("text") or "")}</div>'
+            f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:22px auto 0 auto"><tr><td bgcolor="{BLUE}" style="border-radius:999px">'
+            f'<a href="{esc(b["url"])}" style="display:inline-block;padding:16px 34px;font-family:{FONT};font-size:16px;font-weight:bold;'
+            f'color:#FFFFFF;text-decoration:none;letter-spacing:.02em">{esc(b.get("button") or "Réserver un échange")} 📅</a></td></tr></table></td></tr>')
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -384,11 +418,12 @@ def make_chrome(brand, d: Path, mail: dict, shot, fonts_css: str, uri, logo_svg:
             f".k b{{color:{BLUE_SKY}}}"
             f".by{{position:absolute;left:76px;top:168px;display:flex;align-items:center;gap:22px;color:#9DB8FF;font-weight:700;font-size:36px}}"
             f".by svg{{height:46px;width:auto;display:block}}"
-            f".pill{{position:absolute;right:56px;top:50px;background:rgba(255,255,255,.16);color:#fff;font-weight:700;font-size:24px;"
-            f"letter-spacing:.14em;padding:12px 26px;border-radius:999px;text-transform:uppercase}}"
+            f".pill{{position:absolute;right:56px;top:46px;background:{BLUE};color:#fff;text-align:center;padding:16px 38px 12px 38px;border-radius:34px;"
+            f"box-shadow:0 8px 24px rgba(5,10,45,.35)}}.pill i{{display:block;font-style:normal;font-weight:700;font-size:22px;letter-spacing:.16em;"
+            f"text-transform:uppercase}}.pill b{{display:block;font-weight:800;font-size:84px;line-height:1.05;letter-spacing:-.01em}}"
             f"</style></head><body><img class='l' src='{uri(brand.asset('outro_bg.png'))}'>"
             f"<div class='k'>AI <b>Corner</b></div><div class='by'><span>by</span>{logo_svg}</div>"
-            f"<div class='pill'>Nouvel épisode · {esc(mail['episode'])}</div></body></html>")
+            f"<div class='pill'><i>Nouvel épisode</i><b>{esc(mail['episode'])}</b></div></body></html>")
     out["header"] = shot(page, 1200, 270, d / "entete.png")
     title = (f"<html><head><meta charset='utf-8'><style>{fonts_css}*{{margin:0}}body{{width:1200px;height:300px;overflow:hidden;position:relative;"
              f"background:radial-gradient(ellipse 70% 120% at 85% 0%,{BLUE} 0%,rgba(37,138,243,0) 70%),{BAND_BG};font-family:M,Arial}}"
@@ -448,6 +483,7 @@ def duo(c: dict) -> str:
 <tr><td align="center" style="padding:10px 24px 0 24px;font-family:{FONT};font-size:16px;font-weight:bold;color:{NAVY}">Retrouvez l'épisode complet sur YouTube 👇</td></tr>
 <tr><td align="center" style="padding:14px 24px 0 24px">{youtube(c)}</td></tr>
 {closing_block(c, NAVY_MID, "#FFFFFF", NAVY)}
+{_booking(c)}
 {_platforms(c)}"""
     return shell(c, "#E9EEF9", body, NAVY, "#9DB8FF")
 
@@ -540,6 +576,7 @@ def context(brand_cfg: dict, mail: dict, imgs: dict, title: str) -> dict:
             "guest": mail.get("guest", ""), "role": mail.get("role", ""), "theme": mail.get("theme", ""),
             "hook": mail.get("hook", ""), "intro": mail.get("intro", ""), "closing": mail.get("closing", ""),
             "program": mail.get("program") or [], "url": default_url(brand_cfg, mail), "title": title, "img": imgs,
+            "booking": brand_cfg.get("booking") or {},
             "button": brand_cfg.get("button") or "REGARDER L'ÉPISODE", "platforms": brand_cfg.get("platforms") or [],
             "host_name": brand_cfg.get("from_name") or "Thomas Spitz", "host_role": brand_cfg.get("host_role") or "CEO d'AI Partners",
             "sig": brand_cfg.get("signature") or "Thomas Spitz<br>CEO et fondateur d'AI Partners",

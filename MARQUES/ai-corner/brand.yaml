@@ -16,6 +16,8 @@ montage:
   preset: aip-short          # style des shorts du monteur AI Partners (config/presets/aip-short.yaml)
 
 formats: ["9x16"]            # shorts verticaux seulement (07/10/2026 : le 16:9 doublait build + rendu) ; 16:9 sur demande : --formats 9x16,16x9
+fps: 24                      # cadence des SHORTS = celle des rushs et des montages du monteur (24 i/s) ; en 30 i/s une image sur 5
+                             # était doublée (24 -> 30) : saccade visible sur les mouvements de tête (Arthur, 15/10/2026, début du short 2 E22)
 
 selection:
   n_clips: 5                 # workflow : ~10 propositions (`propose`), 5 retenues (`pick`)
@@ -200,6 +202,12 @@ newsletter:
   from_name: "Thomas Spitz"
   button: "REGARDER L'ÉPISODE"
   signature: "Thomas Spitz<br>CEO et fondateur d'AI Partners"
+  # Appel à l'action avant le bandeau des plateformes (Arthur, 15/10/2026 : « un call to action vers le calendly de Thomas »)
+  booking:
+    title: "Vos équipes testent l'IA. Et après ?"
+    text: "Passons de l'expérimentation à l'impact : 30 minutes avec moi pour en parler."
+    button: "Réserver un échange avec Thomas"
+    url: "https://calendar.google.com/calendar/appointments/schedules/AcZssZ0_yeSZr-eANdqFosuQLg2jE2smXxRU-eIMCXBA0WC3CynV7uSHwNeGX8FK-0MHDtpLcNiC4f9_?gv=true"
   template: duo        # gabarit D1 « Duo » retenu par Arthur le 14/10/2026 (voir clipper/newsletter_templates.py)
   # Bandeau du bas : liens vers l'ÉMISSION (la page de l'émission montre toujours le dernier épisode en tête), pas vers un épisode.
   # Un logo officiel déposé dans assets/platforms/<nom>.png remplace l'icône dessinée.

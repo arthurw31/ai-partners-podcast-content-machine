@@ -87,9 +87,9 @@ envoie personnellement à ses contacts pour un nouvel épisode. Brief, à suivre
 
 Réponds UNIQUEMENT en JSON :
 {{"subject": "🎙️ AI Corner E23 : …", "preheader": "…", "theme": "phrase-thème de 4 à 9 mots",
-  "hook": "la question que pose l'épisode (1 à 2 phrases)",
+  "hook": "la question que pose l'épisode (1 phrase, qui finit par « ? »), puis 1 phrase de contexte",
   "intro": "Pour ce nouvel épisode d'AI Corner, j'ai le plaisir de recevoir … (qui est l'invité, 2 à 3 phrases, puis l'angle de la conversation)",
-  "program": [{{"title": "titre court", "text": "1 phrase concrète", "chapter": "4:53"}}],
+  "program": [{{"title": "titre court", "text": "1 phrase concrète", "emoji": "1 emoji qui illustre le point", "chapter": "4:53"}}],
   "closing": "mot de fin de Thomas, 1 à 2 phrases",
   "evidence": [{{"claim": "fait sur l'invité ou chiffre cité", "t": 123.4, "quote": "passage EXACT de la transcription"}}]}}"""
 
@@ -307,10 +307,12 @@ def email_text(brand, mail: dict) -> str:
     sig = (cfg.get("signature") or "Thomas Spitz<br>CEO et fondateur d'AI Partners").replace("<br>", "\n")
     from .newsletter_templates import default_url
     url = default_url(cfg, mail)
-    prog = "\n".join(f"- {p.get('title', '')} : {p.get('text', '')}" for p in mail.get("program") or [])
+    b = cfg.get("booking") or {}
+    prog = "\n".join(f"- {(p.get('emoji', '') + ' ').lstrip()}{p.get('title', '')} : {p.get('text', '')}" for p in mail.get("program") or [])
+    cta = f"\n{b['title']} {b['text']}\n{b.get('button', 'Réserver un échange')} : {b['url']}\n" if b.get("url") else ""
     return (f"{mail['guest']} ({mail.get('role', '')})\n{mail.get('theme', '')}\n\n{mail.get('hook', '')}\n\n"
             f"{mail.get('intro', '')}\n\nRegarder l'épisode : {url}\n\nAu programme de cet épisode\n{prog}\n\n"
-            f"{mail.get('closing', '')}\n\n{sig}\n")
+            f"{mail.get('closing', '')}\n{cta}\n{sig}\n")
 
 
 def _preview(d: Path, page: str, out: Path) -> Path:
