@@ -59,7 +59,7 @@ def _tail_silence(wav: Path, t: float) -> float:
 
 def _new_sound_before_cut(wav: Path, t: float, look: float = 0.35) -> bool:
     """Un NOUVEAU son démarre juste avant la coupe, après un vrai silence (≥ 0,08 s) : le début de la phrase suivante
-    est entendu en fin d'extrait (short 1 E22 : « l'entreprise. ‖ É… »)."""
+    est entendu en fin d'extrait (short 1 E23 : « l'entreprise. ‖ É… »)."""
     from .tighten import _rms
     r = _rms(wav, max(0.0, t - 1.5), t)
     if len(r) < 20:
@@ -136,7 +136,7 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
         cache.write_text(json.dumps({"key": key, "heard": heard}, ensure_ascii=False), encoding="utf-8")
     bad = audit_joins(heard)
     # double écoute (13/10/2026) : chaque raccord signalé est réécouté SEUL (3 s de part et d'autre) ; la transcription du clip
-    # entier varie avec le contexte (short 4 E22 : « cadre ‖ d'un » signalé dans le clip, propre seul). Seuls les raccords
+    # entier varie avec le contexte (short 4 E23 : « cadre ‖ d'un » signalé dans le clip, propre seul). Seuls les raccords
     # signalés par les DEUX écoutes comptent (et sont annulés par la boucle de polish)
     conf = c.get("bad") if c.get("key") == key and "bad" in c else None
     if conf is None:
@@ -182,7 +182,7 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
     except Exception:  # noqa: BLE001
         pass
     if last in tight:   # fin du short : l'orateur enchaîne sans pause = sa pensée n'est pas finie (Arthur, 11/10/2026 :
-        # « tu l'as coupé un peu trop tôt, le mec était en train de parler » — short 1 E22, « …l'entreprise. ‖ Et puis… »)
+        # « tu l'as coupé un peu trop tôt, le mec était en train de parler » — short 1 E23, « …l'entreprise. ‖ Et puis… »)
         rows.append((FAIL, f"fin du short à {last} : l'orateur continue sans pause (< 0,1 s) — prolonger jusqu'à la vraie fin "
                            f"de la pensée (pause ou changement d'orateur) ou finir sur une phrase précédente"))
         tight = [t for t in tight if t != last]
@@ -194,7 +194,7 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
     rows.append((FAIL if ep_ else OK, "bords de phrase (contrôle strict) : " + (
         "; ".join(f"{p['kind']} à {p['t']:.2f} coupée dans la voix ({int(p['ratio'] * 100)} % du niveau)" for p in ep_)
         + " -> `polish` corrige seul (fix_edges)" if ep_ else "toutes les fins retombées dans le silence, tous les débuts partent d'un silence")))
-    # 2 bis bis. rythme des raccords internes et fin du short (Arthur, 14/10/2026, short 2 E21 : « les phrases ont tendance à
+    # 2 bis bis. rythme des raccords internes et fin du short (Arthur, 14/10/2026, short 2 E22 : « les phrases ont tendance à
     # être coupées trop tôt et il y a un bruit de bouche à la fin »)
     from .strict import join_flow_problems, tail_noise
     jf = join_flow_problems(segs, wav)
@@ -248,7 +248,7 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
         sp = sync_problems(src_av, segs, a_src, dly, int(cfg.fps))
         rows.append((FAIL if sp else OK, "son du montage : " + ("; ".join(sp[:6]) + " (rebuild : build --only N --force)" if sp
                                                             else "chaque morceau exactement à sa place (± 15 ms)")))
-        if not spec:   # épisode DÉJÀ MONTÉ : l'image vient du monteur -> qui est à l'image ? (Arthur, 14/10/2026, short 1 E21)
+        if not spec:   # épisode DÉJÀ MONTÉ : l'image vient du monteur -> qui est à l'image ? (Arthur, 14/10/2026, short 1 E22)
             lr = listener_runs(clip, proj, src_av, work)
             if not lr:
                 rows.append((OK, "image : on voit toujours celui qui parle (jamais l'autre qui écoute ou réagit seul à l'écran)"))

@@ -473,7 +473,7 @@ def _write_summary(ep: Path, clips: dict, projects: list[Path] | None = None) ->
 
 def _free_port(port: int, target: Path) -> None:
     """Un aperçu d'un AUTRE short (autre épisode…) peut occuper le port : on l'arrête, sinon le lien afficherait l'ancien
-    short (bug du 07/10/2026 : lien E22 -> short E21 resté ouvert sur 3002)."""
+    short (bug du 07/10/2026 : lien E23 -> short E22 resté ouvert sur 3002)."""
     import urllib.request
     try:
         with urllib.request.urlopen(f"http://localhost:{port}/api/projects", timeout=2) as r:
@@ -1399,7 +1399,7 @@ def cmd_polish(a: argparse.Namespace) -> None:
         cmd_build(argparse.Namespace(**{**vars(a), "only": resel, "formats": a.formats, "force": False, "no_broll": False,
                                         "jobs": a.jobs}))
         status = cmd_qa(argparse.Namespace(**{**vars(a), "only": sel, "render": False, "episode": False}))
-    # un aperçu plus ancien que le montage n'est JAMAIS gardé à côté (15/10/2026 : l'aperçu du short 2 E21 envoyé à Arthur
+    # un aperçu plus ancien que le montage n'est JAMAIS gardé à côté (15/10/2026 : l'aperçu du short 2 E22 envoyé à Arthur
     # était l'ancien, avec le bruit de bouche déjà corrigé dans le montage — la chaîne s'était arrêtée sur l'échec du short 1)
     for k in idx:
         proj = next(iter(sorted((ep / "clips").glob(f"clip_{k:02d}_*"))), None)

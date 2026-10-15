@@ -2,7 +2,7 @@
 // ajouter, retirer ou modifier une étape = modifier ce fichier, la page suit.
 // Acteurs : "claude" (Claude écrit ou juge), "equipe" (un humain choisit ou valide), "auto" (le code calcule tout seul),
 // "entree" (ce qu'on dépose), "livrable" (ce qu'on obtient).
-// Durées : ordres de grandeur mesurés sur E21 / E22 (épisode de ~52 min), calcul sur le PC sans carte graphique.
+// Durées : ordres de grandeur mesurés sur E22 / E23 (épisode de ~52 min), calcul sur le PC sans carte graphique.
 window.PROCESS = {
   title: "AI Partners Podcast Content Machine",
   tagline: "Un tournage déposé devient 5 shorts, l'épisode monté, son titre et sa miniature, un carrousel LinkedIn et un mail de Thomas.",
@@ -23,11 +23,11 @@ window.PROCESS = {
       pitch: "Les rushs sont reconnus, calés et transcrits mot à mot.",
       deliverable: "Transcription et « qui parle »",
       duration: "≈ 25 min pour 52 min d'épisode",
-      status: { level: "ok", text: "En production depuis E22" },
+      status: { level: "ok", text: "En production depuis E23" },
       summary: "Tout part d'ici : les 5 process en dessous lisent la transcription et savent à chaque mot qui parle (Thomas ou l'invité).",
       improve: [
         "Premier épisode en 4K pas encore testé : surveiller la durée de l'analyse des visages.",
-        "Décalage du micro E22 (-0,037 s mesuré contre +0,037 s dans le fichier) : à trancher."
+        "Décalage du micro E23 (-0,037 s mesuré contre +0,037 s dans le fichier) : à trancher."
       ],
       steps: [
         { actor: "entree", title: "Dépôt des rushs", short: "3 caméras (gros plan invité, plan large, gros plan Thomas) + 1 fichier son, dans DEPOT/.",
@@ -56,11 +56,11 @@ window.PROCESS = {
       pitch: "Claude propose 10 passages, l'équipe en garde 5, la machine monte et contrôle chaque short.",
       deliverable: "5 shorts verticaux + 5 posts LinkedIn",
       duration: "≈ 20 à 30 min de calcul par short",
-      status: { level: "ok", text: "Validé sur E22, en cours sur E21" },
+      status: { level: "ok", text: "Validé sur E23, en cours sur E22" },
       summary: "Le process le plus contrôlé : chaque short passe par un nettoyage du son en plusieurs couches, puis une boucle de contrôle « intransigeante » qui corrige toute seule, avant que l'équipe ne le voie.",
       improve: [
         "Un « hmm » de Thomas prononcé PAR-DESSUS la voix de l'invité ne peut pas être retiré (micro unique).",
-        "Épisodes déjà montés (E21) : l'image vient du monteur, les plans de réaction sont retirés à la main."
+        "Épisodes déjà montés (E22) : l'image vient du monteur, les plans de réaction sont retirés à la main."
       ],
       steps: [
         { actor: "claude", title: "Claude propose ~10 passages", short: "Il lit l'épisode phrase par phrase et choisit les moments forts.",
@@ -119,7 +119,7 @@ window.PROCESS = {
       pitch: "Claude dérushe, la machine monte comme le monteur et ajoute un teaser en ouverture.",
       deliverable: "Épisode 1080p, teaser, chapitres, description YouTube",
       duration: "≈ 15 min pour l'aperçu, plus le rendu final",
-      status: { level: "ok", text: "Validé sur E22" },
+      status: { level: "ok", text: "Validé sur E23" },
       summary: "L'épisode n'est pas rendu par le même moteur que les shorts (ce serait 9 à 10 h) : le corps est assemblé plan par plan, seul le teaser passe par le moteur d'animation.",
       improve: ["Teaser : seule la carte invité est gardée en motion design (chiffres animés et sons désactivés le 09/10)."],
       steps: [
@@ -130,7 +130,7 @@ window.PROCESS = {
           details: ["Reprise reculée au creux du son qui précède.", "« Euh » ou mot répété en tête de reprise : retiré.", "Blanc de plus de 1,2 s au raccord : raccourci.", "Jamais de coupe pendant que quelqu'un parle."],
           origin: "Arthur, 08/10/2026 : « vérifie bien plusieurs fois qu'il n'y a pas de problème de coupure »." },
         { actor: "auto", title: "Plans façon monteur", short: "Les proportions du monteur d'AI Partners, et on voit toujours celui qui parle.",
-          details: ["Gros plans 76 %, plan large 14 %, écran partagé 10 %, plan moyen de 10 s (mesuré sur E20 et E21).",
+          details: ["Gros plans 76 %, plan large 14 %, écran partagé 10 %, plan moyen de 10 s (mesuré sur E20 et E22).",
                     "Une réplique de l'autre de plus de 0,4 s passe sur son gros plan ou en écran partagé.",
                     "Pas de plan de réaction sur celui qui écoute.",
                     "Logo AI Partners en haut à droite."],
@@ -162,7 +162,7 @@ window.PROCESS = {
       pitch: "Claude propose 5 titres en texte, l'équipe en choisit un, puis 4 miniatures avec ce titre.",
       deliverable: "Titre YouTube + miniature 1280×720",
       duration: "≈ 5 min pour le titre, ≈ 5 min pour les miniatures",
-      status: { level: "wait", text: "E22 : titre en attente de validation" },
+      status: { level: "wait", text: "E23 : titre en attente de validation" },
       summary: "Le titre débloque trois autres process : c'est la validation à faire en premier.",
       improve: ["Chaque remarque de l'équipe sur un titre devient une règle du brief (rubrique « À éviter »)."],
       steps: [
@@ -190,7 +190,7 @@ window.PROCESS = {
       pitch: "Claude propose 3 angles, l'équipe en choisit un, Claude rédige les slides dans la charte.",
       deliverable: "PDF LinkedIn + son post",
       duration: "quelques minutes",
-      status: { level: "ok", text: "Style choisi sur E22 (« mix »)" },
+      status: { level: "ok", text: "Style choisi sur E23 (« mix »)" },
       summary: "Le carrousel donne de la valeur à la communauté et finit sur un appel à réserver un échange avec AI Partners.",
       improve: ["URL du CTA « réserver un échange » à confirmer."],
       steps: [
@@ -217,7 +217,7 @@ window.PROCESS = {
       duration: "≈ 3 min de rédaction",
       status: { level: "wip", text: "Gabarit validé ; envoi à la liste à construire" },
       summary: "Le mail part au nom de Thomas, en plus de la newsletter d'AI Partners, pour valoriser chaque épisode.",
-      improve: ["Envoi à la vraie liste à construire (n8n : paquets, suivi, désinscription).", "Version HubSpot faite à la main pour E21 : option --hubspot à prévoir."],
+      improve: ["Envoi à la vraie liste à construire (n8n : paquets, suivi, désinscription).", "Version HubSpot faite à la main pour E22 : option --hubspot à prévoir."],
       steps: [
         { actor: "claude", title: "Claude écrit le mail", short: "À la première personne : objet, accroche, l'invité, 4 points du programme, mot de fin.",
           details: ["Vouvoiement, faits tirés de l'épisode.", "4 textes du programme de longueur égale (150 à 170 caractères)."], cmd: "python -m clipper newsletter …" },

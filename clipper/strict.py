@@ -27,7 +27,7 @@ END_THR = 0.10        # … 10 % du niveau de parole (90e centile des 1,5 s pré
 START_HOLD = 0.06     # un début est propre s'il part d'un silence d'au moins 0,06 s (< START_THR)
 START_THR = 0.12
 JOIN_HOLD = 0.04      # fin de phrase INTERNE (une autre phrase suit au montage) : la suite masque un souffle ; la voix doit
-JOIN_THR = 0.15       # seulement être retombée (E22 short 1 : « …à venir. ‖ Et puis », 0,08 s de silence dans la source)
+JOIN_THR = 0.15       # seulement être retombée (E23 short 1 : « …à venir. ‖ Et puis », 0,08 s de silence dans la source)
 MAX_EXT = 0.6         # correction : fin prolongée au plus de 0,6 s, début avancé au plus de 0,4 s
 MAX_BACK = 0.4
 
@@ -71,7 +71,7 @@ def edge_problems(segs: list[dict], wav: Path) -> list[dict]:
         t = float(segs[k]["end"])
         last = k == len(segs) - 1
         # fin du short suivie DE PRÈS par un autre son dans la source (≤ 0,12 s : souffle, « Ouais » de l'autre) : impossible
-        # d'avoir 0,12 s de silence -> même règle qu'un raccord interne (short 5 E22, « …en bon escient. » / « Ouais », 12/10)
+        # d'avoir 0,12 s de silence -> même règle qu'un raccord interne (short 5 E23, « …en bon escient. » / « Ouais », 12/10)
         if last:
             lvl = _level(wav, t - 1.0)
             nxt = _rms(wav, t, t + 0.12)
@@ -96,7 +96,7 @@ def edge_problems(segs: list[dict], wav: Path) -> list[dict]:
 def _valley(wav: Path, t: float, around: float = 0.3, max_ratio: float = 0.3) -> bool:
     """t est-il au CREUX d'énergie entre deux sons collés (aucun silence à moins de `around` s : « euh » enchaîné sur le
     mot) ? Vrai si la voix y descend sous `max_ratio` du niveau et que c'est le point le plus bas des environs (± 0,04 s).
-    Short 4 E22 : « euh, ‖ là où » — 22 % à 579,08, aucun silence entre les deux (12/10/2026)."""
+    Short 4 E23 : « euh, ‖ là où » — 22 % à 579,08, aucun silence entre les deux (12/10/2026)."""
     lvl = _level(wav, t)
     r = _rms(wav, t - around, t + 0.1)
     if lvl <= 0 or len(r) < 5:
@@ -104,7 +104,7 @@ def _valley(wav: Path, t: float, around: float = 0.3, max_ratio: float = 0.3) ->
     q = r < START_THR * lvl
     n = max(1, int(round(START_HOLD / FRAME)))
     # un vrai silence (≥ START_HOLD d'affilée) existe à côté : la correction doit aller le chercher. Des trames calmes
-    # ISOLÉES ne suffisent pas (15/10/2026, short 1 E21 : « euh ‖ tu galères », une seule trame à 8 % entre les deux)
+    # ISOLÉES ne suffisent pas (15/10/2026, short 1 E22 : « euh ‖ tu galères », une seule trame à 8 % entre les deux)
     if any(q[i:i + n].all() for i in range(0, len(q) - n + 1)):
         return False
     i = int(round(around / FRAME))
@@ -125,7 +125,7 @@ def _fix_end(wav: Path, t: float, limit: float, hold: float = END_HOLD, thr: flo
     if len(r) > n:
         q = r < thr * lvl
         quiet_run = 0          # silence vu APRÈS la coupe (une occlusion dans le mot, avant la coupe, ne compte pas :
-        for i in range(n, len(r) + 1):   # « productivi-t-é », 0,04 s à 6 %, teaser E22)
+        for i in range(n, len(r) + 1):   # « productivi-t-é », 0,04 s à 6 %, teaser E23)
             if q[i - n:i].all():
                 k = i
                 while k < min(len(r), i + 3) and q[k]:   # + un souffle (≤ 0,06 s) SEULEMENT tant que le silence dure
@@ -152,7 +152,7 @@ def _fix_end(wav: Path, t: float, limit: float, hold: float = END_HOLD, thr: flo
 
 def _fix_start(wav: Path, t: float, limit: float) -> float | None:
     """Début recalé dans un silence : d'abord EN AVANT (≤ 0,25 s) si l'on démarre sur la traîne d'un son qui s'éteint avant
-    le 1er mot (E22 short 1 : fin d'hésitation à 2228,67, « Et donc » à 2228,82) ; sinon EN ARRIÈRE (≤ MAX_BACK)."""
+    le 1er mot (E23 short 1 : fin d'hésitation à 2228,67, « Et donc » à 2228,82) ; sinon EN ARRIÈRE (≤ MAX_BACK)."""
     lvl = _level(wav, t + 1.0)
     if lvl <= 0:
         return None
@@ -244,7 +244,7 @@ def caption_problems(html: str, max_lines: int = 3, max_words: int = 12) -> list
     for b in bl:
         if len(b["words"]) > max_words:
             out.append(f"bloc {b['id']} ({b['start']:.2f} s) : {len(b['words'])} mots (max {max_words}) : trop long pour être lu")
-        if b.get("lines", 0) > max_lines:   # bloc trop long : ses dernières lignes sortent de l'écran (15/10/2026, short 1 E21)
+        if b.get("lines", 0) > max_lines:   # bloc trop long : ses dernières lignes sortent de l'écran (15/10/2026, short 1 E22)
             out.append(f"bloc {b['id']} ({b['start']:.2f} s) : {b['lines']} lignes (max {max_lines}) : la fin ne s'affiche pas")
         if b["end"] - b["start"] < 0.3 and b is not bl[-1]:
             out.append(f"bloc {b['id']} ({b['start']:.2f} s) affiché {b['end'] - b['start']:.2f} s seulement : illisible")
@@ -373,7 +373,7 @@ def _attack_start(wav: Path, t: float, back: float = 0.12) -> float | None:
 
 
 def refine_joins(segs: list[dict], wav: Path, voiced: float = 0.25) -> tuple[list[dict], list[str]]:
-    """Retraits de « euh » coupés EN PLEINE VOIX (voix > `voiced` du niveau juste avant la coupe : E22, 9 coupes sur 18 dans le
+    """Retraits de « euh » coupés EN PLEINE VOIX (voix > `voiced` du niveau juste avant la coupe : E23, 9 coupes sur 18 dans le
     short 1) : la fin du mot passait à la trappe (« job principal‖ », perçu comme « coupé trop tôt »). Fin recalée au début
     du « euh » tenu, début du morceau suivant juste avant l'attaque du mot. Un morceau ne déborde jamais sur le suivant."""
     segs = [dict(s) for s in segs]
@@ -441,7 +441,7 @@ def ctc_hesitations(segs: list[dict], words: list[dict], wav: Path, cfg=None, mi
             if len(r) and lvl > 0 and float((r > voiced * lvl).mean()) > 0.3:   # de la voix, pas un silence
                 cuts.append((round(g0, 3), round(g1, 3), x["w"], y["w"]))
         # répétitions (« qu'il faut avoir, qu'il faut avoir », « de mes… de d'un ») : groupe de 1 à 4 mots dit deux fois de
-        # suite -> la 1re occurrence est retirée (12/10/2026, shorts 4 et 5 E22 ; un monteur les coupe toujours)
+        # suite -> la 1re occurrence est retirée (12/10/2026, shorts 4 et 5 E23 ; un monteur les coupe toujours)
         norm = [_norm(x["w"]) for x in al]
         i = 0
         while i < len(al) - 1:
@@ -481,7 +481,7 @@ def ctc_hesitations(segs: list[dict], words: list[dict], wav: Path, cfg=None, mi
 
 
 # ----------------------------------------------------------------------------------------------- fluidité des raccords internes
-# Arthur, 14/10/2026 (short 2 E21) : « les phrases ont tendance à être coupées trop tôt ». Mesure : 5 raccords sur 10 tombaient
+# Arthur, 14/10/2026 (short 2 E22) : « les phrases ont tendance à être coupées trop tôt ». Mesure : 5 raccords sur 10 tombaient
 # en PLEINE VOIX (« il y ‖ a », retrait de 0,14 s ; « aborder ‖ assez », la voix continuait 0,3 s après la coupe) : `fillers`
 # prenait l'allongement naturel d'une voyelle pour un « euh », et l'étape `ctc` acceptait des retraits de 0,26 s. Bon sens de
 # monteur : on ne coupe au milieu d'une phrase que pour retirer une VRAIE hésitation, et jamais en tranchant la fin d'un mot.
@@ -515,7 +515,7 @@ def join_flow_problems(segs: list[dict], wav: Path) -> list[dict]:
         gap = s - e
         er, sr = end_ratio(wav, e, 0.04), start_ratio(wav, s, 0.04)
         if gap > 3.0:
-            # passage suivant pris ailleurs : la fin du morceau doit être une fin de MOT (Thomas, 15/10/2026, short 1 E21 :
+            # passage suivant pris ailleurs : la fin du morceau doit être une fin de MOT (Thomas, 15/10/2026, short 1 E22 :
             # « à 0:07 le mot "métiers" est complètement croppé » — coupe posée sur un changement de plan, pas sur la voix)
             after = start_ratio(wav, e, 0.06)   # la coupe peut tomber dans un micro-creux DU mot (« métier‖s », 1201,62)
             if er > VOICE_CUT or after > 0.5:
@@ -526,7 +526,7 @@ def join_flow_problems(segs: list[dict], wav: Path) -> list[dict]:
         if gap < -0.01:
             continue
         if gap < MIN_CUT and (er > VOICE_CUT or sr > VOICE_CUT):   # court ET dans la voix (un « euh » court coupé
-            # proprement dans des silences reste : 1224,19–1224,52 short 1 E21)
+            # proprement dans des silences reste : 1224,19–1224,52 short 1 E22)
             out.append({"k": k, "t": e, "why": f"retrait de {gap:.2f} s seulement (< {MIN_CUT} s) en pleine voix à {e:.2f} : coupe inutile"})
             continue
         if er > VOICE_CUT and not _steady_after(wav, e):
@@ -577,7 +577,7 @@ def fix_join_flow(segs: list[dict], wav: Path) -> tuple[list[dict], list[str]]:
 
 
 # ----------------------------------------------------------------------------------------------- bruit de bouche en fin de short
-# Arthur, 14/10/2026 (short 2 E21) : « il y a un bruit de bouche à la fin ». La respiration gardée après le dernier mot
+# Arthur, 14/10/2026 (short 2 E22) : « il y a un bruit de bouche à la fin ». La respiration gardée après le dernier mot
 # (`pad_end`, jusqu'à 0,35 s) contenait un claquement de lèvres (1503,59 : 30 ms isolées dans le silence).
 
 def tail_noise(wav: Path, t: float, look: float = 1.0) -> dict | None:
@@ -620,7 +620,7 @@ def fix_tail_noise(segs: list[dict], wav: Path) -> tuple[list[dict], list[str]]:
 
 
 # ----------------------------------------------------------------------------------------------- qui est à l'image (épisode déjà monté)
-# Arthur, 14/10/2026 (short 1 E21) : « vers le début, Thomas coupe la parole à l'invité, il faut pas ; et ça sert à rien de
+# Arthur, 14/10/2026 (short 1 E22) : « vers le début, Thomas coupe la parole à l'invité, il faut pas ; et ça sert à rien de
 # mettre l'image et le son de Thomas qui acquiesce ». Dans un épisode DÉJÀ MONTÉ, l'image vient du montage du monteur : quand
 # Thomas réagit, le plan passe sur lui (short 1 : 6,9–7,8 s, l'invité parle encore). Le son « hmm » est retiré par `ctc` ;
 # l'IMAGE de celui qui écoute, rien ne la voyait. On reconnaît le visage à l'image (SFace, comme `rushes`).
@@ -667,7 +667,7 @@ def listener_shown(clip_media: Path, segs: list[dict], words: list[dict], host_r
                 bad = shown if shown and shown != talk else None
         marks.append((t, ts, sp[2], bad, talk))
         t += step
-    # DERNIÈRE IMAGE (15/10/2026, short 1 E21 : « enlève le plan avec Thomas à la fin, ça n'apporte rien ») : elle reste figée
+    # DERNIÈRE IMAGE (15/10/2026, short 1 E22 : « enlève le plan avec Thomas à la fin, ça n'apporte rien ») : elle reste figée
     # ~0,4 s pendant le fondu vers l'outro. Le montage passait sur Thomas à 1243,125, 0,02 s avant la fin du short ; Thomas
     # allait dire « Et », donc « il parlait » et rien n'était signalé. À la fin, la personne à l'image doit être celle qui a dit
     # la DERNIÈRE PHRASE du short (son dernier mot entier), pas celle qui va parler juste après.

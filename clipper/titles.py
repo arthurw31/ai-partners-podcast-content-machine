@@ -52,7 +52,7 @@ def brief(brand) -> str:
 
 
 def published(brand) -> list[dict]:
-    """[{n: "E21", title, lines: [l1, l2], pill: 0|1|None}] lus dans la section « Titres publiés » de titles.md."""
+    """[{n: "E22", title, lines: [l1, l2], pill: 0|1|None}] lus dans la section « Titres publiés » de titles.md."""
     txt = brief(brand)
     if "## Titres publiés" not in txt:
         return []

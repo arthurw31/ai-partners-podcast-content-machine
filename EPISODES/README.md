@@ -1,7 +1,7 @@
 # EPISODES — un dossier par épisode
 
 ```
-EPISODES/<marque>/<épisode>/          ex. EPISODES/ai-corner/E22_nicolas-comestaz_coty/
+EPISODES/<marque>/<épisode>/          ex. EPISODES/ai-corner/E23_nicolas-comestaz_coty/
 ├── LIVRABLES/   ← à copier sur le Drive (rempli par `python -m clipper livraison`)
 ├── rushs/       ← sources : <épisode>.mp4 (plan large ou master), <épisode>.wav, <épisode>.multicam.json, cameras/
 ├── travail/     ← fichiers du pipeline (transcription, clips, rendus, contrôles qualité, aperçus) : ne pas modifier à la main

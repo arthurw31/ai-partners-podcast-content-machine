@@ -73,7 +73,7 @@ def rebuild_audio(clip_video: Path, audio_src: Path, pieces: list[tuple[float, f
     """Remplace le son d'un clip assemblé par le son reconstruit EN UN SEUL PASSAGE depuis la source (12/10/2026).
 
     Avant : chaque morceau avait son propre son AAC (préchauffage ~21 ms par fichier) recollé sans réencodage -> le son
-    prenait ~25 ms de retard PAR RACCORD (short 2 E22 : +295 ms au 8e morceau) : fin de la dernière phrase tronquée,
+    prenait ~25 ms de retard PAR RACCORD (short 2 E23 : +295 ms au 8e morceau) : fin de la dernière phrase tronquée,
     sous-titres et lèvres décalés ; et `loudnorm` appliqué morceau par morceau (gain dynamique qui étouffe attaques et
     fins sur des morceaux de 0,5–5 s). Ici : chaque morceau (début dans la source, durée = durée EXACTE de sa vidéo)
     est pris à l'échantillon près, fondu de 6 ms aux raccords (pas de clic, durée inchangée), puis un seul `loudnorm`."""

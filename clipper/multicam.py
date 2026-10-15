@@ -1,6 +1,6 @@
 """Montage multicam automatique : rushs (gros plans + plan large + micro) -> un « master » monté comme un épisode.
 
-Cas E22 (06/10/2026) : l'équipe livre les rushs bruts au lieu de l'épisode monté — une caméra par personne en gros
+Cas E23 (06/10/2026) : l'équipe livre les rushs bruts au lieu de l'épisode monté — une caméra par personne en gros
 plan, un plan large, un WAV mono (les deux voix mélangées). Les rushs sont déjà synchronisés (même durée, écart
 caméra/micro < 1 image), donc pas de recalage.
 
@@ -155,7 +155,7 @@ def build_master(cams: dict[str, Path], audio: Path, words: list[dict], dst: Pat
 # ---------------------------------------------------------------------------------------------------------------
 # Découpe multicam d'un passage (utilisée par compose à la place de cut_segment)
 #
-# Le signal de bouche seul n'est pas assez fiable sur 52 min (E22 : net pour l'invité, bruité pour l'animateur),
+# Le signal de bouche seul n'est pas assez fiable sur 52 min (E23 : net pour l'invité, bruité pour l'animateur),
 # alors que chaque short a déjà des tours de parole relus (`turns` de clips.json, la vérité de tout le pipeline).
 # L'épisode « source » est donc un simple lien vers le plan large (probe, images fixes) accompagné d'un fichier
 # `<épisode>.multicam.json` ; seuls les passages des shorts sont montés, à partir des gros plans.
@@ -310,7 +310,7 @@ def short_cams(segments: list[dict], turns: list[dict], words: list[dict], every
 
 def listener_motion(cam: Path, a: float, b: float) -> float:
     """Mouvement maximal (différence moyenne entre images à 6 i/s, vignettes 96×54) dans la caméra de celui qui écoute.
-    E22 : immobile à l'écoute 0,6–1,9 ; se gratte l'oreille 6,95."""
+    E23 : immobile à l'écoute 0,6–1,9 ; se gratte l'oreille 6,95."""
     import subprocess
 
     import numpy as np

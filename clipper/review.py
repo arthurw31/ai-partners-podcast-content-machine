@@ -79,7 +79,7 @@ def _non_ok(md: str) -> str:
 
 def _passages(ep: Path, items: list[tuple[str, str, float | None]]) -> str:
     """Extraits EXACTS de la transcription autour de chaque preuve / citation (1 phrase avant, 2 après) : sans eux, le
-    relecteur prenait une citation vérifiée ou un fait dit ailleurs pour une invention (test du 12/10/2026, carrousel E22)."""
+    relecteur prenait une citation vérifiée ou un fait dit ailleurs pour une invention (test du 12/10/2026, carrousel E23)."""
     from .titles import find_evidence
     tf = ep / "transcript.json"
     if not tf.exists():

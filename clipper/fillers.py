@@ -1,6 +1,6 @@
 """« Euh » collés aux mots : détection acoustique + coupe validée par la transcription.
 
-Retour d'Arthur (08/10/2026, short 1 de E22) : « faut que tu enlèves les euhhh, l'invité le fait beaucoup donc c'est
+Retour d'Arthur (08/10/2026, short 1 de E23) : « faut que tu enlèves les euhhh, l'invité le fait beaucoup donc c'est
 pas assez dynamique ». Ni `tighten` (trous entre mots) ni `verify` (verbatim) ne les voyaient : Whisper rattache le
 « euh » au mot voisin, qui dure alors anormalement longtemps (« humaine » 3,2 s, « qu'il » 1,7 s) et le verbatim ne
 l'écrit pas toujours.

@@ -9,22 +9,22 @@ dossiers). Les règles durables sont dans [CLAUDE.md](../CLAUDE.md) ; ce fichier
   **épisode complet monté** + **teaser** à partir des **rushs multicam** (3 caméras + 1 WAV).
 - Utilisateur : Arthur (AI Partners), non-développeur ; il parle en français, veut des explications simples, des liens
   cliquables vers les aperçus, et que **chaque retour devienne une règle durable** (code/config + CLAUDE.md).
-- Marque en cours : `ai-corner` (podcast AI Corner d'AI Partners). Épisode en cours : **E22**, Thomas Spitz (CEO AI
+- Marque en cours : `ai-corner` (podcast AI Corner d'AI Partners). Épisode en cours : **E23**, Thomas Spitz (CEO AI
   Partners, animateur, à gauche dans le plan large) reçoit **Nicolas Comestaz**, VP Global Data & AI CoE chez **Coty**.
 - Règle d'or : **ne jamais produire un MP4 final sans validation d'Arthur sur l'aperçu** (HyperFrames Studio pour
   shorts/teaser, aperçu 540p pour l'épisode complet).
 - Économie de tokens : Arthur conçoit avec Opus et fait tourner avec Sonnet.
 
-## Fichiers de E22
+## Fichiers de E23
 
 | Quoi | Où |
 |---|---|
-| Rushs (40 Go, non versionnés) | `EPISODES/ai-corner/<épisode>/rushs/rushes/E22/cam1_nicolas.mp4`, `cam2_large.mp4`, `cam3_thomas.mp4` |
-| Audio micro | `EPISODES/ai-corner/<épisode>/rushs/E22_nicolas-comestaz_coty.wav` |
-| « Épisode » (lien dur vers le plan large) + description des caméras | `E22_nicolas-comestaz_coty.mp4` + `E22_nicolas-comestaz_coty.multicam.json` |
-| Tout le travail généré | `EPISODES/ai-corner/E22_nicolas-comestaz_coty/travail/` (transcript, clips.json, teaser_*, episode_plan.*, work/) |
+| Rushs (40 Go, non versionnés) | `EPISODES/ai-corner/<épisode>/rushs/rushes/E23/cam1_nicolas.mp4`, `cam2_large.mp4`, `cam3_thomas.mp4` |
+| Audio micro | `EPISODES/ai-corner/<épisode>/rushs/E23_nicolas-comestaz_coty.wav` |
+| « Épisode » (lien dur vers le plan large) + description des caméras | `E23_nicolas-comestaz_coty.mp4` + `E23_nicolas-comestaz_coty.multicam.json` |
+| Tout le travail généré | `EPISODES/ai-corner/E23_nicolas-comestaz_coty/travail/` (transcript, clips.json, teaser_*, episode_plan.*, work/) |
 
-Commande de base : `python -m clipper <commande> --brand ai-corner --input E22_nicolas-comestaz_coty.mp4`
+Commande de base : `python -m clipper <commande> --brand ai-corner --input E23_nicolas-comestaz_coty.mp4`
 (+ `--guest "Nicolas Comestaz" --company Coty --host "Thomas Spitz (CEO AI Partners)"` pour `episode-*`).
 
 ## Où on en est (12/10/2026)
@@ -36,13 +36,13 @@ Commande de base : `python -m clipper <commande> --brand ai-corner --input E22_n
    sous-titres jamais superposés, aucun écran noir) -> **boucle de correction auto, 6 tours** -> aperçus -> 2e contrôle +
    film des moments à risque. Tests : `python scripts/test_qualite.py` (11/11). Détails : CLAUDE.md « Boucle de
    vérification intransigeante », skill `podcast-clips` § 4.
-2. **Shorts 1 et 2 E22 refaits avec ce process, rendus 1080p + outro** (miniature PROVISOIRE, variante 1, l'équipe n'a pas
+2. **Shorts 1 et 2 E23 refaits avec ce process, rendus 1080p + outro** (miniature PROVISOIRE, variante 1, l'équipe n'a pas
    encore choisi) : `livrables_provisoires/clip_01_…_9x16.mp4` (55,2 s) et `clip_02_…_9x16.mp4` (40,7 s). Anciennes
    versions gardées dans `renders/` (suffixes `_v…_1110` / `_1210`).
-3. **Teaser + épisode complet : rendus finaux validés le 09/10/2026** — `episode/E22_teaser_final.mp4` et
-   `episode/E22_nicolas-comestaz_coty_episode.mp4`. Depuis : fin du teaser = animation logo AI Partners (règle permanente,
-   aperçu `apercus/E22_teaser_fin-logo_apercu.mp4`) et liste de plans « on voit toujours celui qui parle » (aperçu
-   `episode/E22_nicolas-comestaz_coty_episode_apercu.mp4`, QA OK) : **rendu final 1080p en attente de validation**. Le
+3. **Teaser + épisode complet : rendus finaux validés le 09/10/2026** — `episode/E23_teaser_final.mp4` et
+   `episode/E23_nicolas-comestaz_coty_episode.mp4`. Depuis : fin du teaser = animation logo AI Partners (règle permanente,
+   aperçu `apercus/E23_teaser_fin-logo_apercu.mp4`) et liste de plans « on voit toujours celui qui parle » (aperçu
+   `episode/E23_nicolas-comestaz_coty_episode_apercu.mp4`, QA OK) : **rendu final 1080p en attente de validation**. Le
    teaser a été monté avec l'ANCIEN assemblage du son : probablement la même dérive par raccord -> à refaire avec le
    nouveau (`episode-render` le reconstruit, puis `qa`).
 
@@ -53,15 +53,15 @@ Toujours en MP4 (le Studio HyperFrames bugue chez Arthur) : `preview --mp4 --cli
 
 ## Ce qui reste à faire (dans l'ordre probable)
 
-1. FAIT le 13/10/2026 : shorts 3, 4, 5 avec le process validé, rendus 1080p + outro -> `livrables/` (les 5 shorts E22
+1. FAIT le 13/10/2026 : shorts 3, 4, 5 avec le process validé, rendus 1080p + outro -> `livrables/` (les 5 shorts E23
    sont livrés). Posts LinkedIn des shorts 1 à 5 à relire / régénérer (`posts --force`) si les passages ont changé.
 2. FAIT le 13/10/2026 : teaser reconstruit avec le nouveau son (synchro OK) + épisode complet rendu en 1080p
-   (`episode/E22_nicolas-comestaz_coty_episode.mp4`, 47 min, QA OK ; anciennes versions `_v3_0910`).
-3. FAIT le 12/10/2026 : titre validé par Arthur (proposition 4 de la 2e série : « AI Corner E22 | Réinventer ses processus
+   (`episode/E23_nicolas-comestaz_coty_episode.mp4`, 47 min, QA OK ; anciennes versions `_v3_0910`).
+3. FAIT le 12/10/2026 : titre validé par Arthur (proposition 4 de la 2e série : « AI Corner E23 | Réinventer ses processus
    métier pour intégrer vraiment l'IA »), miniature = même photo que la variante 1 avec ce titre (`miniatures/miniature_finale.jpg`),
    shorts 1 et 2 livrés avec l'outro définitive dans `livrables/`. Shorts 3–5 : `outro --only N` après leur rendu.
 4. CTA « bosser avec nous » dans les descriptions YouTube / posts LinkedIn : prêt mais désactivé (attendre Arthur).
-5. Les anciens fichiers (`renders/*_v…`, `E22_teaser_v2/_v3`) peuvent être supprimés par Arthur (pas par Claude).
+5. Les anciens fichiers (`renders/*_v…`, `E23_teaser_v2/_v3`) peuvent être supprimés par Arthur (pas par Claude).
 
 ## Points techniques à connaître (détails dans CLAUDE.md)
 

@@ -1,6 +1,6 @@
 """Qui parle quand, sur tout l'épisode, à partir du micro (mono : les deux voix sur la même piste).
 
-Pourquoi pas la bouche : sur E22 le signal de bouche est net pour l'invité mais bruité pour l'animateur (lunettes,
+Pourquoi pas la bouche : sur E23 le signal de bouche est net pour l'invité mais bruité pour l'animateur (lunettes,
 hochements) — inutilisable seul sur 52 min. Ici : empreintes vocales (WeSpeaker ResNet34, ONNX, 256 dim) sur des
 fenêtres de 1,5 s, regroupées en 2 voix (k-moyennes cosinus), puis chaque mot de la transcription reçoit la voix
 des fenêtres qui le couvrent, lissée sur quelques mots. `sherpa-onnx` / `speechbrain` ne sont pas utilisables sur ce PC

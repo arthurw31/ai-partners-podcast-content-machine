@@ -27,7 +27,7 @@ def _is_highlight(word: str, keywords: set[str]) -> bool:
     if n in keywords:
         return True
     # tolérance aux flexions : "galère" ~ "galères"
-    # (1 lettre d'écart au plus : « process » ne colore plus « processus », relecture du short 1 E21, 15/10/2026)
+    # (1 lettre d'écart au plus : « process » ne colore plus « processus », relecture du short 1 E22, 15/10/2026)
     return any(len(k) >= 5 and (n.startswith(k) or k.startswith(n)) and abs(len(n) - len(k)) <= 1 for k in keywords)
 
 
@@ -134,7 +134,7 @@ def group_words(words: list[dict], clip_start: float, clip_end: float, cfg: Cfg,
     if cur:
         groups.append(cur)
 
-    # lisibilité (relecture critique du short 1 E21, 15/10/2026) : un bloc « TU » affiché 0,06 s (coupé par un raccord) était
+    # lisibilité (relecture critique du short 1 E22, 15/10/2026) : un bloc « TU » affiché 0,06 s (coupé par un raccord) était
     # invisible ; « …SI T'AS PAS DE muscle » puis « DE change T'ES MORT » : le mot fort n'était à l'écran que 0,2 s avant le
     # changement de bloc. Règles : (1) un bloc affiché moins de 0,35 s rejoint le suivant ; (2) le dernier mot d'un bloc qui ne
     # resterait pas 0,35 s à l'écran passe au début du bloc suivant (sauf fin de phrase).
@@ -186,7 +186,7 @@ def group_words(words: list[dict], clip_start: float, clip_end: float, cfg: Cfg,
                 k += 1
                 continue
         # (3) une expression-clé à cheval sur deux blocs (« …PAS DE muscle » / « DE change T'ES MORT ») passe entière dans
-        # le bloc suivant (relecture critique du short 1 E21, 15/10/2026)
+        # le bloc suivant (relecture critique du short 1 E22, 15/10/2026)
         moved = False
         for ph in phrases:
             for cut in range(1, len(ph)):
@@ -222,7 +222,7 @@ def group_words(words: list[dict], clip_start: float, clip_end: float, cfg: Cfg,
 
     out = []
     min_step = float(cap.typewriter_min_char_step)
-    # densité des mots-clés (règle validée : ~1 tous les 6–10 mots ; relecture du short 1 E21, 15/10/2026 : 4 italiques en
+    # densité des mots-clés (règle validée : ~1 tous les 6–10 mots ; relecture du short 1 E22, 15/10/2026 : 4 italiques en
     # 6 s, « agent » juste après « agents ») : au moins 5 mots depuis le précédent, sauf suite de la MÊME expression ; un
     # même mot-clé n'est pas recoloré dans les 6 s
     hl_state = {"since": 99, "prev": None, "seen": {}}
@@ -246,7 +246,7 @@ def group_words(words: list[dict], clip_start: float, clip_end: float, cfg: Cfg,
         end = groups[gi + 1][0]["s"] if gi + 1 < len(groups) else min(D, g[-1]["e"] + 1.2)
         end = max(end, start + float(cap.min_group_duration))
         # jamais deux blocs à l'écran en même temps (Arthur, 12/10/2026 : « des sous-titres qui se chevauchent ») : la durée
-        # minimale ne déborde JAMAIS sur le bloc suivant (avant : jusqu'à 0,3 s de deux blocs superposés, short 1 E22)
+        # minimale ne déborde JAMAIS sur le bloc suivant (avant : jusqu'à 0,3 s de deux blocs superposés, short 1 E23)
         if gi + 1 < len(groups):
             end = min(end, groups[gi + 1][0]["s"])
         lines = []

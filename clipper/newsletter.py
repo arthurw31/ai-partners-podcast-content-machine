@@ -86,7 +86,7 @@ envoie personnellement à ses contacts pour un nouvel épisode. Brief, à suivre
 {brief}
 
 Réponds UNIQUEMENT en JSON :
-{{"subject": "🎙️ AI Corner E22 : …", "preheader": "…", "theme": "phrase-thème de 4 à 9 mots",
+{{"subject": "🎙️ AI Corner E23 : …", "preheader": "…", "theme": "phrase-thème de 4 à 9 mots",
   "hook": "la question que pose l'épisode (1 à 2 phrases)",
   "intro": "Pour ce nouvel épisode d'AI Corner, j'ai le plaisir de recevoir … (qui est l'invité, 2 à 3 phrases, puis l'angle de la conversation)",
   "program": [{{"title": "titre court", "text": "1 phrase concrète", "chapter": "4:53"}}],

@@ -1,12 +1,12 @@
 """Rushs déposés dans DEPOT/ -> épisode prêt pour tout le pipeline (commande `rushes`).
 
 Demande d'Arthur (09/10/2026) : « on dépose les rushs MP4 et l'audio dans le dossier depot » — 3 caméras (gros plan
-invité, plan large, gros plan animateur) + 1 WAV du micro. Pour E22 tout avait été fait à la main ; ici :
+invité, plan large, gros plan animateur) + 1 WAV du micro. Pour E23 tout avait été fait à la main ; ici :
 1. chaque fichier est vérifié (`ffprobe` : un fichier tronqué, « moov atom not found », est écarté) ;
 2. rôle des caméras : le plan large = celle qui montre 2 visages ; les 2 gros plans sont attribués en comparant
    chaque personne aux 2 personnes du plan large (couleurs du visage et du haut du corps), l'animateur étant du côté
    `framing.host_side` du plan large ; planche `rushes_<E>.jpg` à REGARDER, `--host <fichier>` pour corriger ;
-3. décalage du micro sur les caméras : corrélation du son témoin du plan large avec le WAV (E22 : 0,037 s) ;
+3. décalage du micro sur les caméras : corrélation du son témoin du plan large avec le WAV (E23 : 0,037 s) ;
 4. rangement : `EPISODES/<marque>/<épisode>/rushs/rushes/<E>/{invite,large,animateur}_<prénom>.mp4`, WAV ->
    `episodes/<E>_<invite>_<entreprise>.wav`, `<base>.mp4` = lien dur vers le plan large, `<base>.multicam.json`.
 Les fichiers sont DÉPLACÉS (même disque : instantané), jamais copiés (13–14 Go par caméra).
@@ -113,7 +113,7 @@ def host_reference(brand) -> np.ndarray | None:
 def identify(videos: list[Path], duration: float, host_side: str, host_ref: np.ndarray | None = None
              ) -> tuple[dict[str, Path], dict]:
     """{"host": …, "guest": …, "wide": …} + détails. Animateur reconnu à son visage si `host_ref` (le côté où il est
-    assis change d'un épisode à l'autre : E21 à droite, E22 à gauche) ; sinon couleurs + `host_side` de la marque."""
+    assis change d'un épisode à l'autre : E22 à droite, E23 à gauche) ; sinon couleurs + `host_side` de la marque."""
     times = [duration * k for k in (0.2, 0.35, 0.5, 0.65, 0.8)]
     stats = {}
     for v in videos:

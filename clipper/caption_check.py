@@ -1,6 +1,6 @@
 """Double contrôle des sous-titres : chaque mot entendu dans le montage doit être sous-titré.
 
-Retour d'Arthur (08/10/2026, short 1 de E22) : « dans les sous-titres il oublie quelques mots des fois, faudrait une
+Retour d'Arthur (08/10/2026, short 1 de E23) : « dans les sous-titres il oublie quelques mots des fois, faudrait une
 sorte de boucle de double check ». Deux causes mesurées sur ce short :
 - la transcription NORMALE « nettoie » la parole : « c'est », « en fait », « Et », « Donc »… dits mais pas écrits ;
 - un mot à cheval sur une coupe (« euh » retiré juste dedans) n'était gardé que s'il tenait entier dans un morceau
@@ -44,7 +44,7 @@ def _listen(audio: np.ndarray, pad: float, cfg=None) -> list[dict]:
                             "p": float(w.probability)})
     words = merge_fragments(out)
     # nombres découpés par Whisper (« 3 » « 000 ») -> « 3000 », comme dans la transcription normale (sinon le double
-    # contrôle ajoutait un « 3 » devant « 3000 » : « DE 3 3000 agents », teaser E22, 09/10/2026)
+    # contrôle ajoutait un « 3 » devant « 3000 » : « DE 3 3000 agents », teaser E23, 09/10/2026)
     merged: list[dict] = []
     for w in words:
         if merged and re.fullmatch(r"\d{3}[.,]?", w["w"]) and re.fullmatch(r"\d{1,3}", merged[-1]["w"]):

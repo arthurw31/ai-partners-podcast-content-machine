@@ -61,10 +61,10 @@ Relevé sur les 16 épisodes publiés (E06 à E21), captures d'Arthur du 09/10/2
 
 ## À éviter
 
-Titres générés avant ce brief (E22), jugés « pas ouf » par l'équipe le 09/10/2026 :
+Titres générés avant ce brief (E23, Coty), jugés « pas ouf » par l'équipe le 09/10/2026 :
 
 - `IA en entreprise chez Coty : 3000 agents, Microsoft Copilot et la vraie transformation | AI Corner` : liste de mots-clés
-  avec deux-points, pas de préfixe `AI Corner E22 |`, trois sujets à la fois.
+  avec deux-points, pas de préfixe `AI Corner E23 |`, trois sujets à la fois.
 - `Chez Coty il y a / 3000 agents IA actifs` : un fait sur l'entreprise, pas une question du spectateur.
 - `Pourquoi Coty a / 10 fois le même agent ?` : anecdote interne, tournure bancale.
 - `Le vrai métier du / Head of AI selon Coty` : jargon, « selon X » qui ne dit rien.

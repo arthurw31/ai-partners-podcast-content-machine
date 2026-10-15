@@ -1,12 +1,12 @@
-# Bonnes pratiques validées — AI Corner (épisode E22, 05 → 09/10/2026)
+# Bonnes pratiques validées — AI Corner (épisode E23, 05 → 09/10/2026)
 
-Ce qu'Arthur et l'équipe ont validé sur E22 (teaser, épisode complet, short 1) : **la référence pour les prochains
+Ce qu'Arthur et l'équipe ont validé sur E23 (teaser, épisode complet, short 1) : **la référence pour les prochains
 épisodes**. Chaque règle vient d'un retour réel (date + phrase d'Arthur) et est déjà appliquée par l'outil — ce guide
 dit *quoi* et *pourquoi* ; le *comment* (code, réglages) est dans [CLAUDE.md](../CLAUDE.md), le pas à pas dans le skill
 [podcast-clips](../.claude/skills/podcast-clips/SKILL.md), le teaser dans [TEASER_FRAMEWORK.md](TEASER_FRAMEWORK.md).
 
-Résultat jugé « franchement plutôt bien » par Arthur (09/10/2026) : `EPISODES/ai-corner/E22_nicolas-comestaz_coty/travail/episode/`
-(`E22_teaser_final.mp4`, `E22_nicolas-comestaz_coty_episode.mp4`) et `renders/clip_01_…_9x16.mp4` (style à reprendre).
+Résultat jugé « franchement plutôt bien » par Arthur (09/10/2026) : `EPISODES/ai-corner/E23_nicolas-comestaz_coty/travail/episode/`
+(`E23_teaser_final.mp4`, `E23_nicolas-comestaz_coty_episode.mp4`) et `renders/clip_01_…_9x16.mp4` (style à reprendre).
 
 ## 1. Le son et les coupes (valable pour TOUT : shorts, teaser, épisode)
 

@@ -5,7 +5,7 @@ Framework Python qui transforme un épisode de podcast (mp4) en shorts/reels mon
 ce fichier résume ce qu'il faut savoir pour **modifier** le projet sans casser les acquis.
 
 > **Bonnes pratiques validées** (son, coupes, sous-titres, shorts, teaser, épisode, méthode) : [docs/BONNES_PRATIQUES.md](docs/BONNES_PRATIQUES.md)
-> — résumé de tous les retours d'Arthur sur E22, à respecter sur chaque nouvel épisode.
+> — résumé de tous les retours d'Arthur sur E23, à respecter sur chaque nouvel épisode.
 >
 > **Reprise de session** : l'état du travail en cours (épisode, ce qui est validé, ce qui reste) est dans
 > [docs/REPRISE.md](docs/REPRISE.md) — à lire en premier dans une nouvelle session.
@@ -17,7 +17,7 @@ chaque livrable, pour qu'on n'ait plus qu'à le copier dans le Drive »)
 AI Partners Podcast Content Machine/
 ├── DEPOT/        ← vous déposez ici les rushs d'un nouveau tournage (3 caméras + son)
 ├── EPISODES/     ← un dossier par épisode, TOUT dedans
-│   └── <marque>/<épisode>/        ex. ai-corner/E22_nicolas-comestaz_coty/
+│   └── <marque>/<épisode>/        ex. ai-corner/E23_nicolas-comestaz_coty/
 │       ├── LIVRABLES/  ← à copier sur le Drive (`python -m clipper livraison`), rien d'autre
 │       ├── rushs/      ← sources : <épisode>.mp4, .wav, .multicam.json, cameras/
 │       ├── travail/    ← fichiers du pipeline (transcription, clips, rendus, contrôles, aperçus)
@@ -113,7 +113,7 @@ Puis noter la demande et sa date dans la section concernée de ce fichier.
 
 Arthur dépose ses fichiers (épisodes, clips de référence, logos, posts) dans `DEPOT/` (non versionné) : les ranger
 dans `MARQUES/<marque>/episodes|references|assets|assets/guests/` (voir `DEPOT/README.md`). S'il est vide, regarder
-les fichiers récents de `~/Downloads`. Depuis E22, l'équipe livre des **rushs** : 3 caméras 1080p de 13–14 Go
+les fichiers récents de `~/Downloads`. Depuis E23, l'équipe livre des **rushs** : 3 caméras 1080p de 13–14 Go
 (gros plan invité, plan large, gros plan animateur) + 1 WAV du micro, **déposés dans `DEPOT/`** (Arthur, 09/10/2026 :
 « on dépose les rushs MP4 et l'audio dans le dossier depot ») -> `python -m clipper rushes --brand <m> --episode E23
 --guest "Prénom Nom" --company X` (voir « Rushs déposés » plus bas). Si des rushs restent sur Dropbox :
@@ -222,7 +222,7 @@ exporter `PYTHONIOENCODING=utf-8` avant tout `print` contenant des accents ou de
 process pour les rendre mieux, et une étape où quelqu'un du marketing valide un titre parmi 5 propositions »)
 
 - **Cause** : le titre YouTube sortait du prompt de dérushage (`"youtube_title": "<titre YouTube>"`, aucun brief) et la vignette
-  avait son propre générateur ; E22 : `IA en entreprise chez Coty : 3000 agents, Microsoft Copilot et la vraie transformation`
+  avait son propre générateur ; E23 : `IA en entreprise chez Coty : 3000 agents, Microsoft Copilot et la vraie transformation`
   (liste de mots-clés, pas de préfixe) et des vignettes qui énonçaient des faits internes (« Chez Coty il y a 3000 agents »).
 - **Un seul générateur** (`clipper/titles.py`, brief `MARQUES/ai-corner/titles.md` = relevé des 16 titres publiés E06–E21,
   captures d'Arthur) : format YouTube `AI Corner E<n> | <titre>` (sans nom d'invité depuis E16) ; vignette = le MÊME titre en 2
@@ -247,14 +247,14 @@ process pour les rendre mieux, et une étape où quelqu'un du marketing valide u
 - Les contrôles attrapent les règles dures, pas le style : « Pourquoi Coty a / 10 fois le même agent ? » (refusé) est bloqué
   seulement parce qu'il figure dans « À éviter ». Le style repose sur le brief, le jury et la validation humaine.
 - `titles --import-file x.json` : titres déjà écrits (même format que `candidates`) contrôlés et présentés sans appeler
-  Claude (limite d'abonnement atteinte le 09/10 : propositions E22 écrites dans la session à partir de la transcription).
+  Claude (limite d'abonnement atteinte le 09/10 : propositions E23 écrites dans la session à partir de la transcription).
 - Chaque remarque de l'équipe sur un titre -> ligne dans « À éviter » ou règle dans titles.md (puis noter ici).
 
 ## Carrousels LinkedIn : `carousel` (Arthur, 12/10/2026 : « créer des carrousels LinkedIn à partir des podcasts, pour donner de
 la valeur à la commu qui nous suit, et sur la dernière slide un call to action pour inciter les gens à bosser avec nous »)
 
 - Choix d'Arthur : Claude propose l'angle (3 propositions, l'équipe choisit), en FRANÇAIS, CTA « réserver un échange »
-  (`carousel.cta` de brand.yaml, URL `weareaipartners.com` À CONFIRMER), 3 styles testés sur E22 puis l'équipe garde le sien.
+  (`carousel.cta` de brand.yaml, URL `weareaipartners.com` À CONFIRMER), 3 styles testés sur E23 puis l'équipe garde le sien.
 - Références : dossier Drive « Design » de l'équipe marketing (charte AI Partners, modèles Canva « Use case Carousel » —
   couverture bleue avec le « A » en verre, slides navy à cartes blanches, CTA final — et « Carousel GEO », 1200×1500).
 - `clipper/carousel.py` + brief `MARQUES/ai-corner/carousel.md` (injecté tel quel) : `carousel` -> 3 angles (`angles.md`,
@@ -265,7 +265,7 @@ la valeur à la commu qui nous suit, et sur la dernière slide un call to action
   détourée de l'invité reprise des miniatures) -> Chrome `--screenshot` (fenêtre 1080 × 1350·n, `--virtual-time-budget`
   pour les polices) -> découpe en PNG -> PDF. `--render` refait le rendu depuis `contenu.json` ; `--final STYLE` ->
   `carrousel/final/`. Styles : `usecase` (A), `lignes` (B), `portrait` (C), `mix`.
-- **Choix d'Arthur sur E22 (12/10/2026)** : style `mix` = couverture du C (photo détourée de l'invité sur dégradé bleu,
+- **Choix d'Arthur sur E23 (12/10/2026)** : style `mix` = couverture du C (photo détourée de l'invité sur dégradé bleu,
   titre à gauche, encart logo + invité) + slides du A (navy, cartes blanches) — `carousel.style: mix`, seul style rendu
   désormais. Couverture : la promesse claire (« Coty : la méthode en [[5 étapes]] pour adopter l'IA »), PAS une
   accroche choc (proposées : « 3 000 agents IA. Dont 10 qui font la même chose. »… -> « en vrai le titre de base était
@@ -317,7 +317,7 @@ newsletter dans ce style-là : un mail qui part direct de la part du founder »)
   (`border-box`, rembourrage compris). Aperçu local d'un fichier HTML dans le navigateur de l'app : les requêtes @media ne
   s'appliquent PAS (page « data: ») ; tester la version publiée sur GitHub Pages avec la fenêtre mobile (375 px). Un connecteur n8n
   qui renvoie « erreur » peut quand même avoir lancé l'envoi : relire les exécutions avant de relancer. Épisode déjà publié
-  (E21 Mendo, 14/10/2026) : `newsletter --number E21 --guest … --company … --role …` + miniature de l'équipe déjà en place.
+  (E22 Mendo, 14/10/2026) : `newsletter --number E22 --guest … --company … --role …` + miniature de l'équipe déjà en place.
 
 ## Relecture critique sans contexte : `review` (Arthur, 12/10/2026 : « un sous-agent qui n'a pas le contexte de la
 conversation principale, pour un regard neuf et plus critique ; un modèle assez performant » puis « attention à la
@@ -327,7 +327,7 @@ consommation de tokens »)
   à l'équipe : sens, cadrage, lisibilité, fidélité à l'épisode, règles validées (`config/review_checklist.md`, une section
   par type : seule la section utile est envoyée). Il ne voit ni n'entend la vidéo : planche d'images, « ce qu'on entend »,
   rapport `qa`, passages exacts de l'épisode. Défaut sans « où » ni règle = écarté ; ÉCHEC -> boucle « à corriger ».
-- Test sur le carrousel E22 : sans les passages de l'épisode, le relecteur prenait des citations vérifiées et des faits dits
+- Test sur le carrousel E23 : sans les passages de l'épisode, le relecteur prenait des citations vérifiées et des faits dits
   ailleurs (« 3 000 agents » à 34:04, « contrat avec Microsoft ») pour des inventions -> `_passages` fournit l'extrait exact
   autour de chaque preuve, citation, chiffre et expression entre « ». Défauts réels trouvés : « 1 000 licences » au lieu de
   « près de 1 000 », « GLISSEZ » illisible sur la chemise blanche, « 5 étapes dans l'ordre » alors que l'invité décrit des
@@ -365,10 +365,10 @@ shorts il faut que la miniature soit validée »)
   `compose` arrête la composition avec la parole ; l'animation commence par ~0,6 s de noir -> `append` saute ce début ; `qa
   --render` (`black_runs`) et `outro` signalent ÉCHEC dès 0,2–0,3 s de noir.
 - **Fin du short = fin de la PENSÉE** (même retour : « tu l'as coupé un peu trop tôt, le mec était en train de parler ») : short 1
-  E22 finissait sur « …de l'entreprise. » alors que l'invité enchaînait sans pause (« Et puis cette transformation… ») ; `qa` :
+  E23 finissait sur « …de l'entreprise. » alors que l'invité enchaînait sans pause (« Et puis cette transformation… ») ; `qa` :
   fin du short suivie de la voix en < 0,1 s = ÉCHEC (avant : ATTENTION). Correction : prolonger jusqu'à une vraie pause ou un
-  changement d'orateur (E22 : « …cette dimension process dans l'entreprise. », puis Thomas) et, si c'est trop long, retirer une
-  phrase du milieu qui se raccorde naturellement (E22 : « Et je pense que ça va prendre un peu de temps… » retirée, 54 s).
+  changement d'orateur (E23 : « …cette dimension process dans l'entreprise. », puis Thomas) et, si c'est trop long, retirer une
+  phrase du milieu qui se raccorde naturellement (E23 : « Et je pense que ça va prendre un peu de temps… » retirée, 54 s).
 - **Miniature provisoire** (Arthur, 11/10/2026 : « fais-moi 2 shorts en 1080p… et l'outro avec la miniature », sans choix d'équipe
   encore) : `outro --thumb <image>` rend l'outro avec cette image dans `outro_short/outro_9x16_provisoire.mp4` et colle les
   shorts dans `livrables_provisoires/` ; `livrables/` et le choix officiel (`thumbnail --pick`) ne sont jamais touchés. Dès
@@ -381,7 +381,7 @@ shorts il faut que la miniature soit validée »)
   invitée `assets/guests/<entreprise>.svg|png`), titre 2 lignes Metropolis ExtraBold, une ligne sur bandeau bleu arrondi
   (le titre vient de `titles` : voir la section précédente ; depuis le 09/10 ombre douce sous la ligne hors bandeau,
   `title.shadow` dans template.json, 0 pour la retirer).
-- `python -m clipper thumbnail --brand ai-corner --input E22_nicolas-comestaz_coty.mp4 [--n 4] [--title "l1 | *l2"]
+- `python -m clipper thumbnail --brand ai-corner --input E23_nicolas-comestaz_coty.mp4 [--n 4] [--title "l1 | *l2"]
   [--host-frame s] [--guest-frame s]` -> `EPISODES/…/travail/miniatures/` (`variante_N.jpg` 1280×720, `_HD.png`, `planche.jpg`,
   `titres.md`). Invité/entreprise lus dans clips.json. ~5 min (détourage ≈ 45 s par photo, CPU).
 - `clipper/thumbnail.py` : images clés toutes les 8 s -> note YuNet (netteté, regard vers le centre, sourire) ->
@@ -414,36 +414,43 @@ shorts il faut que la miniature soit validée »)
   `models/emotion_ferplus.onnx`, probabilité « joie » : souriant 1,0 / neutre 0,0 — l'ancien indice largeur de bouche
   prenait une bouche ouverte en pleine phrase pour un sourire), classement = joie d'abord + regard vers le centre ;
   planches recadrées sur les VISAGES (16 candidats, 4×4) ; jury `JURY_PROMPT` : vrai sourire tourné vers l'autre.
-  E22 : Thomas 40:06, Nicolas 48:33. Si `claude -p` est indisponible (limite hebdo atteinte le 09/10), l'agent regarde
+  E23 : Thomas 40:06, Nicolas 48:33. Si `claude -p` est indisponible (limite hebdo atteinte le 09/10), l'agent regarde
   les planches et écrit lui-même `work/thumbnail/jury_v2.json` ({"host": [n°…], "guest": [n°…]}).
 - `cv2.imread` ne lit pas les chemins accentués (« Création… ») : `score_frame` lit avec `np.fromfile` + `imdecode`.
 - Nommage des épisodes : **d'après l'INVITÉ**, `E<n>_<prenom-nom-invite>_<entreprise>` (E20 `thierry-champeroux_maif`,
-  E21 `quentin-amaudry_mendo`, E22 `nicolas-comestaz_coty`) — jamais d'après Thomas Spitz, l'animateur (CEO AI
-  Partners, présent dans tous les épisodes). E22 était nommé « thomas-spitz » : renommé le 09/10/2026 (demande
-  d'Arthur, « pour être cohérent avec ce qu'on faisait avant ») — sources, dossier `EPISODES/…/travail/e22-nicolas-comestaz-coty`,
+  E22 `quentin-amaudry_mendo`, E23 `nicolas-comestaz_coty`) — jamais d'après Thomas Spitz, l'animateur (CEO AI
+  Partners, présent dans tous les épisodes). E23 était nommé « thomas-spitz » : renommé le 09/10/2026 (demande
+  d'Arthur, « pour être cohérent avec ce qu'on faisait avant ») — sources, dossier `EPISODES/…/travail/e23-nicolas-comestaz-coty`,
   fichiers et chemins dans les JSON ; jonctions `assets/` des projets recréées (cible absolue).
+- **Renumérotation du 15/10/2026** (Arthur : « le podcast de Mendo c'est le n° 22, pas 21, donc décale les numéros ») :
+  Mendo E21 -> **E22**, Coty E22 -> **E23** (E20 MAIF inchangé ; le vrai E21 publié, « Combien vous coûte vraiment votre
+  IA ? », reste dans titles.md). Dossiers, noms de fichiers, textes et chemins des JSON (dates des fichiers gardées : le
+  pipeline juge « à jour » d'après elles), jonctions `assets/`, `docs/newsletters/E22|E23`, et toutes les notes du dépôt
+  (code, docs, mémoire) : une mention « E22 » datée d'avant le 15/10 parle désormais de Coty sous le nom E23. Le numéro
+  vient du nom de fichier (`titles.episode_number`) : renommer le dossier suffit pour les titres « AI Corner E<n> | … ».
+  Un dossier ouvert dans l'Explorateur (LIVRABLES) bloque le renommage (« Accès refusé ») : le faire fermer.
 
 ## Rushs déposés : `rushes` (Arthur, 09/10/2026 : « on dépose les rushs MP4 et l'audio dans le dossier depot »)
 
 - `clipper/ingest.py` : 3 vidéos + 1 audio lisibles dans `DEPOT/` (un fichier tronqué — `ffprobe` en échec — est
-  ignoré et signalé : les anciens téléchargements partiels d'E22 de 9,3 Go y sont encore). Plan large = la caméra qui
+  ignoré et signalé : les anciens téléchargements partiels d'E23 de 9,3 Go y sont encore). Plan large = la caméra qui
   montre 2 visages ; animateur = gros plan dont l'empreinte de visage (SFace, ONNX, `models/face_recognition_sface.onnx`,
   alignement sur les 5 repères YuNet) ressemble le plus à `assets/host_face.jpg` (Thomas : 0,80 contre 0,20 pour
-  l'invité sur E22) ; sans photo de référence : couleurs comparées au plan large + `framing.host_side`.
-- **Le côté de l'animateur change d'un épisode à l'autre** (E21 à droite, E22 à GAUCHE alors que brand.yaml dit
+  l'invité sur E23) ; sans photo de référence : couleurs comparées au plan large + `framing.host_side`.
+- **Le côté de l'animateur change d'un épisode à l'autre** (E22 à droite, E23 à GAUCHE alors que brand.yaml dit
   `host_side: right`) : `rushes` le mesure dans le plan large et l'écrit dans `multicam.json` (`host_side`) -> passer
   `--host-side` en conséquence.
 - Décalage du micro : corrélation (FFT) du son témoin du plan large avec le WAV, 90 s à ~10 min ; convention de
-  `multicam.json` : son caméra(t) = micro(t - `audio_delay`). E22 mesuré à **-0,037 / -0,042 s** sur les 3 caméras et à
-  3 moments, alors que le fichier E22 contient +0,037 (signe probablement inversé à la mesure manuelle du 06/10 : le
-  son des rendus E22 serait ~74 ms en retard sur l'image) — extraits de test `apercus/test_synchro_{A_actuel,B_mesure}.mp4`,
-  à trancher par Arthur avant de corriger E22.
+  `multicam.json` : son caméra(t) = micro(t - `audio_delay`). E23 mesuré à **-0,037 / -0,042 s** sur les 3 caméras et à
+  3 moments, alors que le fichier E23 contient +0,037 (signe probablement inversé à la mesure manuelle du 06/10 : le
+  son des rendus E23 serait ~74 ms en retard sur l'image) — extraits de test `apercus/test_synchro_{A_actuel,B_mesure}.mp4`,
+  à trancher par Arthur avant de corriger E23.
 - Rangement (depuis le 13/10/2026) : `EPISODES/<marque>/<E>_<invité>_<entreprise>/rushs/cameras/{invite_<prénom>,large,animateur_<prénom>}.mp4`,
   `rushs/<E>_<invité>_<entreprise>.wav`,
   `<base>.mp4` = lien dur vers le plan large, `<base>.multicam.json` ; planche `rushs/rushes_<E>.jpg` à REGARDER
   (`--host <morceau de nom>` corrige l'animateur). Fichiers déplacés, jamais copiés. `--dry-run` : identifie sans déplacer.
 
-## Rushs multicam (E22, 06/10/2026 : l'équipe livre 3 caméras + 1 WAV au lieu de l'épisode monté)
+## Rushs multicam (E23, 06/10/2026 : l'équipe livre 3 caméras + 1 WAV au lieu de l'épisode monté)
 
 - `clipper/multicam.py` : si `EPISODES/<marque>/<épisode>/rushs/<ep>.multicam.json` existe, `compose` découpe chaque passage avec
   `cut_multicam` (gros plan de la personne qui parle, d'après les `turns` de clips.json — la vérité du pipeline ; coupe
@@ -461,17 +468,17 @@ shorts il faut que la miniature soit validée »)
 (1080p). Fichiers : `clipper/episode.py`, `clipper/diarize.py`, section `teaser:` de brand.yaml. Sorties :
 `EPISODES/<marque>/<épisode>/travail/episode_plan.md` (à relire : coupes, teaser, % de plans), `episode/<ep>_episode[_apercu].mp4`,
 `episode/description_youtube.md` (titre + chapitres aux temps du montage).
-- Style mesuré sur les montages du monteur (E20 MAIF, E21 Mendo — même studio que E22) : plan médian ≈ 10 s ;
+- Style mesuré sur les montages du monteur (E20 MAIF, E22 Mendo — même studio que E23) : plan médian ≈ 10 s ;
   gros plans 76 %, large 14 %, écran partagé (2 gros plans côte à côte, animateur du côté où il est dans le large) 10 % ;
   sur la personne qui parle 97 % du temps ; respiration large/split (~7 s) toutes les 12–19 s dans les longues
-  réponses. `build_edl` reproduit ces proportions (E22 : 74/13/13 %, médiane 9 s).
+  réponses. `build_edl` reproduit ces proportions (E23 : 74/13/13 %, médiane 9 s).
 - **On voit TOUJOURS celui qui parle** (Arthur, 09/10/2026 : « des fois l'invité parle et la caméra est centrée sur
   Thomas, et inversement — quand une personne parle, soit un plan avec que lui, soit un plan avec les deux, mais il
   faut qu'on voie toujours celui qui parle ») : `episode.enforce_speaker` (fin de `build_edl`) — dans un gros plan,
   toute réplique de l'autre de plus de 0,4 s (`speaker_runs`) devient son gros plan (≥ 2,5 s) ou un écran partagé
   (≥ 2 s) ; gros plan restant < 2 s -> écran partagé ; répété 3 fois (ping-pong rapide). Les plans de **réaction**
   sur l'écoutant seul sont **supprimés** (`reaction_rate: 0`) : ils montraient l'autre 1,5 s en pleine phrase.
-  E22 avant : 41 passages, 54 s hors champ (réactions, « bonjour Thomas », « Pardon », ping-pong 21:48 « Qui est
+  E23 avant : 41 passages, 54 s hors champ (réactions, « bonjour Thomas », « Pardon », ping-pong 21:48 « Qui est
   globale ? » / « Qui est globale. Ok. » fondu dans un seul plan par le nettoyage des plans < 2 s) ; après : 0.
   `qa --episode` le contrôle deux fois : `speaker_visible` (tours de parole, ÉCHEC) et `voice_matches_shot`
   (empreinte vocale WeSpeaker de chaque gros plan comparée aux deux voix, INDÉPENDANT de la diarisation -> ATTENTION
@@ -484,7 +491,7 @@ shorts il faut que la miniature soit validée »)
   torch 2.14). Changements d'orateur recalés sur le plus grand silence voisin (`_refine_boundaries`).
 - Rendu du corps : un morceau H.264 par plan (`-frames:v` exact, 24 i/s, `-video_track_timescale 12288`), concat sans
   réencodage ; audio = micro sur les mêmes images (aucune dérive) ; volume normalisé sur tout l'épisode (-16 LUFS :
-  E22, le micro de l'invité baisse de 2,5 dB entre 26 et 41 min). Teaser = clip HyperFrames 16:9 (sous-titres de la
+  E23, le micro de l'invité baisse de 2,5 dB entre 26 et 41 min). Teaser = clip HyperFrames 16:9 (sous-titres de la
   charte) via `teaser_brand` ; fin = animation AI Partners + logo (4 s), comme E20.
 - Retours d'Arthur sur le 1er montage (07/10/2026) : « teaser plus dynamique, enlever les euh, qu'on voie les deux
   interlocuteurs, des passages impactants » -> `make_teaser` (TEASER_PROMPT, appel dédié avec Opus :
@@ -500,7 +507,7 @@ shorts il faut que la miniature soit validée »)
   NORMALE (qui omet toujours les hésitations) = hésitation -> reprise 0,28 s avant l'attaque de ce mot (signal le plus
   fiable : le verbatim, lui, entend ou non le « euh » selon la fenêtre) ; « euh » / mot répété en tête (écouté 2 fois, contextes
   différents : le verbatim varie) -> blocs de voix sautés, coupe au point le plus silencieux ; blanc > 1,2 s au
-  raccord -> reprise 0,28 s avant la voix. E22 : « Euh, pour, pour finir » -> « Pour finir » (2924,50) ; 3 s de blanc
+  raccord -> reprise 0,28 s avant la voix. E23 : « Euh, pour, pour finir » -> « Pour finir » (2924,50) ; 3 s de blanc
   après la question reposée + « Euh… ben, je… » non transcrit -> reprise sur « Je pense » (2469,95), 1,1 s de pause.
   Le contrôle final se fait sur le MP4 rendu (audio extrait, réécoute de chaque raccord) : c'est lui qui a trouvé ce
   « ben, je… ». Avant tout rendu final : réécouter chaque raccord (`verify.audit`, 10 s de
@@ -517,7 +524,7 @@ shorts il faut que la miniature soit validée »)
 - L'épisode entier n'est PAS rendu par HyperFrames (≈ 12× la durée = 9–10 h) : corps en FFmpeg, teaser en
   HyperFrames. Toujours montrer l'aperçu (Studio pour le teaser : `preview --clip 99 --formats 16x9`, 540p pour le
   corps) et attendre la confirmation d'Arthur avant tout MP4 final.
-- E21 n'a ni teaser ni logo incrusté ; E20 a un teaser (~55 s, 4–5 phrases de l'invité) + sting logo : c'est ce
+- E22 n'a ni teaser ni logo incrusté ; E20 a un teaser (~55 s, 4–5 phrases de l'invité) + sting logo : c'est ce
   modèle qui est reproduit.
 
 ## Shorts multicam : gros plan + écran partagé (retour de l'équipe via Arthur, 07/10/2026)
@@ -550,9 +557,9 @@ les deux personnes (comme les shorts du monteur : un en haut, un en bas) pour mo
 - Exigences : thèse sans hésitation, ping-pong indissociable (question + SA réponse), chute ≤ 6 s ; extraits
   écartés -> réserve courte et propre ; puis `editorial_order` (LLM, `EDITOR_PROMPT`) recompose l'ordre final à
   partir des seuls extraits VÉRIFIÉS (texte réellement entendu) : Q/R cohérentes, aucune redite, fin forte. Sans ça,
-  E22 avait un ping-pong absurde (« top-down ? » / « 3 000 agents ») et une redite ouverture/fin.
+  E23 avait un ping-pong absurde (« top-down ? » / « 3 000 agents ») et une redite ouverture/fin.
 - Hésitations : `verify._isolated_hole` — on ne retire un « euh »/« enfin » que s'il forme un bloc de voix entouré
-  de vrais silences dans le son ; sinon il reste (E22 : couper sur les horodatages avait emporté « plus de »).
+  de vrais silences dans le son ; sinon il reste (E23 : couper sur les horodatages avait emporté « plus de »).
   Raccord signalé au milieu d'un mot par l'écoute (`audit_joins`) -> retrait annulé, réécoute.
 - Dynamique dosée : `montage.dynamic_fx` (compose) — zoom lent alterné 6 % sur chaque plan + `fx_in: zoomblur`
   (filtre flou + luminosité, 0,32 s, template) sur 1 changement d'extrait sur 3 (`fx_every`). Sous-titres : ombre
@@ -579,8 +586,8 @@ triple check, optimise-le pour la rapidité sans réduire la qualité »)
   Whisper traite toujours des blocs de 30 s, des fenêtres plus courtes ne coûtent pas moins), 2 aperçus MP4 en
   parallèle. Whisper utilise déjà 4 threads = 4 cœurs physiques : rien à gagner de ce côté.
 - `pad_end` corrigé le 08/10 (trouvé par `qa`) : si la coupe tombe déjà dans un vrai silence (≥ 0,08 s), la phrase est
-  finie et on ne dépasse JAMAIS le son suivant (short 1 E22 : « l'entreprise. ‖ É(t) » entendu) ; un silence plus court
-  est une occlusion dans un mot (« bien-t-ôt », 0,06 s) -> on va jusqu'à la vraie fin de la voix. Teaser E22 : 5 fins
+  finie et on ne dépasse JAMAIS le son suivant (short 1 E23 : « l'entreprise. ‖ É(t) » entendu) ; un silence plus court
+  est une occlusion dans un mot (« bien-t-ôt », 0,06 s) -> on va jusqu'à la vraie fin de la voix. Teaser E23 : 5 fins
   reculées de 0,1–0,35 s ; épisode : fins de partie 2406,19 -> 2405,99 et 2819,02 -> 2818,67 (début du hors antenne).
 
 ## Boucle de vérification intransigeante : `strict.py` (Arthur, 12/10/2026 : « il y a parfois des petits accrocs quand
@@ -588,7 +595,7 @@ même, des sous-titres qui se chevauchent ou des phrases coupées légèrement t
 vérification intransigeante qui règle ces problèmes »)
 
 - **Sous-titres superposés** : cause = `captions.group_words` prolongeait un bloc court à `min_group_duration` (0,5 s) PAR-DESSUS
-  le bloc suivant (E22 : 3 chevauchements de 0,12–0,3 s dans le short 1, 2 dans le short 2) -> la durée minimale ne déborde
+  le bloc suivant (E23 : 3 chevauchements de 0,12–0,3 s dans le short 1, 2 dans le short 2) -> la durée minimale ne déborde
   plus jamais ; `strict.caption_problems` lit la COMPOSITION (blocs `cap-N`, `data-start` / `data-duration`, mots `data-t`) :
   deux blocs à l'écran ensemble (≥ 1 image) ou mot prévu hors de son bloc = ÉCHEC dans `qa`.
 - **Fins coupées « un peu trop tôt »** : `qa._voice_at` tolérait une voix qui s'éteint à 10–20 % (dernière syllabe audible).
@@ -606,7 +613,7 @@ vérification intransigeante qui règle ces problèmes »)
   instant écrit en haut) : ~20 s à regarder en premier, à donner à Arthur avec le short.
 - **Son du montage reconstruit en UN passage** (12/10/2026, 2e retour d'Arthur : « encore des phrases coupées trop tôt ») —
   la vraie cause était dans l'ASSEMBLAGE, pas dans les coupes : chaque morceau avait son propre son AAC (préchauffage ~21 ms)
-  recollé sans réencodage -> le son prenait ~25 ms de retard PAR RACCORD (short 2 E22 : +149 ms au 10e morceau) ; la
+  recollé sans réencodage -> le son prenait ~25 ms de retard PAR RACCORD (short 2 E23 : +149 ms au 10e morceau) ; la
   composition s'arrêtant à l'heure prévue, la fin de la dernière phrase était tronquée, et sous-titres / lèvres se décalaient.
   En plus, `loudnorm` était appliqué morceau par morceau (gain dynamique qui étouffe attaques et fins sur 0,5–5 s). Désormais
   (`compose` + `media.rebuild_audio`) : durées arrondies à l'IMAGE SUPÉRIEURE (`ceil(d × fps − 1e-3)` : sans la tolérance,
@@ -621,7 +628,7 @@ vérification intransigeante qui règle ces problèmes »)
   du mot (0,04–0,13 s) ; `qa` signale un « euh » redevenu audible.
 - **Installés le 12/10/2026** (Arthur : « installe-les si c'est pertinent et que ça peut tourner sur mon PC sans le faire
   laguer ») — `clipper/endpoint.py`, modèles dans `models/hf/` (non versionnés, téléchargés au 1er usage, ~1,2 Go) :
-  **Smart Turn v3.2** (`turn_complete(wav, t)`, ~20 ms, 2 threads) : calibré sur E22 — fins validées 0,96–0,99, « …de
+  **Smart Turn v3.2** (`turn_complete(wav, t)`, ~20 ms, 2 threads) : calibré sur E23 — fins validées 0,96–0,99, « …de
   l'entreprise. ‖ Et puis » (l'invité continuait) 0,23, « parce qu'encore » 0,01 ; aveugle à une syllabe coupée
   (« productivi-té » 0,99 : c'est le rôle du contrôle d'énergie) et trompé par une virgule (0,95) -> `qa` : fin du short
   < 0,5 = ÉCHEC, fin interne < 0,5 = ATTENTION. **Alignement CTC** (`align(wav, a, b, texte)`, wav2vec2 français, Viterbi
@@ -629,14 +636,14 @@ vérification intransigeante qui règle ces problèmes »)
   (`strict.ctc_hesitations`) : le VERBATIM (hésitations comprises, il garde « en fait », « c'est » que la transcription
   normale omet) est aligné ; toute voix sans mot ≥ 0,35 s entre deux mots est retirée (« euh » collés dont `fillers` avait
   annulé la coupe, « hmm » d'acquiescement de l'animateur — Arthur, 12/10/2026 : « on entend plusieurs fois Thomas
-  acquiescer en faisant hmm, ça n'apporte rien, ça ne fait pas pro »). E22 : short 2 « …beauté, euh, à nos consommateurs »
+  acquiescer en faisant hmm, ça n'apporte rien, ça ne fait pas pro »). E23 : short 2 « …beauté, euh, à nos consommateurs »
   (1,13 s), « …en fait, euh, et de vendre » (1,23 s). Si l'acquiescement est PAR-DESSUS la voix de l'invité (micro mono),
   il ne peut pas être retiré par une coupe. Boucle de `polish` : **6 tours** (3 avant ; Arthur : « augmente le nombre pour
   que le short soit parfait »).
-- Short 1 E22 vers 34 s (Arthur, 12/10/2026 : « encore un bug ») : « Et puis, euh, cette transformation, elle… humaine, elle
+- Short 1 E23 vers 34 s (Arthur, 12/10/2026 : « encore un bug ») : « Et puis, euh, cette transformation, elle… humaine, elle
   doit » mal nettoyé (« euh » resté, 4 coupes en 2,5 s, « humaine » étiré + 2 s de blanc) -> refait d'après l'alignement :
   « Et puis ‖ cette transformation ‖ humaine, elle doit… » (morceaux 2345,08–2346,05 / 2347,64–2348,62 / 2350,50–…).
-- Shorts 3–5 E22 (12–13/10/2026) — règles ajoutées : **répétitions** (« qu'il faut avoir, qu'il faut avoir ») retirées
+- Shorts 3–5 E23 (12–13/10/2026) — règles ajoutées : **répétitions** (« qu'il faut avoir, qu'il faut avoir ») retirées
   par l'étape `ctc` (groupe de 1 à 4 mots dit deux fois de suite : 1re occurrence coupée) ; **double écoute des raccords** :
   un raccord signalé « dans un mot » par la réécoute du clip entier est réécouté SEUL (± 3 s) ; seul un raccord signalé par
   les DEUX écoutes est un ÉCHEC et est annulé par la boucle (la réécoute du clip entier varie avec le contexte : elle avait
@@ -648,13 +655,13 @@ vérification intransigeante qui règle ces problèmes »)
   traitements (`request_keep_awake`) : une mise en veille avait interrompu la chaîne la nuit du 12/10.
   Volume : `rebuild_audio` fait un `loudnorm` en DEUX passages (mesure puis correction linéaire) — en un passage, le short 5
   (19 s) sortait à -17,6 LUFS ; ne jamais lancer deux chaînes `polish`/`render` sur les mêmes shorts en même temps.
-- E21 (épisode déjà monté, 1080p, 14/10/2026) : la transcription du 05/10 a des horodatages décalés de 0,3 à 0,5 s par
+- E22 (épisode déjà monté, 1080p, 14/10/2026) : la transcription du 05/10 a des horodatages décalés de 0,3 à 0,5 s par
   rapport au son -> les coupes faites à la main se placent sur l'ÉNERGIE du micro (`work/audio16k.wav`, creux réels), pas sur
   les mots de Whisper. Une phrase dite dans un blanc et absente de la transcription normale (« C'était le début, en fait »,
   short 1, 1202,86–1203,85) n'est retirée ni par `ctc` (le verbatim l'aligne comme du texte) ni par `fillers` : la lire dans
   « Ce qu'on entend » du rapport et couper à la main. Après une retouche de `segments` : `build --only N --force` (sinon le
   contrôle de synchro compare un ancien son : « son différent de la source »).
-- **Retours d'Arthur sur les shorts E21 (14/10/2026)** — « Thomas coupe la parole à l'invité, il faut pas ; ça sert à rien de
+- **Retours d'Arthur sur les shorts E22 (14/10/2026)** — « Thomas coupe la parole à l'invité, il faut pas ; ça sert à rien de
   mettre l'image et le son de Thomas qui acquiesce » ; « les phrases ont tendance à être coupées trop tôt et il y a un bruit de
   bouche à la fin » ; « fais plus de boucles de vérification QA » ; « fais preuve de bon sens » :
   - **Qui est à l'image** (épisode DÉJÀ MONTÉ : l'image vient du monteur, qui insère des plans de 1,5 s sur Thomas qui écoute) :
@@ -662,17 +669,17 @@ vérification intransigeante qui règle ces problèmes »)
     compare à qui parle (`work/diarized_words.json`) -> `qa` ÉCHEC « on voit Thomas pendant que l'invité parle » (cache
     `qa/qa_image_NN.json`). Correction automatique seulement au bord d'un morceau ; au milieu, Claude recoupe À LA MAIN sur des
     silences voisins (mots alignés + énergie), quitte à retirer la phrase entière : jamais trancher une phrase de l'invité.
-    E21 : plans de Thomas 1201,625 / 1216,625 / 1230,625 / 1482,625 (+1,5 s), retirés.
+    E22 : plans de Thomas 1201,625 / 1216,625 / 1230,625 / 1482,625 (+1,5 s), retirés.
   - **Rythme des raccords internes** (`strict.join_flow_problems` / `fix_join_flow`, étape de `polish` + chaque tour de boucle +
     `qa`) : retrait < 0,35 s en pleine voix = recollé (« il y ‖ a », 0,14 s) ; fin de morceau en pleine voix sans « euh » tenu
     derrière = fin de mot tranchée -> retrait court (< 0,5 s) recollé, retrait long (vraie hésitation, « ok ‖ bah… si », 1,47 s)
     JAMAIS remis : la fin est prolongée jusqu'au creux qui finit le mot (sinon ATTENTION « à écouter »). `ctc` : retrait réel
     ≥ 0,35 s (0,26 s passaient). `fillers` prenait les voyelles allongées de Quentin pour des « euh ».
   - **Bruit de bouche** après la dernière voix (`strict.tail_noise` : son bref ≤ 0,08 s isolé dans la traîne) -> fin avancée
-    (`fix_tail_noise`), `qa` ÉCHEC sinon. E21 short 2 : claquement à 1503,58.
+    (`fix_tail_noise`), `qa` ÉCHEC sinon. E22 short 2 : claquement à 1503,58.
   - Boucle de `polish` : **10 tours** (6 avant). Une réaction de l'invité (« ok, fine ») n'est pas une réaction vide : la garder.
   - Aperçu avec l'outro pour la validation : `short_outro.append(apercu, outro_short/outro_9x16.mp4, …_avec_outro_apercu.mp4)`.
-- **Retours de Thomas sur le short 1 E21 (15/10/2026)** (« c'est important de bien les mapper, c'est toute la différence de
+- **Retours de Thomas sur le short 1 E22 (15/10/2026)** (« c'est important de bien les mapper, c'est toute la différence de
   le faire avec un pro ») et d'Arthur (« enlève le plan avec Thomas à la fin, ça n'apporte rien ») :
   1. « Le bandeau est un peu en overlap de son menton, à descendre » -> `compose._face_bottom` mesure le bas des visages dans
      la vidéo recadrée pendant l'accroche ; bulle-titre ET sous-titres descendent d'autant (`hook.face_margin` 0,025 H,
@@ -694,7 +701,7 @@ vérification intransigeante qui règle ces problèmes »)
   avec l'instant, dernière image marquée FIN), un gros plan de l'accroche, « ce qu'on entend », qui parle, ce que l'épisode
   dit juste avant et juste après, et la section `short` de `config/review_checklist.md` (tous les retours validés).
   `--no-review` pour s'en passer. ~15 k tokens d'entrée, ~0,3 $ par short. Test à l'aveugle sur l'ancienne version du short 1
-  E21 : il a retrouvé SEUL les 3 retours de Thomas (fin après la chute, dernière image sur Thomas, bulle sur le menton) +
+  E22 : il a retrouvé SEUL les 3 retours de Thomas (fin après la chute, dernière image sur Thomas, bulle sur le menton) +
   « Attends, là » en ouverture, « …qu'un seul » sans complément, un « TU » invisible. Ses défauts sont TRIÉS par Claude
   (bon sens) : corriger ce qui est prouvé, remonter le goût à l'équipe ; une accroche validée par l'équipe ne se change pas
   sans elle. Sous-titres (trouvé par lui) : bloc affiché < 0,35 s fusionné avec le suivant, dernier mot d'un bloc qui ne
@@ -746,7 +753,7 @@ fasse pas effet coupé — et ça vaut pour toutes les formes de vidéo : teaser
   (`episode-plan` sur chaque fin d'extrait du teaser) ; `qa` signale un blanc de fin > 0,6 s.
 - Appelé partout : `trim_edges` (fin de chaque short et de chaque extrait du teaser), `episode.clean_join_starts`
   (fin de chaque partie du montage complet et fin de l'épisode).
-- Cas E22 : teaser « …en productivité » coupé sur la dernière syllabe (« -té » jusqu'à 1294,94, coupe à 1294,85) ;
+- Cas E23 : teaser « …en productivité » coupé sur la dernière syllabe (« -té » jusqu'à 1294,94, coupe à 1294,85) ;
   fin de l'épisode coupée dans « À bien-tôt » (3058,97 -> 3059,42).
 
 ## Volume et musique du teaser (retour d'Arthur, 08/10/2026)
@@ -755,7 +762,7 @@ fasse pas effet coupé — et ça vaut pour toutes les formes de vidéo : teaser
   `episode.assemble` normalise désormais CHAQUE partie séparément à -16 LUFS avant de les enchaîner.
 - Musique d'ambiance sous le teaser : `teaser.audio.music` (brand.yaml, fichier dans `assets/music/`), « vraiment en
   léger, qu'on entende surtout les invités » : `music_volume: 0.08` pour une piste à -16 LUFS (≈ -22 dB sous les
-  voix) ; elle s'éteint pendant la carte de fin. E22 : « Driving Momentum ».
+  voix) ; elle s'éteint pendant la carte de fin. E23 : « Driving Momentum ».
 - Teaser et corps sont rendus SÉPARÉMENT (`renders/teaser.mp4` ; morceaux du corps en cache dans
   `work/episode/pieces_*`) : une retouche du teaser = nouveau rendu du teaser (~10 min) + réassemblage (~5 min,
   sans réencoder le corps). Supprimer/renommer `renders/teaser.mp4` pour forcer son nouveau rendu.
@@ -766,7 +773,7 @@ tôt, un bégaiement au début — rajoute une vérification »)
 - La transcription normale nettoie le texte : « euh », bégaiements, mots coupés y sont invisibles. `clipper/verify.py`
   retranscrit chaque passage en VERBATIM (Whisper + `initial_prompt` plein d'hésitations, 0,4 s avant / 0,6 s après)
   et repère : fillers (`FILLERS`), « enfin » entre virgules (`HEDGES`), mots répétés, mot à cheval sur le début ou
-  la fin. Sur E22 il a retrouvé exactement ce qu'Arthur avait entendu.
+  la fin. Sur E23 il a retrouvé exactement ce qu'Arthur avait entendu.
 - Correction (`fix_segment`, `check_and_fix`, 2 passes) : coupes posées au point le plus SILENCIEUX du micro
   (`_quiet`) — les horodatages verbatim d'un « euh » bougent de ±0,1 s d'une passe à l'autre ; voisins pris dans
   l'ordre des mots (un « euh » mal horodaté avait emporté « refonte ») ; morceaux d'un même passage jamais chevauchants.
@@ -785,7 +792,7 @@ tôt, un bégaiement au début — rajoute une vérification »)
   silence = < 25 % du niveau de parole voisin, fenêtre élargie car les horodatages normaux sont décalés de 0,2–0,3 s)
   + mot suivant qui ne prolonge pas (et/donc/parce que… si pause < 0,5 s) ; changement d'orateur = frontière dès
   0,08 s de blanc. Extrait prolongé jusqu'à la prochaine frontière (≤ 8 s) ou ramené à la précédente, sinon écarté
-  (teaser) / coupe d'origine (short). Cas de référence E22 : « venir ‖ et » non, « leader ‖ En tout cas » non,
+  (teaser) / coupe d'origine (short). Cas de référence E23 : « venir ‖ et » non, « leader ‖ En tout cas » non,
   « l'autre ‖ Donc » oui, « productivité ‖ Le » oui, « réinternaliser ‖ Mais » oui, « consommateurs ‖ (1,6 s) donc » oui.
   Le verbatim (une seule transcription par extrait) ne sert qu'à retirer les « euh » à l'intérieur.
 - Écoute finale (`verify.audit`) : l'audio est assemblé exactement comme au montage puis retranscrit d'un bloc ->
@@ -793,7 +800,7 @@ tôt, un bégaiement au début — rajoute une vérification »)
   signale un « euh » entendu ou un raccord au milieu d'un mot. C'est ce texte qu'on montre à Arthur.
 - Whisper hallucine « Sous-titrage ST' 501 » sur le silence de fin : filtré (`HALLU`).
 
-## « Euh » collés aux mots : `fillers` (retour d'Arthur, 08/10/2026, short 1 E22 : « faut que tu enlèves les euhhh,
+## « Euh » collés aux mots : `fillers` (retour d'Arthur, 08/10/2026, short 1 E23 : « faut que tu enlèves les euhhh,
 l'invité le fait beaucoup donc c'est pas assez dynamique »)
 
 - Ni `tighten` (trous entre mots) ni `verify` (verbatim) ne les voyaient : Whisper rattache le « euh » au mot voisin,
@@ -804,7 +811,7 @@ l'invité le fait beaucoup donc c'est pas assez dynamique »)
   puis écoute (`audit`) : raccord au milieu d'un mot -> coupe annulée. Hésitation en début de passage : on démarre
   après ; deux « euh » collés : une seule coupe. Morceaux gardés ≥ 0,25 s.
 - Commande : `python -m clipper fillers --only N` (sauvegarde `clips_before_fillers.json`), après `verify --fix`,
-  avant `build`. Short 1 E22 : 41,8 -> 37,1 s, 4,7 s d'hésitations retirées, tous les mots gardés.
+  avant `build`. Short 1 E23 : 41,8 -> 37,1 s, 4,7 s d'hésitations retirées, tous les mots gardés.
 
 ## Sous-titres « variante B » + réactions vides (retours d'Arthur, 09/10/2026)
 
@@ -813,19 +820,19 @@ l'invité le fait beaucoup donc c'est pas assez dynamique »)
   **Bold** 700 (pas ExtraBold), capitales, `letter_spacing 0.025em`, aucun trait, ombre en dégradé, fondu mot à mot
   (`reveal: word`, 0,14–0,16 s) ; mot-clé = `fonts.keyword` Lora Italic 600, minuscules, ×1,14, #F2E86D
   (`captions.keyword_style`, appliqué par le template + `captions.py` pour la casse). Remplace le style DUST (Arimo)
-  et le bleu des mots-clés du teaser. Variantes testées : `apercus/E22_teaser_sous-titres_{A,B,actuel}_apercu.mp4`.
+  et le bleu des mots-clés du teaser. Variantes testées : `apercus/E23_teaser_sous-titres_{A,B,actuel}_apercu.mp4`.
 - Mots-clés des shorts : choisis par le LLM s'il n'y en a pas (`captions.auto_keywords`, `caption_check.pick_keywords`,
   appelé par `polish`) : ~1 tous les 6–10 mots, mots porteurs de sens, copiés exactement.
 - « Thomas dit "super intéressant", il faudrait pas ça, ça n'apporte rien » -> **jamais de réaction vide** (liste
   `fillers.REACTIONS` : super intéressant, ah ouais, exactement, d'accord, c'est clair…) : `fillers.drop_reactions`
   retire une réaction prononcée seule entre deux pauses (shorts : étape de `polish` ; teaser : `episode-plan`, et
-  extrait entier retiré) ; `TEASER_PROMPT` l'interdit (le rôle « reaction » doit relancer avec du fond). E22 : le
+  extrait entier retiré) ; `TEASER_PROMPT` l'interdit (le rôle « reaction » doit relancer avec du fond). E23 : le
   « Super intéressant. » du teaser (13:10) retiré.
 
 ## Sous-titres : double contrôle à l'écoute (retour d'Arthur, 08/10/2026 : « dans les sous-titres il oublie quelques
 mots des fois, faudrait une sorte de boucle de double check »)
 
-- Causes mesurées (short 1 E22) : la transcription NORMALE « nettoie » (« c'est », « en fait » ×3, « Et », « Donc »
+- Causes mesurées (short 1 E23) : la transcription NORMALE « nettoie » (« c'est », « en fait » ×3, « Et », « Donc »
   dits mais pas écrits) ; un mot à cheval sur une coupe n'était gardé que s'il tenait entier dans un morceau
   (« redéployer », « humaine » perdus après `fillers`) ; à l'inverse un bout de la phrase suivante (« Et puis ») non
   entendu était sous-titré.
@@ -906,9 +913,9 @@ short -> `preview` libère le port ; 16:9 inutile -> `formats: ["9x16"]` ; tél�
 
 - `build` ne supprime QUE l'ancienne version d'un short de clips.json (même numéro, autre titre) — avant le 09/10/2026
   il supprimait aussi le teaser (99) et ses variantes, en plein rendu. Vidéo redécoupée (`recut`) -> `analysis.json`
-  refait : sinon les visages de l'ancienne découpe cadrent la nouvelle (écran partagé vide en haut, short 1 E22).
+  refait : sinon les visages de l'ancienne découpe cadrent la nouvelle (écran partagé vide en haut, short 1 E23).
 
-- Téléchargements Dropbox : dans le navigateur, les fichiers de 13 Go se coupent vers 50 min (E22 : deux fois, les
+- Téléchargements Dropbox : dans le navigateur, les fichiers de 13 Go se coupent vers 50 min (E23 : deux fois, les
   3 caméras à ~70 %) et restent sous leur nom final, illisibles (« moov atom not found »). `clipper/fetch.py` liste
   le dossier via `list_shared_link_folder_entries` (cookie CSRF `t`), puis télécharge en HTTP Range avec reprise.
   Les requêtes de téléchargement partent **sans** User-Agent de navigateur (sinon Dropbox renvoie sa page HTML).
@@ -937,7 +944,7 @@ short -> `preview` libère le port ; 16:9 inutile -> `formats: ["9x16"]` ; tél�
   en écran partagé a `data-media-start` décalé de 0,001 s.
 - Passages fournis par l'équipe (timecodes + premiers/derniers mots) : commande `passages --file x.yaml` (calage par
   `snap_to_quotes`), puis compléter `turns` (qui parle : cadrage ET attribution dans les posts) et `hook_title`.
-  Whisper peut rater une réplique quand deux personnes parlent en même temps (« C'est exactement ça », E21 44:38) :
+  Whisper peut rater une réplique quand deux personnes parlent en même temps (« C'est exactement ça », E22 44:38) :
   re-transcrire 20 s autour et insérer les mots dans `transcript.json`.
 - Premier épisode en 4K pas encore testé (octobre 2026) : surveiller la durée de `build` (analyse des visages
   sur la 4K) ; si c'est trop lent, analyser une copie réduite et ne garder la 4K que pour le recadrage.

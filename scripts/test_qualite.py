@@ -1,7 +1,7 @@
 """Tests anti-régression de la qualité (Arthur, 12/10/2026 : « une boucle de vérification intransigeante »).
 
 Chaque défaut trouvé par Arthur ou par la QA devient un cas ici : une correction future ne peut plus le faire revenir sans
-que ce script échoue. Lancer : `python scripts/test_qualite.py` (≈ 1 min ; les cas E22 sont sautés si l'audio n'est pas là).
+que ce script échoue. Lancer : `python scripts/test_qualite.py` (≈ 1 min ; les cas E23 sont sautés si l'audio n'est pas là).
 Ajouter un cas = une fonction `test_…` (assert) + la date et la phrase d'Arthur en commentaire.
 """
 from __future__ import annotations
@@ -18,7 +18,7 @@ from clipper.compose import cfg_for_format  # noqa: E402
 from clipper.config import Brand  # noqa: E402
 from clipper.strict import caption_problems, edge_problems, fix_edges  # noqa: E402
 
-E22_WAV = ROOT / "EPISODES" / "ai-corner" / "E22_nicolas-comestaz_coty" / "rushs" / "E22_nicolas-comestaz_coty.wav"
+E23_WAV = ROOT / "EPISODES" / "ai-corner" / "E23_nicolas-comestaz_coty" / "rushs" / "E23_nicolas-comestaz_coty.wav"
 
 
 def _words(spec: list[tuple[str, float, float]]) -> list[dict]:
@@ -27,7 +27,7 @@ def _words(spec: list[tuple[str, float, float]]) -> list[dict]:
 
 def test_sous_titres_jamais_superposes():
     """12/10/2026 « des sous-titres qui se chevauchent » : un bloc court prolongé à sa durée minimale débordait sur le
-    suivant (0,1–0,3 s de deux blocs à l'écran, shorts 1 et 2 E22)."""
+    suivant (0,1–0,3 s de deux blocs à l'écran, shorts 1 et 2 E23)."""
     cfg = cfg_for_format(Brand("ai-corner").cfg, "9x16")
     # débit rapide + une pause courte : des groupes de < 0,5 s
     ws = _words([("Je", 0.0, 0.1), ("crois", 0.1, 0.3), ("qu'on", 0.32, 0.4), ("a", 0.75, 0.8), ("plus", 0.8, 0.95),
@@ -53,16 +53,16 @@ def test_controle_composition_sous_titres():
     assert not [p for p in caption_problems(ok) if "ensemble" in p]
 
 
-def _e22():
-    if not E22_WAV.exists():
-        raise _Skip("audio E22 absent")
-    return E22_WAV
+def _e23():
+    if not E23_WAV.exists():
+        raise _Skip("audio E23 absent")
+    return E23_WAV
 
 
 def test_fin_coupee_trop_tot_detectee_et_corrigee():
-    """07–08/10/2026 teaser E22 « …en productivité » coupé sur la dernière syllabe (« -té » jusqu'à 1294,94, coupe à
+    """07–08/10/2026 teaser E23 « …en productivité » coupé sur la dernière syllabe (« -té » jusqu'à 1294,94, coupe à
     1294,85) : le contrôle strict doit le voir, la correction doit finir dans le silence."""
-    wav = _e22()
+    wav = _e23()
     segs = [{"start": 1290.0, "end": 1294.85, "end_text": "en productivité."}]
     fins = lambda ss: [p for p in edge_problems(ss, wav) if p["kind"] == "fin"]   # noqa: E731
     assert fins(segs), "fin dans la syllabe non détectée"
@@ -73,17 +73,17 @@ def test_fin_coupee_trop_tot_detectee_et_corrigee():
 
 
 def test_fin_validee_acceptee():
-    """Fins validées par Arthur (shorts 1 et 2 E22, 11/10/2026) : jamais signalées (pas de fausse alerte)."""
-    wav = _e22()
+    """Fins validées par Arthur (shorts 1 et 2 E23, 11/10/2026) : jamais signalées (pas de fausse alerte)."""
+    wav = _e23()
     for end in (2372.76, 2089.31):
         segs = [{"start": end - 5, "end": end, "end_text": "x"}]
         assert not [p for p in edge_problems(segs, wav) if p["kind"] == "fin"], end
 
 
 def test_raccord_interne_serre_accepte():
-    """Raccord entre deux phrases avec 0,08 s de silence dans la source (short 1 E22 « …à venir. ‖ et je pense », « et » à
+    """Raccord entre deux phrases avec 0,08 s de silence dans la source (short 1 E23 « …à venir. ‖ et je pense », « et » à
     2339,72) : accepté ou recalé DANS le creux, jamais dans le « et » qui suit."""
-    wav = _e22()
+    wav = _e23()
     segs = [{"start": 2334.68, "end": 2339.68, "end_text": "dans les années à venir."},
             {"start": 2345.08, "end": 2350.0, "end_text": "x"}]
     fixed, _done, _left = fix_edges(segs, wav)
@@ -92,9 +92,9 @@ def test_raccord_interne_serre_accepte():
 
 
 def test_depart_sur_une_traine_corrige_en_avant():
-    """Short 1 E22 démarrait à 2228,67 sur la traîne d'une hésitation (« Et donc » à 2228,82) : départ avancé dans le
+    """Short 1 E23 démarrait à 2228,67 sur la traîne d'une hésitation (« Et donc » à 2228,82) : départ avancé dans le
     silence, jamais reculé dans l'hésitation."""
-    wav = _e22()
+    wav = _e23()
     segs = [{"start": 2228.67, "end": 2230.0, "start_text": "Et donc"}]
     fixed, done, _left = fix_edges(segs, wav)
     assert done and 2228.68 <= fixed[0]["start"] <= 2228.82, fixed[0]["start"]
@@ -113,7 +113,7 @@ def test_durees_a_l_image_sans_double_arrondi():
 def test_son_reconstruit_a_la_bonne_duree():
     """12/10/2026 « phrases coupées trop tôt » : le son des morceaux recollés sans réencodage prenait ~25 ms de retard par
     raccord (préchauffage AAC) ; reconstruit en un passage, il doit durer exactement la somme des morceaux."""
-    wav = _e22()
+    wav = _e23()
     import shutil, subprocess, tempfile
     from clipper.media import FFMPEG, rebuild_audio
     with tempfile.TemporaryDirectory() as d:
@@ -128,9 +128,9 @@ def test_son_reconstruit_a_la_bonne_duree():
 
 
 def test_retrait_euh_colle_garde_la_fin_du_mot():
-    """12/10/2026 : « …leur job principal‖euh » (short 2 E22, coupe à 2076,47 en pleine voix, 81 %) : la coupe est recalée
+    """12/10/2026 : « …leur job principal‖euh » (short 2 E23, coupe à 2076,47 en pleine voix, 81 %) : la coupe est recalée
     au début du « euh » tenu, la fin de « principal » est gardée."""
-    wav = _e22()
+    wav = _e23()
     from clipper.strict import refine_joins
     segs = [{"start": 2070.6, "end": 2076.47}, {"start": 2077.0, "end": 2077.77}, {"start": 2078.42, "end": 2080.0,
                                                                                  "end_text": "x"}]
@@ -141,16 +141,16 @@ def test_retrait_euh_colle_garde_la_fin_du_mot():
 def test_pensee_pas_finie_detectee():
     """11/10/2026 « le mec était en train de parler » : short 1 coupé après « …de l'entreprise. » alors que l'invité
     enchaînait « Et puis… » : Smart Turn doit dire « pas fini » (< 0,5) ; les fins validées, « fini » (> 0,9)."""
-    wav = _e22()
+    wav = _e23()
     from clipper.endpoint import turn_complete
     assert turn_complete(wav, 2345.08) < 0.5
     assert turn_complete(wav, 2372.76) > 0.9 and turn_complete(wav, 2089.31) > 0.9
 
 
 def test_hesitation_collee_retiree_par_alignement():
-    """12/10/2026 : « produits de beauté, euh, à nos consommateurs » (short 2 E22, « euh » collé, retrait annulé par
+    """12/10/2026 : « produits de beauté, euh, à nos consommateurs » (short 2 E23, « euh » collé, retrait annulé par
     fillers) : retiré grâce à l'alignement CTC, sans perdre « beauté » ni « à »."""
-    wav = _e22()
+    wav = _e23()
     from clipper.config import Brand
     from clipper.strict import ctc_hesitations
     segs = [{"start": 2085.0, "end": 2089.31, "end_text": "à nos consommateurs."}]
@@ -160,26 +160,26 @@ def test_hesitation_collee_retiree_par_alignement():
 
 
 def test_fin_suivie_de_pres_par_un_autre_son():
-    """12/10/2026, short 5 E22 : « …en bon escient. » puis souffle et « Ouais » de Thomas 0,08 s après : couper dans ce
+    """12/10/2026, short 5 E23 : « …en bon escient. » puis souffle et « Ouais » de Thomas 0,08 s après : couper dans ce
     petit silence (1408,70) doit être accepté ; couper sur le souffle / le « Ouais » (1409,12) jamais."""
-    wav = _e22()
+    wav = _e23()
     fins = lambda t: [p for p in edge_problems([{"start": 1405.0, "end": t, "end_text": "x"}], wav) if p["kind"] == "fin"]  # noqa: E731
     assert not fins(1408.70), fins(1408.70)
     assert fins(1409.14)
 
 
 def test_fin_dans_une_phrase_enchainee_refusee():
-    """12/10/2026, short 4 E22 : « …ces réunions. » enchaîné sans pause par « Donc j'ai toujours considéré… » : une coupe
+    """12/10/2026, short 4 E23 : « …ces réunions. » enchaîné sans pause par « Donc j'ai toujours considéré… » : une coupe
     à 596,42 est dans la voix (refusée) ; la fin prolongée après « …une forme de pouvoir, je dirais. » (602,25) est propre."""
-    wav = _e22()
+    wav = _e23()
     fins = lambda t: [p for p in edge_problems([{"start": 590.0, "end": t, "end_text": "x"}], wav) if p["kind"] == "fin"]  # noqa: E731
     assert fins(596.42)
     assert not fins(602.253), fins(602.253)
 
 
 def test_repetition_retiree():
-    """12/10/2026, short 5 E22 : « …en fait, qu'il faut avoir, qu'il faut avoir lorsque… » : la 1re occurrence est retirée."""
-    wav = _e22()
+    """12/10/2026, short 5 E23 : « …en fait, qu'il faut avoir, qu'il faut avoir lorsque… » : la 1re occurrence est retirée."""
+    wav = _e23()
     from clipper.config import Brand
     from clipper.strict import ctc_hesitations
     out, log = ctc_hesitations([{"start": 1395.15, "end": 1398.65, "end_text": "x"}], [], wav, Brand("ai-corner").cfg)
@@ -187,22 +187,22 @@ def test_repetition_retiree():
     assert len(out) == 2 and 1397.0 < out[0]["end"] < 1397.2 and 1397.9 < out[1]["start"] < 1398.15, out
 
 
-E21 = ROOT / "EPISODES" / "ai-corner" / "E21_quentin-amaudry_mendo"
-E21_WAV = E21 / "travail" / "work" / "audio16k.wav"
-E21_MP4 = E21 / "rushs" / "E21_quentin-amaudry_mendo.mp4"
+E22 = ROOT / "EPISODES" / "ai-corner" / "E22_quentin-amaudry_mendo"
+E22_WAV = E22 / "travail" / "work" / "audio16k.wav"
+E22_MP4 = E22 / "rushs" / "E22_quentin-amaudry_mendo.mp4"
 
 
-def _e21():
-    if not E21_WAV.exists():
-        raise _Skip("audio E21 absent")
-    return E21_WAV
+def _e22():
+    if not E22_WAV.exists():
+        raise _Skip("audio E22 absent")
+    return E22_WAV
 
 
 def test_retrait_trop_court_ou_fin_de_mot_tranchee_recolle():
-    """14/10/2026 short 2 E21 « les phrases ont tendance à être coupées trop tôt » : « il y ‖ a » (0,14 s retirées en
+    """14/10/2026 short 2 E22 « les phrases ont tendance à être coupées trop tôt » : « il y ‖ a » (0,14 s retirées en
     pleine voix) et « …mais il ‖ se trouve » (la voix continuait 0,25 s après la coupe)."""
     from clipper.strict import fix_join_flow, join_flow_problems
-    wav = _e21()
+    wav = _e22()
     segs = [{"start": 1459.63, "end": 1460.28}, {"start": 1460.42, "end": 1462.26},
             {"start": 1488.485, "end": 1499.095}, {"start": 1499.526, "end": 1503.76}]
     why = " ".join(p["why"] for p in join_flow_problems(segs, wav))
@@ -212,34 +212,34 @@ def test_retrait_trop_court_ou_fin_de_mot_tranchee_recolle():
 
 
 def test_raccord_euh_propre_garde():
-    """Contre-épreuve : un vrai retrait de « euh » (short 2 E21, 1473,14 -> 1473,95, coupe dans le silence) reste."""
+    """Contre-épreuve : un vrai retrait de « euh » (short 2 E22, 1473,14 -> 1473,95, coupe dans le silence) reste."""
     from clipper.strict import join_flow_problems
-    wav = _e21()
+    wav = _e22()
     assert not join_flow_problems([{"start": 1462.79, "end": 1473.14}, {"start": 1473.95, "end": 1476.45}], wav)
 
 
 def test_bruit_de_bouche_en_fin_de_short():
-    """14/10/2026 short 2 E21 « il y a un bruit de bouche à la fin » : claquement à 1503,58 après « …dans des agents »."""
+    """14/10/2026 short 2 E22 « il y a un bruit de bouche à la fin » : claquement à 1503,58 après « …dans des agents »."""
     from clipper.strict import tail_noise
-    p = tail_noise(_e21(), 1503.76)
+    p = tail_noise(_e22(), 1503.76)
     assert p and 1503.5 < p["noise"] < 1503.65 and p["end"] < p["noise"], p
 
 
 def test_thomas_a_l_image_pendant_que_l_invite_parle():
-    """14/10/2026 short 1 E21 « Thomas coupe la parole à l'invité ; ça sert à rien de mettre l'image et le son de Thomas qui
+    """14/10/2026 short 1 E22 « Thomas coupe la parole à l'invité ; ça sert à rien de mettre l'image et le son de Thomas qui
     acquiesce » : plan de Thomas 1201,625–1203,125 (montage du monteur) pendant « …de tes employés »."""
     import json
 
     from clipper.ingest import host_reference
     from clipper.strict import listener_shown
-    _e21()
-    if not E21_MP4.exists():
-        raise _Skip("vidéo E21 absente")
+    _e22()
+    if not E22_MP4.exists():
+        raise _Skip("vidéo E22 absente")
     import subprocess
     import tempfile
-    words = json.loads((E21 / "travail" / "work" / "diarized_words.json").read_text(encoding="utf-8"))
-    cut = Path(tempfile.gettempdir()) / "test_e21_1199.mp4"   # le montage d'un « clip » = 1199–1204 de l'épisode
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", "1199", "-t", "5", "-i", str(E21_MP4), "-an", "-c:v", "libx264",
+    words = json.loads((E22 / "travail" / "work" / "diarized_words.json").read_text(encoding="utf-8"))
+    cut = Path(tempfile.gettempdir()) / "test_e22_1199.mp4"   # le montage d'un « clip » = 1199–1204 de l'épisode
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", "1199", "-t", "5", "-i", str(E22_MP4), "-an", "-c:v", "libx264",
                     "-crf", "18", str(cut)], check=True)
     runs = listener_shown(cut, [{"start": 1199.0, "end": 1204.0}], words, host_reference(Brand("ai-corner")), step=0.25)
     hit = [r for r in runs if r["abs0"] < 1203.0 and r["abs1"] > 1201.8]
@@ -247,7 +247,7 @@ def test_thomas_a_l_image_pendant_que_l_invite_parle():
 
 
 def test_bloc_de_sous_titre_jamais_trop_court():
-    """15/10/2026, relecture critique du short 1 E21 : bloc « TU » de 0,06 s (invisible) et « muscle » 0,2 s en fin de bloc."""
+    """15/10/2026, relecture critique du short 1 E22 : bloc « TU » de 0,06 s (invisible) et « muscle » 0,2 s en fin de bloc."""
     cfg = cfg_for_format(Brand("ai-corner").cfg, "9x16")
     ws = _words([("la", 0.0, 0.2), ("moitié", 0.2, 0.5), ("du", 0.5, 0.6), ("truc", 0.6, 0.9), ("embarquer.", 0.9, 1.4),
                  ("Tu", 1.50, 1.56), ("peux", 1.56, 1.8), ("dire", 1.8, 2.1), ("ok", 2.1, 2.4),
@@ -261,7 +261,7 @@ def test_bloc_de_sous_titre_jamais_trop_court():
 
 
 def test_mots_cles_espaces_et_expression_entiere():
-    """15/10/2026, relecture critique du short 1 E21 : « agent … processus … procurement » (3 italiques en 8 mots, et
+    """15/10/2026, relecture critique du short 1 E22 : « agent … processus … procurement » (3 italiques en 8 mots, et
     « processus » coloré pour « process ») ; « …PAS DE muscle » / « DE change T'ES MORT » (expression coupée en deux blocs)."""
     cfg = cfg_for_format(Brand("ai-corner").cfg, "9x16")
     ws = _words([("des", 0.0, 0.2), ("agents", 0.2, 0.6), ("mais", 0.7, 0.9), ("un", 1.0, 1.1), ("agent", 1.1, 1.4),
@@ -279,15 +279,15 @@ def test_mots_cles_espaces_et_expression_entiere():
 
 
 def test_mot_coupe_avant_un_saut_de_passage():
-    """15/10/2026, Thomas (short 1 E21) « à 0:07 le mot "métiers" est complètement croppé » : coupe à 1201,62 posée sur un
+    """15/10/2026, Thomas (short 1 E22) « à 0:07 le mot "métiers" est complètement croppé » : coupe à 1201,62 posée sur un
     changement de plan, dans un micro-creux du mot, juste avant un saut de passage (1204,95)."""
     from clipper.strict import join_flow_problems
-    p = join_flow_problems([{"start": 1197.03, "end": 1201.62}, {"start": 1204.95, "end": 1208.2}], _e21())
+    p = join_flow_problems([{"start": 1197.03, "end": 1201.62}, {"start": 1204.95, "end": 1208.2}], _e22())
     assert p and p[0].get("hard"), p
 
 
 def test_derniere_image_sur_celui_qui_ecoute():
-    """15/10/2026, Arthur (short 1 E21) « enlève le plan avec Thomas à la fin, ça n'apporte rien » : le montage passe sur
+    """15/10/2026, Arthur (short 1 E22) « enlève le plan avec Thomas à la fin, ça n'apporte rien » : le montage passe sur
     Thomas à 1243,125, la dernière image du short (figée pendant le fondu vers l'outro) le montrait."""
     import json
     import subprocess
@@ -295,12 +295,12 @@ def test_derniere_image_sur_celui_qui_ecoute():
 
     from clipper.ingest import host_reference
     from clipper.strict import listener_shown
-    _e21()
-    if not E21_MP4.exists():
-        raise _Skip("vidéo E21 absente")
-    words = json.loads((E21 / "travail" / "work" / "diarized_words.json").read_text(encoding="utf-8"))
-    cut = Path(tempfile.gettempdir()) / "test_e21_fin.mp4"
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", "1240", "-t", "3.3", "-i", str(E21_MP4), "-an", "-c:v", "libx264",
+    _e22()
+    if not E22_MP4.exists():
+        raise _Skip("vidéo E22 absente")
+    words = json.loads((E22 / "travail" / "work" / "diarized_words.json").read_text(encoding="utf-8"))
+    cut = Path(tempfile.gettempdir()) / "test_e22_fin.mp4"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", "1240", "-t", "3.3", "-i", str(E22_MP4), "-an", "-c:v", "libx264",
                     "-crf", "18", str(cut)], check=True)
     runs = listener_shown(cut, [{"start": 1240.0, "end": 1243.14}], words, host_reference(Brand("ai-corner")))
     end = [r for r in runs if r.get("end")]

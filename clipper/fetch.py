@@ -1,7 +1,7 @@
 """Téléchargement des rushs depuis un lien Dropbox partagé, avec reprise automatique.
 
 Pourquoi : dans le navigateur, les gros fichiers (13 Go) d'un dossier Dropbox partagé se coupent au bout d'environ
-50 min (constaté deux fois le 06/10/2026, E22 : les 3 caméras arrêtées ensemble vers 70 %) et le navigateur garde
+50 min (constaté deux fois le 06/10/2026, E23 : les 3 caméras arrêtées ensemble vers 70 %) et le navigateur garde
 le fichier tronqué sous son nom final, sans « moov atom » -> illisible. Ici : on demande à Dropbox la liste exacte
 (nom + taille), on télécharge chaque fichier par requêtes HTTP Range (reprise là où on s'est arrêté, y compris
 d'un fichier partiel déjà présent) et on ne déclare un fichier fini que si sa taille est exactement celle annoncée.

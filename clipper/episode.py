@@ -1,9 +1,9 @@
 """Montage de l'épisode COMPLET à partir des rushs multicam (3 caméras + micro) — + teaser d'ouverture.
 
 Demande d'Arthur (07/10/2026) : « monte le podcast en entier à partir des 3 longs rushs et de la piste audio, fais aussi
-le teaser ». Style mesuré sur les épisodes montés par le monteur (E20 MAIF, E21 Mendo — même studio que E22) :
+le teaser ». Style mesuré sur les épisodes montés par le monteur (E20 MAIF, E22 Mendo — même studio que E23) :
 
-- E21 : plan médian ≈ 10 s ; gros plans 76 % du temps, plan large 14 %, écran partagé (deux gros plans côte à côte)
+- E22 : plan médian ≈ 10 s ; gros plans 76 % du temps, plan large 14 %, écran partagé (deux gros plans côte à côte)
   10 %. Quand quelqu'un parle, on est sur SON gros plan 97 % du temps ; les longues réponses sont aérées par un
   plan large (~7 s) et/ou un écran partagé (~7 s) toutes les 15–25 s ; ~1 fois par minute, un plan de réaction de
   1,5 s sur la personne qui écoute (sourire, hochement), puis retour.
@@ -193,7 +193,7 @@ def _onset(wav: Path, a: float, b: float, rel: float = 0.3) -> float | None:
 def clean_join_starts(ranges: list[tuple[float, float]], wav: Path, cfg=None, log=print,
                       max_pause: float = 1.2, lead: float = 0.28, words: list[dict] | None = None) -> list[tuple[float, float]]:
     """Chaque reprise après une coupe de dérushage démarre proprement (retour d'Arthur, 08/10/2026 : « vérifie bien
-    plusieurs fois qu'il n'y a pas de problème de coupure, de euh laissé au montage » — E22 reprenait sur « Euh, pour,
+    plusieurs fois qu'il n'y a pas de problème de coupure, de euh laissé au montage » — E23 reprenait sur « Euh, pour,
     pour finir » et laissait 3 s de blanc à un autre raccord).
     0. Reprise au milieu d'un son : reculée au creux qui le précède (on entend ce son en entier, puis 1.).
     0b. Voix entre la reprise et le 1er mot de la transcription normale (qui omet les hésitations) : parasite ->
@@ -227,7 +227,7 @@ def clean_join_starts(ranges: list[tuple[float, float]], wav: Path, cfg=None, lo
             log(f"  reprise {i + 1} : coupe au milieu d'un son ({st:.2f}) -> {new:.2f} s, avant ce son")
             st = new
         # hésitation non transcrite : la transcription normale n'écrit jamais « euh / ben, je… » ; toute voix entre la
-        # reprise et le 1er mot transcrit est donc parasite (E22 41:06 : « Euh… ben, je… » 0,9 s + 2,6 s de blanc)
+        # reprise et le 1er mot transcrit est donc parasite (E23 41:06 : « Euh… ben, je… » 0,9 s + 2,6 s de blanc)
         if words and i:
             nxt = next((w for w in words if float(w["s"]) >= st - 0.05 and str(w["w"]).strip("?.!,… ")), None)
             if nxt and float(nxt["s"]) - st > 0.5:
@@ -389,7 +389,7 @@ def enforce_speaker(shots: list[dict], words: list[dict], min_shot: float = 2.0,
     deux, mais il faut qu'on voie toujours celui qui parle »). Dans chaque gros plan, un passage où parle l'autre
     devient : son gros plan s'il dure ≥ `solo` s, sinon un écran partagé (les deux visibles) d'au moins `min_shot` s ;
     un gros plan restant plus court que `min_shot` passe aussi en écran partagé. Répété (`passes`) car un nouveau gros
-    plan peut à son tour contenir une réplique de l'autre (ping-pong rapide : E22 21:48 « globale ? » / « globale. Ok. »)."""
+    plan peut à son tour contenir une réplique de l'autre (ping-pong rapide : E23 21:48 « globale ? » / « globale. Ok. »)."""
     for _ in range(passes):
         out: list[dict] = []
         changed = False
@@ -714,7 +714,7 @@ def teaser_clip(words: list[dict], plan: dict, guest: str, company: str, wav: Pa
     spare = [e for e in ext if e["orig"] >= 100]
     roles = [x.get("role", "") for x in plan.get("teaser", [])]
     lost = [i for i in range(len(roles)) if i not in {e["orig"] for e in mains}]
-    # ping-pong : une question et sa réponse vont ensemble (E22 : la réponse écartée avait été remplacée par une réserve
+    # ping-pong : une question et sa réponse vont ensemble (E23 : la réponse écartée avait été remplacée par une réserve
     # sans rapport -> « C'est quoi le bon équilibre… ? » / « …c'est un marché de vendeur »)
     for i in list(lost):
         if roles[i] == "pingpong":

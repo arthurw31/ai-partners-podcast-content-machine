@@ -1,13 +1,13 @@
 """Vérification « à l'oreille » des coupes : retranscription VERBATIM de chaque passage, puis correction.
 
 Pourquoi : la transcription normale (Whisper) nettoie le texte — pas de « euh », pas de bégaiement, mots coupés
-invisibles — donc ni le LLM ni `check` ne voient ces défauts. Retour d'Arthur sur le teaser E22 (07/10/2026) : « des
+invisibles — donc ni le LLM ni `check` ne voient ces défauts. Retour d'Arthur sur le teaser E23 (07/10/2026) : « des
 euh qui restent, des phrases coupées un peu trop tôt, un bégaiement au tout début ». Ici, chaque passage (avec 0,4 s
 avant / 0,6 s après) est retranscrit avec une consigne qui pousse Whisper à écrire les hésitations ; on repère :
   - « euh », « hum », « ben »… dans le passage, et les mots répétés (« je je », « c'est c'est ») -> retirés ;
   - un mot à cheval sur le début (début qui mange un mot) -> début avancé avant ce mot (ou après, si c'est un « euh ») ;
   - un mot à cheval sur la fin (fin coupée trop tôt) -> fin repoussée après ce mot (ou avant, si c'est un « euh »).
-Sur E22, ce contrôle a retrouvé exactement les défauts entendus par Arthur. Coût ≈ 1,5× la durée contrôlée (CPU).
+Sur E23, ce contrôle a retrouvé exactement les défauts entendus par Arthur. Coût ≈ 1,5× la durée contrôlée (CPU).
 """
 from __future__ import annotations
 
@@ -126,7 +126,7 @@ def fix_segment(sg: dict, rep: dict, wav: Path) -> list[dict]:
             s1 = _quiet(wav, ew["e"] - 0.03, min(ew["e"] + 0.3, n["s"] if n else ew["e"] + 0.3))
     holes = []
     for f in rep["fillers"] + rep["repeats"]:
-        # voisins dans l'ORDRE des mots (E22 : un « euh » mal horodaté avait emporté « refonte »)
+        # voisins dans l'ORDRE des mots (E23 : un « euh » mal horodaté avait emporté « refonte »)
         pv, n = before(f), after(f)
         a = _quiet(wav, (pv["e"] if pv else f["s"]) - 0.03, f["s"] + 0.08)
         b = _quiet(wav, f["e"] - 0.08, (n["s"] if n else f["e"]) + 0.03)
@@ -177,7 +177,7 @@ def pad_end(wav: Path, t: float, pad: float = 0.35, max_ext: float = 1.2, gap: f
     lvl = float(np.percentile(r[: max(k0, 10)], 90)) or float(np.percentile(r, 90))
     if lvl <= 0:
         return t
-    quiet = r < 0.2 * lvl          # 20 % : le souffle du micro de l'invité monte à ~10 % (E22 34:16)
+    quiet = r < 0.2 * lvl          # 20 % : le souffle du micro de l'invité monte à ~10 % (E23 34:16)
     n = max(2, int(round(gap / 0.02)))
     lo_q = k0
     while lo_q > 0 and quiet[lo_q - 1]:
@@ -187,7 +187,7 @@ def pad_end(wav: Path, t: float, pad: float = 0.35, max_ext: float = 1.2, gap: f
         hi_q += 1
     if quiet[k0] and hi_q - lo_q >= 4:
         # la coupe tombe dans un vrai silence (≥ 0,08 s) : la phrase est finie. On ne va JAMAIS au-delà du son suivant
-        # (short 1 E22 : « l'entreprise. ‖ Et » — le début de la phrase suivante était entendu). Un silence plus court
+        # (short 1 E23 : « l'entreprise. ‖ Et » — le début de la phrase suivante était entendu). Un silence plus court
         # est une occlusion DANS un mot (« bien-t-ôt », 0,06 s) : on continue jusqu'à la vraie fin de la voix.
         k = lo_q
     else:
@@ -217,7 +217,7 @@ def trim_tail(wav: Path, start: float, end: float, keep: float = 0.35, max_tail:
 
 def trim_edges(sg: dict, wav: Path, look: float = 1.2) -> tuple[dict, list[str]]:
     """Bord qui commence sur la FIN d'un mot (ou finit sur le DÉBUT d'un mot) : un bout de voix, puis un blanc ≥ 0,2 s,
-    puis la vraie parole -> on recale sur la parole (retour d'Arthur, teaser E22 : « il commence sur la fin d'un mot,
+    puis la vraie parole -> on recale sur la parole (retour d'Arthur, teaser E23 : « il commence sur la fin d'un mot,
     coupe la demi-seconde du début »). Mesuré sur l'énergie du micro (trames de 20 ms), pas sur la transcription."""
     from .tighten import _rms
     s0, s1 = float(sg["start"]), float(sg["end"])
@@ -269,7 +269,7 @@ def _ends_sentence(w: dict, nxt: dict | None) -> bool:
 def pause_after(wav: Path, t0: float, t1: float) -> float:
     """Plus long silence (s) autour de la frontière entre un mot (fin t0) et le suivant (début t1). Fenêtre élargie
     [t0 - 0,3 ; t1 + 0,5] : la transcription normale décale parfois les fins de mots de 0,2–0,3 s. Silence = trame de
-    20 ms sous 25 % du niveau de parole voisin (90e centile sur ±1,5 s) — souffle compris. Calibré sur E22 :
+    20 ms sous 25 % du niveau de parole voisin (90e centile sur ±1,5 s) — souffle compris. Calibré sur E23 :
     « venir ‖ et » 0,10 s, « leader ‖ En tout cas » 0,18 s (phrases qui continuent) ; « l'autre ‖ Donc » 0,34 s,
     « productivité ‖ Le » ≥ 0,36 s, « réinternaliser ‖ Mais » > 0,5 s (vraies fins)."""
     from .tighten import _rms
@@ -371,7 +371,7 @@ def _isolated_hole(wav: Path, f: dict, reach: float = 0.35, min_quiet: int = 3) 
     (≥ 60 ms) des deux côtés ; coupe au milieu de ces silences. None si le mot est collé à ses voisins.
 
     Les horodatages verbatim d'un « euh » / « enfin » bougent de 0,1–0,2 s d'une transcription à l'autre : couper sur ces
-    horodatages a emporté « plus de » dans « on est, enfin, plus de 3 000 agents » (E22). Ici seul le son décide."""
+    horodatages a emporté « plus de » dans « on est, enfin, plus de 3 000 agents » (E23). Ici seul le son décide."""
     from .tighten import _rms
     a, b = max(0.0, f["s"] - reach), f["e"] + reach
     r = _rms(wav, a, b)
@@ -411,7 +411,7 @@ def snap_extract(words: list[dict], a: int, b: int, wav: Path, cfg=None) -> tupl
     retirer « euh » / répétitions à l'intérieur, chaque coupe au point le plus silencieux entre deux mots.
 
     Pourquoi pas le verbatim pour les bornes : sa ponctuation et ses « euh » changent d'une transcription à l'autre
-    (E22 : « venir. » dans une passe, « venir, et » dans l'autre) — trop instable pour décider où une phrase finit."""
+    (E23 : « venir. » dans une passe, « venir, et » dans l'autre) — trop instable pour décider où une phrase finit."""
     r = sentence_bounds(words, a, b, wav)
     if r is None:
         return [], ["aucune vraie fin de phrase à portée"]
@@ -448,7 +448,7 @@ def complete_sentences(segs: list[dict], wav: Path, cfg=None, max_extend: float 
                        log=None) -> list[dict]:
     """Chaque passage (groupe `orig`) commence au début d'une phrase et finit à la fin d'une phrase.
 
-    Retour d'Arthur (07/10/2026, teaser E22) : « des fois ça coupe quand même avant qu'il ait terminé sa phrase » —
+    Retour d'Arthur (07/10/2026, teaser E23) : « des fois ça coupe quand même avant qu'il ait terminé sa phrase » —
     2 extraits sur 6 finissaient sur une virgule (« …de loin le leader, ‖ en tout cas, nous… »). La transcription
     VERBATIM fait foi (ponctuation + mot suivant) : fin hors phrase -> prolongée jusqu'à la fin de la phrase (≤ 8 s),
     sinon ramenée à la fin de phrase précédente ; aucune -> passage marqué `incomplete` (le teaser l'écarte). Chaque

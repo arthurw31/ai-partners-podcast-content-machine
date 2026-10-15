@@ -7,7 +7,7 @@ description: Pilote tout le process AI Corner avec le framework « clipper » de
 
 Tu pilotes le framework `clipper` (voir [CLAUDE.md](../../../CLAUDE.md), le schéma du process dans
 [README.md](../../../README.md) et le guide pratique [docs/FRAMEWORK.md](../../../docs/FRAMEWORK.md) : délais, quel fichier modifier). **Lis d'abord [docs/BONNES_PRATIQUES.md](../../../docs/BONNES_PRATIQUES.md)** :
-ce qui a été validé sur E22 (le résultat de référence) et ce qu'il ne faut plus jamais faire. L'utilisateur est un membre de l'équipe marketing :
+ce qui a été validé sur E23 (le résultat de référence) et ce qu'il ne faut plus jamais faire. L'utilisateur est un membre de l'équipe marketing :
 il ne tape aucune commande, tu fais tout et tu lui parles simplement (pas de jargon technique).
 
 **Le process (schéma de référence : « Vue d'ensemble » du README, sur GitHub)** : dépôt des rushs -> `rushes` ->
@@ -200,7 +200,7 @@ python -m clipper polish --brand <marque> --input <fichier> --only 1,2,3,4,5    
 Les étapes 1–6 déjà faites sont sautées (`checks` dans `clips.json`) ; `--redo` repart des passages d'origine
 (`clips_before_tighten.json`). Sauvegardes : `clips_before_fillers.json`, `clips_before_ctc.json`.
 
-**Après tout changement de code** du nettoyage ou des contrôles : `python scripts/test_qualite.py` (cas réels E22, tous
+**Après tout changement de code** du nettoyage ou des contrôles : `python scripts/test_qualite.py` (cas réels E23, tous
 OK attendus). **Chaque défaut signalé par l'équipe** (short + seconde) -> corrigé ET ajouté comme test dans ce script.
 
 **Boucle « à corriger » (Arthur, 09/10/2026)** : lis chaque rapport `qa/clip_NN.md` et regarde chaque planche. Ce que la
@@ -354,7 +354,7 @@ le mail « Nostra » d'On Train. Mis en page, en français, vouvoiement. Brief :
    bleu nuit, 4 cartes « Au programme » de MÊME taille (textes de 150 à 170 caractères, de longueur égale : consigne du brief
    + contrôle), miniature avec play, mot de fin, bandeau « Écoutez AI Corner partout » (logos YouTube / Spotify / Ausha
    cliquables vers l'émission), largeur 680 px. Autres gabarits : `--template all|variantes` (comparaison). Épisode DÉJÀ
-   publié sans rushs multicam (E21) : pas de photos détourées, le gabarit `duo` n'en a pas besoin (miniature `miniature_finale.jpg`).
+   publié sans rushs multicam (E22) : pas de photos détourées, le gabarit `duo` n'en a pas besoin (miniature `miniature_finale.jpg`).
 5. Faits « non retrouvés » par le contrôle alors qu'ils sont dits : citation de preuve trop longue -> la raccourcir à une
    phrase exacte de la transcription (`evidence` de `contenu.json`), vérifier à la main l'horodatage, puis `--render`.
 6. **Test d'envoi** : `newsletter … --envoi` (images + HTML sur GitHub Pages, `docs/newsletters/<E>/`), `git push`, attendre la

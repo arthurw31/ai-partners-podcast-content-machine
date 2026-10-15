@@ -4,7 +4,7 @@ Demande d'Arthur (12/10/2026) : « créer des carrousels LinkedIn à partir des 
 communauté qui nous suit, et sur la dernière slide un call to action pour inciter les gens à bosser avec nous », dans la
 charte AI Partners (modèles Canva de l'équipe marketing : carrousels « Use case » et « GEO », 1080 × 1350).
 Réponses d'Arthur : Claude propose l'angle (3 propositions, l'équipe en choisit un), en français, CTA « réserver un
-échange », 3 styles visuels testés sur E22 puis l'équipe garde le sien (`carousel.style` dans brand.yaml).
+échange », 3 styles visuels testés sur E23 puis l'équipe garde le sien (`carousel.style` dans brand.yaml).
 
 1. `propose_angles` : Claude Opus lit la transcription (qui parle, d'après la diarisation) et propose 3 angles de types
    différents, chacun adossé à des passages réels (horodatage + citation exacte, retrouvée dans la transcription) ;

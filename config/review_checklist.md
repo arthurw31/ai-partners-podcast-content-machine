@@ -18,7 +18,7 @@ relu est envoyée au relecteur : garder chaque section COURTE (c'est ce qui coû
   reste de phrase de l'autre personne, aucun mot répété ou « euh » restés, aucune transition qui ne mène nulle part.
   Le début ne dépend pas de ce qui précède dans l'épisode ; la fin est la chute (rien de plus fort juste après, rien
   de plus faible ajouté).
-- Retours de Thomas (15/10/2026, short 1 E21) : le short s'arrête sur la CHUTE (phrase la plus forte), aucune phrase après ;
+- Retours de Thomas (15/10/2026, short 1 E22) : le short s'arrête sur la CHUTE (phrase la plus forte), aucune phrase après ;
   aucun mot tronqué (même pour éviter une image) ; la bulle-titre ne touche jamais le visage (menton) ; on ne voit jamais
   la personne qui écoute, y compris sur la DERNIÈRE image (elle reste figée pendant le fondu vers l'outro).
 - Sous-titres : capitales, mot-clé en italique jaune ~1 tous les 6–10 mots (mot porteur de sens, jamais un petit mot),

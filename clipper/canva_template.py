@@ -279,7 +279,7 @@ def draw_title(canvas: Image.Image, tpl: dict, lines: list[str], highlight: int,
             ImageDraw.Draw(m).rounded_rectangle([0, 0, p.width - 1, p.height - 1], round(pill["radius"] * ph), fill=255)
             canvas.paste(p, (box[0], box[1]), m)
         elif ti.get("shadow", 0.67):
-            # ombre douce sous la ligne hors bandeau : le texte blanc se perdait sur une chemise claire (E22) ; invisible
+            # ombre douce sous la ligne hors bandeau : le texte blanc se perdait sur une chemise claire (E23) ; invisible
             # sur fond sombre, comme sur la vignette DUST de référence
             sh = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
             ImageDraw.Draw(sh).text((W / 2, b + 5), text, font=f, fill=(0, 0, 0, int(255 * ti.get("shadow", 0.67))), anchor="ms")

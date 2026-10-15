@@ -483,7 +483,7 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
     # découpe en cache trop courte (carte de fin allongée depuis) alors que l'épisode a de quoi la couvrir : on redécoupe
     stale = (src_clip.exists() and probe(src_clip)["duration"] < D_total - 0.05
              and info["duration"] - float(segments[-1]["start"]) > float(segments[-1]["duration"]) + outro_d - 0.05)
-    # rushs multicam (E22+) : gros plan de la personne qui parle, selon les tours de parole du clip
+    # rushs multicam (E23+) : gros plan de la personne qui parle, selon les tours de parole du clip
     # (ou `cams` : plans imposés [{at, speaker: host|guest|wide}] — teaser : alternance + réactions)
     multicam = load_multicam(source)
     cams = None
@@ -539,7 +539,7 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
     # l'audio sous la carte de fin s'arrête avant que le locuteur suivant reprenne
     tail = float(segments[-1].get("tail_silence", clip.get("tail_silence", 5.0)))
     # silence réellement disponible, mesuré dans le son du montage (le `tail_silence` stocké date de la sélection et
-    # ne suit pas les recalages de fin) : le fondu finit AVANT le son suivant (short 1 E22 : « É(t) » 0,02 s après)
+    # ne suit pas les recalages de fin) : le fondu finit AVANT le son suivant (short 1 E23 : « É(t) » 0,02 s après)
     if outro_d > 0 and src_clip.exists():
         import numpy as np
 
@@ -561,7 +561,7 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
 
     # ---- 2. analyse (plans, visages, locuteur) ----
     # vidéo redécoupée -> analyse (plans, visages) refaite : sinon les visages de l'ANCIENNE découpe cadrent la nouvelle
-    # (short 1 E22, 09/10/2026 : écran partagé déplacé, cadrage resté sur l'ancien -> image vide en haut)
+    # (short 1 E23, 09/10/2026 : écran partagé déplacé, cadrage resté sur l'ancien -> image vide en haut)
     analysis = analyze(src_clip, cfg, proj / "analysis.json", force=force or recut)
 
     # ---- 3. mots (temps relatifs au clip assemblé) ----
@@ -866,7 +866,7 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
                             "cams": [full]}]
             console.print(f"  {fmt:5s} recadrage FFmpeg → {ref_name}")
 
-        # bulle-titre JAMAIS sur le visage (Thomas, 15/10/2026, short 1 E21 : « le bandeau est un peu en overlap de son menton,
+        # bulle-titre JAMAIS sur le visage (Thomas, 15/10/2026, short 1 E22 : « le bandeau est un peu en overlap de son menton,
         # à descendre ») : bas des visages mesuré dans la vidéo recadrée pendant l'accroche ; s'il dépasse le haut de la bulle
         # (moins une marge), bulle ET sous-titres descendent d'autant (même écart entre eux, mêmes positions tout le clip)
         if hook_ctx.get("enabled") and hook_ctx.get("text") and plan_render is not plan:
@@ -884,7 +884,7 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
         # flash / light leak SEULEMENT quand l'angle de caméra change au raccord (retour d'Arthur, 08/10/2026 : « des
         # sortes de flashs lumineux de transition : il faut les mettre que quand tu changes d'angle de caméra ») ; un
         # raccord sur la même caméra (« euh » retiré, passage enchaîné) reste une coupe nette. Mesure : différence
-        # d'image de part et d'autre du raccord (même caméra 0,5–7 ; autre caméra ≈ 50 sur le short 1 de E22).
+        # d'image de part et d'autre du raccord (même caméra 0,5–7 ; autre caméra ≈ 50 sur le short 1 de E23).
         thr = float(fcfg.montage.get("transition_min_diff", 25))
         fx_junctions = [j for j in junctions if frame_diff(j) >= thr]
         motion = _motion_ctx(fcfg, clip, words_rel, plan, D_speech, outro_start, brand, assets, fonts_dir)

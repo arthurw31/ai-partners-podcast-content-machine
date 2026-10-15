@@ -145,7 +145,7 @@ crée `MARQUES/mon-podcast/` :
 AI Partners Podcast Content Machine/
 ├── DEPOT/        ← vous déposez ici les rushs d'un nouveau tournage (3 caméras + son)
 ├── EPISODES/     ← un dossier par épisode, TOUT dedans
-│   └── <marque>/<épisode>/        ex. ai-corner/E22_nicolas-comestaz_coty/
+│   └── <marque>/<épisode>/        ex. ai-corner/E23_nicolas-comestaz_coty/
 │       ├── LIVRABLES/  ← à copier sur le Drive (`python -m clipper livraison`), rien d'autre
 │       ├── rushs/      ← sources : <épisode>.mp4, .wav, .multicam.json, cameras/
 │       ├── travail/    ← fichiers du pipeline (transcription, clips, rendus, contrôles, aperçus)
