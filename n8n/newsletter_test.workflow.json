@@ -22,15 +22,15 @@
        "type": "string"
       },
       {
-       "id": "p-prenom",
-       "name": "prenom",
-       "value": "Arthur",
-       "type": "string"
-      },
-      {
        "id": "p-episode",
        "name": "episode",
        "value": "E22",
+       "type": "string"
+      },
+      {
+       "id": "p-yt",
+       "name": "lien_youtube",
+       "value": "",
        "type": "string"
       },
       {
@@ -105,7 +105,7 @@
   },
   {
    "parameters": {
-    "jsCode": "const p = $('Paramètres du test').first().json;\nconst html = $('Lire le mail publié').first().json.html;\nconst objet = String($('Lire l'objet').first().json.objet || '').trim();\n// {{prenom}} et {{lien_desinscription}} sont des emplacements laissés dans le mail par la commande « newsletter --envoi »\nconst prenom = (p.prenom || '').trim();\nconst message = html\n  .split('Bonjour {{prenom}},').join(prenom ? 'Bonjour ' + prenom + ',' : 'Bonjour,')\n  .split('{{prenom}}').join(prenom)\n  .split('{{lien_desinscription}}').join(p.lien_desinscription);\nreturn [{ json: { destinataire: p.destinataire, objet, message, nom_expediteur: p.nom_expediteur } }];"
+    "jsCode": "const p = $('Paramètres du test').first().json;\nconst html = $('Lire le mail publié').first().json.html;\nconst objet = String($('Lire l'objet').first().json.objet || '').trim();\n// Lien YouTube de L'ÉPISODE : à demander à l'équipe marketing (règle d'Arthur, 15/10/2026), jamais la playlist\nconst yt = String(p.lien_youtube || '').trim();\nif (html.includes('{{lien_youtube}}') && !/^https:\\/\\/(www\\.)?(youtube\\.com\\/watch|youtu\\.be\\/)/.test(yt)) {\n  throw new Error('Renseigne « lien_youtube » dans Paramètres du test : le lien de l'épisode sur YouTube (demandé au marketing), pas la playlist.');\n}\n// pas de prénom : le même mail pour tous\nconst message = html\n  .split('{{lien_youtube}}').join(yt)\n  .split('{{lien_desinscription}}').join(p.lien_desinscription);\nreturn [{ json: { destinataire: p.destinataire, objet, message, nom_expediteur: p.nom_expediteur } }];"
    },
    "name": "Personnaliser le mail",
    "type": "n8n-nodes-base.code",

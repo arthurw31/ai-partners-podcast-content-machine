@@ -49,6 +49,7 @@ AI Partners Podcast Content Machine/
   (le destinataire voit les images directement, sans cliquer), « Bonjour {{prenom}}, » et un lien « Se désinscrire »
   ({{lien_desinscription}}). Trafic GitHub Pages négligeable (3 images ≈ 230 Ko ; Gmail met en cache). NE JAMAIS supprimer
   le dossier d'une newsletter envoyée.
+- **Lien YouTube = celui de l'ÉPISODE, jamais la playlist** (Arthur, 15/10/2026 : « sur le lien qui envoie vers YouTube, il faut envoyer vers le lien de l'épisode, pas la playlist ; retiens-le comme règle par défaut, et dans le workflow il faudra demander au marketing le lien YouTube ») : sans `--youtube-url`, le mail garde l'emplacement `{{lien_youtube}}` (en-tête, photo, bouton, miniature) ; le workflow n8n a un paramètre `lien_youtube` à faire remplir par le marketing (erreur claire s'il est vide ou si c'est une playlist). La playlist ne sert plus que pour le logo YouTube et le bandeau « Écoutez AI Corner partout ». Aucun prénom dans le mail (« Bonjour {{prenom}} » supprimé, 15/10/2026) ; seules les images qui mènent hors du mail sont des liens (sinon Gmail les ouvre en grand).
 - n8n (instance aipartners.app.n8n.cloud) : workflow « AI Corner — test newsletter (envoi à soi-même) » : paramètres
   (destinataire, prénom, épisode) -> lit `email.html` et `objet.txt` sur GitHub Pages -> remplace les emplacements ->
   Gmail (HTML, nom d'expéditeur « Thomas Spitz », sans mention n8n). Limites Google Workspace ≈ 2 000 mails / jour par

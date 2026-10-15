@@ -477,7 +477,7 @@ def _platforms(c: dict) -> str:
         return (f'<td align="center" valign="middle" width="96" style="padding:0 8px"><a href="{esc(p["url"])}" style="text-decoration:none">'
                 f'<img src="{c["rel"]("plat_" + key)}" width="80" height="80" alt="{esc(label)}" '
                 f'style="display:block;width:80px;height:80px;border:0"></a></td>')
-    return (f'<tr><td bgcolor="{BAND_BG}"><a href="{esc(c["url"])}" style="text-decoration:none"><img src="{c["rel"]("plat_title")}" width="680" '
+    return (f'<tr><td bgcolor="{BAND_BG}"><a href="{esc(show_url(c))}" style="text-decoration:none"><img src="{c["rel"]("plat_title")}" width="680" '
             f'alt="Écoutez AI Corner partout" style="display:block;width:100%;max-width:680px;border:0"></a></td></tr>'
             f'<tr><td bgcolor="{BAND_BG}" align="center" style="padding:0 14px 38px 14px"><table role="presentation" align="center" cellpadding="0" '
             f'cellspacing="0"><tr>{"".join(cell(p) for p in items)}</tr></table></td></tr>')
@@ -576,12 +576,15 @@ VARIANTES = ["vedette", "duo", "ronds", "lettre", "duo_nuit"]
 
 
 def default_url(brand_cfg: dict, mail: dict) -> str:
-    """Lien du bouton et de la miniature : l'épisode si on a son lien, sinon la playlist YouTube de l'émission
-    (Arthur, 14/10/2026 : « pour YouTube, le lien vers la playlist, comme ça on n'a pas à donner le lien de l'épisode à chaque fois »)."""
-    if mail.get("youtube_url"):
-        return mail["youtube_url"]
-    yt = next((p.get("url") for p in brand_cfg.get("platforms") or [] if (p.get("name") or "").lower() == "youtube"), "")
-    return yt or "#"
+    """Lien du bouton et de la miniature : le lien de L'ÉPISODE sur YouTube (Arthur, 15/10/2026 : « sur le lien qui envoie vers YouTube,
+    il faut envoyer vers le lien de l'épisode, pas la playlist ; retiens-le comme règle par défaut, et dans le workflow il faudra
+    demander au marketing le lien YouTube »). Sans lien connu à la génération : emplacement {{lien_youtube}}, rempli par n8n."""
+    return mail.get("youtube_url") or "{{lien_youtube}}"
+
+
+def show_url(c: dict) -> str:
+    """Lien vers l'ÉMISSION (playlist YouTube), pour les images qui ne désignent pas un épisode (bandeau des plateformes)."""
+    return next((p.get("url") for p in c.get("platforms") or [] if (p.get("name") or "").lower() == "youtube"), "") or c["url"]
 
 
 def context(brand_cfg: dict, mail: dict, imgs: dict, title: str) -> dict:
