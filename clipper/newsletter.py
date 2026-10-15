@@ -94,52 +94,6 @@ Réponds UNIQUEMENT en JSON :
   "evidence": [{{"claim": "fait sur l'invité ou chiffre cité", "t": 123.4, "quote": "passage EXACT de la transcription"}}]}}"""
 
 
-FR_PROMPT = """Tu relis un mail en FRANÇAIS destiné à des dirigeants français. Retrouve tous les mots ou expressions ANGLAIS (ou anglicismes
-évitables) et propose pour chacun un équivalent français naturel. NE TOUCHE PAS : noms propres (entreprises, produits, marques,
-personnes : Mendo, Excel, AI Corner, AI Partners, YouTube, Spotify, Copilot...), sigles (IA, CEO, SaaS...), mots passés dans l'usage
-courant et sans équivalent simple (e-mail, podcast, comex, start-up). Garde le sens, la longueur et la ponctuation, jamais de tiret
-cadratin. Réponds UNIQUEMENT en JSON : {"changes": [{"champ": "intro|hook|theme|closing|subject|preheader|program.N.title|program.N.text",
-"avant": "texte EXACT trouvé dans le champ (quelques mots)", "apres": "remplacement"}]} ; liste vide si rien à changer."""
-
-
-def _fields(mail: dict):
-    for k in ("subject", "preheader", "theme", "hook", "intro", "closing"):
-        yield k, mail.get(k) or ""
-    for i, pr in enumerate(mail.get("program") or []):
-        yield f"program.{i}.title", pr.get("title") or ""
-        yield f"program.{i}.text", pr.get("text") or ""
-
-
-def francise(brand, mail: dict) -> list[dict]:
-    """Passe d'un agent qui retire les mots anglais du mail (Thomas, 15/10/2026 : « il faudrait que vous regardiez les anglicismes en
-    automatique avec un agent, évitons de le faire à la main » ; Carol-Ann : les noms de sociétés restent). Corrige `mail` en place,
-    renvoie les changements appliqués (gardés dans mail["anglicismes"])."""
-    from .llm import ask_json
-    text = chr(10).join(f"[{k}] {v}" for k, v in _fields(mail))
-    try:
-        data = ask_json(FR_PROMPT, text, model=str(_cfg(brand).get("model") or "claude-opus-5"),
-                        backend=brand.cfg.selection.llm_backend, max_tokens=2000)
-    except RuntimeError as e:                   # limite d'abonnement atteinte : on n'arrête pas le mail, on le signale
-        console.print(f"[yellow]Passe anti-anglais NON faite (agent indisponible) : {str(e)[:120]}[/yellow]")
-        mail["anglicismes"] = None
-        return []
-    done = []
-    for ch in data.get("changes") or []:
-        champ, avant, apres = ch.get("champ", ""), ch.get("avant", ""), ch.get("apres", "")
-        if not avant or not apres or avant == apres:
-            continue
-        if champ.startswith("program."):
-            _, i, key = champ.split(".")
-            holder = (mail.get("program") or [])[int(i)]
-        else:
-            holder, key = mail, champ
-        if avant in (holder.get(key) or ""):
-            holder[key] = holder[key].replace(avant, apres, 1)
-            done.append({"champ": champ, "avant": avant, "apres": apres})
-    mail["anglicismes"] = done
-    return done
-
-
 def write(brand, transcript: dict, ep: Path, meta: dict, note: str = "") -> dict:
     from .llm import ask_json
     console.print("Claude écrit le mail de Thomas (≈ 3 min)…")
@@ -154,7 +108,6 @@ def write(brand, transcript: dict, ep: Path, meta: dict, note: str = "") -> dict
                     max_tokens=6000)
     mail = {"episode": meta["number"], "guest": meta["guest"], "company": meta["company"], "role": meta["role"],
             "generated": date.today().isoformat(), "note": note, "youtube_url": "", **data}
-    francise(brand, mail)                       # aucun mot anglais (hors noms propres), vérifié par un agent
     return mail
 
 

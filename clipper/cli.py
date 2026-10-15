@@ -784,16 +784,12 @@ def cmd_newsletter(a: argparse.Namespace) -> None:
     role = a.role or meta.get("guest_role", "")
     transcript = transcribe((spec or {}).get("audio") or video, ep / "transcript.json", brand.cfg, ep / "work",
                             names=[guest, company])
-    if (a.render or a.youtube_url or a.francais) and (d / "contenu.json").exists():
+    if (a.render or a.youtube_url) and (d / "contenu.json").exists():
         mail = json.loads((d / "contenu.json").read_text(encoding="utf-8"))
     else:
         mail = write(brand, transcript, ep, {"number": number, "guest": guest, "company": company, "role": role}, a.note)
     if a.youtube_url:
         mail["youtube_url"] = a.youtube_url.strip()
-    if a.francais:
-        from .newsletter import francise
-        for ch in francise(brand, mail):
-            console.print(f"  [cyan]anglais retiré[/cyan] ({ch['champ']}) : « {ch['avant']} » -> « {ch['apres']} »")
     save(ep, mail, transcript["segments"])
     res = render(brand, ep, mail, portraits(brand, ep, video, company), template=a.template or None)
     for c in mail["checks"]:
@@ -1594,7 +1590,6 @@ def main(argv: list[str] | None = None) -> None:
     sp.add_argument("--youtube-url", default="", help="lien de l'épisode publié sur YouTube (bouton + miniature cliquable)")
     sp.add_argument("--render", action="store_true", help="refait le rendu depuis newsletter/contenu.json (après retouche du texte)")
     sp.add_argument("--template", default="", help="gabarit : classique | nuit | heros | editorial | vedette | duo | ronds | lettre | duo_nuit | all (compare tous) | variantes (le style vedette et ses 4 variantes)")
-    sp.add_argument("--francais", action="store_true", help="un agent retire les mots anglais de contenu.json (hors noms propres) puis refait le rendu")
     sp.add_argument("--final", action="store_true", help="validation de l'équipe -> newsletter/final/ (refusé sans lien YouTube)")
     sp.add_argument("--envoi", action="store_true", help="version prête pour n8n : images publiées (GitHub Pages), {{prenom}}, lien de désinscription")
     sp.add_argument("--by", default="", help="qui a validé (prénom)")
