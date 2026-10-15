@@ -27,7 +27,8 @@ def _is_highlight(word: str, keywords: set[str]) -> bool:
     if n in keywords:
         return True
     # tolérance aux flexions : "galère" ~ "galères"
-    return any(len(k) >= 5 and (n.startswith(k) or k.startswith(n)) and abs(len(n) - len(k)) <= 2 for k in keywords)
+    # (1 lettre d'écart au plus : « process » ne colore plus « processus », relecture du short 1 E21, 15/10/2026)
+    return any(len(k) >= 5 and (n.startswith(k) or k.startswith(n)) and abs(len(n) - len(k)) <= 1 for k in keywords)
 
 
 def _fill_lines(words: list[dict], max_chars: int, max_lines: int) -> list[list[dict]]:
@@ -85,10 +86,13 @@ def group_words(words: list[dict], clip_start: float, clip_end: float, cfg: Cfg,
     small = {"le", "la", "les", "de", "des", "du", "un", "une", "et", "en", "a", "au", "aux", "pas", "plus", "que",
              "qui", "ce", "se", "sa", "son", "ses", "on", "il", "elle", "l", "d", "c", "est", "dans", "pour", "par"}
     kw = set()
+    phrases = []   # expressions de plusieurs mots (« muscle de change ») : jamais coupées entre deux blocs
     if cap.get("highlight_keywords", True):
         for k in keywords:
             toks = [_norm(t) for t in re.split(r"[\s'’]+", k) if _norm(t)]
             kw |= {t for t in toks if t not in small and (len(t) >= 3 or t.isdigit())}
+            if len(toks) > 1:
+                phrases.append(toks)
     max_chars = int(cap.max_chars_per_line)
     max_lines = int(cap.max_lines)
     max_words = int(cap.max_words_per_group)
@@ -145,6 +149,19 @@ def group_words(words: list[dict], clip_start: float, clip_end: float, cfg: Cfg,
         if len(g) >= 3 and nxt[0]["s"] - g[-1]["s"] < MIN_SHOW and g[-1]["w"][-1:] not in ".?!…,":
             groups[k + 1] = [g[-1]] + nxt
             groups[k] = g[:-1]
+            continue
+        # (3) une expression-clé à cheval sur deux blocs (« …PAS DE muscle » / « DE change T'ES MORT ») passe entière dans
+        # le bloc suivant (relecture critique du short 1 E21, 15/10/2026)
+        moved = False
+        for ph in phrases:
+            for cut in range(1, len(ph)):
+                if len(g) > cut and [_norm(x["w"]) for x in g[-cut:]] == ph[:cut] and                         [_norm(x["w"]) for x in nxt[:len(ph) - cut]] == ph[cut:]:
+                    groups[k + 1] = g[-cut:] + nxt
+                    groups[k] = g[:-cut]
+                    moved = True
+                    break
+            if moved:
+                break
         k += 1
 
     # dialogue : une réplique très courte (« Ouais. ») rejoint la réplique suivante de l'autre locuteur
@@ -170,6 +187,24 @@ def group_words(words: list[dict], clip_start: float, clip_end: float, cfg: Cfg,
 
     out = []
     min_step = float(cap.typewriter_min_char_step)
+    # densité des mots-clés (règle validée : ~1 tous les 6–10 mots ; relecture du short 1 E21, 15/10/2026 : 4 italiques en
+    # 6 s, « agent » juste après « agents ») : au moins 5 mots depuis le précédent, sauf suite de la MÊME expression ; un
+    # même mot-clé n'est pas recoloré dans les 6 s
+    hl_state = {"since": 99, "prev": None, "seen": {}}
+    phrase_words = [set(ph) for ph in phrases]
+
+    def _keep_hl(w: dict) -> bool:
+        n = _norm(w["w"])
+        same_phrase = hl_state["prev"] is not None and hl_state["since"] <= 2 and any(
+            n in ws_ and hl_state["prev"] in ws_ for ws_ in phrase_words)
+        root = n[:5]
+        recent = w["s"] - hl_state["seen"].get(root, -99) < 6.0
+        ok = same_phrase or (hl_state["since"] >= 5 and not recent)
+        if ok:
+            hl_state["since"], hl_state["prev"] = 0, n
+            hl_state["seen"][root] = w["s"]
+        return ok
+
     for gi, g in enumerate(groups):
         start = g[0]["s"]
         # le groupe reste affiché jusqu'au suivant (ou fin du clip)
@@ -189,7 +224,9 @@ def group_words(words: list[dict], clip_start: float, clip_end: float, cfg: Cfg,
         for li, line in enumerate(raw_lines):
             lw = []
             for wi, w in enumerate(line):
-                hl = _is_highlight(w["w"], kw)
+                hl = _is_highlight(w["w"], kw) and _keep_hl(w)
+                if not hl:
+                    hl_state["since"] += 1
                 # casse propre aux mots-clés (captions.keyword_style.uppercase) : style « multi-polices » où le mot-clé
                 # est en minuscules italiques au milieu de capitales (ou l'inverse)
                 ks = cap.get("keyword_style") or {}

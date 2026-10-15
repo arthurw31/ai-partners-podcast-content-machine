@@ -260,6 +260,24 @@ def test_bloc_de_sous_titre_jamais_trop_court():
     assert not any(t.strip().upper().endswith("MUSCLE") for t in txt), txt
 
 
+def test_mots_cles_espaces_et_expression_entiere():
+    """15/10/2026, relecture critique du short 1 E21 : « agent … processus … procurement » (3 italiques en 8 mots, et
+    « processus » coloré pour « process ») ; « …PAS DE muscle » / « DE change T'ES MORT » (expression coupée en deux blocs)."""
+    cfg = cfg_for_format(Brand("ai-corner").cfg, "9x16")
+    ws = _words([("des", 0.0, 0.2), ("agents", 0.2, 0.6), ("mais", 0.7, 0.9), ("un", 1.0, 1.1), ("agent", 1.1, 1.4),
+                 ("qui", 1.4, 1.5), ("va", 1.5, 1.6), ("faire", 1.6, 1.8), ("ton", 1.8, 1.9), ("processus", 1.9, 2.3),
+                 ("de", 2.3, 2.4), ("procurement.", 2.4, 2.9),
+                 ("et", 3.0, 3.1), ("donc", 3.1, 3.3), ("si", 3.3, 3.4), ("t'as", 3.4, 3.6), ("pas", 3.6, 3.7),
+                 ("de", 3.7, 3.8), ("muscle", 3.8, 4.1), ("de", 4.12, 4.2), ("change", 4.2, 4.6), ("t'es", 4.7, 4.9),
+                 ("mort.", 4.9, 5.2)])
+    caps = group_words(ws, 0.0, 5.6, cfg, ["agents", "procurement", "process de travail", "muscle de change"],
+                       breaks=[4.12])
+    hl = [w["text"].lower() for c in caps for ln in c["lines"] for w in ln if w["hl"]]
+    assert "processus" not in hl and "agent" not in hl, hl
+    last = [w["text"].lower() for ln in caps[-1]["lines"] for w in ln]
+    assert "muscle" in last and "change" in last, [[w["text"] for ln in c["lines"] for w in ln] for c in caps]
+
+
 def test_mot_coupe_avant_un_saut_de_passage():
     """15/10/2026, Thomas (short 1 E21) « à 0:07 le mot "métiers" est complètement croppé » : coupe à 1201,62 posée sur un
     changement de plan, dans un micro-creux du mot, juste avant un saut de passage (1204,95)."""
