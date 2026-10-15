@@ -361,12 +361,25 @@ def _hook_html(c: dict, dark: bool = False) -> str:
     return out
 
 
+def _intro_html(c: dict) -> str:
+    """Intro en paragraphes courts (Arthur, 15/10/2026 : « mets mieux en page pour que ce soit plus lisible »), invité en gras."""
+    paras = [x.strip() for x in str(c.get("intro") or "").split(chr(10)) if x.strip()]
+    out = []
+    for i, x in enumerate(paras):
+        h = para(x)
+        g = esc(c.get("guest") or "")
+        if g and i == 0:
+            h = h.replace(g, f"<strong>{g}</strong>", 1)
+        out.append(f'<p style="margin:0 0 14px 0">{h}</p>')
+    return "".join(out)
+
+
 def _text_block(c: dict, dark: bool = False, hook: bool = True) -> str:
     fg = "#DCE3F7" if dark else NAVY_MID
     bg = NAVY if dark else "#FFFFFF"
     h = _hook_html(c, dark) if hook and c.get("hook") else ""
     return (f'<tr><td bgcolor="{bg}" class="pad" style="padding:30px 40px 0 40px;font-family:{FONT};font-size:17px;line-height:1.6;color:{fg}">'
-            f'<!--HELLO-->{h}<p style="margin:0">{para(c["intro"])}</p></td></tr>')
+            f'<!--HELLO-->{h}{_intro_html(c)}</td></tr>')
 
 
 def _booking(c: dict) -> str:
@@ -448,8 +461,8 @@ def make_chrome(brand, d: Path, mail: dict, shot, fonts_css: str, uri, logo_svg:
 def _header(c: dict) -> str:
     if not c["img"].get("header"):
         return _topbar(c)
-    return (f'<tr><td bgcolor="{NAVY}"><img src="{c["rel"]("header")}" width="680" alt="AI Corner by AI Partners · {esc(c["episode"])}" '
-            f'style="display:block;width:100%;max-width:680px"></td></tr>')
+    return (f'<tr><td bgcolor="{NAVY}"><a href="{esc(c["url"])}" style="text-decoration:none"><img src="{c["rel"]("header")}" width="680" '
+            f'alt="AI Corner by AI Partners · {esc(c["episode"])}" style="display:block;width:100%;max-width:680px;border:0"></a></td></tr>')
 
 
 def _platforms(c: dict) -> str:
@@ -464,8 +477,8 @@ def _platforms(c: dict) -> str:
         return (f'<td align="center" valign="middle" width="96" style="padding:0 8px"><a href="{esc(p["url"])}" style="text-decoration:none">'
                 f'<img src="{c["rel"]("plat_" + key)}" width="80" height="80" alt="{esc(label)}" '
                 f'style="display:block;width:80px;height:80px;border:0"></a></td>')
-    return (f'<tr><td bgcolor="{BAND_BG}"><img src="{c["rel"]("plat_title")}" width="680" alt="Écoutez AI Corner partout" '
-            f'style="display:block;width:100%;max-width:680px"></td></tr>'
+    return (f'<tr><td bgcolor="{BAND_BG}"><a href="{esc(c["url"])}" style="text-decoration:none"><img src="{c["rel"]("plat_title")}" width="680" '
+            f'alt="Écoutez AI Corner partout" style="display:block;width:100%;max-width:680px;border:0"></a></td></tr>'
             f'<tr><td bgcolor="{BAND_BG}" align="center" style="padding:0 14px 38px 14px"><table role="presentation" align="center" cellpadding="0" '
             f'cellspacing="0"><tr>{"".join(cell(p) for p in items)}</tr></table></td></tr>')
 

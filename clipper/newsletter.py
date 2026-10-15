@@ -88,7 +88,7 @@ envoie personnellement à ses contacts pour un nouvel épisode. Brief, à suivre
 Réponds UNIQUEMENT en JSON :
 {{"subject": "🎙️ AI Corner E23 : …", "preheader": "…", "theme": "phrase-thème de 4 à 9 mots",
   "hook": "la question que pose l'épisode (1 phrase, qui finit par « ? »), puis 1 phrase de contexte",
-  "intro": "Pour ce nouvel épisode d'AI Corner, j'ai le plaisir de recevoir … (qui est l'invité, 2 à 3 phrases, puis l'angle de la conversation)",
+  "intro": "3 PARAGRAPHES COURTS séparés par une ligne vide : 1) Pour ce nouvel épisode d'AI Corner, j'ai le plaisir de recevoir … (1 phrase) ; 2) qui est l'invité (2 phrases) ; 3) l'angle de la conversation (1 phrase)",
   "program": [{{"title": "titre court", "text": "1 phrase concrète", "emoji": "1 emoji qui illustre le point", "chapter": "4:53"}}],
   "closing": "mot de fin de Thomas, 1 à 2 phrases",
   "evidence": [{{"claim": "fait sur l'invité ou chiffre cité", "t": 123.4, "quote": "passage EXACT de la transcription"}}]}}"""
@@ -420,7 +420,7 @@ def send_ready(brand, ep: Path, mail: dict) -> dict:
     - images copiées dans `docs/newsletters/<E>/` (publiées par GitHub Pages au prochain push) et liens ABSOLUS `https://`
       dans le HTML : la boîte du destinataire les charge toute seule, il ne clique sur rien. Ne jamais supprimer le dossier
       d'une newsletter envoyée (un vieux mail rouvert va rechercher ses images) ;
-    - « Bonjour {{prenom}}, » en tête et un lien « Se désinscrire » ({{lien_desinscription}}) en pied : remplacés par n8n ;
+    - un lien « Se désinscrire » ({{lien_desinscription}}) en pied : remplacés par n8n ;
     - le HTML est aussi publié (`docs/newsletters/<E>/email.html`) : n8n le lit à cette adresse, rien à copier à la main.
     """
     from .config import ROOT
@@ -435,14 +435,14 @@ def send_ready(brand, ep: Path, mail: dict) -> dict:
         if (src / "images" / name).exists():
             shutil.copy2(src / "images" / name, pub / name)
     h = h.replace('src="images/', f'src="{base}/')
-    hello = '<p style="margin:0 0 14px 0;font-weight:bold">Bonjour {{prenom}},</p>'
+    hello = ""        # pas de prénom : le même mail pour tous (Arthur, 15/10/2026)
     unsub = ('<br>Vous recevez ce mail car vous êtes en contact avec AI Partners. '
              '<a href="{{lien_desinscription}}" style="color:#8A93B2">Se désinscrire</a>')
     if "<!--HELLO-->" in h:                       # tous les gabarits : marqueurs (newsletter_templates.py)
         h = h.replace("<!--HELLO-->", hello, 1).replace("<!--FOOT-->", unsub, 1)
     else:                                         # ancien HTML sans marqueurs
         hook = '<p style="margin:0 0 18px 0;font-weight:bold">'
-        h = h.replace(hook, '<p style="margin:0 0 14px 0">Bonjour {{prenom}},</p>\n ' + hook, 1)
+        pass
         h = h.replace("AI Corner, le podcast d'AI Partners.</p>", "AI Corner, le podcast d'AI Partners." + unsub + "</p>", 1)
     out = d / "email_a_envoyer.html"
     out.write_text(h, encoding="utf-8")
