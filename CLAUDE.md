@@ -701,6 +701,22 @@ vérification intransigeante qui règle ces problèmes »)
      la fin -> `listener_shown` contrôle la DERNIÈRE image contre l'auteur de la dernière phrase (pas celui qui va parler
      ensuite) et `fix_listener_shown` coupe juste avant le plan. Durées des morceaux comptées à l'image près, comme `compose`.
   Chaque retour (Arthur, Thomas, l'équipe) = règle généralisée + test dans `scripts/test_qualite.py` + note ici.
+- **Retours d'Arthur du 15/10/2026 (suite, shorts E22)** :
+  1. « Le bandeau blanc du début overlap encore le menton » : `compose._face_bottom` ne mesurait que 8 images ; la tête qui
+     s'abaisse entre deux mesures passait sous la bulle (mesuré 1038 px, réel 1074). Désormais une image toutes les 0,2 s sur
+     toute la durée de la bulle, marge `hook.face_margin` 0,03 H ; vérifié sur E22 : 59 à 63 px entre le bas du visage et la bulle.
+  2. « Le tout début du short 2 est saccadé » : les rushs et montages sont en **24 i/s**, les shorts étaient en 30 : une image
+     sur 5 doublée (zéros réguliers dans la différence d'images), à-coups sur les mouvements de tête, amplifiés dans l'aperçu
+     12 i/s (cadence irrégulière 2-3-2-3). **Les shorts sont désormais en 24 i/s** (`fps: 24` dans brand.yaml, = teaser et
+     épisode ; l'aperçu 12 i/s en est exactement la moitié) ; `short_outro` rend l'outro à la même cadence (`fps` de la marque,
+     inclus dans l'empreinte) et `append` garde celle du short (jamais de reconversion 24 -> 30). Changer de cadence = refaire
+     l'outro (`outro --force`) et `build --force`.
+  3. Bug révélé par le passage à 24 i/s : un raccord posé à 2 ms du début d'un mot coupait aussi avant le mot suivant (bloc
+     « ET » seul, 0,14 s) -> `captions.group_words` : tolérance des deux côtés du raccord (test dédié).
+  4. Liens donnés à Arthur : toujours depuis la RACINE du projet (`EPISODES/…`), jamais relatifs à un sous-dossier : mon dossier de
+     travail avait changé et les liens ne s'ouvraient pas ; donner aussi le chemin Windows complet du dossier.
+  5. Une autre session renumérote les épisodes pendant qu'on travaille (Mendo E21 -> E22, Coty E22 -> E23) : relire `ls EPISODES/…`
+     avant de donner un chemin, ne jamais le recopier d'un message précédent.
 - **Relecture « bon sens » en fin de `polish`** (Arthur, 15/10/2026 : « rajouter une couche agent par-dessus qui juge avec bon
   sens la vidéo entière » -> « oui fais ça ») : `cli._polish_review` lance `review` (Claude Opus SANS contexte) sur chaque short
   après le contrôle des aperçus ; il reçoit des planches SERRÉES de tout le short (`review.dense_sheets` : une image / 0,5 s

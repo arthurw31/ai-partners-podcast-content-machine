@@ -278,6 +278,17 @@ def test_mots_cles_espaces_et_expression_entiere():
     assert "muscle" in last and "change" in last, [[w["text"] for ln in c["lines"] for w in ln] for c in caps]
 
 
+def test_raccord_a_2_ms_d_un_mot_ne_cree_pas_de_bloc_d_un_mot():
+    """15/10/2026, short 1 E22 passé à 24 i/s : raccord à 17,542 s, mot « et » à 17,54 s -> le raccord coupait aussi avant « tu »
+    et « ET » restait seul 0,14 s à l'écran (bloc illisible)."""
+    cfg = cfg_for_format(Brand("ai-corner").cfg, "9x16")
+    ws = _words([("fait", 17.16, 17.34), ("et", 17.54, 17.68), ("tu", 17.68, 17.78), ("vas", 17.78, 17.88),
+                 ("avoir", 17.88, 18.06), ("besoin", 18.06, 18.3), ("que", 18.3, 18.4), ("tes", 18.4, 18.54)])
+    caps = group_words(ws, 0.0, 19.0, cfg, [], breaks=[17.542])
+    blocks = [[w["text"] for ln in c["lines"] for w in ln] for c in caps]
+    assert not any(b[0] == "ET" and len(b) == 1 for b in blocks) and ["ET", "TU"] == blocks[-1][:2], blocks
+
+
 def test_mot_coupe_avant_un_saut_de_passage():
     """15/10/2026, Thomas (short 1 E22) « à 0:07 le mot "métiers" est complètement croppé » : coupe à 1201,62 posée sur un
     changement de plan, dans un micro-creux du mot, juste avant un saut de passage (1204,95)."""

@@ -363,12 +363,14 @@ def _logo_bar(W: int, H: int, files: list[Path], cfg: Cfg) -> dict:
             "center_y_px": int(round(H * float(cfg.get("bar_center_y", 0.064))))}
 
 
-def _face_bottom(video: Path, until: float, W: int, n: int = 8) -> int:
-    """Bas le plus bas des visages (px, image de sortie) entre 0 et `until` s : la boîte YuNet s'arrête au menton."""
+def _face_bottom(video: Path, until: float, W: int, step: float = 0.2) -> int:
+    """Bas le plus bas des visages (px, image de sortie) entre 0 et `until` s : la boîte YuNet s'arrête au menton. Une image
+    toutes les 0,2 s : avec 8 images seulement (Thomas, 15/10/2026 : « il y a encore le bandeau blanc qui overlap le menton »),
+    la tête qui s'abaisse entre deux mesures passait sous la bulle (bas mesuré 1038 px, réel 1074)."""
     from .ingest import _faces, _frame
     low = 0
-    for i in range(n):
-        t = until * (i + 0.5) / n
+    for i in range(max(8, int(until / step))):
+        t = min(until - 0.05, 0.05 + i * step)
         img = _frame(video, t, W)
         for f in (_faces(img) if img is not None else []):
             low = max(low, int(f[1] + f[3]))
@@ -754,6 +756,8 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
                         e["zoom_from"], e["zoom_to"] = round(1.0 + 1.4 * amt, 3), 1.0
         if plan:
             plan[-1]["t1"] = D_speech
+        if os.environ.get("CLIPPER_DEBUG_CAPS"):
+            Path(os.environ["CLIPPER_DEBUG_CAPS"]).write_text(json.dumps({"words": words_rel, "turns": turns_rel, "breaks": junctions, "kw": clip.get("keywords", []), "D": D_speech}), encoding="utf-8")
         caps = group_words(words_rel, 0.0, D_speech, fcfg, clip.get("keywords", []), turns_rel=turns_rel, breaks=junctions)
 
         c = fcfg.captions
@@ -871,7 +875,7 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
         # (moins une marge), bulle ET sous-titres descendent d'autant (même écart entre eux, mêmes positions tout le clip)
         if hook_ctx.get("enabled") and hook_ctx.get("text") and plan_render is not plan:
             chin = _face_bottom(assets / plan_render[0]["cams"][0]["src"], float(hook_ctx["duration"]), W)
-            need = chin + int(H * float(hk.get("face_margin", 0.025))) - int(hook_ctx["top_px"]) if chin else 0
+            need = chin + int(H * float(hk.get("face_margin", 0.03))) - int(hook_ctx["top_px"]) if chin else 0
             room = int(H * float(hk.get("max_caption_y", 0.80))) - int(cap_ctx["top_px"])
             shift = max(0, min(need, room))
             if shift:

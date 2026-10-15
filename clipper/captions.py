@@ -125,7 +125,9 @@ def group_words(words: list[dict], clip_start: float, clip_end: float, cfg: Cfg,
             too_long = len(_fill_lines(cur + [w], max_chars, max_lines + 1)) > max_lines
         speaker_change = bool(cur) and w["spk"] != cur[-1]["spk"]
         # jonction de segments (passage pris ailleurs dans l'épisode) : toujours un nouveau bloc
-        crosses = bool(cur) and any(cur[-1]["s"] < bk <= w["s"] + 0.02 for bk in (breaks or []))
+        # (tolérance des deux côtés : un raccord posé à 0,002 s du début d'un mot coupait AUSSI avant le mot suivant -> bloc
+        # d'un seul mot « ET » affiché 0,14 s, short 1 E22, 15/10/2026)
+        crosses = bool(cur) and any(cur[-1]["s"] + 0.02 < bk <= w["s"] + 0.02 for bk in (breaks or []))
         if cur and (too_long or gap > pause_break or ends_sentence or speaker_change or crosses):
             groups.append(cur)
             cur, cur_len = [], 0

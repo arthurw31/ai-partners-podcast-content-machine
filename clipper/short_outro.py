@@ -54,7 +54,7 @@ html, body {{ width: 1080px; height: 1920px; overflow: hidden; background: #000;
 .btn::before {{ content: ""; position: absolute; left: 46px; top: 30px; border-left: 30px solid #fff; border-top: 18px solid transparent; border-bottom: 18px solid transparent; }}
 .logo {{ position: absolute; left: 50%; }}
 </style></head><body>
-<div id="root" data-composition-id="main" data-start="0" data-duration="{d}" data-width="1080" data-height="1920" data-fps="30">
+<div id="root" data-composition-id="main" data-start="0" data-duration="{d}" data-width="1080" data-height="1920" data-fps="{fps}">
 <div class="layer" id="bgwrap"><video class="bgv" id="bgvid" src="assets/outro.mp4" data-start="0" data-duration="{d}" data-media-start="0" data-track-index="0" muted playsinline></video></div>
 <div class="clip layer" id="ov" data-start="0" data-duration="{d}" data-track-index="2"><div class="veil"></div>
 <img class="logo" id="lg" src="assets/logo.png" alt="" style="top:300px; width:420px; margin-left:-210px" />
@@ -105,7 +105,8 @@ def build(brand, ep: Path, video: Path, force: bool = False, thumb: Path | None 
     tag = "_provisoire" if provisional else ""
     proj = ep / "outro_short" / f"9x16{tag}"
     out = ep / "outro_short" / f"outro_9x16{tag}.mp4"
-    stamp = hashlib.sha256(thumb.read_bytes() + f"{title}|{cta}|{d}".encode()).hexdigest()[:16]
+    fps = int(brand.cfg.get("fps", FPS))   # = cadence des shorts (24 = celle des rushs : voir CLAUDE.md « Cadence »)
+    stamp = hashlib.sha256(thumb.read_bytes() + f"{title}|{cta}|{d}|{fps}".encode()).hexdigest()[:16]
     stamp_f = out.with_suffix(".stamp")
     if out.exists() and not force and stamp_f.exists() and stamp_f.read_text() == stamp:
         return out
@@ -113,19 +114,19 @@ def build(brand, ep: Path, video: Path, force: bool = False, thumb: Path | None 
     assets.mkdir(parents=True, exist_ok=True)
     if force or not (assets / "outro.mp4").exists():
         prepare_outro_video(brand.asset(str(cfg.get("video", "outro_anim.mov"))), assets / "outro.mp4", W, H, d,
-                            focus_x=float(cfg.get("video_focus_x", 0.62)), fps=FPS)
+                            focus_x=float(cfg.get("video_focus_x", 0.62)), fps=fps)
     shutil.copy2(thumb, assets / "thumb.jpg")
     shutil.copy2(brand.asset(str(cfg.get("logo", "logo.png"))), assets / "logo.png")
     shutil.copy2(brand.asset("fonts/Metropolis-Bold.ttf"), assets / "Metropolis-Bold.ttf")
     y = 640
-    html = PAGE.format(tx=TX, tw=TW, th=TH, d=d, title=title, cta=cta, y=y, by=y + TH + 280,
+    html = PAGE.format(fps=fps, tx=TX, tw=TW, th=TH, d=d, title=title, cta=cta, y=y, by=y + TH + 280,
                        a0=y + TH + 250, a1=y + TH + 140, a2=y + TH + 50)
     (proj / "index.html").write_text(html, encoding="utf-8")
     ok, findings = lint(proj)
     if not ok:
         raise SystemExit("Outro : composition refusée par HyperFrames : " + "; ".join(str(f.get("message", f))[:120] for f in findings[:3]))
     console.print("Rendu de l'outro des shorts (HyperFrames, ~2 min)…")
-    render(proj, out, quality="delivery", fps=FPS)
+    render(proj, out, quality="delivery", fps=fps)
     stamp_f.write_text(stamp)
     return out
 
@@ -151,6 +152,7 @@ def append(short: Path, outro: Path, dst: Path, fade: float = 0.4) -> Path:
     """short + outro -> dst. La dernière image du short est tenue `fade` s pendant que l'outro apparaît en fondu : la voix
     n'est JAMAIS raccourcie ni fondue (règle « jamais couper une fin de phrase »). Outro muette. H.264 CRF 14, AAC."""
     d = float(probe(short)["duration"])
+    fps = int(round(probe(short)["fps"])) or FPS   # cadence du SHORT : jamais reconvertie (24 -> 30 = image doublée 1 sur 5)
     # l'animation commence par ~0,6 s de noir (lignes pas encore dessinées) : collée telle quelle, ça faisait un trou noir
     # entre le short et la carte (Arthur, 11/10/2026 : « juste après, tu as mis un écran noir ») -> début noir sauté
     from .qa import black_runs
@@ -158,8 +160,8 @@ def append(short: Path, outro: Path, dst: Path, fade: float = 0.4) -> Path:
     lead = max(0.0, blk[0][1] - 0.1) if blk and blk[0][0] < 0.05 else 0.0
     total = d + float(probe(outro)["duration"]) - lead
     dst.parent.mkdir(parents=True, exist_ok=True)
-    fc = (f"[0:v]fps={FPS},settb=AVTB,format=yuv420p,tpad=stop_mode=clone:stop_duration={fade}[a];"
-          f"[1:v]trim=start={lead:.3f},setpts=PTS-STARTPTS,fps={FPS},settb=AVTB,format=yuv420p,scale={W}:{H}[b];"
+    fc = (f"[0:v]fps={fps},settb=AVTB,format=yuv420p,tpad=stop_mode=clone:stop_duration={fade}[a];"
+          f"[1:v]trim=start={lead:.3f},setpts=PTS-STARTPTS,fps={fps},settb=AVTB,format=yuv420p,scale={W}:{H}[b];"
           f"[a][b]xfade=transition=fade:duration={fade}:offset={d:.3f},format=yuv420p[v];"
           f"[0:a]aresample=48000,apad,atrim=0:{total:.3f}[aout]")
     subprocess.run([FFMPEG, "-y", "-v", "error", "-i", str(short), "-i", str(outro), "-filter_complex", fc,
