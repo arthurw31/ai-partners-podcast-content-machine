@@ -12,6 +12,12 @@ relu est envoyée au relecteur : garder chaque section COURTE (c'est ce qui coû
 
 ## short
 - 25 à 45 s ; l'accroche (bulle-titre) pose une vraie question et le passage y répond ; la fin est une vraie conclusion.
+- Images (planches serrées, une toutes les 0,5 s) : on voit TOUJOURS la personne qui parle (d'après « qui parle ») ;
+  une image de celui qui écoute ou réagit, même 0,5 s, même sur la dernière image (FIN), est un ÉCHEC (Arthur, 14–15/10/2026).
+- Sens après les coupes : lire « ce qu'on entend » comme un spectateur ; chaque phrase est complète et se comprend, aucun
+  reste de phrase de l'autre personne, aucun mot répété ou « euh » restés, aucune transition qui ne mène nulle part.
+  Le début ne dépend pas de ce qui précède dans l'épisode ; la fin est la chute (rien de plus fort juste après, rien
+  de plus faible ajouté).
 - Retours de Thomas (15/10/2026, short 1 E21) : le short s'arrête sur la CHUTE (phrase la plus forte), aucune phrase après ;
   aucun mot tronqué (même pour éviter une image) ; la bulle-titre ne touche jamais le visage (menton) ; on ne voit jamais
   la personne qui écoute, y compris sur la DERNIÈRE image (elle reste figée pendant le fondu vers l'outro).

@@ -1227,6 +1227,28 @@ def cmd_qa(a: argparse.Namespace) -> str:
     return worst
 
 
+def _polish_review(a: argparse.Namespace, brand, ep: Path, shorts: list[int]) -> None:
+    """Dernier contrôle de `polish` : relecteur Claude SANS contexte qui juge le short entier avec bon sens (Arthur,
+    15/10/2026 : « rajouter une couche agent par-dessus qui juge avec bon sens la vidéo entière ») — planches serrées de tout
+    le short (dernière image comprise), ce qu'on entend, qui parle, ce qui précède et suit dans l'épisode, checklist des
+    retours validés. Il ne corrige rien : ses défauts prouvés (« À CORRIGER ») passent par la boucle « à corriger » de Claude
+    AVANT d'envoyer l'aperçu. ~40–60 k tokens par short ; jamais relancé sur un short inchangé."""
+    if getattr(a, "no_review", False):
+        return
+    from .review import review
+    console.rule("Relecture critique (bon sens, sans contexte)")
+    for n in shorts:
+        try:
+            res = review(brand, ep, "short", n)
+        except Exception as e:  # noqa: BLE001  (limite d'abonnement, CLI indisponible : le reste du process continue)
+            console.print(f"[yellow]#{n} relecture impossible : {e}[/yellow]")
+            continue
+        color = {"OK": "green", "ATTENTION": "yellow"}.get(res["verdict"], "red")
+        console.print(f"[{color}]#{n} {res['verdict']}[/{color}] : {len(res['issues'])} défaut(s) -> qa/review_short_{n:02d}.md")
+        for i in res["issues"]:
+            console.print(f"  {i['severity']} · {i['where']} · {i['problem']} -> {i.get('fix', '')}")
+
+
 def cmd_polish(a: argparse.Namespace) -> None:
     """Chaîne complète d'un short après le choix des passages (`pick`), avec les contrôles à chaque étape :
     tighten -> verify --fix -> fillers -> build (sous-titres doublement contrôlés) -> qa -> aperçu MP4 -> qa de
@@ -1396,12 +1418,14 @@ def cmd_polish(a: argparse.Namespace) -> None:
             cmd_preview(argparse.Namespace(brand=a.brand, input=a.input, clip=sel, formats=a.formats, port="3002",
                                            no_open=True, stop=False, mp4=True, fps=a.fps))
             cmd_qa(argparse.Namespace(**{**vars(a), "only": sel, "render": True, "episode": False, "preview_check": True}))
+            _polish_review(a, brand, ep, good)
         sys.exit("Contrôle qualité en ÉCHEC : corriger avant l'aperçu (voir EPISODES/…/travail/qa/). --anyway pour passer outre.")
     console.rule("Aperçus MP4")
     cmd_preview(argparse.Namespace(brand=a.brand, input=a.input, clip=sel, formats=a.formats, port="3002",
                                    no_open=True, stop=False, mp4=True, fps=a.fps))
     console.rule("Contrôle qualité des aperçus")
     cmd_qa(argparse.Namespace(**{**vars(a), "only": sel, "render": True, "episode": False, "preview_check": True}))
+    _polish_review(a, brand, ep, [int(k) for k in sel.split(",")])
     console.print("[bold]Prochaine étape[/bold] : regarder les planches d'images (EPISODES/…/travail/qa/), envoyer les liens des aperçus "
                   "à Arthur ; après sa validation seulement : render --only N, puis qa --render --only N.")
 
@@ -1494,6 +1518,7 @@ def main(argv: list[str] | None = None) -> None:
     sp.add_argument("--jobs", default=""); sp.add_argument("--fps", default="12")
     sp.add_argument("--redo", action="store_true", help="tout refaire depuis clips_before_tighten.json")
     sp.add_argument("--anyway", action="store_true", help="faire l'aperçu même si le contrôle qualité échoue")
+    sp.add_argument("--no-review", action="store_true", help="sans la relecture critique finale (agent sans contexte)")
     sp.set_defaults(fn=cmd_polish, render=False, episode=False, proxy=False)
     sp = sub.add_parser("qa", help="contrôle qualité : rapport par short (EPISODES/…/travail/qa/) ; --render ; --episode")
     common(sp); sp.add_argument("--only", default=""); sp.add_argument("--formats", default="")

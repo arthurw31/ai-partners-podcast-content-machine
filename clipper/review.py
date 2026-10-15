@@ -125,6 +125,91 @@ def _claims(label: str, obj) -> list[tuple[str, str, None]]:
     return out
 
 
+def short_video(ep: Path, n: int) -> Path | None:
+    """La vidéo la plus récente du short (rendu final ou aperçu), sans l'outro."""
+    cands = [p for d in ("renders", "apercus") if (ep / d).exists() for p in (ep / d).glob(f"clip_{n:02d}_*.mp4")
+             if "avec_outro" not in p.name]
+    return max(cands, key=lambda p: p.stat().st_mtime) if cands else None
+
+
+def dense_sheets(video: Path, work: Path, name: str, fps: float = 2.0, cols: int = 8, tw: int = 200,
+                 per_sheet: int = 64) -> list[Path]:
+    """Planches SERRÉES de tout le short (Arthur, 15/10/2026 : « une couche agent qui juge avec bon sens la vidéo
+    entière ») : une image toutes les 0,5 s + la DERNIÈRE image (figée pendant le fondu vers l'outro), chacune avec son
+    instant ; + un gros plan de la bulle-titre (vérifier qu'elle ne touche pas le visage)."""
+    import subprocess
+    import tempfile
+
+    from PIL import ImageDraw
+
+    from .media import FFMPEG, probe
+    d = float(probe(video)["duration"])
+    times = [round(i / fps, 2) for i in range(int(d * fps) + 1) if i / fps < d - 0.05] + [round(d - 0.04, 2)]
+    tmp = Path(tempfile.mkdtemp(prefix="review_"))
+    frames = []
+    for i, t in enumerate(times):
+        f = tmp / f"f{i:03d}.jpg"
+        subprocess.run([FFMPEG, "-v", "error", "-y", "-ss", f"{t:.2f}", "-i", str(video), "-frames:v", "1",
+                        "-vf", f"scale={tw}:-2", str(f)], check=False)
+        if f.exists():
+            frames.append((t, Image.open(f).convert("RGB")))
+    out = []
+    work.mkdir(parents=True, exist_ok=True)
+    for s in range(0, len(frames), per_sheet):
+        chunk = frames[s:s + per_sheet]
+        th = chunk[0][1].height
+        sheet = Image.new("RGB", (cols * tw, ((len(chunk) + cols - 1) // cols) * th), "black")
+        dr = ImageDraw.Draw(sheet)
+        for k, (t, im) in enumerate(chunk):
+            x, y = (k % cols) * tw, (k // cols) * th
+            sheet.paste(im, (x, y))
+            last = s + k == len(frames) - 1
+            label = f"{int(t // 60)}:{t % 60:04.1f}" + (" FIN" if last else "")
+            dr.rectangle([x, y, x + 74 + (30 if last else 0), y + 16], fill="black")
+            dr.text((x + 3, y + 2), label, fill="yellow" if not last else "red")
+        p = work / f"{name}_planche_{s // per_sheet + 1}.jpg"
+        sheet.save(p, quality=82)
+        out.append(p)
+    big = work / f"{name}_accroche.jpg"
+    subprocess.run([FFMPEG, "-v", "error", "-y", "-ss", "2.0", "-i", str(video), "-frames:v", "1", "-vf", "scale=540:-2",
+                    str(big)], check=False)
+    if big.exists():
+        out.append(big)
+    return out
+
+
+def _short_context(ep: Path, c: dict) -> str:
+    """Qui dit quoi (voix reconnues) dans le short, et ce que l'épisode dit JUSTE AVANT le début et JUSTE APRÈS la fin :
+    pour juger si l'extrait commence sur une idée complète et s'arrête sur sa chute."""
+    tf = ep / "transcript.json"
+    dw = ep / "work" / "diarized_words.json"
+    segs = c.get("segments") or []
+    if not segs or not tf.exists():
+        return ""
+    names = {"host": "Thomas (animateur)", "guest": f"{c.get('guest') or 'invité'} (invité)"}
+    out = []
+    if dw.exists():
+        ws = json.loads(dw.read_text(encoding="utf-8"))
+        lines, cur, buf = [], None, []
+        for sg in segs:
+            for w in ws:
+                if float(sg["start"]) - 0.05 <= w["s"] <= float(sg["end"]):
+                    if w.get("spk") != cur and buf:
+                        lines.append(f"{names.get(cur, '?')} : {' '.join(buf)}")
+                        buf = []
+                    cur = w.get("spk")
+                    buf.append(w["w"])
+        if buf:
+            lines.append(f"{names.get(cur, '?')} : {' '.join(buf)}")
+        out.append("QUI PARLE DANS LE SHORT (voix reconnues) :\n" + "\n".join(lines))
+    tr = json.loads(tf.read_text(encoding="utf-8"))["segments"]
+    a, b = float(segs[0]["start"]), float(segs[-1]["end"])
+    before = " ".join(s["text"].strip() for s in tr if a - 12 <= float(s["start"]) < a - 0.2)
+    after = " ".join(s["text"].strip() for s in tr if b + 0.1 <= float(s["start"]) < b + 12)
+    out.append(f"DANS L'ÉPISODE, JUSTE AVANT LE DÉBUT : « …{before[-300:]} »\nJUSTE APRÈS LA FIN : « {after[:300]}… »")
+    return "\n\n".join(out)
+
+
 def gather(ep: Path, kind: str, only: int | None = None) -> tuple[str, str, list[Path], str]:
     """(nom, texte, images, description des entrées) pour un livrable."""
     work = ep / "work" / "review"
@@ -137,10 +222,15 @@ def gather(ep: Path, kind: str, only: int | None = None) -> tuple[str, str, list
         c = next((x for x in clips if x.get("index") == only), {})
         text = (f"SHORT {only} — bulle-titre (accroche) : « {c.get('hook_title', '')} »\n"
                 f"Mots-clés en italique : {', '.join(c.get('keywords') or []) or '(aucun)'}\n\n"
-                f"RAPPORT DU CONTRÔLE AUTOMATIQUE :\n{_non_ok(md.read_text(encoding='utf-8'))}")
-        imgs = [_small(sheet, work / f"short_{only:02d}.jpg")] if sheet.exists() else []
-        return f"short_{only:02d}", text, imgs, ("le rapport du contrôle automatique avec le texte exact de ce qu'on entend "
-                                                  "(‖ = raccords de montage), l'accroche, et une planche d'images du rendu")
+                f"RAPPORT DU CONTRÔLE AUTOMATIQUE :\n{_non_ok(md.read_text(encoding='utf-8'))}\n\n{_short_context(ep, c)}")
+        vid = short_video(ep, only)
+        imgs = dense_sheets(vid, work, f"short_{only:02d}") if vid else (
+            [_small(sheet, work / f"short_{only:02d}.jpg")] if sheet.exists() else [])
+        return f"short_{only:02d}", text, imgs, (
+            "le rapport du contrôle automatique avec le texte exact de ce qu'on entend (‖ = raccords de montage), qui parle, "
+            "ce que l'épisode dit juste avant et juste après l'extrait, l'accroche, des planches d'images de TOUT le short "
+            "(une toutes les 0,5 s, instant en jaune, dernière image marquée FIN en rouge : elle reste figée pendant le fondu "
+            "vers la carte de fin) et un gros plan de l'image à 2 s (bulle-titre)")
     if kind == "episode":
         md = next((p for p in (ep / "qa" / "episode_apercu.md", ep / "qa" / "episode.md") if p.exists()), None)
         if not md:
