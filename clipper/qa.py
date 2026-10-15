@@ -257,7 +257,10 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
                                    f"{'l invité' if r_['shown'] == 'host' else 'Thomas'} parle ({r_['t0']:.1f}–{r_['t1']:.1f} s du short, "
                                    f"{r_['abs0']:.2f}–{r_['abs1']:.2f} dans l'épisode) : retirer (couper sur des silences voisins)"))
     if html.exists():
-        cp = caption_problems(html.read_text(encoding="utf-8"))
+        from .compose import cfg_for_format
+        ccap = cfg_for_format(cfg, fmt).captions
+        cp = caption_problems(html.read_text(encoding="utf-8"), max_lines=int(ccap.get("max_lines", 3)),
+                              max_words=int(ccap.get("max_words_per_group", 11)) + 1)
         rows.append((FAIL if cp else OK, "sous-titres à l'écran : " + ("; ".join(cp[:6]) if cp else
                                                                    "jamais deux blocs ensemble, chaque mot dans son bloc")))
     from .render import lint

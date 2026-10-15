@@ -229,11 +229,12 @@ def caption_blocks(html: str) -> list[dict]:
         body = p[:p.find("</div>\n      </div>")] if "</div>\n      </div>" in p else p[:4000]
         s, d = float(m.group(2)), float(m.group(3))
         out.append({"id": int(m.group(1)), "start": s, "end": round(s + d, 3),
-                    "words": [float(x) for x in re.findall(r'id="w-\d+-\d+" data-t="([\d.]+)"', body)]})
+                    "words": [float(x) for x in re.findall(r'(?:class="cap-word[^"]*"[^>]*?|id="w-\d+-\d+" )data-t="([\d.]+)"', body)],
+                    "lines": len(re.findall(r'class="cap-line[" ]', body))})
     return out
 
 
-def caption_problems(html: str) -> list[str]:
+def caption_problems(html: str, max_lines: int = 3, max_words: int = 12) -> list[str]:
     """Deux blocs à l'écran en même temps (≥ 1 image à 30 i/s) ; mot qui apparaît hors de son bloc (jamais vu)."""
     bl = sorted(caption_blocks(html), key=lambda b: b["start"])
     out = []
@@ -241,6 +242,12 @@ def caption_problems(html: str) -> list[str]:
         if b["start"] < a["end"] - 0.02:
             out.append(f"blocs {a['id']} et {b['id']} à l'écran ensemble {a['end'] - b['start']:.2f} s (à {b['start']:.2f} s)")
     for b in bl:
+        if len(b["words"]) > max_words:
+            out.append(f"bloc {b['id']} ({b['start']:.2f} s) : {len(b['words'])} mots (max {max_words}) : trop long pour être lu")
+        if b.get("lines", 0) > max_lines:   # bloc trop long : ses dernières lignes sortent de l'écran (15/10/2026, short 1 E21)
+            out.append(f"bloc {b['id']} ({b['start']:.2f} s) : {b['lines']} lignes (max {max_lines}) : la fin ne s'affiche pas")
+        if b["end"] - b["start"] < 0.3 and b is not bl[-1]:
+            out.append(f"bloc {b['id']} ({b['start']:.2f} s) affiché {b['end'] - b['start']:.2f} s seulement : illisible")
         lost = [t for t in b["words"] if t < b["start"] - 0.02 or t > b["end"] - 0.03]
         if lost:
             out.append(f"bloc {b['id']} ({b['start']:.2f}–{b['end']:.2f} s) : {len(lost)} mot(s) prévu(s) hors du bloc ({lost[0]:.2f} s)")

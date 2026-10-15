@@ -139,14 +139,25 @@ def group_words(words: list[dict], clip_start: float, clip_end: float, cfg: Cfg,
     # changement de bloc. Règles : (1) un bloc affiché moins de 0,35 s rejoint le suivant ; (2) le dernier mot d'un bloc qui ne
     # resterait pas 0,35 s à l'écran passe au début du bloc suivant (sauf fin de phrase).
     MIN_SHOW = 0.35
+
+    def _fits(ws_: list[dict]) -> bool:   # jamais plus que ce qu'un bloc peut afficher (sinon la fin n'apparaît jamais :
+        # bloc de 20 mots « …ELLES SOIENT CRITIQUES POUR TE FAIRE DU feedback » jamais vu, 15/10/2026)
+        return (len(ws_) <= max_words and sum(len(x["w"]) + 1 for x in ws_) <= budget
+                and (max_lines < 3 or len(_fill_lines(ws_, max_chars, max_lines + 1)) <= max_lines))
+
     k = 0
     while k < len(groups) - 1:
         g, nxt = groups[k], groups[k + 1]
         if nxt[0]["s"] - g[0]["s"] < MIN_SHOW and g[-1]["w"][-1:] not in ".?!…":
-            groups[k + 1] = g + nxt
-            del groups[k]
-            continue
-        if len(g) >= 3 and nxt[0]["s"] - g[-1]["s"] < MIN_SHOW and g[-1]["w"][-1:] not in ".?!…,":
+            if _fits(g + nxt):
+                groups[k + 1] = g + nxt
+                del groups[k]
+                continue
+            if k > 0 and _fits(groups[k - 1] + g):
+                groups[k - 1] = groups[k - 1] + g
+                del groups[k]
+                continue
+        if len(g) >= 3 and nxt[0]["s"] - g[-1]["s"] < MIN_SHOW and g[-1]["w"][-1:] not in ".?!…," and _fits([g[-1]] + nxt):
             groups[k + 1] = [g[-1]] + nxt
             groups[k] = g[:-1]
             continue
@@ -155,7 +166,7 @@ def group_words(words: list[dict], clip_start: float, clip_end: float, cfg: Cfg,
         moved = False
         for ph in phrases:
             for cut in range(1, len(ph)):
-                if len(g) > cut and [_norm(x["w"]) for x in g[-cut:]] == ph[:cut] and                         [_norm(x["w"]) for x in nxt[:len(ph) - cut]] == ph[cut:]:
+                if len(g) > cut and [_norm(x["w"]) for x in g[-cut:]] == ph[:cut] and                         [_norm(x["w"]) for x in nxt[:len(ph) - cut]] == ph[cut:] and _fits(g[-cut:] + nxt):
                     groups[k + 1] = g[-cut:] + nxt
                     groups[k] = g[:-cut]
                     moved = True
