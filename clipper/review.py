@@ -148,7 +148,7 @@ def dense_sheets(video: Path, work: Path, name: str, fps: float = 2.0, cols: int
     tmp = Path(tempfile.mkdtemp(prefix="review_"))
     frames = []
     for i, t in enumerate(times):
-        f = tmp / f"f{i:03d}.jpg"
+        f = tmp / f"f{i:03d}.png"   # PNG : le JPEG de FFmpeg refuse certaines images (plage YUV limitée)
         subprocess.run([FFMPEG, "-v", "error", "-y", "-ss", f"{t:.2f}", "-i", str(video), "-frames:v", "1",
                         "-vf", f"scale={tw}:-2", str(f)], check=False)
         if f.exists():
