@@ -413,6 +413,41 @@ def finalize(ep: Path, mail: dict, by: str = "", note: str = "") -> Path:
 PAGES_BASE = "https://arthurw31.github.io/ai-partners-podcast-content-machine/newsletters"
 
 
+def hubspot_module(h: str) -> str:
+    """Version pour le module « Modifier HTML » de HubSpot, tirée du mail prêt à l'envoi (liens absolus). Réglages appris au 1er envoi
+    (14/10/2026, retours de la collègue marketing d'Arthur) : HubSpot REFUSE `html`, `head`, `body` et `<style>` dans un module (donc
+    aucune règle @media) ; pas de prénom ; le pied de page de désinscription et l'adresse sont ceux, standard, de HubSpot (hors module) ;
+    l'espace réel du module est étroit (≈ 480 px) : les 4 cartes du programme sont un VRAI tableau 2 × 2 (jamais des blocs côte à côte,
+    qui passaient en une colonne), de hauteur égale ; lien YouTube = celui de l'épisode."""
+    import math
+    start = h.index('<table role="presentation" width="680"')
+    end = h.rindex("</table></td></tr></table></body>") + len("</table>")
+    body = h[start:end]
+    body = re.sub(r"<br>Vous recevez ce mail.*?Se désinscrire</a>", "", body, flags=re.S)
+    card = re.compile(r'<div class="card" style="[^"]*"><div style="[^"]*">(.*?)</div><strong style="[^"]*">(.*?)</strong><br>(.*?)</div>', re.S)
+    cards = card.findall(body)
+    if len(cards) == 4:
+        def need(c):
+            return 36 + 22 * math.ceil(len(re.sub("<[^>]+>", "", c[1])) / 22) + 23 * math.ceil(len(c[2]) / 26) + 30
+        hgt = max(need(c) for c in cards) + 12
+        td = ('<td width="49%" height="{h}" valign="top" bgcolor="#F1F6FD" style="width:49%;background-color:#F1F6FD;border-radius:14px;'
+              'padding:14px 14px 16px 14px;font-family:Helvetica, Arial, sans-serif;font-size:15px;line-height:1.5;color:#1D2C76;text-align:left">'
+              '<div style="font-size:24px;font-weight:bold;color:#258AF3;padding-bottom:6px">{n}</div>'
+              '<strong style="color:#151D53;font-size:17px;line-height:1.3">{t}</strong><br>{x}</td>')
+        cell = [td.format(h=hgt, n=c[0], t=c[1], x=c[2]) for c in cards]
+        gap = '<td width="2%" style="width:2%;font-size:0;line-height:0">&nbsp;</td>'
+        space = '<tr><td colspan="3" height="12" style="font-size:0;line-height:0;height:12px">&nbsp;</td></tr>'
+        grid = ('<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate">'
+                f"<tr>{cell[0]}{gap}{cell[1]}</tr>{space}<tr>{cell[2]}{gap}{cell[3]}</tr></table>")
+        a = body.index('<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="font-size:0;line-height:0">')
+        b = body.index("</td></tr></table>", body.index('class="card"', a) + 1)
+        last = body.rindex('class="card"', a)
+        b = body.index("</td></tr></table>", last) + len("</td></tr></table>")
+        body = body[:a] + grid + body[b:]
+    body = re.sub(r' class="[^"]*"', "", body)
+    return body.strip() + chr(10)
+
+
 def send_ready(brand, ep: Path, mail: dict) -> dict:
     """Version prête pour l'envoi par n8n depuis la boîte de Thomas (Arthur, 13/10/2026 : « on fait juste avec n8n et le mail
     de Thomas » ; « que le destinataire voie le vrai rendu avec les images »).
@@ -446,6 +481,8 @@ def send_ready(brand, ep: Path, mail: dict) -> dict:
         h = h.replace("AI Corner, le podcast d'AI Partners.</p>", "AI Corner, le podcast d'AI Partners." + unsub + "</p>", 1)
     out = d / "email_a_envoyer.html"
     out.write_text(h, encoding="utf-8")
+    if "{{lien_youtube}}" not in h:                      # module HubSpot : seulement si le lien de l'épisode est connu
+        (d / "email_hubspot_module.html").write_text(hubspot_module(h), encoding="utf-8")
     (pub / "email.html").write_text(h, encoding="utf-8")
     subject = (src / "objet.txt").read_text(encoding="utf-8") if (src / "objet.txt").exists() else ""
     m = re.search(r"Objet\s*:\s*(.+)", subject)
