@@ -101,7 +101,11 @@ def _valley(wav: Path, t: float, around: float = 0.3, max_ratio: float = 0.3) ->
     r = _rms(wav, t - around, t + 0.1)
     if lvl <= 0 or len(r) < 5:
         return False
-    if (r < START_THR * lvl).sum() >= 3:      # un vrai silence existe à côté : la correction doit aller le chercher
+    q = r < START_THR * lvl
+    n = max(1, int(round(START_HOLD / FRAME)))
+    # un vrai silence (≥ START_HOLD d'affilée) existe à côté : la correction doit aller le chercher. Des trames calmes
+    # ISOLÉES ne suffisent pas (15/10/2026, short 1 E21 : « euh ‖ tu galères », une seule trame à 8 % entre les deux)
+    if any(q[i:i + n].all() for i in range(0, len(q) - n + 1)):
         return False
     i = int(round(around / FRAME))
     lo = max(0, i - 2)
