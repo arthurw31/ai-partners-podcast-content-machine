@@ -79,6 +79,17 @@ def make_hero(brand, d: Path, mail: dict, guest_png: Path | None, shot, fonts_cs
 # Morceaux communs
 # ---------------------------------------------------------------------------------------------------------------
 
+def edge(bg: str, k: float = 0.55) -> str:
+    """Couleur de la tranche d'un bouton : le fond assombri."""
+    return "#" + "".join(f"{int(int(bg[n:n + 2], 16) * k):02X}" for n in (1, 3, 5))
+
+
+def solid(bg: str) -> str:
+    """Bouton en relief discret (Arthur, 15/10/2026 : « des boutons plus en 3D pour qu'on capte que ce sont des boutons, sans que ça
+    fasse trop ») : tranche plus sombre dessous (bordure basse) + ombre légère ; compatible Gmail / Outlook (bordure, pas de dégradé)."""
+    return (f"border-radius:999px;border-bottom:4px solid {edge(bg)};box-shadow:0 4px 8px rgba(10,15,51,.22)")
+
+
 def button(c: dict, bg: str = BLUE, fg: str = "#FFFFFF", margin: str = "28px auto") -> str:
     """Bouton pilule : texte + pastille « lecture » dans deux cellules alignées au milieu (un `vertical-align` sur l'image se
     décalait dans Gmail : « le nouveau emoji play est mal cadré », Arthur, 15/10/2026)."""
@@ -87,7 +98,7 @@ def button(c: dict, bg: str = BLUE, fg: str = "#FFFFFF", margin: str = "28px aut
         return (f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:{margin}"><tr><td bgcolor="{bg}" '
                 f'style="border-radius:999px"><a href="{href}" style="display:inline-block;padding:16px 36px;{font};color:{fg};'
                 f'text-decoration:none">{esc(c["button"])} ▶</a></td></tr></table>')
-    return (f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:{margin}"><tr><td bgcolor="{bg}" style="border-radius:999px">'
+    return (f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:{margin}"><tr><td bgcolor="{bg}" style="{solid(bg)}">'
             f'<table role="presentation" cellpadding="0" cellspacing="0"><tr>'
             f'<td valign="middle" style="padding:16px 12px 16px 36px;line-height:1"><a href="{href}" style="{font};color:{fg};text-decoration:none">'
             f'{esc(c["button"])}</a></td>'
@@ -407,7 +418,7 @@ def _booking(c: dict) -> str:
     return (f'<tr><td bgcolor="{LIGHT}" align="center" class="pad" style="padding:34px 40px 36px 40px;font-family:{FONT}">'
             f'<div style="font-size:22px;font-weight:bold;color:{NAVY};line-height:1.3">{esc(b.get("title") or "")}</div>'
             f'<div style="font-size:16px;line-height:1.55;color:{NAVY_MID};padding-top:8px">{esc(b.get("text") or "")}</div>'
-            f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:22px auto 0 auto"><tr><td bgcolor="{NAVY}" style="border-radius:999px">'
+            f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:22px auto 0 auto"><tr><td bgcolor="{NAVY}" style="{solid(NAVY)}">'
             f'<a href="{esc(b["url"])}" style="display:inline-block;padding:16px 34px;font-family:{FONT};font-size:16px;font-weight:bold;'
             f'color:#FFFFFF;text-decoration:none;letter-spacing:.02em">{esc(b.get("button") or "Réserver un échange")}</a></td></tr></table></td></tr>')
 
