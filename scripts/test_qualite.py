@@ -246,6 +246,20 @@ def test_thomas_a_l_image_pendant_que_l_invite_parle():
     assert hit and hit[0]["shown"] == "host", [(r["abs0"], r["abs1"], r["shown"]) for r in runs if r["abs1"] > 1199][:5]
 
 
+def test_bloc_de_sous_titre_jamais_trop_court():
+    """15/10/2026, relecture critique du short 1 E21 : bloc « TU » de 0,06 s (invisible) et « muscle » 0,2 s en fin de bloc."""
+    cfg = cfg_for_format(Brand("ai-corner").cfg, "9x16")
+    ws = _words([("la", 0.0, 0.2), ("moitié", 0.2, 0.5), ("du", 0.5, 0.6), ("truc", 0.6, 0.9), ("embarquer.", 0.9, 1.4),
+                 ("Tu", 1.50, 1.56), ("peux", 1.56, 1.8), ("dire", 1.8, 2.1), ("ok", 2.1, 2.4),
+                 ("si", 3.0, 3.1), ("t'as", 3.1, 3.3), ("pas", 3.3, 3.5), ("de", 3.5, 3.7), ("muscle", 3.72, 3.92),
+                 ("de", 3.95, 4.0), ("change", 4.0, 4.4), ("t'es", 4.5, 4.7), ("mort.", 4.7, 5.0)])
+    caps = group_words(ws, 0.0, 5.5, cfg, ["muscle"], breaks=[1.56, 3.95])
+    for a, b in zip(caps, caps[1:]):
+        assert b["start"] - a["start"] >= 0.35, f"bloc {a['id']} affiché {b['start'] - a['start']:.2f} s"
+    txt = [" ".join(w["text"] for ln in c["lines"] for w in ln) for c in caps]
+    assert not any(t.strip().upper().endswith("MUSCLE") for t in txt), txt
+
+
 def test_mot_coupe_avant_un_saut_de_passage():
     """15/10/2026, Thomas (short 1 E21) « à 0:07 le mot "métiers" est complètement croppé » : coupe à 1201,62 posée sur un
     changement de plan, dans un micro-creux du mot, juste avant un saut de passage (1204,95)."""

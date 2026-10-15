@@ -688,6 +688,17 @@ vérification intransigeante qui règle ces problèmes »)
      la fin -> `listener_shown` contrôle la DERNIÈRE image contre l'auteur de la dernière phrase (pas celui qui va parler
      ensuite) et `fix_listener_shown` coupe juste avant le plan. Durées des morceaux comptées à l'image près, comme `compose`.
   Chaque retour (Arthur, Thomas, l'équipe) = règle généralisée + test dans `scripts/test_qualite.py` + note ici.
+- **Relecture « bon sens » en fin de `polish`** (Arthur, 15/10/2026 : « rajouter une couche agent par-dessus qui juge avec bon
+  sens la vidéo entière » -> « oui fais ça ») : `cli._polish_review` lance `review` (Claude Opus SANS contexte) sur chaque short
+  après le contrôle des aperçus ; il reçoit des planches SERRÉES de tout le short (`review.dense_sheets` : une image / 0,5 s
+  avec l'instant, dernière image marquée FIN), un gros plan de l'accroche, « ce qu'on entend », qui parle, ce que l'épisode
+  dit juste avant et juste après, et la section `short` de `config/review_checklist.md` (tous les retours validés).
+  `--no-review` pour s'en passer. ~15 k tokens d'entrée, ~0,3 $ par short. Test à l'aveugle sur l'ancienne version du short 1
+  E21 : il a retrouvé SEUL les 3 retours de Thomas (fin après la chute, dernière image sur Thomas, bulle sur le menton) +
+  « Attends, là » en ouverture, « …qu'un seul » sans complément, un « TU » invisible. Ses défauts sont TRIÉS par Claude
+  (bon sens) : corriger ce qui est prouvé, remonter le goût à l'équipe ; une accroche validée par l'équipe ne se change pas
+  sans elle. Sous-titres (trouvé par lui) : bloc affiché < 0,35 s fusionné avec le suivant, dernier mot d'un bloc qui ne
+  resterait pas 0,35 s à l'écran passé au bloc suivant (`captions.group_words`).
 - Pistes restantes de la recherche (si des défauts restent) : **Smart Turn v3** (pipecat-ai, BSD-2, ONNX
   8 Mo, français, ~12–100 ms CPU) = probabilité que l'orateur ait FINI sa phrase, d'après la prosodie, à chaque fin
   d'extrait ; **alignement forcé CTC** (wav2vec2 français `bofenghuang/asr-wav2vec2-ctc-french`, Apache-2.0, Viterbi en numpy,

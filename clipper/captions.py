@@ -130,6 +130,23 @@ def group_words(words: list[dict], clip_start: float, clip_end: float, cfg: Cfg,
     if cur:
         groups.append(cur)
 
+    # lisibilité (relecture critique du short 1 E21, 15/10/2026) : un bloc « TU » affiché 0,06 s (coupé par un raccord) était
+    # invisible ; « …SI T'AS PAS DE muscle » puis « DE change T'ES MORT » : le mot fort n'était à l'écran que 0,2 s avant le
+    # changement de bloc. Règles : (1) un bloc affiché moins de 0,35 s rejoint le suivant ; (2) le dernier mot d'un bloc qui ne
+    # resterait pas 0,35 s à l'écran passe au début du bloc suivant (sauf fin de phrase).
+    MIN_SHOW = 0.35
+    k = 0
+    while k < len(groups) - 1:
+        g, nxt = groups[k], groups[k + 1]
+        if nxt[0]["s"] - g[0]["s"] < MIN_SHOW and g[-1]["w"][-1:] not in ".?!…":
+            groups[k + 1] = g + nxt
+            del groups[k]
+            continue
+        if len(g) >= 3 and nxt[0]["s"] - g[-1]["s"] < MIN_SHOW and g[-1]["w"][-1:] not in ".?!…,":
+            groups[k + 1] = [g[-1]] + nxt
+            groups[k] = g[:-1]
+        k += 1
+
     # dialogue : une réplique très courte (« Ouais. ») rejoint la réplique suivante de l'autre locuteur
     dialogue_flags: list[bool] = [False] * len(groups)
     if cap.get("dialogue_dashes", False) and turns_rel:
