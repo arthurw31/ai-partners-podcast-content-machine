@@ -151,7 +151,7 @@ def nuit(c: dict) -> str:
  <div style="font-size:20px;font-weight:bold;color:#FFFFFF;padding:22px 0 18px 0;border-top:1px solid #2B3A8C">Au programme de cet épisode</div>
  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{rows}</table></td></tr>
 <tr><td bgcolor="{NAVY}" align="center" style="padding:6px 24px 0 24px;font-family:{FONT};font-size:16px;color:#FFFFFF">
- <p style="margin:0 0 14px 0;font-weight:bold">Retrouvez l'épisode complet sur YouTube 👇</p>{youtube(c)}</td></tr>
+ <p style="margin:0 0 14px 0;font-weight:bold">Retrouvez l'épisode complet sur YouTube</p>{youtube(c)}</td></tr>
 {closing_block(c, "#DCE3F7", NAVY, "#FFFFFF")}"""
     return shell(c, NAVY_DEEP, body, NAVY_DEEP, "#8A93B2", NAVY)
 
@@ -180,7 +180,7 @@ def heros(c: dict) -> str:
  <div style="font-size:20px;font-weight:bold;color:{NAVY};padding-bottom:16px">Au programme de cet épisode</div>
  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{rows}</table></td></tr>
 <tr><td align="center" style="padding:4px 24px 0 24px;font-family:{FONT};font-size:16px;color:{NAVY}">
- <p style="margin:0 0 14px 0;font-weight:bold">Retrouvez l'épisode complet sur YouTube 👇</p>{youtube(c)}</td></tr>
+ <p style="margin:0 0 14px 0;font-weight:bold">Retrouvez l'épisode complet sur YouTube</p>{youtube(c)}</td></tr>
 {closing_block(c, NAVY_MID, "#FFFFFF", NAVY)}"""
     return shell(c, "#E9EEF9", body, NAVY, "#9DB8FF")
 
@@ -300,7 +300,7 @@ def square_photo(png: Path | None, out: Path) -> Path | None:
     return out
 
 
-def _grid(cards: list, dark: bool = False) -> str:
+def _grid(cards: list, dark: bool = False, c_img: dict | None = None) -> str:
     """Programme en cartes, 2 par ligne (empilées sur téléphone)."""
     bg, num, tt, tx = (NAVY_MID, BLUE_SKY, "#FFFFFF", "#C9D3F5") if dark else (LIGHT, BLUE, NAVY, NAVY_MID)
 
@@ -312,15 +312,19 @@ def _grid(cards: list, dark: bool = False) -> str:
     # les 4 cartes ont la MÊME hauteur (Arthur, 14/10/2026), quelle que soit la quantité de texte : minimum commun, jamais rogné
     h = max((need(p) for p in list(cards)[:4]), default=0) + 38
 
-    def emo(p):   # emoji de la carte (Arthur, 15/10/2026 : « sur la partie 4 carrés rajouter des emojis »)
-        return f'&nbsp;&nbsp;<span style="font-size:22px">{esc(p["emoji"])}</span>' if p.get("emoji") else ""
+    def icon(p):   # icône de la carte (Thomas, 15/10/2026 : « pas d'emoji ici, plutôt des icônes »)
+        name = p.get("icon")
+        if not name or not (c_img or {}).get("icon_" + name):
+            return ""
+        return (f'<img src="images/{c_img["icon_" + name].name}" width="28" height="28" alt="" '
+                f'style="display:block;width:28px;height:28px;border:0">')
 
     def card(k, p):
         # carte = bloc « inline-block » (2 par ligne, empilées sur téléphone par .card) ; les cellules de tableau passées en
         # display:block débordaient du mail sur téléphone (14/10/2026)
         return (f'<div class="card" style="display:inline-block;vertical-align:top;width:48.5%;margin:0 .75% 12px .75%;box-sizing:border-box;'
                 f'background-color:{bg};border-radius:14px;padding:16px 16px 18px 16px;height:{h}px;text-align:left;font-family:{FONT};'
-                f'font-size:14px;line-height:1.5;color:{tx}"><div style="font-size:22px;font-weight:bold;color:{num};padding-bottom:6px">{k:02d}{emo(p)}</div>'
+                f'font-size:14px;line-height:1.5;color:{tx}"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="font-size:22px;font-weight:bold;color:{num};padding-bottom:6px;font-family:{FONT}">{k:02d}</td><td align="right" valign="top" style="padding-bottom:6px">{icon(p)}</td></tr></table>'
                 f'<strong style="color:{tt};font-size:16px;line-height:1.3">{esc(p.get("title"))}</strong><br>{esc(p.get("text"))}</div>')
     return ('<tr><td style="font-size:0;line-height:0">' + "".join(card(i + 1, p) for i, p in enumerate(list(cards)[:4])) + "</td></tr>")
 
@@ -342,7 +346,7 @@ def _thumb(c: dict, label: str = "") -> str:
     if not c["img"].get("youtube"):
         return ""
     lab = (f'<tr><td align="center" style="padding:6px 24px 14px 24px;font-family:{FONT};font-size:16px;font-weight:bold;color:{label}">'
-           f"Retrouvez l'épisode complet sur YouTube 👇</td></tr>") if label else ""
+           f"Retrouvez l'épisode complet sur YouTube</td></tr>") if label else ""
     return (lab + f'<tr><td><a href="{esc(c["url"])}"><img src="{c["rel"]("youtube")}" width="680" alt="{esc(c["title"])}" '
             f'style="display:block;width:100%;max-width:680px"></a></td></tr>')
 
@@ -365,7 +369,7 @@ def _hook_html(c: dict, dark: bool = False) -> str:
     if not q:
         q, rest = text, ""
     fg, box, line = ("#FFFFFF", NAVY_MID, BLUE_SKY) if dark else (NAVY, LIGHT, BLUE)
-    out = (f'<div style="margin:0 0 16px 0;padding:18px 22px;background-color:{box};border-left:5px solid {line};border-radius:10px;'
+    out = (f'<div style="margin:0 0 16px 0;padding:18px 22px;background-color:{box};border-radius:10px;'
            f'font-size:22px;line-height:1.35;font-weight:bold;color:{fg}">{para(q)}</div>')
     if rest:
         out += f'<p style="margin:0 0 16px 0;font-size:17px;line-height:1.6;color:{"#DCE3F7" if dark else NAVY_MID}">{para(rest)}</p>'
@@ -403,7 +407,7 @@ def _booking(c: dict) -> str:
             f'<div style="font-size:16px;line-height:1.55;color:{NAVY_MID};padding-top:8px">{esc(b.get("text") or "")}</div>'
             f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:22px auto 0 auto"><tr><td bgcolor="{BLUE}" style="border-radius:999px">'
             f'<a href="{esc(b["url"])}" style="display:inline-block;padding:16px 34px;font-family:{FONT};font-size:16px;font-weight:bold;'
-            f'color:#FFFFFF;text-decoration:none;letter-spacing:.02em">{esc(b.get("button") or "Réserver un échange")} 📅</a></td></tr></table></td></tr>')
+            f'color:#FFFFFF;text-decoration:none;letter-spacing:.02em">{esc(b.get("button") or "Réserver un échange")}</a></td></tr></table></td></tr>')
 
 
 # ---------------------------------------------------------------------------------------------------------------
@@ -444,6 +448,47 @@ def play_icon(out: Path) -> Path:
     return out
 
 
+ICON_NAMES = ["target", "cycle", "chart", "eye-off", "users", "bulb"]
+
+
+def draw_icon(name: str, out: Path, color=(37, 138, 243)) -> Path:
+    """Icônes en traits (bleu AI Partners, fond transparent) pour les cartes du programme, dessinées à la main avec PIL."""
+    from PIL import Image, ImageDraw
+    k, n, w = 6, 56, 4
+    im = Image.new("RGBA", (n * k, n * k), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    col = color + (255,)
+    P = lambda *v: [x * k for x in v]                                   # noqa: E731
+    if name == "target":
+        for r in (24, 15):
+            d.ellipse(P(28 - r, 28 - r, 28 + r, 28 + r), outline=col, width=w * k)
+        d.ellipse(P(23, 23, 33, 33), fill=col)
+    elif name == "cycle":
+        d.arc(P(8, 8, 48, 48), 200, 340, fill=col, width=w * k)
+        d.arc(P(8, 8, 48, 48), 20, 160, fill=col, width=w * k)
+        d.polygon(P(44, 12, 50, 24, 36, 22), fill=col)
+        d.polygon(P(12, 44, 6, 32, 20, 34), fill=col)
+    elif name == "chart":
+        for x, h in ((10, 18), (24, 30), (38, 42)):
+            d.rounded_rectangle(P(x, 50 - h, x + 9, 50), 2 * k, fill=col)
+    elif name == "eye-off":
+        d.ellipse(P(5, 15, 51, 41), outline=col, width=w * k)
+        d.ellipse(P(22, 22, 34, 34), fill=col)
+        d.line(P(8, 50, 48, 6), fill=(255, 255, 255, 255), width=(w + 6) * k)
+        d.line(P(8, 50, 48, 6), fill=col, width=w * k)
+    elif name == "users":
+        d.ellipse(P(15, 8, 33, 26), outline=col, width=w * k)
+        d.arc(P(6, 30, 42, 66), 180, 360, fill=col, width=w * k)
+        d.ellipse(P(35, 14, 49, 28), outline=col, width=(w - 1) * k)
+        d.arc(P(32, 34, 56, 62), 200, 340, fill=col, width=(w - 1) * k)
+    else:  # bulb
+        d.ellipse(P(12, 4, 44, 36), outline=col, width=w * k)
+        d.rounded_rectangle(P(20, 38, 36, 44), 2 * k, fill=col)
+        d.rounded_rectangle(P(22, 47, 34, 52), 2 * k, fill=col)
+    im.resize((n, n), Image.Resampling.LANCZOS).save(out)
+    return out
+
+
 def make_chrome(brand, d: Path, mail: dict, shot, fonts_css: str, uri, logo_svg: str, platforms: list) -> dict:
     """Images du D1 : en-tête (AI Corner by logo AI Partners), titre du bandeau du bas, et une carte par plateforme
     (tuile d'appli brillante + nom + « Écouter », cliquable en entier)."""
@@ -463,6 +508,8 @@ def make_chrome(brand, d: Path, mail: dict, shot, fonts_css: str, uri, logo_svg:
             f"<div class='pill'><i>Nouvel épisode</i><b>{esc(mail['episode'])}</b></div></body></html>")
     out["header"] = shot(page, 1200, 270, d / "entete.png")
     out["btn_play"] = play_icon(d / "bouton_play.png")
+    for name in {p.get("icon") for p in mail.get("program") or [] if p.get("icon") in ICON_NAMES}:
+        out["icon_" + name] = draw_icon(name, d / f"icone_{name}.png")
     title = (f"<html><head><meta charset='utf-8'><style>{fonts_css}*{{margin:0}}body{{width:1200px;height:300px;overflow:hidden;position:relative;"
              f"background:radial-gradient(ellipse 70% 120% at 85% 0%,{BLUE} 0%,rgba(37,138,243,0) 70%),{BAND_BG};font-family:M,Arial}}"
              f".m{{position:absolute;left:-60px;top:-140px;width:1000px;opacity:.55;mix-blend-mode:screen}}"
@@ -517,8 +564,8 @@ def duo(c: dict) -> str:
 <tr><td align="center">{button(c, bg=NAVY)}</td></tr>
 <tr><td class="pad" style="padding:6px 34px 0 34px;font-family:{FONT}">
  <div style="font-size:20px;font-weight:bold;color:{NAVY};padding:0 6px 14px 6px">Au programme de cet épisode</div>
- <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{_grid(c["program"])}</table></td></tr>
-<tr><td align="center" style="padding:10px 24px 0 24px;font-family:{FONT};font-size:16px;font-weight:bold;color:{NAVY}">Retrouvez l'épisode complet sur YouTube 👇</td></tr>
+ <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{_grid(c["program"], c_img=c["img"])}</table></td></tr>
+<tr><td align="center" style="padding:10px 24px 0 24px;font-family:{FONT};font-size:16px;font-weight:bold;color:{NAVY}">Retrouvez l'épisode complet sur YouTube</td></tr>
 <tr><td align="center" style="padding:14px 24px 0 24px">{youtube(c)}</td></tr>
 {closing_block(c, NAVY_MID, "#FFFFFF", NAVY)}
 {_booking(c)}
@@ -544,7 +591,7 @@ def ronds(c: dict) -> str:
 <tr><td align="center">{button(c)}</td></tr>
 <tr><td class="pad" style="padding:6px 34px 0 34px;font-family:{FONT}">
  <div style="font-size:20px;font-weight:bold;color:{NAVY};padding:0 6px 14px 6px">Au programme de cet épisode</div>
- <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{_grid(c["program"])}</table></td></tr>
+ <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{_grid(c["program"], c_img=c["img"])}</table></td></tr>
 {closing_block(c, NAVY_MID, "#FFFFFF", NAVY)}"""
     return shell(c, "#E9EEF9", body, NAVY, "#9DB8FF")
 
@@ -574,7 +621,7 @@ def lettre(c: dict) -> str:
 <tr><td align="center">{button(c)}</td></tr>
 <tr><td class="pad" style="padding:6px 34px 0 34px;font-family:{FONT}">
  <div style="font-size:20px;font-weight:bold;color:{NAVY};padding:0 6px 14px 6px">Au programme de cet épisode</div>
- <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{_grid(c["program"])}</table></td></tr>
+ <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{_grid(c["program"], c_img=c["img"])}</table></td></tr>
 {closing_block(c, NAVY_MID, "#FFFFFF", NAVY)}"""
     return shell(c, "#E9EEF9", body, NAVY, "#9DB8FF")
 
@@ -589,7 +636,7 @@ def duo_nuit(c: dict) -> str:
 <tr><td bgcolor="{NAVY}" class="pad" style="padding:6px 34px 0 34px;font-family:{FONT}">
  <div style="font-size:20px;font-weight:bold;color:#FFFFFF;padding:0 6px 14px 6px">Au programme de cet épisode</div>
  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{_grid(c["program"], dark=True)}</table></td></tr>
-<tr><td bgcolor="{NAVY}" align="center" style="padding:10px 24px 14px 24px;font-family:{FONT};font-size:16px;font-weight:bold;color:#FFFFFF">Retrouvez l'épisode complet sur YouTube 👇</td></tr>
+<tr><td bgcolor="{NAVY}" align="center" style="padding:10px 24px 14px 24px;font-family:{FONT};font-size:16px;font-weight:bold;color:#FFFFFF">Retrouvez l'épisode complet sur YouTube</td></tr>
 <tr><td bgcolor="{NAVY}" align="center" style="padding:0 24px">{youtube(c)}</td></tr>
 {closing_block(c, "#DCE3F7", NAVY, "#FFFFFF")}"""
     return shell(c, NAVY_DEEP, body, NAVY_DEEP, "#8A93B2", NAVY)
