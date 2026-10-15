@@ -1375,7 +1375,27 @@ def cmd_polish(a: argparse.Namespace) -> None:
         cmd_build(argparse.Namespace(**{**vars(a), "only": resel, "formats": a.formats, "force": False, "no_broll": False,
                                         "jobs": a.jobs}))
         status = cmd_qa(argparse.Namespace(**{**vars(a), "only": sel, "render": False, "episode": False}))
+    # un aperçu plus ancien que le montage n'est JAMAIS gardé à côté (15/10/2026 : l'aperçu du short 2 E21 envoyé à Arthur
+    # était l'ancien, avec le bruit de bouche déjà corrigé dans le montage — la chaîne s'était arrêtée sur l'échec du short 1)
+    for k in idx:
+        proj = next(iter(sorted((ep / "clips").glob(f"clip_{k:02d}_*"))), None)
+        comp = proj / "assets" / "source.mp4" if proj else None
+        for old in (ep / "apercus").glob(f"clip_{k:02d}_*_apercu.mp4") if (ep / "apercus").exists() else []:
+            if comp and comp.exists() and old.stat().st_mtime < comp.stat().st_mtime:
+                dst = archives_dir(ep) / "apercus"
+                dst.mkdir(parents=True, exist_ok=True)
+                shutil.move(str(old), str(dst / old.name))
+                console.print(f"  [yellow]aperçu périmé rangé dans archives : {old.name}[/yellow]")
     if status == "ÉCHEC" and not a.anyway:
+        # les shorts qui passent ont quand même leur aperçu ; seuls ceux en ÉCHEC attendent une correction
+        good = [k for k in idx if (ep / "qa" / f"clip_{k:02d}.md").exists() and not
+                (ep / "qa" / f"clip_{k:02d}.md").read_text(encoding="utf-8").splitlines()[0].rstrip().endswith("ÉCHEC")]
+        if good:
+            sel = ",".join(str(k) for k in good)
+            console.rule(f"Aperçus MP4 des shorts qui passent ({sel})")
+            cmd_preview(argparse.Namespace(brand=a.brand, input=a.input, clip=sel, formats=a.formats, port="3002",
+                                           no_open=True, stop=False, mp4=True, fps=a.fps))
+            cmd_qa(argparse.Namespace(**{**vars(a), "only": sel, "render": True, "episode": False, "preview_check": True}))
         sys.exit("Contrôle qualité en ÉCHEC : corriger avant l'aperçu (voir EPISODES/…/travail/qa/). --anyway pour passer outre.")
     console.rule("Aperçus MP4")
     cmd_preview(argparse.Namespace(brand=a.brand, input=a.input, clip=sel, formats=a.formats, port="3002",
