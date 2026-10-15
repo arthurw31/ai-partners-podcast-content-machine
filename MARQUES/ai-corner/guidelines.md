@@ -38,6 +38,9 @@
   qui a évité un risque.
 - L'échange Thomas/invité peut rester si la question sert d'accroche (question courte, réponse cash).
 - Durée idéale : 30–38 s. Toujours finir sur une fin de phrase forte ou une conclusion.
+- **Finir sur la CHUTE** (Thomas, 15/10/2026 : « on peut arrêter à "t'es mort" ») : le short s'arrête sur la phrase la plus
+  forte de la fin ; rien après (ni « et nous c'est la vision qu'on porte », ni transition, ni phrase qui affaiblit la chute).
+  `end_text` = les derniers mots de la chute.
 
 ## À éviter
 - Présentation plate de l'entreprise, chronologie, organigramme, généralités sur « l'IA va tout changer ».

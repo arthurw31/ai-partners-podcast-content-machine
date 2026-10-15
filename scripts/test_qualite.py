@@ -246,6 +246,35 @@ def test_thomas_a_l_image_pendant_que_l_invite_parle():
     assert hit and hit[0]["shown"] == "host", [(r["abs0"], r["abs1"], r["shown"]) for r in runs if r["abs1"] > 1199][:5]
 
 
+def test_mot_coupe_avant_un_saut_de_passage():
+    """15/10/2026, Thomas (short 1 E21) « à 0:07 le mot "métiers" est complètement croppé » : coupe à 1201,62 posée sur un
+    changement de plan, dans un micro-creux du mot, juste avant un saut de passage (1204,95)."""
+    from clipper.strict import join_flow_problems
+    p = join_flow_problems([{"start": 1197.03, "end": 1201.62}, {"start": 1204.95, "end": 1208.2}], _e21())
+    assert p and p[0].get("hard"), p
+
+
+def test_derniere_image_sur_celui_qui_ecoute():
+    """15/10/2026, Arthur (short 1 E21) « enlève le plan avec Thomas à la fin, ça n'apporte rien » : le montage passe sur
+    Thomas à 1243,125, la dernière image du short (figée pendant le fondu vers l'outro) le montrait."""
+    import json
+    import subprocess
+    import tempfile
+
+    from clipper.ingest import host_reference
+    from clipper.strict import listener_shown
+    _e21()
+    if not E21_MP4.exists():
+        raise _Skip("vidéo E21 absente")
+    words = json.loads((E21 / "travail" / "work" / "diarized_words.json").read_text(encoding="utf-8"))
+    cut = Path(tempfile.gettempdir()) / "test_e21_fin.mp4"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", "1240", "-t", "3.3", "-i", str(E21_MP4), "-an", "-c:v", "libx264",
+                    "-crf", "18", str(cut)], check=True)
+    runs = listener_shown(cut, [{"start": 1240.0, "end": 1243.14}], words, host_reference(Brand("ai-corner")))
+    end = [r for r in runs if r.get("end")]
+    assert end and end[0]["shown"] == "host" and 1242.95 < end[0]["abs0"] < 1243.13, runs
+
+
 class _Skip(Exception):
     pass
 

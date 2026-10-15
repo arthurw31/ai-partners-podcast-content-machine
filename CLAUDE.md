@@ -672,6 +672,22 @@ vérification intransigeante qui règle ces problèmes »)
     (`fix_tail_noise`), `qa` ÉCHEC sinon. E21 short 2 : claquement à 1503,58.
   - Boucle de `polish` : **10 tours** (6 avant). Une réaction de l'invité (« ok, fine ») n'est pas une réaction vide : la garder.
   - Aperçu avec l'outro pour la validation : `short_outro.append(apercu, outro_short/outro_9x16.mp4, …_avec_outro_apercu.mp4)`.
+- **Retours de Thomas sur le short 1 E21 (15/10/2026)** (« c'est important de bien les mapper, c'est toute la différence de
+  le faire avec un pro ») et d'Arthur (« enlève le plan avec Thomas à la fin, ça n'apporte rien ») :
+  1. « Le bandeau est un peu en overlap de son menton, à descendre » -> `compose._face_bottom` mesure le bas des visages dans
+     la vidéo recadrée pendant l'accroche ; bulle-titre ET sous-titres descendent d'autant (`hook.face_margin` 0,025 H,
+     plafond `hook.max_caption_y` 0,80 H). Vaut pour tous les shorts.
+  2. « À 0:07 le mot "métiers" est complètement croppé » : la coupe avait été posée sur le changement de plan (Thomas à
+     l'image), dans un micro-creux du mot. Règle : un mot n'est JAMAIS tronqué pour une raison d'image ; on recoupe sur une
+     vraie fin de mot plus tôt (« …déployer des agents. ‖ Mais t'inquiète… »). `strict.join_flow_problems` contrôle aussi les
+     fins de morceau avant un SAUT de passage (> 3 s) : voix au point de coupe ou juste après -> ÉCHEC (`hard`), fin prolongée
+     jusqu'à la fin du mot si possible.
+  3. « On peut arrêter à "t'es mort" » : le short finit sur la CHUTE, rien après (règle dans `guidelines.md` pour la
+     sélection et dans `config/review_checklist.md`).
+  4. Dernière image : elle reste figée ~0,4 s pendant le fondu vers l'outro ; le montage passait sur Thomas 0,02 s avant
+     la fin -> `listener_shown` contrôle la DERNIÈRE image contre l'auteur de la dernière phrase (pas celui qui va parler
+     ensuite) et `fix_listener_shown` coupe juste avant le plan. Durées des morceaux comptées à l'image près, comme `compose`.
+  Chaque retour (Arthur, Thomas, l'équipe) = règle généralisée + test dans `scripts/test_qualite.py` + note ici.
 - Pistes restantes de la recherche (si des défauts restent) : **Smart Turn v3** (pipecat-ai, BSD-2, ONNX
   8 Mo, français, ~12–100 ms CPU) = probabilité que l'orateur ait FINI sa phrase, d'après la prosodie, à chaque fin
   d'extrait ; **alignement forcé CTC** (wav2vec2 français `bofenghuang/asr-wav2vec2-ctc-french`, Apache-2.0, Viterbi en numpy,

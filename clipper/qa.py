@@ -110,7 +110,8 @@ def listener_runs(clip: dict, proj: Path, media: Path, work: Path) -> list[dict]
         brand = Brand(ep.parents[1].name)
     except Exception:  # noqa: BLE001
         return []
-    runs = listener_shown(media, clip["segments"], json.loads(dw.read_text(encoding="utf-8")), host_reference(brand))
+    runs = listener_shown(media, clip["segments"], json.loads(dw.read_text(encoding="utf-8")), host_reference(brand),
+                          fps=int(brand.cfg.fps))
     cache.write_text(json.dumps({"key": key, "runs": runs}, ensure_ascii=False), encoding="utf-8")
     return runs
 
@@ -197,8 +198,8 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
     # être coupées trop tôt et il y a un bruit de bouche à la fin »)
     from .strict import join_flow_problems, tail_noise
     jf = join_flow_problems(segs, wav)
-    hard = [p for p in jf if not p.get("extend")]
-    soft = [p for p in jf if p.get("extend")]   # longue hésitation retirée, collée au mot (aucun creux) : la coupe reste
+    hard = [p for p in jf if not p.get("extend") or p.get("hard")]
+    soft = [p for p in jf if p.get("extend") and not p.get("hard")]   # longue hésitation retirée, collée au mot (aucun creux) : la coupe reste
     rows.append((FAIL if hard else OK, "raccords internes (rythme) : " + ("; ".join(p["why"] for p in hard[:5]) + " -> `polish` recolle"
                                                                            if hard else "aucune coupe inutile, aucune fin de mot tranchée")))
     if soft:

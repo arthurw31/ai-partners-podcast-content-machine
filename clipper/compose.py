@@ -363,6 +363,18 @@ def _logo_bar(W: int, H: int, files: list[Path], cfg: Cfg) -> dict:
             "center_y_px": int(round(H * float(cfg.get("bar_center_y", 0.064))))}
 
 
+def _face_bottom(video: Path, until: float, W: int, n: int = 8) -> int:
+    """Bas le plus bas des visages (px, image de sortie) entre 0 et `until` s : la boîte YuNet s'arrête au menton."""
+    from .ingest import _faces, _frame
+    low = 0
+    for i in range(n):
+        t = until * (i + 0.5) / n
+        img = _frame(video, t, W)
+        for f in (_faces(img) if img is not None else []):
+            low = max(low, int(f[1] + f[3]))
+    return low
+
+
 def _hook_duration(hk: Cfg, segments: list[dict], caps: list[dict], D_speech: float) -> float:
     """Durée du titre. `auto` (style shorts AI Partners) : le temps de l'accroche — fin du 1er segment,
     bornée à [min_duration, max_duration], puis calée sur la fin d'un bloc de sous-titres (jamais en plein mot)."""
@@ -853,6 +865,21 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
             plan_render = [{"id": 1, "t0": 0.0, "t1": D_speech, "layout": "full", "zoom_from": 1.0, "zoom_to": 1.0,
                             "cams": [full]}]
             console.print(f"  {fmt:5s} recadrage FFmpeg → {ref_name}")
+
+        # bulle-titre JAMAIS sur le visage (Thomas, 15/10/2026, short 1 E21 : « le bandeau est un peu en overlap de son menton,
+        # à descendre ») : bas des visages mesuré dans la vidéo recadrée pendant l'accroche ; s'il dépasse le haut de la bulle
+        # (moins une marge), bulle ET sous-titres descendent d'autant (même écart entre eux, mêmes positions tout le clip)
+        if hook_ctx.get("enabled") and hook_ctx.get("text") and plan_render is not plan:
+            chin = _face_bottom(assets / plan_render[0]["cams"][0]["src"], float(hook_ctx["duration"]), W)
+            need = chin + int(H * float(hk.get("face_margin", 0.025))) - int(hook_ctx["top_px"]) if chin else 0
+            room = int(H * float(hk.get("max_caption_y", 0.80))) - int(cap_ctx["top_px"])
+            shift = max(0, min(need, room))
+            if shift:
+                hook_ctx["top_px"] = int(hook_ctx["top_px"]) + shift
+                cap_ctx["top_px"] = int(cap_ctx["top_px"]) + shift
+                for g in caps:
+                    g["top_px"] = int(g["top_px"]) + shift
+                console.print(f"  {fmt:5s} bulle-titre et sous-titres descendus de {shift} px (bas du visage à {chin} px)")
 
         # flash / light leak SEULEMENT quand l'angle de caméra change au raccord (retour d'Arthur, 08/10/2026 : « des
         # sortes de flashs lumineux de transition : il faut les mettre que quand tu changes d'angle de caméra ») ; un
