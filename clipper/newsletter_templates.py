@@ -80,9 +80,11 @@ def make_hero(brand, d: Path, mail: dict, guest_png: Path | None, shot, fonts_cs
 # ---------------------------------------------------------------------------------------------------------------
 
 def button(c: dict, bg: str = BLUE, fg: str = "#FFFFFF", margin: str = "28px auto") -> str:
+    icon = (f'<img src="{c["rel"]("btn_play")}" width="24" height="24" alt="" style="vertical-align:middle;border:0;margin:-3px 0 0 10px">'
+            if c["img"].get("btn_play") else " ▶")
     return (f'<table role="presentation" cellpadding="0" cellspacing="0" style="margin:{margin}"><tr><td bgcolor="{bg}" '
-            f'style="border-radius:999px"><a href="{esc(c["url"])}" style="display:inline-block;padding:16px 36px;font-family:{FONT};'
-            f'font-size:16px;font-weight:bold;color:{fg};text-decoration:none;letter-spacing:.04em">{esc(c["button"])} ▶</a></td></tr></table>')
+            f'style="border-radius:999px"><a href="{esc(c["url"])}" style="display:inline-block;padding:14px 32px 14px 36px;font-family:{FONT};'
+            f'font-size:16px;font-weight:bold;color:{fg};text-decoration:none;letter-spacing:.04em">{esc(c["button"])}{icon}</a></td></tr></table>')
 
 
 def youtube(c: dict, radius: int = 14, max_w: int = 632) -> str:
@@ -420,6 +422,19 @@ def _glyph(brand, key: str, color: str | None, uri) -> str:
     return f"<div style='font-weight:800;font-size:40px;color:{NAVY};text-align:center;line-height:150px'>{esc(key)}</div>"
 
 
+def play_icon(out: Path) -> Path:
+    """Pastille « lecture » aux couleurs d'AI Partners (rond blanc, triangle bleu #258AF3), fond transparent : remplace le ▶ du
+    bouton « Regarder l'épisode » (Arthur, 15/10/2026 : « un emoji aux couleurs d'AI Partners »)."""
+    from PIL import Image, ImageDraw
+    k, n = 4, 56
+    im = Image.new("RGBA", (n * k, n * k), (0, 0, 0, 0))
+    dr = ImageDraw.Draw(im)
+    dr.ellipse([0, 0, n * k - 1, n * k - 1], fill=(255, 255, 255, 255))
+    dr.polygon([(22 * k, 15 * k), (22 * k, 41 * k), (43 * k, 28 * k)], fill=(37, 138, 243, 255))
+    im.resize((n, n), Image.Resampling.LANCZOS).save(out)
+    return out
+
+
 def make_chrome(brand, d: Path, mail: dict, shot, fonts_css: str, uri, logo_svg: str, platforms: list) -> dict:
     """Images du D1 : en-tête (AI Corner by logo AI Partners), titre du bandeau du bas, et une carte par plateforme
     (tuile d'appli brillante + nom + « Écouter », cliquable en entier)."""
@@ -438,6 +453,7 @@ def make_chrome(brand, d: Path, mail: dict, shot, fonts_css: str, uri, logo_svg:
             f"<div class='k'>AI <b>Corner</b></div><div class='by'><span>by</span>{logo_svg}</div>"
             f"<div class='pill'><i>Nouvel épisode</i><b>{esc(mail['episode'])}</b></div></body></html>")
     out["header"] = shot(page, 1200, 270, d / "entete.png")
+    out["btn_play"] = play_icon(d / "bouton_play.png")
     title = (f"<html><head><meta charset='utf-8'><style>{fonts_css}*{{margin:0}}body{{width:1200px;height:300px;overflow:hidden;position:relative;"
              f"background:radial-gradient(ellipse 70% 120% at 85% 0%,{BLUE} 0%,rgba(37,138,243,0) 70%),{BAND_BG};font-family:M,Arial}}"
              f".m{{position:absolute;left:-60px;top:-140px;width:1000px;opacity:.55;mix-blend-mode:screen}}"
