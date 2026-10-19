@@ -121,6 +121,40 @@ def reconcile(caps: list[dict], heard: list[dict], bounds: list[float] | None = 
     return out, notes
 
 
+def realign(caps: list[dict], media: Path, bounds: list[float], tol: float = 0.3) -> tuple[list[dict], list[str]]:
+    """Horaires des mots recalés sur le son du montage par alignement CTC (`endpoint.align`), morceau par morceau.
+    Depuis les coupes de phrase seulement (Arthur, 19/10/2026), un « euh » court reste dans la phrase : Whisper le rattache
+    au mot SUIVANT, qui s'affichait trop tôt (short 1 E22 : « UN » à l'écran 1,5 s avant d'être dit, pendant
+    « pousser, euh… un agent »). Un mot n'est déplacé que si l'écart dépasse `tol` (0,3 s : les petits écarts restent ceux de l'écoute) ; morceau ignoré si l'alignement
+    ne retrouve pas tous ses mots."""
+    try:
+        from .endpoint import _ctc, _norm_text, align
+        vocab = _ctc()[0].tokenizer.get_vocab()
+    except Exception as e:  # noqa: BLE001 — modèle indisponible : horaires de l'écoute gardés
+        return caps, [f"recalage CTC impossible ({e})"]
+    out, notes = [dict(w) for w in caps], []
+    edges = sorted(set([0.0, *bounds]))
+    for b0, b1 in zip(edges, edges[1:]):
+        idx = [k for k, w in enumerate(out) if b0 - 0.02 <= w["s"] < b1 - 0.02]
+        if len(idx) < 2:
+            continue
+        ntok = [len(_norm_text(out[k]["w"], vocab).split()) for k in idx]
+        al = align(media, b0, b1, " ".join(out[k]["w"] for k in idx))
+        if len(al) != sum(ntok):
+            continue
+        pos = 0
+        for k, n in zip(idx, ntok):
+            if not n:
+                continue
+            s, e = al[pos]["s"], al[pos + n - 1]["e"]
+            pos += n
+            if abs(s - out[k]["s"]) > tol:
+                notes.append(f"@ « {out[k]['w']} » {out[k]['s']:.2f} -> {s:.2f} s (son du montage)")
+                out[k]["s"], out[k]["e"] = round(s, 3), round(max(e, s + 0.05), 3)
+    out.sort(key=lambda w: w["s"])
+    return out, notes
+
+
 def missing(caps: list[dict], heard: list[dict]) -> list[str]:
     """Contrôle final : mots entendus (deux écoutes) toujours absents des sous-titres."""
     ca = [_norm(w["w"]) for w in caps]

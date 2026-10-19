@@ -594,6 +594,9 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
         from .caption_check import heard_words, missing, reconcile
         heard = heard_words(src_clip, D_speech, cfg, proj / "heard_words.json")
         words_rel, cnotes = reconcile(words_rel, heard, bounds=[0.0, *junctions, D_speech])
+        from .caption_check import realign
+        words_rel, rnotes = realign(words_rel, src_clip, [*junctions, D_speech])
+        cnotes += rnotes
         left = missing(words_rel, heard)
         report = cnotes + [f"RESTE : {m}" for m in left]
         (proj / "captions_check.txt").write_text("".join(f"{x}\n" for x in report), encoding="utf-8")

@@ -138,6 +138,8 @@ montage:
   join_transition: cut      # cut | flash | leak  (jonction entre deux segments ; leak = lumière orangée, style shorts AI Partners)
   transition_min_diff: 25   # flash/leak seulement si l'angle de caméra change au raccord (diff. d'image ≥ 25 ; même caméra ≈ 0–7)
   flash_color: "#FFFFFF"
+  long_hesitation: 1.6     # dans une phrase, seules les hésitations ≥ 1,6 s sont coupées (Arthur, 19/10/2026 : « ça saccade
+                            # moins sans être trop long ») ; 0 = retirer tous les « euh » (ancien montage, plus saccadé)
 
 # ----------------------------------------------------------------- outro ---
 outro:

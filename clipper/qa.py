@@ -205,6 +205,16 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
     if soft:
         rows.append((WARN, "raccords à écouter (hésitation collée au mot retirée, aucun creux pour couper) : "
                      + "; ".join(f"{p['t']:.2f}" for p in soft[:5])))
+    # mots retirés au milieu d'une phrase par une petite coupe (19/10/2026, short 2 E22 : « c'est la » perdu à une reprise)
+    try:
+        from .strict import words_cut_in_phrase
+        dw_ = proj.parent.parent / "work" / "diarized_words.json"
+        if dw_.exists():
+            wc = words_cut_in_phrase(segs, json.loads(dw_.read_text(encoding="utf-8")), wav)
+            rows.append((WARN if wc else OK, "mots dans les phrases : " + ("; ".join(wc[:4]) + " -> à écouter, reprendre au début du mot"
+                                                                          if wc else "aucun mot retiré au milieu d'une phrase")))
+    except Exception as e:  # noqa: BLE001 — alignement CTC indisponible
+        rows.append((WARN, f"mots dans les phrases : contrôle impossible ({e})"))
     tn = tail_noise(wav, float(segs[-1]["end"]))
     rows.append((FAIL if tn else OK, "fin du short : " + (f"bruit de bouche à {tn['noise']:.2f}, après la dernière voix ({tn['voice_end']:.2f})"
                                                           if tn else "rien après la dernière voix (ni claquement ni souffle)")))

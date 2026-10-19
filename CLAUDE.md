@@ -717,6 +717,21 @@ vérification intransigeante qui règle ces problèmes »)
      travail avait changé et les liens ne s'ouvraient pas ; donner aussi le chemin Windows complet du dossier.
   5. Une autre session renumérote les épisodes pendant qu'on travaille (Mendo E21 -> E22, Coty E22 -> E23) : relire `ls EPISODES/…`
      avant de donner un chemin, ne jamais le recopier d'un message précédent.
+- **Coupes de phrase seulement** (Arthur, 19/10/2026, comparatif du short 1 E22 en 3 versions, 6 coupes / 3 coupes / aucune :
+  « les cuts du premier ne sont pas assez fluides, ça fait trop saccadé, il faudrait un entre-deux » puis, sur la version à
+  3 coupes : « c'est mieux, ça saccade moins sans être trop long, généralise la règle ») : chaque retrait d'un « euh » DANS
+  une phrase fait sauter la tête sur la même caméra et casse l'intonation. Désormais on coupe entre deux phrases ou pour
+  retirer des mots (réplique de l'autre, répétition, phrase hors sujet, plan de celui qui écoute) ; dans une phrase, seules
+  les hésitations ≥ 1,6 s sont retirées (`montage.long_hesitation`, 0 = ancien comportement). `strict.merge_phrase_cuts`
+  (étape « phrase » de `polish`, après `ctc`) recolle tout retrait < 1,6 s qui ne contient aucun mot de la transcription
+  normale (mots recalés par CTC), ou un seul petit mot de faux départ (« procurement, euh, sur ‖ la moitié »), sauf s'il est
+  répété juste après. E22 : short 1 de 6 à 3 coupes (25 -> 28 s), short 2 de 6 à 2 coupes. Test `test_coupes_de_phrase_seulement`.
+  Versions comparées : `EPISODES/ai-corner/E22_quentin-amaudry_mendo/travail/comparatif/`.
+  Conséquences trouvées par la relecture le même jour : (1) un « euh » gardé est rattaché par Whisper au mot SUIVANT, qui
+  s'affichait trop tôt (« UN » 1,5 s avant d'être dit) -> `caption_check.realign` recale chaque mot sur le son du montage (CTC)
+  quand l'écart dépasse 0,3 s ; (2) une reprise posée 0,4 s trop tard avait retiré « c'est la » (short 2 : « …à une
+  entreprise. ‖ réalité de ce qui… ») sans qu'aucun contrôle le voie -> `strict.words_cut_in_phrase`, ligne « mots dans les
+  phrases » de `qa` (ATTENTION). Tests `test_sous_titre_recale_apres_une_hesitation_gardee`, `test_mots_retires_au_milieu_d_une_phrase`.
 - **Relecture « bon sens » en fin de `polish`** (Arthur, 15/10/2026 : « rajouter une couche agent par-dessus qui juge avec bon
   sens la vidéo entière » -> « oui fais ça ») : `cli._polish_review` lance `review` (Claude Opus SANS contexte) sur chaque short
   après le contrôle des aperçus ; il reçoit des planches SERRÉES de tout le short (`review.dense_sheets` : une image / 0,5 s

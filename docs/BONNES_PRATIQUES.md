@@ -17,6 +17,7 @@ Résultat jugé « franchement plutôt bien » par Arthur (09/10/2026) : `EPISOD
 | … mais jamais au point d'entendre le **début de la phrase suivante** | trouvé par le contrôle qualité (« l'entreprise. ‖ É… », 08/10) |
 | … et **pas de blanc trop long** non plus : au plus ~0,35 s de silence après la voix en fin d'extrait | « après "top-down avec du leadership" il y a un petit blanc qui n'est pas ouf » (09/10, 1,4 s) |
 | Retirer les **« euh »**, y compris ceux collés aux mots, sans jamais perdre un mot | « l'invité le fait beaucoup, ce n'est pas assez dynamique » (08/10) |
+| …mais dans une phrase, seulement les hésitations **longues** (≥ 1,6 s) : on coupe entre les phrases, un « euh » court reste | « les cuts ne sont pas assez fluides, ça fait trop saccadé » puis « ça saccade moins sans être trop long, généralise la règle » (19/10) |
 | **Aucune réaction vide** (« super intéressant », « ah ouais », « exactement »…) | « ça n'apporte rien » (09/10) |
 | Une reprise après une coupe de dérushage démarre sur un mot propre (pas de « euh, pour, pour… », pas de long blanc) | « vérifie bien plusieurs fois qu'il n'y a pas de euh laissé au montage » (08/10) |
 | Dans l'épisode complet, les « euh » à l'intérieur des réponses restent (conversation naturelle) | style du monteur |

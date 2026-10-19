@@ -1324,7 +1324,15 @@ def cmd_polish(a: argparse.Namespace) -> None:
             c = _mark(dict(c, segments=segs, duration=round(sum(float(x["duration"]) for x in segs), 2)), "ctc")
         # rythme (Arthur, 14/10/2026 : « les phrases ont tendance à être coupées trop tôt, il y a un bruit de bouche à la fin ») :
         # retraits trop courts ou qui tranchent la fin d'un mot -> recollés ; claquement après la dernière voix -> fin avancée
-        from .strict import fix_join_flow, fix_tail_noise
+        # coupes de phrase seulement (Arthur, 19/10/2026 : « les cuts ne sont pas assez fluides, ça fait trop saccadé ») :
+        # les retraits d'hésitations COURTES dans une phrase sont recollés (une coupe = un saut d'image sur la même caméra)
+        from .strict import fix_join_flow, fix_tail_noise, merge_phrase_cuts
+        long_hes = float(brand.cfg.montage.get("long_hesitation", 1.6) or 0)
+        segs, log0 = merge_phrase_cuts(c["segments"], words, wav, long_hes) if long_hes > 0 else (c["segments"], [])
+        for m in log0:
+            console.print(f"  phrase : {m}")
+        if log0:
+            c = dict(c, segments=segs, duration=round(sum(float(x["duration"]) for x in segs), 2))
         segs, log = fix_join_flow(c["segments"], wav)
         segs, log2 = fix_tail_noise(segs, wav)
         for m in log + log2:

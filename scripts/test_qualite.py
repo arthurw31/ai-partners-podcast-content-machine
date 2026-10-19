@@ -318,6 +318,49 @@ def test_derniere_image_sur_celui_qui_ecoute():
     assert end and end[0]["shown"] == "host" and 1242.95 < end[0]["abs0"] < 1243.13, runs
 
 
+def test_coupes_de_phrase_seulement():
+    """19/10/2026, Arthur (comparatif du short 1 E22) « les cuts ne sont pas assez fluides, ça fait trop saccadé, il faudrait
+    un entre-deux » puis « c'est mieux, ça saccade moins sans être trop long, généralise la règle » : sur les 7 morceaux de
+    la version à 6 coupes, les 3 retraits d'hésitations courtes dans une phrase (0,32 / 1,01 / 1,36 s, dont le faux départ
+    « sur ») sont recollés ; les coupes entre phrases (plans de Thomas, mots retirés) restent = la version validée."""
+    import json
+
+    from clipper.strict import merge_phrase_cuts
+    wav = _e22()
+    words = json.loads((E22 / "travail" / "work" / "diarized_words.json").read_text(encoding="utf-8"))
+    a = [(1198.5, 1200.27), (1206.42, 1208.205), (1209.215, 1212.385), (1213.745, 1216.18), (1218.125, 1224.195),
+         (1224.515, 1226.705), (1232.7, 1240.6)]
+    out, _ = merge_phrase_cuts([{"start": s, "end": e, "duration": e - s} for s, e in a], words, wav)
+    assert [(x["start"], x["end"]) for x in out] == [(1198.5, 1200.27), (1206.42, 1216.18), (1218.125, 1226.705),
+                                                      (1232.7, 1240.6)], out
+
+
+def test_mots_retires_au_milieu_d_une_phrase():
+    """19/10/2026, relecture du short 2 E22 : « …à une entreprise. ‖ réalité de ce qui… », la reprise à 1488,485 avait perdu
+    « c'est la » (dits à 1488,11–1488,39) ; contre-épreuve : la reprise avant « c'est » (1488,06) est propre."""
+    import json
+
+    from clipper.strict import words_cut_in_phrase
+    wav = _e22()
+    words = json.loads((E22 / "travail" / "work" / "diarized_words.json").read_text(encoding="utf-8"))
+    bad = words_cut_in_phrase([{"start": 1484.98, "end": 1487.695}, {"start": 1488.485, "end": 1490.0}], words, wav)
+    assert bad and "c'est" in bad[0], bad
+    assert not words_cut_in_phrase([{"start": 1484.98, "end": 1487.695}, {"start": 1488.06, "end": 1490.0}], words, wav)
+
+
+def test_sous_titre_recale_apres_une_hesitation_gardee():
+    """19/10/2026, relecture du short 1 E22 (coupes de phrase seulement) : « pousser, euh… un agent » — Whisper rattachait
+    le « euh » gardé au mot suivant, « UN » s'affichait 1,5 s avant d'être dit ; recalé sur le son (CTC)."""
+    from clipper.caption_check import realign
+    wav = _e22()
+    caps = [{"w": w, "s": s, "e": s + 0.2} for w, s in
+            [("TU", 1207.44), ("VAS", 1207.60), ("POUSSER", 1207.74), ("UN", 1208.1), ("AGENT", 1209.77), ("QUI", 1210.07)]]
+    out, _ = realign(caps, wav, [1207.3, 1210.3])
+    un = next(x for x in out if x["w"] == "UN")
+    assert 1209.45 < un["s"] < 1209.75, out
+    assert abs(next(x for x in out if x["w"] == "TU")["s"] - 1207.44) < 0.05, out   # petits écarts : inchangés
+
+
 class _Skip(Exception):
     pass
 

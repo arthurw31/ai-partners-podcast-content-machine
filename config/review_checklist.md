@@ -7,7 +7,8 @@ relu est envoyée au relecteur : garder chaque section COURTE (c'est ce qui coû
 - Rien d'inventé : chaque citation, chiffre ou nom doit venir de l'épisode.
 - Jamais couper une pensée : chaque extrait commence au début d'une phrase et finit sur une fin de phrase complète.
 - Aucune coupe pendant la voix ; ~0,35 s de respiration à la fin, jamais le début de la phrase suivante, pas de blanc > 0,6 s.
-- Aucun « euh » ni bégaiement audible dans un short ou le teaser ; aucune réaction vide (« super intéressant », « ah ouais »).
+- Aucun bégaiement ni réaction vide (« super intéressant », « ah ouais ») ; dans une phrase, un « euh » COURT reste (Arthur,
+  19/10/2026 : couper chaque « euh » fait saccadé) : seules les hésitations ≥ 1,6 s sont retirées. Ne pas signaler un « euh » court.
 - Volume -16 LUFS ; charte AI Partners (bleu #258AF3, bleu nuit #151D53), jamais d'italique sauf le mot-clé des sous-titres.
 
 ## short
@@ -15,7 +16,7 @@ relu est envoyée au relecteur : garder chaque section COURTE (c'est ce qui coû
 - Images (planches serrées, une toutes les 0,5 s) : on voit TOUJOURS la personne qui parle (d'après « qui parle ») ;
   une image de celui qui écoute ou réagit, même 0,5 s, même sur la dernière image (FIN), est un ÉCHEC (Arthur, 14–15/10/2026).
 - Sens après les coupes : lire « ce qu'on entend » comme un spectateur ; chaque phrase est complète et se comprend, aucun
-  reste de phrase de l'autre personne, aucun mot répété ou « euh » restés, aucune transition qui ne mène nulle part.
+  reste de phrase de l'autre personne, aucun mot répété ni longue hésitation restée, aucune transition qui ne mène nulle part.
   Le début ne dépend pas de ce qui précède dans l'épisode ; la fin est la chute (rien de plus fort juste après, rien
   de plus faible ajouté).
 - Retours de Thomas (15/10/2026, short 1 E22) : le short s'arrête sur la CHUTE (phrase la plus forte), aucune phrase après ;

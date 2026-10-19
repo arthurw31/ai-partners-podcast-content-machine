@@ -480,6 +480,88 @@ def ctc_hesitations(segs: list[dict], words: list[dict], wav: Path, cfg=None, mi
     return out, log
 
 
+# ----------------------------------------------------------------------------------------------- coupes de phrase seulement
+# Arthur, 19/10/2026 (comparatif du short 1 E22 : 6 coupes / 3 coupes / aucune) : « les cuts du premier ne sont pas assez
+# fluides, ça fait trop saccadé, il faudrait un entre-deux » puis, sur la version à 3 coupes : « c'est mieux, ça saccade moins
+# sans être trop long, généralise la règle ». Chaque retrait d'un « euh » DANS une phrase fait sauter la tête sur la même
+# caméra et casse l'intonation. Règle : on coupe entre deux phrases (ou pour retirer des mots : réplique de l'autre,
+# répétition, phrase hors sujet) ; dans une phrase, seules les hésitations LONGUES (≥ LONG_HESITATION) sont retirées.
+
+LONG_HESITATION = 1.6   # retrait sans mot plus court : recollé (short 1 E22 : 0,32 / 1,01 / 1,36 s recollés, validé)
+
+
+def _gap_words(segs: list[dict], k: int, words: list[dict], wav: Path) -> tuple[list[dict], list[dict]]:
+    """Mots de la transcription normale (sauf « euh ») retirés par le raccord k, et les mots entendus juste après, recalés
+    sur le son (CTC) : les horodatages de Whisper sont parfois décalés de 0,3 à 0,5 s (E22)."""
+    from .endpoint import align
+    from .verify import FILLERS, _norm
+    e, s = float(segs[k]["end"]), float(segs[k + 1]["start"])
+    near = [w for w in words if e - 2.0 <= (float(w["s"]) + float(w["e"])) / 2 <= s + 2.0]
+    if not near:
+        return [], []
+    al = align(wav, max(0.0, float(near[0]["s"]) - 0.6), float(near[-1]["e"]) + 0.6, " ".join(w["w"] for w in near))
+    inside = [x for x in al if _norm(x["w"]) not in FILLERS
+              and min(x["e"], s - 0.03) - max(x["s"], e + 0.03) > 0.5 * (x["e"] - x["s"])]
+    return inside, [x for x in al if x["s"] >= s - 0.03]
+
+
+def _false_start(inside: list[dict], after: list[dict]) -> bool:
+    """Un seul petit mot retiré = faux départ (« procurement, euh, sur ‖ la moitié du truc »), sauf s'il est répété juste
+    après (bégaiement « de ‖ de », retiré exprès par `ctc`)."""
+    from .verify import _norm
+    return (len(inside) == 1 and len(_norm(inside[0]["w"])) <= 4
+            and not (after and _norm(after[0]["w"]) == _norm(inside[0]["w"])))
+
+
+def phrase_cut_merges(segs: list[dict], words: list[dict], wav: Path, long_hes: float = LONG_HESITATION) -> list[int]:
+    """Raccords (k = morceau AVANT) qui ne retirent qu'une hésitation courte dans une phrase : écart dans la source
+    < `long_hes` et AUCUN mot de la transcription normale dans le retrait (elle n'écrit jamais « euh » / « hmm » ; un mot
+    retiré = un choix de montage, gardé), ou un faux départ."""
+    out = []
+    for k in range(len(segs) - 1):
+        if not (0 <= float(segs[k + 1]["start"]) - float(segs[k]["end"]) < long_hes):
+            continue
+        inside, after = _gap_words(segs, k, words, wav)
+        if not inside or _false_start(inside, after):
+            out.append(k)
+    return out
+
+
+def words_cut_in_phrase(segs: list[dict], words: list[dict], wav: Path, long_hes: float = LONG_HESITATION) -> list[str]:
+    """Raccords courts (< `long_hes`) qui retirent de VRAIS mots au milieu d'une phrase, hors répétition : à écouter.
+    Short 2 E22 (19/10/2026, trouvé par la relecture) : « …à une entreprise. ‖ réalité de ce qui… », « c'est la » retiré
+    par une reprise posée 0,4 s trop tard ; aucun contrôle ne le voyait (aucun mot coupé, bords dans des silences)."""
+    from .verify import _norm
+    out = []
+    for k in range(len(segs) - 1):
+        e, s = float(segs[k]["end"]), float(segs[k + 1]["start"])
+        if not (0 <= s - e < long_hes):
+            continue
+        inside, after = _gap_words(segs, k, words, wav)
+        if not inside or _false_start(inside, after):
+            continue
+        n = len(inside)
+        rep = [_norm(x["w"]) for x in inside] == [_norm(x["w"]) for x in after[:n]]
+        if not rep:
+            out.append(f"{e:.2f}–{s:.2f} : « {' '.join(x['w'] for x in inside)} » retiré au milieu d'une phrase")
+    return out
+
+
+def merge_phrase_cuts(segs: list[dict], words: list[dict], wav: Path,
+                      long_hes: float = LONG_HESITATION) -> tuple[list[dict], list[str]]:
+    """Recolle les raccords de `phrase_cut_merges` (son d'origine : toujours sûr)."""
+    segs = [dict(x) for x in segs]
+    log = []
+    for k in sorted(phrase_cut_merges(segs, words, wav, long_hes), reverse=True):
+        a, b = segs[k], segs[k + 1]
+        segs[k] = dict(a, end=b["end"], duration=round(float(b["end"]) - float(a["start"]), 3),
+                       **({"end_text": b["end_text"]} if b.get("end_text") else {}))
+        del segs[k + 1]
+        log.append(f"hésitation courte gardée dans la phrase ({float(a['end']):.2f}–{float(b['start']):.2f}, "
+                   f"{float(b['start']) - float(a['end']):.2f} s) : une coupe de moins")
+    return segs, log
+
+
 # ----------------------------------------------------------------------------------------------- fluidité des raccords internes
 # Arthur, 14/10/2026 (short 2 E22) : « les phrases ont tendance à être coupées trop tôt ». Mesure : 5 raccords sur 10 tombaient
 # en PLEINE VOIX (« il y ‖ a », retrait de 0,14 s ; « aborder ‖ assez », la voix continuait 0,3 s après la coupe) : `fillers`
