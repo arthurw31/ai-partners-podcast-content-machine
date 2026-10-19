@@ -21,6 +21,9 @@
   Exemples du monteur : « Quelle est la valeur ajoutée des agents IA ? », « Qui gouverne les agents IA ? »,
   « L'IA agentique : un outil ou une ressource ? », « Comment gérer les early adopters ? ». Parfois une
   affirmation forte avec un point : « Le cerveau ne crée pas de dopamine sur les tâches répétitives monotones. »
+- **Le juste milieu du montage** (Arthur, 19/10/2026) : préférer des passages qui se tiennent en 1 à 4 morceaux PRIS EN
+  ENTIER (phrases complètes, petites hésitations comprises) plutôt qu'un passage qu'il faudrait couper toutes les 4 s pour
+  le rendre net ; on coupe entre les phrases, jamais dedans ; une coupe toutes les 6 s au plus en moyenne.
 - Chaque passage est une pensée complète ; les passages s'enchaînent naturellement à l'oreille
   (pas de « comme je le disais » qui renvoie à un passage absent, pas de rupture de sujet).
 - Pas de B-roll ni de mot-clé coloré : c'est le propos qui porte.

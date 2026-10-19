@@ -42,6 +42,26 @@ Résultat jugé « franchement plutôt bien » par Arthur (09/10/2026) : `EPISOD
 - **Aucun zoom** (« pour les shorts, ne pas mettre de zoom », 08/10).
 - Flash lumineux de transition **seulement quand l'angle de caméra change** (08/10).
 
+### Le juste milieu du montage (validé par Arthur le 19/10/2026 sur E22 : « c'est parfait, c'est le juste milieu entre trop de
+montage et pas assez, c'est bien fluide »)
+
+Comparatif fait avec l'équipe sur le short 1 E22 : 6 coupes en 25 s (« trop saccadé, pas naturel »), 0 coupe en 42 s (trop
+long, Thomas à l'image, hésitations), **3 coupes en 28 s (retenu)**. Ce qui fait un short bien monté :
+1. **On coupe entre les phrases, pas dedans.** Une phrase est gardée entière, avec son intonation, ses respirations et ses
+   petits « euh » (moins de 1,6 s). Une coupe dans une phrase fait sauter la tête sur la même caméra et casse la voix.
+2. **Peu de coupes : une toutes les 6 s au plus en moyenne** (validé : 3 coupes / 28 s, 1 coupe / 41 s ; refusé : une toutes
+   les 4 s). `qa` le mesure (ligne « rythme des coupes »).
+3. **Chaque coupe a une raison de sens**, jamais de confort : retirer une phrase hors sujet ou qui demande du contexte, une
+   interruption ou une réaction de l'autre, un plan où l'on voit celui qui écoute, une hésitation LONGUE (1,6 s et plus),
+   un bégaiement ou une répétition.
+4. **Chaque coupe tombe dans un vrai silence** entre deux phrases, avec un peu d'air de chaque côté : aucun mot tronqué, aucun
+   mot perdu (« c'est la » retiré par une reprise 0,4 s trop tard : refusé), la phrase d'après reprend sur son premier mot.
+5. **On accepte quelques secondes de plus pour la fluidité** (+3 s sur le short 1) ; on ne raccourcit pas en coupant dans les phrases.
+6. **Le reste ne change pas** : début sur une phrase qui pose le sujet, fin sur la CHUTE, on voit toujours celui qui parle,
+   sous-titres calés sur le son (un « euh » gardé ne doit pas faire apparaître le mot suivant en avance).
+Réglages : `montage.long_hesitation` (1,6 s), `strict.merge_phrase_cuts`, `strict.cut_rhythm`, `strict.words_cut_in_phrase`,
+`caption_check.realign`. Les 3 versions : `EPISODES/ai-corner/E22_quentin-amaudry_mendo/travail/comparatif/`.
+
 ## 4. Le teaser d'ouverture (16:9, ~40–45 s)
 
 - Script façon « Dans la tête d'un CEO » : thèse sans hésitation → développement → vrai ping-pong question/réponse →

@@ -205,6 +205,11 @@ def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: 
     if soft:
         rows.append((WARN, "raccords à écouter (hésitation collée au mot retirée, aucun creux pour couper) : "
                      + "; ".join(f"{p['t']:.2f}" for p in soft[:5])))
+    # juste milieu du montage (Arthur, 19/10/2026) : une coupe toutes les 6 s au moins en moyenne, sinon « trop saccadé »
+    from .strict import cut_rhythm
+    tight_, txt_ = cut_rhythm(segs)
+    rows.append((WARN if tight_ else OK, "rythme des coupes : " + txt_ + (
+        " -> trop saccadé : recoller les coupes faites DANS une phrase" if tight_ else " (juste milieu)")))
     # mots retirés au milieu d'une phrase par une petite coupe (19/10/2026, short 2 E22 : « c'est la » perdu à une reprise)
     try:
         from .strict import words_cut_in_phrase

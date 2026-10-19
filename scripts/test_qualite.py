@@ -335,6 +335,17 @@ def test_coupes_de_phrase_seulement():
                                                       (1232.7, 1240.6)], out
 
 
+def test_rythme_des_coupes_juste_milieu():
+    """19/10/2026, Arthur : « c'est le juste milieu entre trop de montage et pas assez, c'est bien fluide » (3 coupes / 28 s)
+    contre « trop saccadé » (6 coupes / 25 s)."""
+    from clipper.strict import cut_rhythm
+    a = [(1198.5, 1200.27), (1206.42, 1208.205), (1209.215, 1212.385), (1213.745, 1216.18), (1218.125, 1224.195),
+         (1224.515, 1226.705), (1232.7, 1240.6)]
+    c = [(1198.5, 1200.27), (1206.42, 1216.18), (1218.125, 1226.705), (1232.7, 1240.6)]
+    assert cut_rhythm([{"start": s, "end": e} for s, e in a])[0]
+    assert not cut_rhythm([{"start": s, "end": e} for s, e in c])[0]
+
+
 def test_mots_retires_au_milieu_d_une_phrase():
     """19/10/2026, relecture du short 2 E22 : « …à une entreprise. ‖ réalité de ce qui… », la reprise à 1488,485 avait perdu
     « c'est la » (dits à 1488,11–1488,39) ; contre-épreuve : la reprise avant « c'est » (1488,06) est propre."""

@@ -732,6 +732,11 @@ vérification intransigeante qui règle ces problèmes »)
   quand l'écart dépasse 0,3 s ; (2) une reprise posée 0,4 s trop tard avait retiré « c'est la » (short 2 : « …à une
   entreprise. ‖ réalité de ce qui… ») sans qu'aucun contrôle le voie -> `strict.words_cut_in_phrase`, ligne « mots dans les
   phrases » de `qa` (ATTENTION). Tests `test_sous_titre_recale_apres_une_hesitation_gardee`, `test_mots_retires_au_milieu_d_une_phrase`.
+  **Validé comme référence** (Arthur, 19/10/2026, sur les finaux E22 : « comme ça c'est parfait, c'est le juste milieu entre
+  trop de montage et pas assez, c'est bien fluide, formalise ce qui fait que c'est bien monté ») : les 6 règles sont dans
+  [docs/BONNES_PRATIQUES.md](docs/BONNES_PRATIQUES.md) § « Le juste milieu du montage » ; `qa` mesure le rythme
+  (`strict.cut_rhythm` : une coupe toutes les 6 s au plus en moyenne, sinon ATTENTION « trop saccadé ») ; brief de sélection
+  (`guidelines.md`) et checklist du relecteur mis à jour. Test `test_rythme_des_coupes_juste_milieu`.
 - **Relecture « bon sens » en fin de `polish`** (Arthur, 15/10/2026 : « rajouter une couche agent par-dessus qui juge avec bon
   sens la vidéo entière » -> « oui fais ça ») : `cli._polish_review` lance `review` (Claude Opus SANS contexte) sur chaque short
   après le contrôle des aperçus ; il reçoit des planches SERRÉES de tout le short (`review.dense_sheets` : une image / 0,5 s

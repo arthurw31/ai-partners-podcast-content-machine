@@ -547,6 +547,20 @@ def words_cut_in_phrase(segs: list[dict], words: list[dict], wav: Path, long_hes
     return out
 
 
+MIN_CUT_SPACING = 6.0   # une coupe en moyenne toutes les 6 s au moins (validé : short 1 E22 3 coupes / 28 s, short 2 1 / 41 s ;
+                        # refusé « trop saccadé » : 6 coupes / 25 s, une toutes les 4 s)
+
+
+def cut_rhythm(segs: list[dict], min_spacing: float = MIN_CUT_SPACING) -> tuple[bool, str]:
+    """Rythme des coupes d'un short (Arthur, 19/10/2026 : « c'est le juste milieu entre trop de montage et pas assez ») :
+    (trop serré ?, résumé). Coupe = raccord entre deux morceaux, quel qu'il soit."""
+    n = max(0, len(segs) - 1)
+    d = sum(float(s["end"]) - float(s["start"]) for s in segs)
+    every = d / n if n else d
+    return (n > 0 and every < min_spacing,
+            f"{n} coupe(s) en {d:.0f} s" + (f", une toutes les {every:.1f} s" if n else ""))
+
+
 def merge_phrase_cuts(segs: list[dict], words: list[dict], wav: Path,
                       long_hes: float = LONG_HESITATION) -> tuple[list[dict], list[str]]:
     """Recolle les raccords de `phrase_cut_merges` (son d'origine : toujours sûr)."""
