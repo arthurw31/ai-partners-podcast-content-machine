@@ -104,16 +104,20 @@ def listener_runs(clip: dict, proj: Path, media: Path, work: Path) -> list[dict]
     key = json.dumps([[round(float(x["start"]), 3), round(float(x["end"]), 3)] for x in clip["segments"]]) + f"|{media.stat().st_mtime:.0f}"
     cache = work / f"qa_image_{clip['index']:02d}.json"
     c = json.loads(cache.read_text(encoding="utf-8")) if cache.exists() else {}
+    # plan de l'écoutant VALIDÉ par Arthur (20/10/2026, short 5 E22 : « finis sur "ça te décuple" » malgré 1,4 s de Quentin à
+    # l'image, plan du monteur qu'on ne peut pas retirer sans couper la chute) : `listener_ok` = [[début, fin]] en temps source
+    ok = [(float(a) - 0.15, float(b) + 0.15) for a, b in (clip.get("listener_ok") or [])]
+    keep = lambda rs: [r for r in rs if not any(a <= float(r["abs0"]) and float(r["abs1"]) <= b for a, b in ok)]
     if c.get("key") == key:
-        return c["runs"]
+        return keep(c.get("all", c["runs"]))
     try:
         brand = Brand(ep.parents[1].name)
     except Exception:  # noqa: BLE001
         return []
     runs = listener_shown(media, clip["segments"], json.loads(dw.read_text(encoding="utf-8")), host_reference(brand),
                           fps=int(brand.cfg.fps))
-    cache.write_text(json.dumps({"key": key, "runs": runs}, ensure_ascii=False), encoding="utf-8")
-    return runs
+    cache.write_text(json.dumps({"key": key, "all": runs, "runs": keep(runs)}, ensure_ascii=False), encoding="utf-8")
+    return keep(runs)
 
 
 def qa_short(clip: dict, proj: Path, wav: Path, cfg, fmt: str = "9x16", render: Path | None = None,

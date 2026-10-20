@@ -756,6 +756,11 @@ vérification intransigeante qui règle ces problèmes »)
   7. Un plan du monteur sur l'écoutant au milieu de la CHUTE ne se coupe pas (short 5 : Quentin 1,4 s pendant « …ça te
      décuple ») : finir avant, sur une fin de phrase, et le dire à Arthur.
   Tests : `test_mot_perdu_dans_une_coupe_courte_remis`, `test_plan_qui_anticipe_la_reponse_accepte`, `test_coupe_voulue_jamais_recollee`.
+  8. Retours d'Arthur (20/10/2026) : short 5 « finis sur "ça te décuple" » (plan de Quentin accepté) -> `listener_ok` du clip
+     ([[début, fin]] en temps source) : plans de l'écoutant VALIDÉS, ignorés par `qa.listener_runs` et la boucle ; short 3 « à
+     17–18 s une coupure bizarre, un changement de plan inutile » : la coupe d'un « Exactement » tombait 0,1 s après un
+     changement de plan du monteur et laissait UNE image de l'autre plan -> coupe retirée. Règle : ne jamais poser une coupe à
+     moins de ~0,5 s d'un changement de plan de la source (fragment de plan visible) ; mieux vaut garder une réaction discrète.
 - **Relecture « bon sens » en fin de `polish`** (Arthur, 15/10/2026 : « rajouter une couche agent par-dessus qui juge avec bon
   sens la vidéo entière » -> « oui fais ça ») : `cli._polish_review` lance `review` (Claude Opus SANS contexte) sur chaque short
   après le contrôle des aperçus ; il reçoit des planches SERRÉES de tout le short (`review.dense_sheets` : une image / 0,5 s
