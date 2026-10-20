@@ -148,10 +148,13 @@ def realign(caps: list[dict], media: Path, bounds: list[float], tol: float = 0.3
                 continue
             s, e = al[pos]["s"], al[pos + n - 1]["e"]
             pos += n
-            if abs(s - out[k]["s"]) > tol:
+            # jamais d'inversion de l'ordre des mots (20/10/2026, short 3 E22 : « VRAIE » recalé après « BONNE ») : le mot ne
+            # bouge que s'il reste entre ses voisins
+            prev_s = out[k - 1]["s"] if k > 0 else -1.0
+            next_s = out[k + 1]["s"] if k + 1 < len(out) else 1e9
+            if abs(s - out[k]["s"]) > tol and prev_s < s < next_s:
                 notes.append(f"@ « {out[k]['w']} » {out[k]['s']:.2f} -> {s:.2f} s (son du montage)")
                 out[k]["s"], out[k]["e"] = round(s, 3), round(max(e, s + 0.05), 3)
-    out.sort(key=lambda w: w["s"])
     return out, notes
 
 

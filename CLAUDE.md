@@ -761,6 +761,13 @@ vérification intransigeante qui règle ces problèmes »)
      17–18 s une coupure bizarre, un changement de plan inutile » : la coupe d'un « Exactement » tombait 0,1 s après un
      changement de plan du monteur et laissait UNE image de l'autre plan -> coupe retirée. Règle : ne jamais poser une coupe à
      moins de ~0,5 s d'un changement de plan de la source (fragment de plan visible) ; mieux vaut garder une réaction discrète.
+  9. Fins prolongées à la demande d'Arthur (20/10/2026 : « continue le short après "ça te décuple", j'ai l'impression qu'il
+     n'avait pas fini » ; short 3 « on dirait qu'il n'a pas fini de développer son idée », « mais pas un short trop long ») :
+     la fin d'une idée = jusqu'à ce que l'orateur passe la parole ou change de sujet, pas la première phrase forte. Le relecteur,
+     lui, préfère la chute la plus forte : en cas de désaccord, c'est l'avis d'Arthur qui compte. Si le monteur passe sur
+     l'écoutant pendant les tout derniers mots : `freeze_from` du clip (temps source) = l'image est FIGÉE sur celui qui parle à
+     partir de cet instant, le son continue (`compose`, empreinte de découpe comprise). Sous-titres : `caption_check.realign`
+     ne déplace jamais un mot au-delà de ses voisins (« BONNE VRAIE » inversés), instants des mots strictement croissants.
 - **Relecture « bon sens » en fin de `polish`** (Arthur, 15/10/2026 : « rajouter une couche agent par-dessus qui juge avec bon
   sens la vidéo entière » -> « oui fais ça ») : `cli._polish_review` lance `review` (Claude Opus SANS contexte) sur chaque short
   après le contrôle des aperçus ; il reçoit des planches SERRÉES de tout le short (`review.dense_sheets` : une image / 0,5 s

@@ -19,6 +19,7 @@ from . import broll as broll_mod
 from .analysis import analyze
 from .captions import group_words
 from .config import FORMATS, TEMPLATES_DIR, Brand, Cfg, deep_merge
+from .media import FFMPEG
 from .media import (concat_segments, cut_segment, rebuild_audio, extract_frame, make_blurred_still, prepare_outro_video, probe,
                     reframe_video)
 from .multicam import cut_multicam, load_spec as load_multicam
@@ -508,7 +509,8 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
     else:
         # épisode déjà monté (19/10/2026, short 5 E22) : sans empreinte des passages, une retouche de `segments` gardait
         # l'ANCIENNE découpe (son et image de l'ancien montage, sous-titres faux) tant qu'on n'ajoutait pas `--force`
-        stamp = json.dumps([[round(float(s["start"]), 3), round(float(s["end"]), 3)] for s in segments] + [outro_d, "son-v2"])
+        stamp = json.dumps([[round(float(s["start"]), 3), round(float(s["end"]), 3)] for s in segments]
+                           + [outro_d, "son-v2", float(clip.get("freeze_from") or 0)])
         stamp_f = assets / "source.stamp"
         stale = stale or (src_clip.exists() and (not stamp_f.exists() or stamp_f.read_text(encoding="utf-8") != stamp))
     recut = bool(force or stale or not src_clip.exists())
@@ -529,8 +531,24 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
                              normalize_audio=False, fps=_fps, frames=n_fr, video_only=True)
                 a0 = max(0.0, float(sg["start"]) - float(multicam.get("audio_delay", 0.0)))
             else:
-                cut_segment(source, part, float(sg["start"]), dur, height=h_max, normalize_audio=False, fps=_fps,
-                            frames=n_fr, video_only=True)
+                # fin FIGÉE sur celui qui parle (20/10/2026, short 3 E22 : le monteur passe sur l'invité 0,2 s avant que Thomas
+                # finisse « …une vraie bonne question » ; la dernière image, figée pendant le fondu vers l'outro, ne doit pas être
+                # celui qui écoute) : `freeze_from` (temps source) = la dernière image AVANT le plan de l'écoutant est tenue
+                # pendant que la voix finit (le son, lui, n'est jamais raccourci)
+                # `freeze_from` (temps source) : tout ce qui suit cet instant est figé, quelle que soit la fin réglée ensuite
+                frz = 0
+                if last and clip.get("freeze_from"):
+                    frz = max(0, math.ceil((float(sg["start"]) + dur - float(clip["freeze_from"])) * _fps - 1e-3))
+                frz = min(frz, max(0, n_fr - 1))
+                cut_segment(source, part, float(sg["start"]), (n_fr - frz) / _fps if frz else dur, height=h_max,
+                            normalize_audio=False, fps=_fps, frames=n_fr - frz, video_only=True)
+                if frz:
+                    held = part.with_name(part.stem + "_fige.mp4")
+                    subprocess.run([FFMPEG, "-v", "error", "-y", "-i", str(part), "-vf", f"tpad=stop_mode=clone:stop={frz}",
+                                    "-frames:v", str(n_fr), "-c:v", "libx264", "-crf", "10", "-pix_fmt", "yuv420p", "-an",
+                                    str(held)], check=True)
+                    held.replace(part)
+                    console.print(f"  fin figée : {frz} image(s) tenue(s) sur le dernier plan de celui qui parle (freeze_from)")
                 a0 = float(sg["start"])
             pieces.append((a0, n_fr / _fps))
             parts.append(part)
@@ -629,6 +647,12 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
         cnotes += rnotes
         words_rel = _apply_fixes(words_rel)
         heard = _apply_fixes([dict(h) for h in heard], quiet=True)
+        # instants strictement croissants (20/10/2026, short 5 E22 : « COMPTE » et « QUE » au même instant après le recalage,
+        # le premier tombait à la frontière de son bloc et s'affichait hors de lui)
+        for k in range(1, len(words_rel)):
+            if words_rel[k]["s"] < words_rel[k - 1]["s"] + 0.04:
+                words_rel[k] = dict(words_rel[k], s=round(words_rel[k - 1]["s"] + 0.04, 3))
+                words_rel[k]["e"] = max(words_rel[k]["e"], words_rel[k]["s"] + 0.05)
         left = missing(words_rel, heard)
         report = cnotes + [f"RESTE : {m}" for m in left]
         (proj / "captions_check.txt").write_text("".join(f"{x}\n" for x in report), encoding="utf-8")
