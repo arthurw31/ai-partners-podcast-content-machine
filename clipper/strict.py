@@ -521,10 +521,31 @@ def phrase_cut_merges(segs: list[dict], words: list[dict], wav: Path, long_hes: 
     for k in range(len(segs) - 1):
         if not (0 <= float(segs[k + 1]["start"]) - float(segs[k]["end"]) < long_hes):
             continue
+        if segs[k].get("keep_cut"):   # coupe voulue (ex. « Exactement » de l'autre, absent de la transcription normale)
+            continue
         inside, after = _gap_words(segs, k, words, wav)
-        if not inside or _false_start(inside, after):
+        if not inside or _false_start(inside, after) or _lost_words(segs, k, inside, after, words):
             out.append(k)
     return out
+
+
+def _lost_words(segs: list[dict], k: int, inside: list[dict], after: list[dict], words: list[dict]) -> bool:
+    """Retrait court qui a emporté de VRAIS mots de la même personne, sans répétition derrière : un mot perdu, jamais un choix
+    (19/10/2026, shorts 3 et 4 E22 : `ctc` avait pris « se ‖ poser » et « étaient ‖ sur un repo » pour des hésitations ;
+    short 2 : « c'est la » perdu à une reprise). Gardé coupé : réplique de l'autre personne, réaction, répétition."""
+    from .fillers import REACTIONS
+    from .verify import _norm
+    n = len(inside)
+    if [_norm(x["w"]) for x in inside] == [_norm(x["w"]) for x in after[:n]]:
+        return False
+    text = " ".join(_norm(x["w"]) for x in inside)
+    if any(text == _norm(r) or text.startswith(_norm(r) + " ") for r in REACTIONS):
+        return False
+    e = float(segs[k]["end"])
+    before = [w for w in words if "spk" in w and float(w["e"]) <= e + 0.1]
+    who = before[-1]["spk"] if before else None
+    mid = [w for w in words if "spk" in w and float(segs[k]["end"]) <= (float(w["s"]) + float(w["e"])) / 2 <= float(segs[k + 1]["start"])]
+    return bool(who) and all(w["spk"] == who for w in mid)
 
 
 def words_cut_in_phrase(segs: list[dict], words: list[dict], wav: Path, long_hes: float = LONG_HESITATION) -> list[str]:
@@ -607,6 +628,8 @@ def join_flow_problems(segs: list[dict], wav: Path) -> list[dict]:
     out = []
     for k in range(len(segs) - 1):
         a, b = segs[k], segs[k + 1]
+        if a.get("keep_cut"):   # coupe voulue (réaction de l'autre retirée) : jamais recollée pour le rythme
+            continue
         e, s = float(a["end"]), float(b["start"])
         gap = s - e
         er, sr = end_ratio(wav, e, 0.04), start_ratio(wav, s, 0.04)
@@ -797,9 +820,16 @@ def listener_shown(clip_media: Path, segs: list[dict], words: list[dict], host_r
             out.append(cur)
         cur = {"t0": t - step / 2, "t1": t + step / 2, "abs0": ts - step / 2, "abs1": ts + step / 2, "k": k,
                "shown": bad, "speaking": talk} if bad else None
+    # plan qui ANTICIPE la réponse (19/10/2026, short 4 E22 : le monteur passe sur Thomas 0,4 s avant son « Et nous, on
+    # recommande… », pendant les derniers mots de l'invité) : coupe normale de monteur, pas « celui qui écoute à l'image »
+    out = [r for r in out if not any(w["spk"] == r["shown"] and r["abs0"] - 0.1 <= w["s"] <= min(r["abs0"] + ANTICIP, r["abs1"] + 0.2)
+                                     for w in ws)]
     if end_run:
         out.append(end_run)
     return out
+
+
+ANTICIP = 0.5   # le plan de celui qui va parler peut commencer jusqu'à 0,5 s avant son premier mot
 
 
 def fix_listener_shown(segs: list[dict], runs: list[dict], min_piece: float = 0.4) -> tuple[list[dict], list[str], list[str]]:

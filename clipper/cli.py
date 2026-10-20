@@ -1386,7 +1386,7 @@ def cmd_polish(a: argparse.Namespace) -> None:
                 cj = json.loads(cache.read_text(encoding="utf-8"))
                 bad = sorted(cj["bad"] if "bad" in cj else audit_joins(cj.get("heard", "")), reverse=True)   # confirmés par la qa
                 for j in bad:
-                    if j + 1 < len(segs) and 0 <= float(segs[j + 1]["start"]) - float(segs[j]["end"]) <= 3.0:
+                    if j + 1 < len(segs) and 0 <= float(segs[j + 1]["start"]) - float(segs[j]["end"]) <= 3.0                             and not segs[j].get("keep_cut"):
                         a_, b_ = segs[j], segs[j + 1]
                         segs[j] = dict(a_, end=b_["end"], duration=round(float(b_["end"]) - float(a_["start"]), 3),
                                        **({"end_text": b_["end_text"]} if b_.get("end_text") else {}))

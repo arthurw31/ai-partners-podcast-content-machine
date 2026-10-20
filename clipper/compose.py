@@ -505,6 +505,12 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
         stamp = json.dumps([segments, cams or clip.get("turns", []), outro_d, "son-v2"], sort_keys=True, default=str)
         stamp_f = assets / "source.multicam.stamp"
         stale = stale or not stamp_f.exists() or stamp_f.read_text(encoding="utf-8") != stamp
+    else:
+        # épisode déjà monté (19/10/2026, short 5 E22) : sans empreinte des passages, une retouche de `segments` gardait
+        # l'ANCIENNE découpe (son et image de l'ancien montage, sous-titres faux) tant qu'on n'ajoutait pas `--force`
+        stamp = json.dumps([[round(float(s["start"]), 3), round(float(s["end"]), 3)] for s in segments] + [outro_d, "son-v2"])
+        stamp_f = assets / "source.stamp"
+        stale = stale or (src_clip.exists() and (not stamp_f.exists() or stamp_f.read_text(encoding="utf-8") != stamp))
     recut = bool(force or stale or not src_clip.exists())
     if recut:
         console.print(f"  découpe de {len(segments)} segment(s) source…")
@@ -536,8 +542,7 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
         audio_src = Path(multicam["audio"]) if multicam else source
         console.print(f"[dim]  son : {len(pieces)} morceaux, {sum(d for _, d in pieces):.3f} s : {[(round(a, 3), round(d, 3)) for a, d in pieces]}[/dim]")
         rebuild_audio(src_clip, audio_src, pieces, normalize=bool(cfg.audio.normalize))
-        if multicam:
-            stamp_f.write_text(stamp, encoding="utf-8")
+        stamp_f.write_text(stamp, encoding="utf-8")
     # l'audio sous la carte de fin s'arrête avant que le locuteur suivant reprenne
     tail = float(segments[-1].get("tail_silence", clip.get("tail_silence", 5.0)))
     # silence réellement disponible, mesuré dans le son du montage (le `tail_silence` stocké date de la sélection et
@@ -588,6 +593,31 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
         (sg, off), a, b = best, float(best[0]["start"]), float(best[0]["end"])
         words_rel.append({"w": w["w"], "s": round(off + max(w["s"], a) - a, 3), "e": round(off + min(w["e"], b) - a, 3)})
     words_rel.sort(key=lambda x: x["s"])
+    # mots mal entendus par Whisper ET par l'écoute (19/10/2026, short 5 E22 : « là tu fais de l'IA » écrit « foi et aïe ») :
+    # `caption_fixes` du clip = {"mots entendus": "mots justes"}, remplacés en gardant les horaires du passage (sous-titres ET
+    # écoute, pour que le contrôle « mot entendu non sous-titré » compare les mêmes mots)
+    def _apply_fixes(ws_: list[dict], quiet: bool = False) -> list[dict]:
+        from .verify import _norm
+        for bad_, good_ in (clip.get("caption_fixes") or {}).items():
+            src_ = [_norm(x) for x in bad_.split() if _norm(x)]
+            dst_ = good_.split()
+            for i in range(len(ws_) - len(src_) + 1):
+                if [_norm(w["w"]) for w in ws_[i:i + len(src_)]] == src_:
+                    s0, e0 = ws_[i]["s"], ws_[i + len(src_) - 1]["e"]
+                    st_ = (e0 - s0) / len(dst_)
+                    ws_[i:i + len(src_)] = [dict(ws_[i], w=w, s=round(s0 + j * st_, 3), e=round(s0 + (j + 1) * st_, 3), **({"n": _norm(w)} if "n" in ws_[i] else {}))
+                                            for j, w in enumerate(dst_)]
+                    if not quiet:
+                        console.print(f"  sous-titres : « {bad_} » -> « {good_} » (caption_fixes)")
+                    break
+        # ponctuation seule (« ? » rendu comme un mot : bloc d'une image, short 5 E22) -> collée au mot d'avant
+        out_ = []
+        for w in ws_:
+            if out_ and w["w"].strip() and all(ch in "?!.,;:…" for ch in w["w"].strip()):
+                out_[-1] = dict(out_[-1], w=out_[-1]["w"] + w["w"].strip(), e=max(out_[-1]["e"], w["e"]))
+            else:
+                out_.append(w)
+        return out_
     # double contrôle des sous-titres (retour d'Arthur, 08/10/2026 : « il oublie quelques mots des fois ») : le montage
     # est écouté deux fois ; tout mot entendu les deux fois doit être sous-titré (clipper/caption_check.py)
     if cfg.captions.get("double_check", True) and src_clip.exists():
@@ -597,11 +627,15 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
         from .caption_check import realign
         words_rel, rnotes = realign(words_rel, src_clip, [*junctions, D_speech])
         cnotes += rnotes
+        words_rel = _apply_fixes(words_rel)
+        heard = _apply_fixes([dict(h) for h in heard], quiet=True)
         left = missing(words_rel, heard)
         report = cnotes + [f"RESTE : {m}" for m in left]
         (proj / "captions_check.txt").write_text("".join(f"{x}\n" for x in report), encoding="utf-8")
         console.print(f"  sous-titres : {len(cnotes)} correction(s) d'après l'écoute"
                       + (f", [yellow]{len(left)} écart(s) restant(s)[/yellow]" if left else ", aucun mot entendu oublié"))
+    else:
+        words_rel = _apply_fixes(words_rel)
     turns_rel = []
     for tr in clip.get("turns", []):
         r = abs_to_rel(float(tr["at"]))
@@ -887,6 +921,25 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
                 for g in caps:
                     g["top_px"] = int(g["top_px"]) + shift
                 console.print(f"  {fmt:5s} bulle-titre et sous-titres descendus de {shift} px (bas du visage à {chin} px)")
+        # bulle-titre de 3 lignes (19/10/2026, short 4 E22 : « Vos agents IA sont-ils prisonniers de vos outils ? ») : la mise en
+        # page prévoit 2 lignes, les sous-titres passaient SUR la 3e ligne pendant toute l'accroche -> ils descendent d'une ligne
+        # par ligne en plus (au plus jusqu'à `max_caption_y`), sinon la bulle remonte du reste
+        if hook_ctx.get("enabled") and hook_ctx.get("text"):
+            # texte réparti en lignes ÉQUILIBRÉES : ~23 caractères par ligne (mesuré sur E22 : « Sans muscle du changement,
+            # t'es mort. », 37 car. -> 2 lignes ; « Vos agents IA sont-ils prisonniers de vos outils ? », 50 car. -> 3 lignes)
+            cpl = max(8, int(23 * int(hook_ctx["max_w_px"]) / 907 * 76 / int(hook_ctx["font_px"])))
+            n_lines = -(-len(str(hook_ctx["text"])) // cpl)
+            extra = max(0, n_lines - 2) * int(int(hook_ctx["font_px"]) * float(hk.get("line_height", 1.12)))
+            if extra:
+                room2 = max(0, int(H * float(hk.get("max_caption_y", 0.80))) - int(cap_ctx["top_px"]))
+                down = min(extra, room2)
+                cap_ctx["top_px"] = int(cap_ctx["top_px"]) + down
+                for g in caps:
+                    g["top_px"] = int(g["top_px"]) + down
+                if extra > down:
+                    hook_ctx["top_px"] = int(hook_ctx["top_px"]) - (extra - down)
+                console.print(f"  {fmt:5s} bulle-titre sur {n_lines} lignes : sous-titres descendus de {down} px"
+                              + (f", bulle remontée de {extra - down} px" if extra > down else ""))
 
         # flash / light leak SEULEMENT quand l'angle de caméra change au raccord (retour d'Arthur, 08/10/2026 : « des
         # sortes de flashs lumineux de transition : il faut les mettre que quand tu changes d'angle de caméra ») ; un

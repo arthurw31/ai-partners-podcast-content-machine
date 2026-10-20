@@ -737,6 +737,25 @@ vérification intransigeante qui règle ces problèmes »)
   [docs/BONNES_PRATIQUES.md](docs/BONNES_PRATIQUES.md) § « Le juste milieu du montage » ; `qa` mesure le rythme
   (`strict.cut_rhythm` : une coupe toutes les 6 s au plus en moyenne, sinon ATTENTION « trop saccadé ») ; brief de sélection
   (`guidelines.md`) et checklist du relecteur mis à jour. Test `test_rythme_des_coupes_juste_milieu`.
+- **Shorts 3 à 5 E22 (19–20/10/2026), passages découpés à la main** — ce que la chaîne automatique abîmait, corrigé :
+  1. `ctc` prenait de vrais mots pour des hésitations (« se ‖ poser », « étaient ‖ sur un repo », « tu testes ») et `verify`
+     recalait des coupes à la main sur la fin de phrase PRÉCÉDENTE (perdu : « la souveraineté technologique », « deux, des
+     process ») -> `strict._lost_words` : un retrait court qui emporte de vrais mots de la même personne, sans répétition, est
+     recollé ; passages coupés à la main = `checks` posés (« manuel ») pour ne pas repasser tighten / verify / fillers / ctc.
+  2. Coupe VOULUE (réaction de l'autre absente de la transcription : « Exactement », « C'est vrai ») : `keep_cut: true` sur le
+     morceau ; ni `merge_phrase_cuts`, ni `fix_join_flow`, ni la boucle (raccord « dans un mot ») ne la recollent.
+  3. Épisode déjà monté : une retouche de `segments` gardait l'ANCIENNE découpe (`source.mp4`) sans `--force` -> empreinte des
+     passages `assets/source.stamp` (comme `source.multicam.stamp`).
+  4. Plan qui ANTICIPE la réponse (le monteur passe sur Thomas ≤ 0,5 s avant son premier mot) : accepté par `listener_shown`
+     (`strict.ANTICIP`) ; le relecteur le signale quand même : à valider par Arthur.
+  5. Bulle-titre de 3 lignes (> 46 caractères) : les sous-titres passaient dessus pendant toute l'accroche -> `compose` descend
+     les sous-titres d'une ligne par ligne en plus (~23 caractères par ligne, lignes équilibrées).
+  6. Sous-titres : `caption_fixes` par clip ({"mots entendus": "mots justes"}, appliqué aux sous-titres ET à l'écoute) pour un
+     mot que Whisper ne comprend jamais (« là tu fais × IA » entendu « foi et aïe ») ; ponctuation seule (« ? ») collée au mot
+     d'avant ; `group_words` revoit le reste d'un bloc dont les mots sont passés un à un au suivant (« DE ROUTE » seul 0,3 s).
+  7. Un plan du monteur sur l'écoutant au milieu de la CHUTE ne se coupe pas (short 5 : Quentin 1,4 s pendant « …ça te
+     décuple ») : finir avant, sur une fin de phrase, et le dire à Arthur.
+  Tests : `test_mot_perdu_dans_une_coupe_courte_remis`, `test_plan_qui_anticipe_la_reponse_accepte`, `test_coupe_voulue_jamais_recollee`.
 - **Relecture « bon sens » en fin de `polish`** (Arthur, 15/10/2026 : « rajouter une couche agent par-dessus qui juge avec bon
   sens la vidéo entière » -> « oui fais ça ») : `cli._polish_review` lance `review` (Claude Opus SANS contexte) sur chaque short
   après le contrôle des aperçus ; il reçoit des planches SERRÉES de tout le short (`review.dense_sheets` : une image / 0,5 s

@@ -335,6 +335,47 @@ def test_coupes_de_phrase_seulement():
                                                       (1232.7, 1240.6)], out
 
 
+def test_mot_perdu_dans_une_coupe_courte_remis():
+    """19/10/2026, short 3 E22 : `ctc` avait retiré « poser » (« commencent à se ‖ pas mal de questions ») en le prenant pour
+    une hésitation ; la coupe courte qui emporte un vrai mot de la même personne, sans répétition, est recollée."""
+    import json
+
+    from clipper.strict import merge_phrase_cuts
+    wav = _e22()
+    words = json.loads((E22 / "travail" / "work" / "diarized_words.json").read_text(encoding="utf-8"))
+    out, _ = merge_phrase_cuts([{"start": 1507.5, "end": 1509.08}, {"start": 1509.54, "end": 1513.75}], words, wav)
+    assert len(out) == 1, out
+
+
+def test_plan_qui_anticipe_la_reponse_accepte():
+    """19/10/2026, short 4 E22 : le montage passe sur Thomas 0,4 s avant son « Et nous, on recommande… », pendant les
+    derniers mots de Quentin : coupe normale de monteur, pas « on voit celui qui écoute »."""
+    import json
+    import subprocess
+    import tempfile
+
+    from clipper.ingest import host_reference
+    from clipper.strict import listener_shown
+    _e22()
+    if not E22_MP4.exists():
+        raise _Skip("vidéo E22 absente")
+    words = json.loads((E22 / "travail" / "work" / "diarized_words.json").read_text(encoding="utf-8"))
+    cut = Path(tempfile.gettempdir()) / "test_e22_anticipe.mp4"
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-ss", "613", "-t", "5", "-i", str(E22_MP4), "-an", "-c:v", "libx264",
+                    "-crf", "18", str(cut)], check=True)
+    runs = listener_shown(cut, [{"start": 613.0, "end": 618.0}], words, host_reference(Brand("ai-corner")))
+    assert not [r for r in runs if 615.8 < r["abs0"] < 616.8], runs
+
+
+def test_coupe_voulue_jamais_recollee():
+    """19/10/2026, short 3 E22 : « C'est vrai » de Quentin dans une pause de Thomas (absent de la transcription normale) :
+    une coupe marquée `keep_cut` n'est jamais recollée par la règle des coupes de phrase."""
+    from clipper.strict import phrase_cut_merges
+    wav = _e22()
+    segs = [{"start": 1530.12, "end": 1545.86, "keep_cut": True}, {"start": 1546.3, "end": 1547.85}]
+    assert phrase_cut_merges(segs, [], wav) == []
+
+
 def test_rythme_des_coupes_juste_milieu():
     """19/10/2026, Arthur : « c'est le juste milieu entre trop de montage et pas assez, c'est bien fluide » (3 coupes / 28 s)
     contre « trop saccadé » (6 coupes / 25 s)."""

@@ -147,21 +147,23 @@ def group_words(words: list[dict], clip_start: float, clip_end: float, cfg: Cfg,
         return (len(ws_) <= max_words and sum(len(x["w"]) + 1 for x in ws_) <= budget
                 and (max_lines < 3 or len(_fill_lines(ws_, max_chars, max_lines + 1)) <= max_lines))
 
-    def _rebalance(ws_: list[dict], min_first: int = 1, max_first: int | None = None) -> list[list[dict]] | None:
+    def _rebalance(ws_: list[dict], min_first: int = 1, max_first: int | None = None,
+                   last_min: float = MIN_SHOW) -> list[list[dict]] | None:
         """Coupe `ws_` en deux blocs qui tiennent chacun, le 1er affiché ≥ MIN_SHOW et son dernier mot ≥ MIN_SHOW ;
         préfère une coupe après une ponctuation puis la plus équilibrée."""
         best, score = None, 1e9
         for i in range(max(1, min_first), min(len(ws_) - 1, max_first if max_first is not None else len(ws_) - 1) + 1):
             a_, b_ = ws_[:i], ws_[i:]
-            if not (_fits(a_) and _fits(b_)) or b_[0]["s"] - a_[0]["s"] < MIN_SHOW or b_[0]["s"] - a_[-1]["s"] < MIN_SHOW:
+            if not (_fits(a_) and _fits(b_)) or b_[0]["s"] - a_[0]["s"] < MIN_SHOW or b_[0]["s"] - a_[-1]["s"] < last_min:
                 continue
             sc = abs(len(a_) - len(b_)) - (3 if a_[-1]["w"][-1:] in ",;:.?!" else 0)
             if sc < score:
                 best, score = [a_, b_], sc
         return best
 
-    k = 0
-    while k < len(groups) - 1:
+    k, guard = 0, 0
+    while k < len(groups) - 1 and guard < 8 * len(groups) + 20:
+        guard += 1
         g, nxt = groups[k], groups[k + 1]
         if nxt[0]["s"] - g[0]["s"] < MIN_SHOW and g[-1]["w"][-1:] not in ".?!…":
             if _fits(g + nxt):
@@ -177,6 +179,18 @@ def group_words(words: list[dict], clip_start: float, clip_end: float, cfg: Cfg,
                 groups[k], groups[k + 1] = bal
                 k += 1
                 continue
+            # paroles rapides derrière (19/10/2026, short 5 E22 : « DE ROUTE » seul 0,3 s, puis « et que t'as des process »
+            # dit en 0,5 s) : redécoupe avec le bloc PRÉCÉDENT, en tolérant un dernier mot affiché 0,2 s (mot à mot)
+            bal = _rebalance(groups[k - 1] + g, last_min=0.2) if k > 0 else None
+            if bal:
+                groups[k - 1], groups[k] = bal
+                k += 1
+                continue
+            bal = _rebalance(g + nxt, last_min=0.2)
+            if bal:
+                groups[k], groups[k + 1] = bal
+                k += 1
+                continue
         if len(g) >= 3 and nxt[0]["s"] - g[-1]["s"] < MIN_SHOW and g[-1]["w"][-1:] not in ".?!…,":
             if _fits([g[-1]] + nxt):
                 groups[k + 1] = [g[-1]] + nxt
@@ -185,7 +199,10 @@ def group_words(words: list[dict], clip_start: float, clip_end: float, cfg: Cfg,
             bal = _rebalance([g[-1]] + nxt)   # le mot passe devant le bloc suivant, redécoupé en deux s'il déborde
             if bal:
                 groups[k:k + 2] = [g[:-1]] + bal
-                k += 1
+                # le reste est revu (19/10/2026, short 5 E22 : à force de passer les mots un à un au bloc suivant, il restait
+                # « DE ROUTE » seul 0,3 s, jamais recontrôlé)
+                if len(g) - 1 >= 3:
+                    k += 1
                 continue
         # (3) une expression-clé à cheval sur deux blocs (« …PAS DE muscle » / « DE change T'ES MORT ») passe entière dans
         # le bloc suivant (relecture critique du short 1 E22, 15/10/2026)
