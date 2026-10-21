@@ -43,7 +43,8 @@ Résultat jugé « franchement plutôt bien » par Arthur (09/10/2026) : `EPISOD
 - Flash lumineux de transition **seulement quand l'angle de caméra change** (08/10).
 - **Trois textes par short** (« comme on poste sur plusieurs plateformes », 21/10) : post LinkedIn en français, le même en anglais,
   et un texte français pour Instagram / TikTok / YouTube Shorts (1re ligne = la thèse entre « », sans emoji ni lien, fin fixe
-  « Chez AI PARTNERS… Abonnez-vous à la chaîne YouTube… notre dernier podcast avec <invité> »). **Jamais de tiret cadratin.**
+  « Chez AI PARTNERS… Abonnez-vous à la chaîne YouTube… notre dernier podcast avec <invité> », puis « Écoutez le podcast complet : <lien YouTube> »
+  en dernière ligne ; le même lien dans le CTA des deux posts LinkedIn). **Jamais de tiret cadratin.**
   Livrés dans un sous-dossier par short (`LIVRABLES/2_shorts/short_N/`) avec la vidéo : `short_N_linkedin_FR.txt`, `short_N_linkedin_EN.txt`, `short_N_instagram_tiktok_youtube_FR.txt`.
 
 ### Le juste milieu du montage (validé par Arthur le 19/10/2026 sur E22 : « c'est parfait, c'est le juste milieu entre trop de

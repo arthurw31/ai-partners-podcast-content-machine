@@ -221,7 +221,10 @@ exporter `PYTHONIOENCODING=utf-8` avant tout `print` contenant des accents ou de
    même idée, même structure, même lien), (3) texte INSTAGRAM / TIKTOK / YOUTUBE SHORTS en français (`social_post_fr`) :
    1re ligne = la thèse entre « », paragraphes courts, chute ; aucun emoji, hashtag, lien ni CTA ; le programme ajoute
    LUI-MÊME la fin fixe (présentation d'AI PARTNERS + « Abonnez-vous à la chaîne YouTube AI PARTNERS… notre dernier podcast
-   avec <Invité>, <Rôle> chez <Entreprise> », `publication.social_fr` de brand.yaml, rôle en français = `--guest-role-fr`).
+   avec <Invité>, <Rôle> chez <Entreprise> » + « Écoutez le podcast complet : <lien YouTube de l'épisode> » en DERNIÈRE ligne,
+   cliquable sur YouTube Shorts ; Arthur, 21/10/2026 : « il me faut le lien du podcast YouTube en lien cliquable dans les textes » ;
+   `publication.social_fr` de brand.yaml, rôle en français = `--guest-role-fr`, lien = `--episode-url`, mémorisé dans
+   `clips.json` (`episode_url`) et repris aux relances ; les deux posts LinkedIn portent le même lien dans leur CTA).
    **JAMAIS de tiret cadratin** dans aucun des trois (`llm._no_dash` + `posts.check_texts`). La chute reformule le clip, elle
    n'invente ni définition ni morale. `check_texts` contrôle : 3 textes présents, tirets, hashtags, langue de chaque texte,
    lien de l'épisode, format du texte réseaux ; `livraison` range chaque short dans son SOUS-DOSSIER `LIVRABLES/2_shorts/short_N/` (Arthur, 21/10/2026 : « pour que ce

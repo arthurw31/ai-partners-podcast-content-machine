@@ -34,8 +34,8 @@ tu rédiges TROIS textes qui l'accompagnent sur les réseaux :
 3. `social_post_fr` : le texte pour Instagram / TikTok / YouTube Shorts, en FRANÇAIS, dans le style des exemples
    « Instagram / TikTok / YouTube Shorts » du brief : la 1re ligne est la thèse du short entre guillemets français
    « … », puis des paragraphes courts (le contraste, l'idée de la personne qui parle, le concret), puis la chute en une
-   ligne. AUCUN emoji, AUCUN hashtag, AUCUN lien, AUCUN CTA : la présentation d'AI Partners et l'invitation à s'abonner à la
-   chaîne YouTube sont ajoutées après par le programme, ne les écris pas.
+   ligne. AUCUN emoji, AUCUN hashtag, AUCUN lien, AUCUN CTA : la présentation d'AI Partners, l'invitation à s'abonner à la
+   chaîne YouTube et le lien du podcast sont ajoutés après par le programme, ne les écris pas.
 
 Règles absolues :
 - Les trois textes portent L'IDÉE DU CLIP (ce qui se dit dans cet extrait précis), reformulée avec ses mots-clés,
@@ -110,18 +110,21 @@ def write_posts(brand: Brand, ep: Path, clips: dict, transcript: dict, episode_u
         return clips
     posts_dir = ep / "posts"
     posts_dir.mkdir(parents=True, exist_ok=True)
+    # lien du podcast sur YouTube : donné une fois (`--episode-url`), mémorisé dans clips.json, repris aux relances
+    episode_url = episode_url or str(clips.get("episode_url") or "") or str(pub.get("episode_url") or "")
+    if episode_url:
+        clips["episode_url"] = episode_url
 
     targets = [c for c in clips["clips"] if not only or c["index"] in only]
     todo = [c for c in targets if force or not all(c.get(k) for k in TEXT_KEYS)]
     if not todo:
         console.print(f"[dim]Posts en cache : {posts_dir}[/dim]")
-        if _add_contact(targets, pub) | _add_social_outro(targets, pub, clips):
+        if _add_contact(targets, pub) | _add_social_outro(targets, pub, clips, episode_url):
             (ep / "clips.json").write_text(json.dumps(clips, ensure_ascii=False, indent=1), encoding="utf-8")
         _write_files(posts_dir, targets, clips)
         return clips
 
     brief = brand.posts_brief or "(aucun brief : langue du podcast, ton professionnel, 100–150 mots, CTA vers l'épisode complet)"
-    episode_url = episode_url or str(pub.get("episode_url") or "")
     guest, company = clips.get("guest", ""), clips.get("company", "")
     clips_txt = []
     for c in todo:
@@ -169,7 +172,7 @@ def write_posts(brand: Brand, ep: Path, clips: dict, transcript: dict, episode_u
         c.pop("short_description", None)       # ancien champ (hashtags), remplacé par social_post_fr
         c["post_variant"] = str(p.get("variant", ""))
     _add_contact(todo, pub)
-    _add_social_outro(todo, pub, clips)
+    _add_social_outro(todo, pub, clips, episode_url)
     (ep / "clips.json").write_text(json.dumps(clips, ensure_ascii=False, indent=1), encoding="utf-8")
     _write_files(posts_dir, targets, clips)
     for c in todo:
@@ -219,23 +222,34 @@ def guest_line(clips: dict) -> str:
     return f"{guest} ({company})" if guest and company else (guest or company)
 
 
-def social_outro(pub: dict, clips: dict) -> str:
-    """Fin FIXE du texte Instagram / TikTok / YouTube Shorts (Arthur, 21/10/2026) : la présentation d'AI Partners puis
-    l'invitation à s'abonner à la chaîne YouTube, avec le dernier podcast. Écrite par le programme, jamais par le modèle."""
+def social_outro(pub: dict, clips: dict, episode_url: str = "") -> str:
+    """Fin FIXE du texte Instagram / TikTok / YouTube Shorts (Arthur, 21/10/2026) : la présentation d'AI Partners, l'invitation à
+    s'abonner à la chaîne YouTube avec le dernier podcast, puis le LIEN du podcast (Arthur, 21/10/2026 : « il me faut le lien du
+    podcast YouTube en lien cliquable dans les textes » ; YouTube Shorts le rend cliquable, Instagram et TikTok demandent le lien
+    en bio). Écrite par le programme, jamais par le modèle."""
     s = pub.get("social_fr") or {}
     about, sub = str(s.get("about") or "").strip(), str(s.get("subscribe") or "").strip()
-    return "\n\n".join(x for x in (about, sub.replace("{guest_line}", guest_line(clips))) if x)
+    link = str(s.get("link_line") or "").strip().replace("{episode_url}", episode_url) if episode_url else ""
+    return "\n\n".join(x for x in (about, sub.replace("{guest_line}", guest_line(clips)), link) if x)
 
 
-def _add_social_outro(clips_list: list[dict], pub: dict, clips: dict) -> bool:
-    out, changed = social_outro(pub, clips), False
+def _add_social_outro(clips_list: list[dict], pub: dict, clips: dict, episode_url: str = "") -> bool:
+    """Ajoute la fin fixe (idempotent) ; si le texte l'a déjà mais pas le lien, ajoute seulement la ligne du lien."""
+    s = pub.get("social_fr") or {}
+    out, changed = social_outro(pub, clips, episode_url), False
     if not out:
         return False
-    marker = str((pub.get("social_fr") or {}).get("about") or "")[:40]
+    marker = str(s.get("about") or "")[:40]
+    link = str(s.get("link_line") or "").strip().replace("{episode_url}", episode_url) if episode_url else ""
     for c in clips_list:
         body = c.get("social_post_fr")
-        if body and marker not in body:
+        if not body:
+            continue
+        if marker not in body:
             c["social_post_fr"] = body.rstrip() + "\n\n" + out
+            changed = True
+        elif link and episode_url not in body:
+            c["social_post_fr"] = body.rstrip() + "\n\n" + link
             changed = True
     return changed
 
@@ -267,8 +281,13 @@ def check_texts(c: dict, pub: dict, episode_url: str = "") -> list[str]:
             out.append("social_post_fr : la 1re ligne doit être la thèse entre « »")
         if _has_emoji(soc):
             out.append("social_post_fr : pas d'emoji")
-        if "http" in soc:
-            out.append("social_post_fr : pas de lien (Instagram / TikTok ne les rendent pas cliquables)")
+        url0 = episode_url or str(c.get("episode_url") or "") or str(pub.get("episode_url") or "")
+        import re as _re
+        autres = [u for u in _re.findall(r"https?://\S+", soc) if not url0 or u.rstrip(".,;)") != url0]
+        if autres:
+            out.append("social_post_fr : un seul lien autorisé, celui du podcast YouTube (ajouté par le programme)")
+        if url0 and url0 not in soc:
+            out.append("social_post_fr : lien du podcast YouTube absent (il doit finir le texte, sans ponctuation collée)")
         sub = str((pub.get("social_fr") or {}).get("subscribe") or "")[:25]
         if sub and sub not in soc:
             out.append("social_post_fr : phrase d'abonnement absente")

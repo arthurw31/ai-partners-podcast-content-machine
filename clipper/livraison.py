@@ -124,7 +124,7 @@ def build(brand, video: Path, work: Path) -> tuple[Path, list[tuple[str, str, st
             done.append(f)
         if len(have) == len(names):
             stale = bool(post) and post.stat().st_mtime < mp4.stat().st_mtime - 6 * 3600
-            issues = check_texts(c, brand.cfg.get("publication") or {})
+            issues = check_texts(c, brand.cfg.get("publication") or {}, str(clips.get("episode_url") or ""))
             rows.append((WARN if stale or issues else OK, f"textes short {n} (LinkedIn FR + EN, Instagram / TikTok / YouTube Shorts)",
                          "; ".join(issues) if issues else ("écrits avant le dernier montage du short : à relire (`posts --only N --force`)" if stale else "à jour")))
         elif have:

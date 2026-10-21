@@ -382,18 +382,24 @@ def test_textes_de_publication():
     réseaux finit par la fin fixe d'AI PARTNERS + l'abonnement (ajoutée par le programme)."""
     from clipper.posts import _add_social_outro, check_texts, guest_line
     pub = {"social_fr": {"about": "Chez AI PARTNERS, nous accompagnons les organisations dans la conception de solutions d'IA.",
-                         "subscribe": "Abonnez-vous à la chaîne YouTube AI PARTNERS et notamment notre dernier podcast avec {guest_line}."}}
+                         "subscribe": "Abonnez-vous à la chaîne YouTube AI PARTNERS et notamment notre dernier podcast avec {guest_line}.",
+                         "link_line": "Écoutez le podcast complet : {episode_url}"}}
     clips = {"guest": "Quentin Amaudry", "company": "Mendo", "guest_role_fr": "Cofondateur et CEO"}
     assert guest_line(clips) == "Quentin Amaudry, Cofondateur et CEO chez Mendo"
     url = "https://youtu.be/x"
     c = {"linkedin_post": f"We used to use tools.\n\nThe team said that. 🎙️ Watch the full podcast: {url}",
          "linkedin_post_fr": f"Avant, nous utilisions des outils.\n\n🎙️ Retrouvez l'épisode complet : {url}",
          "social_post_fr": "« Avant on utilisait des outils. »\n\nNous avons changé de méthode."}
-    _add_social_outro([c], pub, clips)
-    assert c["social_post_fr"].endswith("avec Quentin Amaudry, Cofondateur et CEO chez Mendo.")
+    _add_social_outro([c], pub, clips, url)
+    # lien du podcast YouTube en dernière ligne, sans ponctuation collée (Arthur, 21/10/2026 : « en lien cliquable »)
+    assert c["social_post_fr"].endswith("chez Mendo.\n\nÉcoutez le podcast complet : " + url), c["social_post_fr"][-120:]
     n = c["social_post_fr"]
-    _add_social_outro([c], pub, clips)
+    _add_social_outro([c], pub, clips, url)
     assert c["social_post_fr"] == n, "ajout de la fin fixe non idempotent"
+    # texte déjà complété avant que le lien existe : seule la ligne du lien est ajoutée
+    old = dict(c, social_post_fr=n.rsplit("\n\n", 1)[0])
+    _add_social_outro([old], pub, clips, url)
+    assert old["social_post_fr"] == n
     assert check_texts(c, pub, url) == [], check_texts(c, pub, url)
     bad = dict(c, linkedin_post="A — B " + url, social_post_fr="Sans guillemets #IA \U0001F680 https://x.fr")
     why = " ".join(check_texts(bad, pub, url))

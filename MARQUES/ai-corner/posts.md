@@ -10,8 +10,8 @@ pour les shorts de l'épisode Dust, octobre 2026), puis les textes de référenc
 2. **Post LinkedIn en français** (`linkedin_post_fr`) : le même post, même idée, même structure, même CTA avec le même lien,
    écrit naturellement en français (pas une traduction mot à mot), voix « nous ».
 3. **Texte Instagram / TikTok / YouTube Shorts en français** (`social_post_fr`) : même idée, dans le style des exemples de la
-   dernière section. Le programme ajoute LUI-MÊME à la fin la présentation d'AI PARTNERS et l'invitation à s'abonner à la
-   chaîne YouTube avec le dernier podcast (`publication.social_fr` de brand.yaml) : ne pas les écrire.
+   dernière section. Le programme ajoute LUI-MÊME à la fin la présentation d'AI PARTNERS , l'invitation à s'abonner à la
+   chaîne YouTube avec le dernier podcast, puis le LIEN du podcast YouTube (`publication.social_fr` de brand.yaml) : ne pas les écrire.
 
 ## Règles générales (valables pour les trois)
 - **Jamais de tiret cadratin « — » ni demi-cadratin « – »** (Arthur, 14/10/2026, redit le 21/10/2026 : on poste sur plusieurs
@@ -146,7 +146,8 @@ Un texte long de réseau social, en français, **sans emoji, sans hashtag, sans 
 4. La chute en une ou deux phrases, souvent en miroir de l'accroche.
 5. **Fin FIXE ajoutée par le programme** (ne pas l'écrire) : « Chez AI PARTNERS, nous accompagnons les organisations… » puis
    « Abonnez-vous à la chaîne YouTube AI PARTNERS pour découvrir nos analyses… et notamment notre dernier podcast avec <Invité>,
-   <Rôle> chez <Entreprise>. »
+   <Rôle> chez <Entreprise>. » puis « Écoutez le podcast complet : <lien YouTube de l'épisode> » (lien cliquable sur YouTube
+   Shorts ; Instagram et TikTok ne rendent pas les liens des légendes cliquables : lien en bio).
 
 ### Exemple 1 (short « L'IA agentique : un outil ou une ressource ? », sans la fin fixe)
 

@@ -113,6 +113,7 @@ publication:                 # TROIS textes par short (21/10/2026) : post Linked
   social_fr:                 # fin FIXE du texte Instagram / TikTok / YouTube Shorts (Arthur, 21/10/2026), ajoutée par le programme
     about: "Chez AI PARTNERS, nous accompagnons les organisations dans la conception et le déploiement de solutions d'IA centrées sur les usages, afin de générer un impact concret pour les métiers, les collaborateurs et les clients."
     subscribe: "Abonnez-vous à la chaîne YouTube AI PARTNERS pour découvrir nos analyses et retours d'expérience sur l'IA appliquée aux entreprises et notamment notre dernier podcast avec {guest_line}."
+    link_line: "Écoutez le podcast complet : {episode_url}"   # lien du podcast YouTube, dernière ligne (Arthur, 21/10/2026 : « en lien cliquable dans les textes »)
   host_name: "Thomas Spitz"
   channels: "AI PARTNERS YouTube channel, Spotify, Ausha"
   # CTA « bosser avec nous » (idée de Thomas, 09/10/2026 : « ça manque de call to action pour bosser avec nous » ; Arthur :
