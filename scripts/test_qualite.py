@@ -376,6 +376,32 @@ def test_coupe_voulue_jamais_recollee():
     assert phrase_cut_merges(segs, [], wav) == []
 
 
+def test_textes_de_publication():
+    """21/10/2026, Arthur : « comme on poste sur plusieurs plateformes, un texte LinkedIn en français et un en anglais, et pour
+    Insta / TikTok / YouTube Shorts un texte français dans ce style, sans tiret cadratin » : trois textes par short, le texte
+    réseaux finit par la fin fixe d'AI PARTNERS + l'abonnement (ajoutée par le programme)."""
+    from clipper.posts import _add_social_outro, check_texts, guest_line
+    pub = {"social_fr": {"about": "Chez AI PARTNERS, nous accompagnons les organisations dans la conception de solutions d'IA.",
+                         "subscribe": "Abonnez-vous à la chaîne YouTube AI PARTNERS et notamment notre dernier podcast avec {guest_line}."}}
+    clips = {"guest": "Quentin Amaudry", "company": "Mendo", "guest_role_fr": "Cofondateur et CEO"}
+    assert guest_line(clips) == "Quentin Amaudry, Cofondateur et CEO chez Mendo"
+    url = "https://youtu.be/x"
+    c = {"linkedin_post": f"We used to use tools.\n\nThe team said that. 🎙️ Watch the full podcast: {url}",
+         "linkedin_post_fr": f"Avant, nous utilisions des outils.\n\n🎙️ Retrouvez l'épisode complet : {url}",
+         "social_post_fr": "« Avant on utilisait des outils. »\n\nNous avons changé de méthode."}
+    _add_social_outro([c], pub, clips)
+    assert c["social_post_fr"].endswith("avec Quentin Amaudry, Cofondateur et CEO chez Mendo.")
+    n = c["social_post_fr"]
+    _add_social_outro([c], pub, clips)
+    assert c["social_post_fr"] == n, "ajout de la fin fixe non idempotent"
+    assert check_texts(c, pub, url) == [], check_texts(c, pub, url)
+    bad = dict(c, linkedin_post="A — B " + url, social_post_fr="Sans guillemets #IA \U0001F680 https://x.fr")
+    why = " ".join(check_texts(bad, pub, url))
+    for needle in ("tiret cadratin", "hashtag", "entre", "emoji", "lien", "abonnement"):
+        assert needle in why, (needle, why)
+    assert "manquant" in " ".join(check_texts({"linkedin_post": "x"}, pub, ""))
+
+
 def test_rythme_des_coupes_juste_milieu():
     """19/10/2026, Arthur : « c'est le juste milieu entre trop de montage et pas assez, c'est bien fluide » (3 coupes / 28 s)
     contre « trop saccadé » (6 coupes / 25 s)."""

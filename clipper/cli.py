@@ -430,6 +430,8 @@ def cmd_posts(a: argparse.Namespace) -> dict:
     clips = json.loads((ep / "clips.json").read_text(encoding="utf-8"))
     if getattr(a, "guest_role", ""):
         clips["guest_role"] = a.guest_role
+    if getattr(a, "guest_role_fr", ""):
+        clips["guest_role_fr"] = a.guest_role_fr
     clips = write_posts(brand, ep, clips, transcript, episode_url=getattr(a, "episode_url", "") or "",
                         only=_parse_only(getattr(a, "only", "")), force=a.force)
     _write_summary(ep, clips)
@@ -464,8 +466,9 @@ def _write_summary(ep: Path, clips: dict, projects: list[Path] | None = None) ->
                   f"- **Mots-clés** : {', '.join(c.get('keywords', []))}",
                   f"- **B-roll** : {', '.join(b['query'] for b in c.get('broll', [])) or '—'}", ""]
         if c.get("linkedin_post"):
-            lines += ["**Post LinkedIn :**", "", "```", c["linkedin_post"], "```", "",
-                      "**Description courte (Reels / Shorts) :**", "", "```", c.get("short_description", ""), "```", ""]
+            lines += ["**Post LinkedIn (français) :**", "", "```", c.get("linkedin_post_fr", ""), "```", "",
+                      "**Post LinkedIn (English) :**", "", "```", c["linkedin_post"], "```", "",
+                      "**Instagram / TikTok / YouTube Shorts (français) :**", "", "```", c.get("social_post_fr", ""), "```", ""]
         else:
             lines += ["*Post LinkedIn pas encore rédigé : `python -m clipper posts …`*", ""]
     (ep / "summary.md").write_text("\n".join(lines), encoding="utf-8")
@@ -1475,7 +1478,8 @@ def main(argv: list[str] | None = None) -> None:
 
     def posts_args(sp: argparse.ArgumentParser) -> None:
         sp.add_argument("--episode-url", default="", help="URL de l'episode complet (mise en clair dans le CTA)")
-        sp.add_argument("--guest-role", default="", help="role de l'invite, ex: 'CDO at MAIF'")
+        sp.add_argument("--guest-role", default="", help="role de l'invite en anglais, ex: 'CDO'")
+        sp.add_argument("--guest-role-fr", default="", help="role de l'invite en francais, ex: 'directeur data' (phrase d'abonnement des textes reseaux)")
 
     sp = sub.add_parser("run", help="pipeline complet"); common(sp); selection_args(sp); build_args(sp); render_args(sp); posts_args(sp)
     sp.add_argument("--no-render", action="store_true"); sp.set_defaults(fn=cmd_run)

@@ -108,8 +108,11 @@ outro:
 broll:
   enabled: false             # aucun B-roll dans les clips du monteur
 
-publication:                 # posts LinkedIn en anglais, style de la page AI Partners (voir posts.md)
+publication:                 # TROIS textes par short (21/10/2026) : post LinkedIn en anglais + en français + texte réseaux en français (voir posts.md)
   language: en
+  social_fr:                 # fin FIXE du texte Instagram / TikTok / YouTube Shorts (Arthur, 21/10/2026), ajoutée par le programme
+    about: "Chez AI PARTNERS, nous accompagnons les organisations dans la conception et le déploiement de solutions d'IA centrées sur les usages, afin de générer un impact concret pour les métiers, les collaborateurs et les clients."
+    subscribe: "Abonnez-vous à la chaîne YouTube AI PARTNERS pour découvrir nos analyses et retours d'expérience sur l'IA appliquée aux entreprises et notamment notre dernier podcast avec {guest_line}."
   host_name: "Thomas Spitz"
   channels: "AI PARTNERS YouTube channel, Spotify, Ausha"
   # CTA « bosser avec nous » (idée de Thomas, 09/10/2026 : « ça manque de call to action pour bosser avec nous » ; Arthur :

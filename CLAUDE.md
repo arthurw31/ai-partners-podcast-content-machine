@@ -216,13 +216,22 @@ exporter `PYTHONIOENCODING=utf-8` avant tout `print` contenant des accents ou de
    pris à des endroits différents de l'épisode ; `clip["segments"]` (liste ordonnée), `compose` découpe chaque
    segment, les concatène (`media.concat_segments`) et remappe mots/tours de parole/B-roll en temps relatif
    (`abs_to_rel`). `montage.join_transition: cut|flash`.
-6. **Un post LinkedIn par clip** (`clipper/posts.py`, commande `posts`, lancée par `run`) : rédigé dans le ton de
+6. **TROIS textes par clip** (Arthur, 21/10/2026 : « comme on poste sur plusieurs plateformes »), `clipper/posts.py`, commande
+   `posts`, lancée par `run` : (1) post LinkedIn en ANGLAIS (`linkedin_post`), (2) le même en FRANÇAIS (`linkedin_post_fr`,
+   même idée, même structure, même lien), (3) texte INSTAGRAM / TIKTOK / YOUTUBE SHORTS en français (`social_post_fr`) :
+   1re ligne = la thèse entre « », paragraphes courts, chute ; aucun emoji, hashtag, lien ni CTA ; le programme ajoute
+   LUI-MÊME la fin fixe (présentation d'AI PARTNERS + « Abonnez-vous à la chaîne YouTube AI PARTNERS… notre dernier podcast
+   avec <Invité>, <Rôle> chez <Entreprise> », `publication.social_fr` de brand.yaml, rôle en français = `--guest-role-fr`).
+   **JAMAIS de tiret cadratin** dans aucun des trois (`llm._no_dash` + `posts.check_texts`). La chute reformule le clip, elle
+   n'invente ni définition ni morale. `check_texts` contrôle : 3 textes présents, tirets, hashtags, langue de chaque texte,
+   lien de l'épisode, format du texte réseaux ; `livraison` écrit par short `short_N_linkedin_FR.txt`, `_linkedin_EN.txt`,
+   `_instagram_tiktok_youtube_FR.txt` (à coller tels quels). Test `test_textes_de_publication`. Chaque post est rédigé dans le ton de
    `MARQUES/<slug>/posts.md` (règles + posts réellement publiés par la marque, à ne jamais recopier), porte l'idée
    du clip, n'invente rien qui ne soit dans la transcription de l'extrait. AI Corner : **méthode « post d'un short »**
    déduite des 4 posts publiés pour les shorts Dust (accroche-thèse en 1 ligne — citation, constat ou question —,
    contraste, invité « Prénom Nom, Rôle at Entreprise », développement concret, chute en 1 ligne, CTA 🎬/🎙️ + lien) ;
    anglais, voix de la page AI Partners, sans hashtags. Les formats « nouvel épisode / preview » seulement sur demande. Sortie : `EPISODES/…/travail/posts/clip_NN_<titre>.md` + champs
-   `linkedin_post` / `short_description` dans `clips.json` + `summary.md`.
+   `linkedin_post` / `linkedin_post_fr` / `social_post_fr` dans `clips.json` (l'ancien `short_description` à hashtags n'existe plus) + `summary.md`.
 
 ## Titre de l'épisode : `titles` (Arthur, 09/10/2026 : « l'équipe m'a retourné que les titres n'étaient pas ouf ; réfléchis à un
 process pour les rendre mieux, et une étape où quelqu'un du marketing valide un titre parmi 5 propositions »)

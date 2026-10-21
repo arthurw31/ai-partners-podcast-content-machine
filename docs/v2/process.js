@@ -54,7 +54,7 @@ window.PROCESS = {
     {
       id: "shorts", num: 2, title: "5 shorts", group: "main",
       pitch: "Claude propose 10 passages, l'équipe en garde 5, la machine monte et contrôle chaque short.",
-      deliverable: "5 shorts verticaux + 5 posts LinkedIn",
+      deliverable: "5 shorts verticaux + 15 textes (LinkedIn FR et EN, Instagram / TikTok / YouTube Shorts FR)",
       duration: "≈ 20 à 30 min de calcul par short",
       status: { level: "ok", text: "Validé sur E23, en cours sur E22" },
       summary: "Le process le plus contrôlé : chaque short passe par un nettoyage du son en plusieurs couches, puis une boucle de contrôle « intransigeante » qui corrige toute seule, avant que l'équipe ne le voie.",
@@ -104,14 +104,14 @@ window.PROCESS = {
           loop: { to: 2, label: "retouche demandée : retour au nettoyage" } },
         { actor: "auto", title: "Rendu 1080p", short: "Version finale en haute qualité, puis contrôle du fichier.",
           duration: "≈ 12 × la durée du short (2 en parallèle)", cmd: "python -m clipper render --only N", files: ["travail/renders/*.mp4"] },
-        { actor: "claude", title: "1 post LinkedIn par short", short: "En anglais, dans la voix de la page AI Partners, sans hashtags.",
+        { actor: "claude", title: "3 textes par short", short: "Post LinkedIn en français et en anglais, texte Instagram / TikTok / YouTube Shorts en français. Jamais de tiret cadratin.",
           details: ["Méthode « post d'un short » tirée des posts déjà publiés : accroche, contraste, invité, développement, chute, lien.",
                     "Rien qui ne soit dit dans l'extrait."],
           cmd: "python -m clipper posts …", files: ["travail/posts/clip_NN_*.md"] },
         { actor: "auto", title: "Outro avec la miniature", short: "Carte « l'épisode complet » avec la miniature YouTube, collée à la fin de chaque short.",
           details: ["Rendue une seule fois, puis ajoutée à chaque short sans écran noir.", "Format vérifié pour être lisible partout (H.264 yuv420p)."],
           duration: "≈ 2 min 40 une fois, puis ≈ 1 min par short", cmd: "python -m clipper outro …", files: ["travail/livrables/clip_NN_*_9x16.mp4"] },
-        { actor: "livrable", title: "5 shorts + 5 posts", short: "Prêts à publier." }
+        { actor: "livrable", title: "5 shorts + leurs 3 textes", short: "Prêts à publier." }
       ]
     },
 
