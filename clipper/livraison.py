@@ -5,8 +5,8 @@ finales de chaque livrable, pour qu'on n'ait plus qu'à le copier dans le Drive 
 `python -m clipper livraison --brand <m> --input <E>.mp4` -> EPISODES/<marque>/<épisode>/LIVRABLES/ :
     LISEZMOI.md              quoi publier où, titre, état des contrôles, ce qui manque
     1_episode_youtube/       épisode .mp4 · miniature.jpg / _HD.png · titre_et_description.md
-    2_shorts/                short_N_<titre>.mp4 + 3 textes par short : short_N_linkedin_FR.txt, short_N_linkedin_EN.txt,
-                             short_N_instagram_tiktok_youtube_FR.txt (à coller tels quels)
+    2_shorts/short_N/        UN dossier par short : short_N_<titre>.mp4 + ses 3 textes (short_N_linkedin_FR.txt,
+                             short_N_linkedin_EN.txt, short_N_instagram_tiktok_youtube_FR.txt : à coller tels quels)
     3_carrousel_linkedin/    carrousel.pdf · slides/ · post_linkedin.md
     4_newsletter/            email.html · email.txt · objet.txt · apercu.png · images/
     5_teaser/                teaser .mp4
@@ -102,7 +102,8 @@ def build(brand, video: Path, work: Path) -> tuple[Path, list[tuple[str, str, st
         if not mp4.exists():
             rows.append((MISSING, f"short {n}", f"« {label} » : pas encore livré (`render` puis `outro`)"))
             continue
-        dst = d2 / f"short_{n}_{_slug(label, 45)}.mp4"
+        sd = d2 / f"short_{n}"     # UN sous-dossier par short : la vidéo et ses 3 textes (Arthur, 21/10/2026 : « pour que ce soit structuré »)
+        dst = sd / f"short_{n}_{_slug(label, 45)}.mp4"
         _copy(mp4, dst, done)
         st = _qa_status(work / "qa" / f"clip_{n:02d}.md")
         problems = []
@@ -117,7 +118,7 @@ def build(brand, video: Path, work: Path) -> tuple[Path, list[tuple[str, str, st
         post = next(iter(sorted((work / "posts").glob(f"clip_{n:02d}_*.md"))), None) if (work / "posts").exists() else None
         have = [(k, nm) for k, nm in names if (c.get(k) or "").strip()]
         for k, nm in have:
-            f = d2 / f"short_{n}_{nm}.txt"
+            f = sd / f"short_{n}_{nm}.txt"
             f.parent.mkdir(parents=True, exist_ok=True)
             f.write_text(c[k].strip() + "\n", encoding="utf-8")
             done.append(f)
@@ -195,7 +196,7 @@ def build(brand, video: Path, work: Path) -> tuple[Path, list[tuple[str, str, st
     lines += [f"| {icon[s]} | {what} | {detail.replace('|', '¦')} |" for s, what, detail in rows]
     lines += ["", "## Où publier", "",
               "- `1_episode_youtube/` : la vidéo, la miniature et le titre + la description (avec les chapitres) sur YouTube.",
-              "- `2_shorts/` : chaque short (vidéo avec l'outro) et ses 3 textes : `linkedin_FR.txt` et `linkedin_EN.txt` pour LinkedIn,",
+              "- `2_shorts/short_N/` : un dossier par short, avec la vidéo (outro comprise) et ses 3 textes : `linkedin_FR.txt` et `linkedin_EN.txt` pour LinkedIn,",
               "  `instagram_tiktok_youtube_FR.txt` pour Instagram, TikTok et YouTube Shorts (à coller tels quels, sans tiret cadratin).",
               "- `3_carrousel_linkedin/` : le PDF en document LinkedIn, avec `post_linkedin.md` (le lien est dans le post).",
               "- `4_newsletter/` : le mail de Thomas (`email.html`, objet dans `objet.txt`) — à envoyer après la mise en ligne.",

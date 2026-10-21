@@ -224,8 +224,8 @@ exporter `PYTHONIOENCODING=utf-8` avant tout `print` contenant des accents ou de
    avec <Invité>, <Rôle> chez <Entreprise> », `publication.social_fr` de brand.yaml, rôle en français = `--guest-role-fr`).
    **JAMAIS de tiret cadratin** dans aucun des trois (`llm._no_dash` + `posts.check_texts`). La chute reformule le clip, elle
    n'invente ni définition ni morale. `check_texts` contrôle : 3 textes présents, tirets, hashtags, langue de chaque texte,
-   lien de l'épisode, format du texte réseaux ; `livraison` écrit par short `short_N_linkedin_FR.txt`, `_linkedin_EN.txt`,
-   `_instagram_tiktok_youtube_FR.txt` (à coller tels quels). Test `test_textes_de_publication`. Chaque post est rédigé dans le ton de
+   lien de l'épisode, format du texte réseaux ; `livraison` range chaque short dans son SOUS-DOSSIER `LIVRABLES/2_shorts/short_N/` (Arthur, 21/10/2026 : « pour que ce
+   soit structuré ») avec la vidéo et `short_N_linkedin_FR.txt`, `_linkedin_EN.txt`, `_instagram_tiktok_youtube_FR.txt` (à coller tels quels). Test `test_textes_de_publication`. Chaque post est rédigé dans le ton de
    `MARQUES/<slug>/posts.md` (règles + posts réellement publiés par la marque, à ne jamais recopier), porte l'idée
    du clip, n'invente rien qui ne soit dans la transcription de l'extrait. AI Corner : **méthode « post d'un short »**
    déduite des 4 posts publiés pour les shorts Dust (accroche-thèse en 1 ligne — citation, constat ou question —,

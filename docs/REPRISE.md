@@ -1,6 +1,6 @@
 # E22 Mendo : les 5 shorts sont FINIS (21/10/2026)
 
-Rendus 1080p 24 i/s, outro collée, posts LinkedIn rédigés, tout rangé dans `EPISODES/ai-corner/E22_quentin-amaudry_mendo/LIVRABLES/2_shorts/`.
+Rendus 1080p 24 i/s, outro collée, posts LinkedIn rédigés, tout rangé dans `EPISODES/ai-corner/E22_quentin-amaudry_mendo/LIVRABLES/2_shorts/short_N/` (vidéo + 3 textes par short).
 Validés par Arthur : 1 et 2 (19/10), 3, 4, 5 (21/10). Réserves connues : short 2 et 5 en ATTENTION qa (un « ben » court gardé, voulu),
 short 5 : 59 s avec l'outro (53 s de parole, fin prolongée à la demande d'Arthur), bulle du short 1 non changée (le relecteur proposait
 « Pourquoi déployer des agents ne suffit pas ? »). Reste pour E22 : titre YouTube (`titles --pick`), épisode complet, carrousel,
