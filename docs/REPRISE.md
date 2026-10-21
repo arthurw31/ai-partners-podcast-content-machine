@@ -1,20 +1,10 @@
-# EN COURS (19/10/2026, 16 h 55) : E22 Mendo, shorts 3, 4, 5
+# E22 Mendo : les 5 shorts sont FINIS (21/10/2026)
 
-Shorts 1 et 2 E22 : FINIS (rendus, outro, posts, `LIVRABLES/2_shorts/`), montage « juste milieu » validé par Arthur.
-Shorts 3, 4, 5 = candidats 8, 9, 10 choisis par Thomas (Slack #marketing). Segments écrits à la main dans `clips.json`
-(coupes entre phrases seulement, sauvegarde avant : `archives/clips_before_shorts_3_4_5.json`) :
-- #3 « Vos agents IA ont-ils votre expertise ? » : (1507.5–1513.75) (1515.45–1526.2) (1530.15–1547.85) ; Quentin (Mercor)
-  puis Thomas, fin « …ça demande une nouvelle compétence ».
-- #4 « …prisonniers de vos outils ? » : (606.85–626.0) (628.5–629.95) (632.7–652.0) ; fin « …leur outil souverain ».
-- #5 « Qu'est-ce qu'une AI Native Company ? » : (2304.7–2338.4) (2340.6–2348.75) ; fin « …ça te décuple ».
-`polish --only 3,4,5` lancé puis ARRÊTÉ (PC éteint) au 1er tour de la boucle. 1er contrôle (`travail/polish_345.log`) :
-- #3 : début à 1507.50 coupé dans la voix -> recaler le début avant « aux US » (mot à 1507.70) ;
-- #4 : un mot entendu non sous-titré ; Thomas à l'image 10,0–10,5 s du short pendant que Quentin parle (plan du monteur) ;
-- #5 : `verify` a avancé le début à 2299.29 (à revoir : on veut « Tu sais, j'essaie de le définir… ») et il est coupé
-  dans la voix ; un mot non sous-titré ; Quentin à l'image 30,2–31,0 s pendant que Thomas parle.
-Reprendre : corriger ces points dans `clips.json`, relancer `polish --only 3,4,5`, regarder les planches, envoyer les
-aperçus à Arthur, puis `render`, `qa --render`, `outro --only 3,4,5`, `posts --only 3,4,5 --guest-role "Co-founder & CEO at Mendo"
---episode-url https://youtu.be/jPK1bXcS_Ak`, `livraison`.
+Rendus 1080p 24 i/s, outro collée, posts LinkedIn rédigés, tout rangé dans `EPISODES/ai-corner/E22_quentin-amaudry_mendo/LIVRABLES/2_shorts/`.
+Validés par Arthur : 1 et 2 (19/10), 3, 4, 5 (21/10). Réserves connues : short 2 et 5 en ATTENTION qa (un « ben » court gardé, voulu),
+short 5 : 59 s avec l'outro (53 s de parole, fin prolongée à la demande d'Arthur), bulle du short 1 non changée (le relecteur proposait
+« Pourquoi déployer des agents ne suffit pas ? »). Reste pour E22 : titre YouTube (`titles --pick`), épisode complet, carrousel,
+newsletter validée. Règles apprises sur ces shorts : section « Shorts 3 à 5 E22 » de CLAUDE.md et docs/BONNES_PRATIQUES.md.
 
 # Reprise de session — état au 12/10/2026
 
