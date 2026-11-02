@@ -491,13 +491,12 @@ def send_ready(brand, ep: Path, mail: dict) -> dict:
         h = h.replace("AI Corner, le podcast d'AI Partners.</p>", "AI Corner, le podcast d'AI Partners." + unsub + "</p>", 1)
     out = d / "email_a_envoyer.html"
     out.write_text(h, encoding="utf-8")
-    if "mosaique_haut" in h and "{{lien_youtube}}" in h:     # mosaïque, lien pas encore connu : jeton à remplacer (HubSpot lirait {{ }} comme du HubL)
-        (d / "email_hubspot_module.html").write_text(hubspot_module(h.replace("{{lien_youtube}}", "LIEN_EPISODE_YOUTUBE")), encoding="utf-8")
-    elif "{{lien_youtube}}" not in h:                    # module HubSpot : seulement si le lien de l'épisode est connu
-        try:
-            (d / "email_hubspot_module.html").write_text(hubspot_module(h), encoding="utf-8")
-        except RuntimeError:                             # gabarit sans les 4 cartes du Duo (ex. « mosaique », en images) : pas de module
-            pass
+    link_unknown = "{{lien_youtube}}" in h               # lien de l'épisode pas encore connu : jeton à remplacer (HubSpot lirait {{ }} comme du HubL)
+    try:
+        (d / "email_hubspot_module.html").write_text(
+            hubspot_module(h.replace("{{lien_youtube}}", "LIEN_EPISODE_YOUTUBE") if link_unknown else h), encoding="utf-8")
+    except RuntimeError:                                 # gabarit sans cartes reconnues : pas de module
+        pass
     (pub / "email.html").write_text(h, encoding="utf-8")
     subject = (src / "objet.txt").read_text(encoding="utf-8") if (src / "objet.txt").exists() else ""
     m = re.search(r"Objet\s*:\s*(.+)", subject)

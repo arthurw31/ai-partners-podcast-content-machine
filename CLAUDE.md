@@ -134,7 +134,10 @@ Puis noter la demande et sa date dans la section concernée de ce fichier.
   annoncer en une ligne le temps attendu d'après le tableau de [docs/FRAMEWORK.md](docs/FRAMEWORK.md) / README (ex. « rendu de 4 shorts :
   ≈ 40 min »), puis la durée réelle si elle s'en écarte. Règle de comportement (pas de code) : dans le skill `podcast-clips` et la mémoire.
 
-## Gabarit de mail « mosaïque » (Arthur, 02/11/2026)
+## Gabarit de mail « mosaïque » (Arthur, 02/11/2026) : ÉCARTÉ par l'équipe le même jour
+
+- **Décision d'Arthur (02/11/2026) : « mon équipe aime pas cette newsletter, mets-la de côté et on repart sur l'ancienne, exactement la même forme et le même copywriting que celle d'E22, mais pour Coty »** : E23 est donc au gabarit **Duo** (`newsletter.template: duo`, inchangé), rédigé comme le mail E22 (bandeau « Nouvel épisode », thème, question d'accroche puis constat, intro en 3 paragraphes, 4 cartes « Au programme » avec icônes, vignette YouTube, mot de Thomas, réservation, plateformes). Cartes du programme de E23 = sujets concrets et actionnables (former à Copilot, choisir Copilot, organiser son équipe IA, valider les cas d'usage). Le gabarit mosaïque reste dans le code (`--template mosaique`) mais n'est plus utilisé ; les notes ci-dessous valent si l'équipe le reprend.
+- Module HubSpot : `newsletter --envoi` l'écrit AUSSI quand le lien de l'épisode est inconnu, avec le jeton `LIEN_EPISODE_YOUTUBE` (à remplacer à la main ou via `--youtube-url`).
 
 - Demande : mail « vraiment tech, web3, clean et épuré », noir et blanc, calqué sur une référence (site « Technology that connects » : cartes
   arrondies qui s'emboîtent) ; en-tête et miniature en couleur comme le Duo, puis UNE forme blanche à coins arrondis qui descend du titre
