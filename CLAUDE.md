@@ -115,6 +115,37 @@ boucle, nouvelle dépendance, nouveau livrable, retour d'Arthur qui change une �
    modification, aucun modèle .onnx), puis regarder la page publiée (~1 min après le push).
 Puis noter la demande et sa date dans la section concernée de ce fichier.
 
+## Règles du 02/11/2026 (Arthur) : 4 shorts, logo clair / sombre, estimation de durée
+
+- **4 shorts par podcast** (« passer à seulement 4 shorts par podcast ») : `selection.n_clips: 4` dans brand.yaml ; `propose` garde
+  ~10 passages, l'équipe en choisit 4 ; livraison = 4 MP4 + 12 textes. README, skill, schéma et ARCHITECTURE à jour. Test `test_quatre_shorts_par_episode`.
+- **Logo AI Partners blanc ou noir selon le fond** (« le studio est très lumineux, on voit mal le logo en haut : analyse la couleur
+  des rushs en haut, fond plutôt sombre -> logo blanc, sinon logo noir ») : `clipper/logo_tone.py` mesure la luminosité perceptuelle
+  de la zone du logo (barre centrée des shorts, coin haut droit du teaser 16:9 et de l'épisode), médiane de quelques images, seuil
+  0,5 (`logo.light_threshold`). Fond clair -> `logo.file_on_light` (`aip_logo_black.png`), sinon `logo.file` (blanc). Shorts et teaser :
+  une mesure par vidéo dans `compose` (ligne « logo AI Partners : fond … » dans la sortie de `build`) ; épisode : PLAN PAR PLAN dans
+  `episode.render_piece` (`episode_logo.file_on_light`, dossier de pièces `_ton` : les anciennes pièces au logo blanc ne sont pas
+  réutilisées, donc rendu du corps à refaire en entier). Mesuré sur E23 : fond 0,65 à 0,69 (clair, logo noir), caméra de Thomas 0,48.
+  `episode-render --logo noir|blanc|auto` impose le même logo sur tout le corps (E23, 02/11/2026 : « change juste le logo de blanc à noir » : `--logo noir`).
+  Désactivable : `logo.auto_tone: false`. L'outro et la fin de l'épisode (animation sombre) gardent le logo blanc. Test
+  `test_logo_noir_sur_fond_clair_blanc_sur_fond_sombre`.
+- **Estimation de durée à chaque production** (« à chaque fois que tu produis des choses, dis-moi une estimation de combien de temps ça va
+  prendre ») : avant toute commande longue (transcription, `propose`, `polish`, aperçu, rendu, `episode-render`, `thumbnail`, `outro`),
+  annoncer en une ligne le temps attendu d'après le tableau de [docs/FRAMEWORK.md](docs/FRAMEWORK.md) / README (ex. « rendu de 4 shorts :
+  ≈ 40 min »), puis la durée réelle si elle s'en écarte. Règle de comportement (pas de code) : dans le skill `podcast-clips` et la mémoire.
+
+## Gabarit de mail « mosaïque » (Arthur, 02/11/2026)
+
+- Demande : mail « vraiment tech, web3, clean et épuré », noir et blanc, calqué sur une référence (site « Technology that connects » : cartes
+  arrondies qui s'emboîtent) ; en-tête et miniature en couleur comme le Duo, puis UNE forme blanche à coins arrondis qui descend du titre
+  (grand rectangle) en escalier de carrés reliés (le programme) jusqu'au mot de la fin ; coins concaves FINS (`R_IN` 7 px, convexes 30 px) ;
+  bandeau des plateformes en noir et blanc ; pictogrammes libres de droits (Lucide, ISC, `assets/icons/`, un par point, `program[i].glyph`).
+- `clipper/newsletter_mosaique.py` : `newsletter --render --template mosaique` ; images `mosaique_*.png` rendues par Chrome (un mail ne dessine pas
+  de coins concaves), texte alternatif complet, 256 couleurs et miniature en JPEG pour rester sous ~200 Ko ; textes raccourcis dans contenu.json
+  (`hook_court`, `intro_court`, `closing_court`, `program[i].court`, `stat`), à défaut le début du texte long. Défaut de la marque inchangé : `duo`.
+- Limites connues : texte DANS l'image (réduit sur téléphone : ≈ 0,55x, à tester Gmail / Outlook) ; pas de module HubSpot pour ce gabarit ;
+  textes courts à faire relire par Thomas. Test `test_gabarit_mosaique`.
+
 ## Point d'entrée utilisateur
 
 Arthur dépose ses fichiers (épisodes, clips de référence, logos, posts) dans `DEPOT/` (non versionné) : les ranger
@@ -126,9 +157,9 @@ les fichiers récents de `~/Downloads`. Depuis E23, l'équipe livre des **rushs*
 `python -m clipper fetch "<lien>"` (jamais via le navigateur : coupure vers 50 min, fichier tronqué gardé sous son nom).
 
 Le skill `.claude/skills/podcast-clips/SKILL.md` décrit le **workflow en 5 étapes** voulu par Arthur (05/10/2026) :
-dépôt de l'épisode (4K) → `propose` (~10 passages) → l'humain en choisit 5 + demandes particulières (`pick`,
+dépôt de l'épisode (4K) → `propose` (~10 passages) → l'humain en choisit 4 + demandes particulières (`pick`,
 `find`, `check`) → `build` + **`preview`** (aperçu instantané, retouches par `build --only N`) + `posts` → validation
-→ `render` une seule fois → livraison des 5 MP4 et des 5 posts. Ne jamais monter avant le choix humain, ne jamais
+→ `render` une seule fois → livraison des 4 MP4 et de leurs textes. Ne jamais monter avant le choix humain, ne jamais
 rendre avant la validation sur l'aperçu. Schéma : README (seule référence). Délais et « quel fichier modifier » : `docs/FRAMEWORK.md`, sans schéma depuis le
 09/10/2026 (Arthur : « ça n'a pas trop de sens de garder ça vu qu'on a déjà le schéma ») ; destiné à l'équipe marketing, qui
 installe via « clone … et installe tout ce qu'il faut » dans Claude Code — voir README).

@@ -465,5 +465,36 @@ def main() -> int:
     return 1 if bad else 0
 
 
+def test_logo_noir_sur_fond_clair_blanc_sur_fond_sombre():
+    """02/11/2026 « le studio est très lumineux, on voit mal le logo en haut : fond sombre -> logo blanc, fond clair -> logo noir »."""
+    import numpy as np
+    from clipper import logo_tone
+    brand = Brand("ai-corner")
+    clair = np.full((100, 200, 3), 168, np.uint8)      # studio E23 : luminosité ≈ 0,66
+    sombre = np.full((100, 200, 3), 40, np.uint8)
+    l_c = logo_tone.box_luminance(clair, logo_tone.BOXES["bar"])
+    l_s = logo_tone.box_luminance(sombre, logo_tone.BOXES["bar"])
+    assert logo_tone.pick_logo(brand, l_c, brand.cfg.logo)[0].name == "aip_logo_black.png"
+    assert logo_tone.pick_logo(brand, l_s, brand.cfg.logo)[0].name == "logo.png"
+    assert logo_tone.pick_logo(brand, None, brand.cfg.logo)[0].name == "logo.png"   # mesure impossible : blanc par défaut
+
+
+def test_gabarit_mosaique():
+    """02/11/2026 « les coins des carrés qui se touchent plus fins, comme sur la photo » : coin concave plus fin que le convexe ;
+    le gabarit existe et un texte long est raccourci à une fin de phrase."""
+    from clipper import newsletter_mosaique as nm
+    from clipper.newsletter_templates import BUILDERS, TEMPLATES
+    assert nm.R_IN < nm.R_OUT and "mosaique" in BUILDERS and "mosaique" in TEMPLATES
+    path = nm.rounded_path(nm.ribbon(nm.H0), nm.R_OUT, nm.R_IN)
+    assert f"A{nm.R_IN},{nm.R_IN}" in path and f"A{nm.R_OUT},{nm.R_OUT}" in path
+    court = nm.sentences("Première phrase courte. Deuxième phrase un peu plus longue que la première. Troisième.", 60, 2)
+    assert court.endswith(".") and len(court) <= 62, court
+
+
+def test_quatre_shorts_par_episode():
+    """02/11/2026 « passer à seulement 4 shorts par podcast »."""
+    assert int(Brand("ai-corner").cfg.selection.n_clips) == 4
+
+
 if __name__ == "__main__":
     sys.exit(main())

@@ -20,7 +20,7 @@ fps: 24                      # cadence des SHORTS = celle des rushs et des monta
                              # était doublée (24 -> 30) : saccade visible sur les mouvements de tête (Arthur, 15/10/2026, début du short 2 E22)
 
 selection:
-  n_clips: 5                 # workflow : ~10 propositions (`propose`), 5 retenues (`pick`)
+  n_clips: 4                 # workflow : ~10 propositions (`propose`), 4 retenues (`pick`) (Arthur, 02/11/2026 : « seulement 4 shorts par podcast »)
   min_duration: 25           # shorts du monteur : 16–38 s
   max_duration: 45
   target_duration: 34
@@ -322,6 +322,7 @@ episode_end:                 # fin de l'épisode complet : animation AI Partners
 
 episode_logo:
   file: "logo.png"
+  file_on_light: "aip_logo_black.png"   # choisi PLAN PAR PLAN d'après la luminosité du coin haut droit (Arthur, 02/11/2026)
   width: 0.20
   margin: 0.02
 

@@ -66,6 +66,7 @@ guest_logo:
   margin: 0.088
 logo:
   mode: image
+  file_on_light: "aip_logo_black.png"   # fond clair en haut (studio lumineux) -> logo noir, sinon blanc (Arthur, 02/11/2026)
   position: top-right
   width: 0.46
   margin: 0.088

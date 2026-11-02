@@ -29,6 +29,7 @@ TEMPLATES = {
     "ronds": "D2 · Ronds : deux photos rondes (Thomas, l'invité) puis la miniature",
     "lettre": "D3 · Lettre : le mail s'ouvre sur Thomas et son mot, puis la miniature",
     "duo_nuit": "D4 · Duo nuit : comme Duo, tout le corps en bleu nuit",
+    "mosaique": "M · Mosaïque : noir et blanc, une forme blanche à coins arrondis qui descend en escalier (Arthur, 02/11/2026)",
 }
 
 
@@ -672,6 +673,15 @@ def duo_nuit(c: dict) -> str:
 
 BUILDERS = {"nuit": nuit, "heros": heros, "editorial": editorial, "vedette": vedette,
             "duo": duo, "ronds": ronds, "lettre": lettre, "duo_nuit": duo_nuit}
+
+
+def _mosaique(c: dict) -> str:
+    """Gabarit noir et blanc : import paresseux (newsletter_mosaique.py dépend de ce module : shell, esc, FONT)."""
+    from .newsletter_mosaique import mosaique
+    return mosaique(c)
+
+
+BUILDERS["mosaique"] = _mosaique
 VARIANTES = ["vedette", "duo", "ronds", "lettre", "duo_nuit"]
 
 

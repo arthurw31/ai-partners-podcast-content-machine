@@ -470,7 +470,16 @@ def render_piece(spec: dict, shot: dict, dst: Path, fps: int, size: tuple[int, i
     lg_in, lg_tail = [], ""
     if logo:
         lw, mg = int(W * float(logo["width"])), int(W * float(logo["margin"]))
-        lg_in = ["-i", str(logo["file"])]
+        lg_file = logo["file"]
+        if logo.get("file_on_light"):
+            # logo noir sur un plan clair (Arthur, 02/11/2026) : luminosité du coin haut droit, au tiers et aux deux tiers du plan
+            from . import logo_tone
+            cam = shot["cam"] if shot["cam"] != "split" else split_order[1]
+            span = n / fps
+            lum = logo_tone.video_luminance(cams[cam], t0 + span / 3, t0 + 2 * span / 3, logo_tone.BOXES["top-right"], n=2)
+            if logo_tone.is_light(lum):
+                lg_file = logo["file_on_light"]
+        lg_in = ["-i", str(lg_file)]
         lg_tail = f";[{{li}}:v]scale={lw}:-1,format=rgba[lg];[v0][lg]overlay=W-w-{mg}:{mg},format=yuv420p[v]"
     if shot["cam"] == "split":
         L, R = split_order
@@ -503,7 +512,7 @@ def render_body(spec: dict, shots: list[dict], ranges: list[tuple[float, float]]
                 audio_delay: float = 0.0, logo: dict | None = None) -> Path:
     """Vidéo du corps de l'épisode (plans concaténés) + audio du micro sur les mêmes intervalles (images entières)."""
     work = work.resolve()
-    pieces_dir = work / (("pieces_proxy" if proxy else "pieces") + (f"_logo{float(logo['width']):.3f}" if logo else ""))
+    pieces_dir = work / (("pieces_proxy" if proxy else "pieces") + (f"_logo{float(logo['width']):.3f}{'_ton' if logo.get('file_on_light') else ('' if Path(logo['file']).stem == 'logo' else '_' + Path(logo['file']).stem)}" if logo else ""))
     pieces_dir.mkdir(parents=True, exist_ok=True)
     size = (960, 540) if proxy else (1920, 1080)
     mid = sum(r[0] + r[1] for r in ranges[:1]) / 2 if ranges else 600

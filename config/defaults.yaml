@@ -107,6 +107,9 @@ logo:
   enabled: true
   mode: auto                # auto | image | text | none  (auto = image si fichier présent sinon text)
   file: "logo.png"          # relatif à assets/
+  file_on_light: ""         # logo à poser sur un fond CLAIR (noir) ; vide = toujours `file`
+  auto_tone: true           # mesure la luminosité du haut de l'image : fond clair -> file_on_light, sombre -> file (clipper/logo_tone.py)
+  light_threshold: 0.5      # luminosité perceptuelle (0 à 1) au-dessus de laquelle le fond est « clair »
   text_lines: ["DANS LA", "TÊTE", "D'UN CEO"]
   position: top-right       # top-left | top-right | bottom-left | bottom-right
   width: 0.13               # fraction de la largeur du canvas

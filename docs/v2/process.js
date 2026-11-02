@@ -5,7 +5,7 @@
 // Durées : ordres de grandeur mesurés sur E22 / E23 (épisode de ~52 min), calcul sur le PC sans carte graphique.
 window.PROCESS = {
   title: "AI Partners Podcast Content Machine",
-  tagline: "Un tournage déposé devient 5 shorts, l'épisode monté, son titre et sa miniature, un carrousel LinkedIn et un mail de Thomas.",
+  tagline: "Un tournage déposé devient 4 shorts, l'épisode monté, son titre et sa miniature, un carrousel LinkedIn et un mail de Thomas.",
   input: { title: "Rushs du tournage", text: "3 caméras + le micro, déposés dans DEPOT/" },
 
   // Rendez-vous entre process : une validation de l'équipe qui débloque une étape ailleurs. Seule source des dépendances
@@ -52,9 +52,9 @@ window.PROCESS = {
     },
 
     {
-      id: "shorts", num: 2, title: "5 shorts", group: "main",
-      pitch: "Claude propose 10 passages, l'équipe en garde 5, la machine monte et contrôle chaque short.",
-      deliverable: "5 shorts verticaux + 15 textes (LinkedIn FR et EN, Instagram / TikTok / YouTube Shorts FR)",
+      id: "shorts", num: 2, title: "4 shorts", group: "main",
+      pitch: "Claude propose 10 passages, l'équipe en garde 4, la machine monte et contrôle chaque short.",
+      deliverable: "4 shorts verticaux + 12 textes (LinkedIn FR et EN, Instagram / TikTok / YouTube Shorts FR)",
       duration: "≈ 20 à 30 min de calcul par short",
       status: { level: "ok", text: "Validé sur E23, en cours sur E22" },
       summary: "Le process le plus contrôlé : chaque short passe par un nettoyage du son en plusieurs couches, puis une boucle de contrôle « intransigeante » qui corrige toute seule, avant que l'équipe ne le voie.",
@@ -68,7 +68,7 @@ window.PROCESS = {
                     "Règle d'or : jamais couper une pensée (début de phrase, fin de phrase complète).",
                     "Plusieurs angles en parallèle, puis un jury de Claude garde les meilleurs."],
           cmd: "python -m clipper propose --brand ai-corner --input <épisode>.mp4", files: ["travail/candidates.md"] },
-        { actor: "equipe", title: "L'équipe choisit 5 passages", short: "Plus d'éventuelles demandes : un passage précis, un autre découpage.",
+        { actor: "equipe", title: "L'équipe choisit 4 passages", short: "Plus d'éventuelles demandes : un passage précis, un autre découpage.",
           cmd: "python -m clipper pick … / find / check" },
         { actor: "auto", title: "Nettoyage du son", short: "On coupe entre les phrases ; dans une phrase, seules les longues hésitations partent.",
           details: ["tighten : blancs et « euh » entre les mots (retraits de 0,6 s et plus).",
@@ -82,6 +82,7 @@ window.PROCESS = {
         { actor: "auto", title: "Montage et sous-titres", short: "Gros plan sur celui qui parle, écran partagé de temps en temps, sous-titres de la charte.",
           details: ["Gros plan de la personne qui parle ; écran partagé (invité en haut, Thomas en bas) toutes les 7 à 9 s, seulement si celui qui écoute est calme.",
                     "Sous-titres « variante B » : capitales Metropolis + un mot-clé en italique jaune, choisi par Claude.",
+                    "Logo AI Partners : la luminosité du haut de l'image est mesurée, fond sombre -> logo blanc, fond clair (studio lumineux) -> logo noir.",
                     "Sous-titres réécoutés deux fois : un mot entendu mais pas écrit est ajouté.",
                     "Son reconstruit en un seul passage, volume à -16 LUFS."],
           cmd: "python -m clipper polish --brand ai-corner --input <épisode>.mp4 --only N" },
@@ -111,7 +112,7 @@ window.PROCESS = {
         { actor: "auto", title: "Outro avec la miniature", short: "Carte « l'épisode complet » avec la miniature YouTube, collée à la fin de chaque short.",
           details: ["Rendue une seule fois, puis ajoutée à chaque short sans écran noir.", "Format vérifié pour être lisible partout (H.264 yuv420p)."],
           duration: "≈ 2 min 40 une fois, puis ≈ 1 min par short", cmd: "python -m clipper outro …", files: ["travail/livrables/clip_NN_*_9x16.mp4"] },
-        { actor: "livrable", title: "5 shorts + leurs 3 textes", short: "Prêts à publier." }
+        { actor: "livrable", title: "4 shorts + leurs 3 textes", short: "Prêts à publier." }
       ]
     },
 
@@ -134,12 +135,13 @@ window.PROCESS = {
           details: ["Gros plans 76 %, plan large 14 %, écran partagé 10 %, plan moyen de 10 s (mesuré sur E20 et E22).",
                     "Une réplique de l'autre de plus de 0,4 s passe sur son gros plan ou en écran partagé.",
                     "Pas de plan de réaction sur celui qui écoute.",
-                    "Logo AI Partners en haut à droite."],
+                    "Logo AI Partners en haut à droite, blanc ou noir selon la luminosité du plan (studio lumineux : noir)."],
           origin: "Arthur, 09/10/2026 : « il faut qu'on voie toujours celui qui parle »." },
         { actor: "claude", title: "Teaser", short: "5 à 7 extraits forts, alternés entre Thomas et l'invité.",
           details: ["Script en rôles : thèse, développement, échange, histoire, conviction, chute.",
                     "Chaque extrait est réécouté ; seuls les extraits vérifiés sont gardés, puis Claude recompose l'ordre final.",
-                    "Sous-titres de la charte, carte invité, musique très légère, fin sur l'animation du logo (7 s)."],
+                    "Sous-titres de la charte, carte invité, musique très légère, fin sur l'animation du logo (7 s).",
+                    "Logo du haut blanc ou noir selon la luminosité de l'image."],
           duration: "≈ 10 min de rendu" },
         { actor: "auto", title: "Chapitres et description YouTube", short: "Aux temps exacts du montage, avec le titre validé.",
           files: ["travail/episode/description_youtube.md"] },
@@ -224,7 +226,9 @@ window.PROCESS = {
           details: ["Vouvoiement, faits tirés de l'épisode.", "4 textes du programme de longueur égale (150 à 170 caractères)."], cmd: "python -m clipper newsletter …" },
         { actor: "auto", title: "Contrôles", short: "Faits et chiffres retrouvés dans l'épisode.",
           checks: ["Chaque fait a sa citation retrouvée dans la transcription.", "Chiffres présents dans l'épisode.", "Jamais de tiret « — »."] },
-        { actor: "auto", title: "Mise en page « Duo »", short: "En-tête AI Corner by AI Partners, miniature, 4 cartes, logos YouTube, Spotify et Ausha.",
+        { actor: "auto", title: "Mise en page « Duo » ou « Mosaïque »", short: "En-tête AI Corner by AI Partners, miniature, 4 cartes (ou mosaïque noir et blanc en escalier avec pictogrammes), logos YouTube, Spotify et Ausha.",
+          details: ["Duo : gabarit retenu le 14/10, cartes bleues.", "Mosaïque (02/11/2026) : tout en noir et blanc, une forme blanche à coins arrondis qui descend du titre jusqu'au mot de la fin ; texte raccourci, pictogrammes Lucide (licence ISC).", "La mosaïque est rendue en images (texte alternatif complet) : un mail ne sait pas dessiner des coins concaves."],
+          origin: "Arthur, 02/11/2026 : « le système de carrés arrondis suit toute la newsletter, reliés comme sur le design de référence, vraiment tech, web3, clean et épuré ».",
           files: ["travail/newsletter/email.html", "travail/newsletter/apercu.png"] },
         { actor: "claude", title: "Relecture par un Claude sans contexte", short: "Fidélité et ton.", loop: { to: 0, label: "à corriger : Claude réécrit" } },
         { actor: "equipe", title: "L'équipe valide le mail", short: "", cmd: "python -m clipper newsletter --final" },

@@ -175,7 +175,7 @@ def _fonts_css(brand) -> str:
             f'@font-face{{font-family:M;src:url("{_uri(f / "Metropolis-ExtraBold.ttf")}");font-weight:800}}')
 
 
-def make_images(brand, ep: Path, mail: dict, portraits_: dict, thumb: Path | None) -> dict:
+def make_images(brand, ep: Path, mail: dict, portraits_: dict, thumb: Path | None, template: str = "", title: str = "") -> dict:
     """Images du mail (à téléverser dans l'outil d'envoi) : bandeau, photo de l'invité, miniature YouTube + bouton lecture."""
     d = ep / "newsletter" / "images"
     d.mkdir(parents=True, exist_ok=True)
@@ -199,6 +199,9 @@ def make_images(brand, ep: Path, mail: dict, portraits_: dict, thumb: Path | Non
         out["duo"] = duo
     from .newsletter_templates import make_chrome
     out.update(make_chrome(brand, d, mail, _shot, _fonts_css(brand), _uri, logo, _cfg(brand).get("platforms") or []))
+    if template in ("mosaique", "all"):                       # images du gabarit noir et blanc (Chrome, ~40 s) : seulement si on s'en sert
+        from .newsletter_mosaique import make_mosaic
+        out.update(make_mosaic(brand, d, mail, _shot, _fonts_css(brand), _uri, thumb, logo, _cfg(brand).get("platforms") or [], title, _cfg(brand)))
     host = square_photo(portraits_.get("host"), d / "thomas.jpg")
     if host:
         out["host"] = host
@@ -356,8 +359,8 @@ def render(brand, ep: Path, mail: dict, portraits_: dict, template: str | None =
     d.mkdir(parents=True, exist_ok=True)
     title, title_ok = episode_title(ep)
     thumb, thumb_ok = thumbnail_image(ep)
-    imgs = make_images(brand, ep, mail, portraits_, thumb)
     template = template or str(_cfg(brand).get("template") or "classique")
+    imgs = make_images(brand, ep, mail, portraits_, thumb, template, title)
     if template in ("all", "variantes"):
         from .newsletter_templates import VARIANTES
         names = list(TEMPLATES) if template == "all" else list(VARIANTES)
@@ -486,7 +489,10 @@ def send_ready(brand, ep: Path, mail: dict) -> dict:
     out = d / "email_a_envoyer.html"
     out.write_text(h, encoding="utf-8")
     if "{{lien_youtube}}" not in h:                      # module HubSpot : seulement si le lien de l'épisode est connu
-        (d / "email_hubspot_module.html").write_text(hubspot_module(h), encoding="utf-8")
+        try:
+            (d / "email_hubspot_module.html").write_text(hubspot_module(h), encoding="utf-8")
+        except RuntimeError:                             # gabarit sans les 4 cartes du Duo (ex. « mosaique », en images) : pas de module
+            pass
     (pub / "email.html").write_text(h, encoding="utf-8")
     subject = (src / "objet.txt").read_text(encoding="utf-8") if (src / "objet.txt").exists() else ""
     m = re.search(r"Objet\s*:\s*(.+)", subject)

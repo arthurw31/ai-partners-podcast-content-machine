@@ -128,7 +128,7 @@ def cmd_propose(a: argparse.Namespace) -> dict:
                         force=a.force or not (ep / "candidates.json").exists(), extra_instructions=a.instructions or "",
                         host_side=a.host_side)
     lines = [f"# Passages proposés — {data.get('guest', '')} ({data.get('company', '')})", "",
-             "Choisissez-en 5 : `python -m clipper pick … --ids 1,3,4,7,9`", ""]
+             "Choisissez-en 4 : `python -m clipper pick … --ids 1,3,4,7`", ""]
     for c in data["clips"]:
         segs = " + ".join(f"{_ts(sg['start'])}→{_ts(sg['end'])}" for sg in c["segments"])
         lines += [f"## {c['index']}. {c.get('hook_title') or c['title']}",
@@ -928,10 +928,17 @@ def _contact(brand: Brand) -> str:
     return contact_line(brand.cfg.get("publication") or {}, str(brand.cfg.get("language") or "fr"))
 
 
-def _episode_logo(brand: Brand) -> dict | None:
+def _episode_logo(brand: Brand, mode: str = "auto") -> dict | None:
+    """Logo incrusté dans le corps de l'épisode. mode : auto = blanc / noir plan par plan d'après la luminosité du coin ;
+    noir / blanc = le même logo sur tout l'épisode (Arthur, 02/11/2026 : « change juste le logo de blanc à noir »)."""
     lg = brand.cfg.get("episode_logo") or {}
     f = brand.asset(lg.get("file")) if lg else None
-    return {"file": f, "width": lg.get("width", 0.12), "margin": lg.get("margin", 0.03)} if f else None
+    light = brand.asset(lg.get("file_on_light")) if lg.get("file_on_light") else None
+    if f and mode == "noir" and light:
+        f, light = light, None
+    elif mode == "blanc":
+        light = None
+    return {"file": f, "width": lg.get("width", 0.12), "margin": lg.get("margin", 0.03), "file_on_light": light} if f else None
 
 
 def cmd_episode_plan(a: argparse.Namespace) -> None:
@@ -1051,7 +1058,7 @@ def cmd_episode_render(a: argparse.Namespace) -> None:
     console.print("Corps de l'épisode…")
     body_v = render_body(spec, shots, edl["ranges"], work, None, fps=fps, proxy=proxy, jobs=int(a.jobs or 3),
                          split_order=("host", "guest") if a.host_side != "right" else ("guest", "host"),
-                         audio_delay=float(spec.get("audio_delay", 0)), logo=_episode_logo(brand))
+                         audio_delay=float(spec.get("audio_delay", 0)), logo=_episode_logo(brand, getattr(a, "logo", "auto")))
     end = end_card(brand, work / f"end{tag}.mp4", size, fps, proxy)
     out_dir = ep / "episode"
     out_dir.mkdir(exist_ok=True)
@@ -1493,7 +1500,7 @@ def main(argv: list[str] | None = None) -> None:
     sp = sub.add_parser("propose", help="~10 passages candidats à soumettre (candidates.md)"); common(sp); selection_args(sp)
     sp.set_defaults(fn=cmd_propose)
     sp = sub.add_parser("pick", help="garde les candidats choisis -> clips.json"); common(sp)
-    sp.add_argument("--ids", required=True, help="numéros des candidats, ex: 1,3,4,7,9"); sp.set_defaults(fn=cmd_pick)
+    sp.add_argument("--ids", required=True, help="numéros des candidats, ex: 1,3,4,7"); sp.set_defaults(fn=cmd_pick)
     sp = sub.add_parser("passages", help="passages déjà choisis (fichier YAML) -> clips.json"); common(sp); selection_args(sp)
     sp.add_argument("--file", required=True, help="YAML : start, end, start_text, end_text, hook_title, turns")
     sp.add_argument("--guest-role", default="", help="rôle de l'invité, ex: 'CEO of Mendo'"); sp.set_defaults(fn=cmd_passages)
@@ -1524,6 +1531,7 @@ def main(argv: list[str] | None = None) -> None:
         sp.add_argument("--host-side", default="left", choices=["left", "right"], help="côté de l'animateur dans le plan large")
         sp.add_argument("--proxy", action="store_true"); sp.add_argument("--minutes", type=int, default=0)
         sp.add_argument("--jobs", default="3"); sp.add_argument("--new-teaser", action="store_true")
+        sp.add_argument("--logo", default="auto", choices=["auto", "noir", "blanc"], help="logo AI Partners du corps : auto (selon le fond, plan par plan), noir ou blanc partout")
         sp.set_defaults(fn=fn)
     sp = sub.add_parser("verify", help="contrôle verbatim des coupes (euh, bégaiements, mots coupés) ; --fix corrige"); common(sp)
     sp.add_argument("--only", default=""); sp.add_argument("--fix", action="store_true"); sp.set_defaults(fn=cmd_verify)

@@ -754,8 +754,17 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
             console.print(f"  [yellow]logo invité introuvable (MARQUES/{brand.slug}/assets/guests/{slugify(clip.get('company', '') or 'entreprise')}.svg|png)[/yellow]")
     logo_file = None
     if cfg.logo.enabled and cfg.logo.mode in ("auto", "image") and brand.logo_path:
-        logo_file = "logo" + brand.logo_path.suffix.lower()
-        _copy_logo(brand.logo_path, assets / logo_file)
+        # logo blanc sur fond sombre, noir sur fond clair (Arthur, 02/11/2026 : « le studio est très lumineux, on voit mal le logo ») :
+        # luminosité de la zone du logo mesurée sur la découpe du passage
+        from . import logo_tone
+        src_logo = brand.logo_path
+        if cfg.logo.get("file_on_light") and cfg.logo.get("auto_tone", True):
+            zone = "bar" if (cfg.guest_logo.get("bar") and guest_logo_file) else str(cfg.logo.get("position", "top-right"))
+            lum = logo_tone.video_luminance(src_clip, 0.0, D_speech, logo_tone.BOXES.get(zone, logo_tone.BOXES["top-right"]))
+            src_logo, tone = logo_tone.pick_logo(brand, lum, cfg.logo)
+            console.print(f"  logo AI Partners : fond {tone} en haut (luminosité {lum if lum is None else round(lum, 2)}) -> {src_logo.name}")
+        logo_file = "logo" + src_logo.suffix.lower()
+        _copy_logo(src_logo, assets / logo_file)
     logo_mode = "none" if not cfg.logo.enabled or cfg.logo.mode == "none" else ("image" if logo_file else "text")
     music = None
     if brand.music_path:

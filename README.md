@@ -37,7 +37,7 @@ l'ancien schéma Mermaid est archivé dans [docs/ancien/](docs/ancien/).</sub>
 
 Aucune vidéo finale n'est rendue sans validation sur un aperçu.
 
-**Livrables d'un épisode** : 5 shorts MP4 (avec outro) et leurs 5 posts LinkedIn · l'épisode 1080p avec son teaser, sa
+**Livrables d'un épisode** : 4 shorts MP4 (avec outro) et leurs textes de publication (LinkedIn FR + EN, Instagram / TikTok / YouTube Shorts) · l'épisode 1080p avec son teaser, sa
 description YouTube et ses chapitres · le titre validé et la miniature choisie · le carrousel LinkedIn (PDF) et la
 description LinkedIn qui l'accompagne (avec le lien de réservation) · le mail podcast de Thomas, prêt à envoyer.
 
@@ -63,7 +63,7 @@ l'épisode et choisir le titre en même temps.
    Claude récupère le projet, installe Python, Node, FFmpeg et les dépendances (validez les fenêtres
    d'installation si Windows en affiche), puis vérifie que tout est prêt.
 4. Ouvrez le dossier `ai-partners-podcast-content-machine` dans Claude Code. C'est prêt : déposez un épisode dans `DEPOT/` et
-   écrivez « fais-moi 5 shorts de ce podcast » (ou `/podcast-clips`).
+   écrivez « fais-moi 4 shorts de ce podcast » (ou `/podcast-clips`).
 
 Pour récupérer les améliorations plus tard : « mets à jour le projet » (Claude fait un `git pull`).
 
@@ -84,7 +84,7 @@ Facultatif : une clé `ANTHROPIC_API_KEY` (sinon la sélection des extraits pass
 via la commande `claude`). Un GPU NVIDIA accélère fortement la transcription mais n'est pas nécessaire.
 
 Ordres de grandeur sans GPU (PC portable) : transcription ≈ 20 min pour un épisode de 50 min, 10 propositions
-≈ 8 min, montage + rendu ≈ 6–8 min par short (2 en parallèle), soit ≈ 30–40 min pour 5 shorts.
+≈ 8 min, montage + rendu ≈ 6–8 min par short (2 en parallèle), soit ≈ 25–30 min pour 4 shorts. Claude annonce toujours une estimation de durée avant chaque production.
 
 ## 2. Installation
 
@@ -121,13 +121,13 @@ seul au premier lancement.
    aussi être déposé ; des rushs restés sur Dropbox se récupèrent avec `python -m clipper fetch "<lien>"`.
 3. Écrivez par exemple :
 
-   > Fais-moi 5 shorts de ce podcast. Invité : Quentin Amaudry, CEO de Mendo.
+   > Fais-moi 4 shorts de ce podcast. Invité : Quentin Amaudry, CEO de Mendo.
 
 4. Claude (skill `podcast-clips`) range les fichiers, transcrit l'épisode, puis vous propose une dizaine de
    passages (titre, timecodes, extrait). Vous répondez avec vos 5 numéros et vos demandes éventuelles
-   (« il faut absolument le passage où il parle de… »). Claude monte les 5 shorts et vous envoie un
+   (« il faut absolument le passage où il parle de… »). Claude monte les 4 shorts et vous envoie un
    **aperçu MP4** de chacun : vous les regardez dans votre lecteur, demandez vos retouches, et le rendu final
-   des MP4 n'est lancé qu'une fois tout validé. Claude vous envoie les 5 MP4 et les 5 posts LinkedIn.
+   des MP4 n'est lancé qu'une fois tout validé. Claude vous envoie les 4 MP4 et leurs textes de publication.
    Même principe pour l'épisode complet avec son teaser (« monte l'épisode en entier ») et pour les
    miniatures YouTube (« fais les miniatures »).
 

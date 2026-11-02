@@ -13,7 +13,7 @@ jour à chaque changement. Cette page ne refait pas le schéma ; elle répond au
 | --- | --- | --- |
 | Dépôt + transcription | vous déposez les 3 rushs MP4 et l'audio WAV dans `DEPOT/`, Claude les range, les synchronise et transcrit | ≈ 1 min + ≈ 20 min (automatique) |
 | 10 passages proposés | Claude | ≈ 8 min |
-| Choix des 5 passages + demandes | **vous** | 2 min |
+| Choix des 4 passages + demandes | **vous** | 2 min |
 | Nettoyage, montage, contrôle qualité, aperçus, posts | Claude prépare, **vous regardez les aperçus et validez** | ≈ 6–8 min par short, ≈ 3 min par retouche |
 | Rendu final des shorts | Claude | ≈ 10 min par short, 2 en parallèle, une seule fois |
 | 5 titres proposés -> choix | Claude, puis **vous** | quelques minutes |

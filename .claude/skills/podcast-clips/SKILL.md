@@ -1,6 +1,6 @@
 ---
 name: podcast-clips
-description: Pilote tout le process AI Corner avec le framework « clipper » de ce dépôt, des rushs d'un tournage (3 caméras MP4 + audio WAV déposés dans DEPOT/) jusqu'à tous les livrables, en cinq colonnes parallèles — 5 shorts verticaux montés + leur post LinkedIn (10 passages proposés, l'équipe en choisit 5, contrôle qualité, validation, rendu, outro avec la miniature), l'épisode complet monté avec son teaser (dérushage, aperçu, contrôle qualité, validation, rendu 1080p), le titre puis la miniature YouTube (5 titres en texte, l'équipe en choisit un, puis 4 miniatures, l'équipe en choisit une), le carrousel LinkedIn (3 angles proposés, l'équipe en choisit un, slides rédigées et rendues dans la charte AI Partners, CTA « réserver un échange »), le mail podcast de Thomas (newsletter écrite à la 1re personne, mise en page, validée par l'équipe). Déclencher sur « clip », « short », « reel », « découpe mon podcast », « fais des extraits », « nouveau podcast », « monte l'épisode », « teaser », « titre de l'épisode », « miniature », « carrousel », « carousel LinkedIn », « newsletter », « mail de Thomas », « /podcast-clips », ou dès que des rushs ou un épisode sont déposés dans DEPOT/.
+description: Pilote tout le process AI Corner avec le framework « clipper » de ce dépôt, des rushs d'un tournage (3 caméras MP4 + audio WAV déposés dans DEPOT/) jusqu'à tous les livrables, en cinq colonnes parallèles — 4 shorts verticaux montés + leur post LinkedIn (10 passages proposés, l'équipe en choisit 4, contrôle qualité, validation, rendu, outro avec la miniature), l'épisode complet monté avec son teaser (dérushage, aperçu, contrôle qualité, validation, rendu 1080p), le titre puis la miniature YouTube (5 titres en texte, l'équipe en choisit un, puis 4 miniatures, l'équipe en choisit une), le carrousel LinkedIn (3 angles proposés, l'équipe en choisit un, slides rédigées et rendues dans la charte AI Partners, CTA « réserver un échange »), le mail podcast de Thomas (newsletter écrite à la 1re personne, mise en page, validée par l'équipe). Déclencher sur « clip », « short », « reel », « découpe mon podcast », « fais des extraits », « nouveau podcast », « monte l'épisode », « teaser », « titre de l'épisode », « miniature », « carrousel », « carousel LinkedIn », « newsletter », « mail de Thomas », « /podcast-clips », ou dès que des rushs ou un épisode sont déposés dans DEPOT/.
 ---
 
 # Podcast → shorts, épisode complet, titre et miniature, carrousel, mail de Thomas
@@ -15,7 +15,7 @@ il ne tape aucune commande, tu fais tout et tu lui parles simplement (pas de jar
 
 | Colonne | Étapes | Section |
 | --- | --- | --- |
-| 5 shorts 9:16 | `propose` -> l'équipe choisit 5 passages -> `polish` (+ `qa`, boucle « à corriger ») -> l'équipe valide les aperçus -> `render` + `posts` -> **`outro`** | 2 à 5 |
+| 4 shorts 9:16 | `propose` -> l'équipe choisit 4 passages -> `polish` (+ `qa`, boucle « à corriger ») -> l'équipe valide les aperçus -> `render` + `posts` -> **`outro`** | 2 à 5 |
 | Épisode + teaser | `episode-plan` -> `episode-render --proxy` (+ `qa`, boucle « à corriger ») -> l'équipe valide l'aperçu -> `episode-render` 1080p | « Épisode complet » |
 | Titre puis miniature | `titles` (5 titres en texte) -> l'équipe en choisit un -> `thumbnail` (4 miniatures) -> l'équipe en choisit une | « Titre et miniature » |
 | Mail de Thomas | `newsletter` (mail écrit + mis en page) -> l'équipe valide -> `newsletter --youtube-url … --final` | « Mail podcast de Thomas » |
@@ -37,7 +37,11 @@ Défaut ÉCHEC -> corrige (boucle « à corriger ») puis relance ; ATTENTION et
 livrable. Une seule relecture par version (un livrable inchangé n'est pas relu deux fois) : ne la lance qu'une fois tous
 les défauts mesurables corrigés, pour ne pas payer plusieurs relectures.
 
-**Huit moments où l'humain décide** (rien ne passe sans) : les 5 passages, la validation des aperçus des shorts, la
+**Estimation de durée** (Arthur, 02/11/2026 : « à chaque fois que tu produis des choses, dis-moi une estimation de combien de temps ça va prendre ») : avant toute commande longue (transcription, `propose`, `polish`, aperçu, rendu, `episode-render`, `thumbnail`, `outro`…), annoncer en une ligne le temps attendu d'après les ordres de grandeur du README / `docs/FRAMEWORK.md` (ex. « rendu de 4 shorts : ≈ 40 min, 2 en parallèle »), puis donner la durée réelle à la fin si elle s'en écarte.
+
+**Logo clair / sombre** : le logo AI Partners en haut est choisi tout seul d'après la luminosité du haut de l'image (`clipper/logo_tone.py`) : fond sombre -> blanc, fond clair (studio très lumineux) -> noir ; une ligne « logo AI Partners : fond … » dans la sortie de `build`. Ne rien faire à la main.
+
+**Huit moments où l'humain décide** (rien ne passe sans) : les 4 passages, la validation des aperçus des shorts, la
 validation de l'aperçu de l'épisode, le titre, la miniature, l'angle du carrousel, la validation du carrousel, la
 validation du mail de Thomas. Avant chaque aperçu, la vidéo passe le contrôle
 automatique (`qa`) ; tant qu'il montre un défaut, tu corriges et tu recommences (boucle « à corriger ») avant de la
