@@ -26,7 +26,7 @@ TW = SW - 40             # largeur de la miniature, posée DANS le blanc (20 px 
 TH = round(TW * 9 / 16)  # hauteur de la miniature
 TXT = HEAD + TH + 30     # début du titre, de l'accroche et du bouton
 H0 = TXT + 400           # fin du grand rectangle (titre, accroche, « Les thèmes abordés » + bouton)
-BH = 290                 # hauteur d'un carré blanc de l'escalier (titre + 5 lignes de texte lisibles)
+BH = 340                 # hauteur d'un carré blanc de l'escalier (titre + 5 lignes de texte lisibles)
 TITLE_H = 100            # titre du bandeau des plateformes, dans la même forme blanche
 H1 = 400                 # hauteur du rectangle final (mot de Thomas + réservation)
 DEFAULT_GLYPHS = ["git-compare", "zap", "network", "users"]
@@ -128,8 +128,8 @@ ARROW = '<svg width="{s}" height="{s}" viewBox="0 0 64 64"><path d="M14 50 50 14
 
 def _css(fonts_css: str) -> str:
     return (fonts_css + "*{box-sizing:border-box;margin:0}body{background:#000;color:#fff;font-family:M,Arial,sans-serif;zoom:2;overflow:hidden}"
-            ".m{font:16px/1 Consolas,'Courier New',monospace;letter-spacing:.02em}.bt{font:700 25px/1.15 M;color:#000;margin-top:16px;letter-spacing:-.01em}"
-            ".bx{font:18px/1.45 Arial;color:#1A1A1A;margin-top:10px}"
+            ".m{font:16px/1 Consolas,'Courier New',monospace;letter-spacing:.02em}.bt{font:700 28px/1.15 M;color:#000;margin-top:16px;letter-spacing:-.01em}"
+            ".bx{font:21px/1.42 Arial;color:#1A1A1A;margin-top:12px}"
             ".btn{display:inline-block;background:#000;color:#fff;font:700 19px/1 M;padding:21px 30px;border-radius:50px;white-space:nowrap}"
             ".lg{display:block;line-height:0}.lg svg{height:14px;width:auto;display:block}")
 
@@ -140,7 +140,7 @@ def _lab(text: str, color: str) -> str:
 
 def _item(x: int, y: int, it: dict) -> str:
     """Carré blanc d'un point du programme : le thème et son petit texte (l'icône est dans la case noire voisine)."""
-    return (f'<div style="position:absolute;left:{x}px;top:{y}px;width:{C - 60}px"><div class=bt style="margin-top:0">{esc(it["title"])}</div>'
+    return (f'<div style="position:absolute;left:{x}px;top:{y}px;width:{C - 50}px"><div class=bt style="margin-top:0">{esc(it["title"])}</div>'
             f'<div class=bx>{esc(it["text"])}</div></div>')
 
 
@@ -186,7 +186,7 @@ def make_mosaic(brand, d: Path, mail: dict, shot, fonts_css: str, uri, thumb: Pa
  <div style="font:23px/1.4 Arial;color:#000;margin-top:22px">{esc(t["hook"])}</div>
  <div style="margin-top:34px;display:flex;justify-content:space-between;align-items:center;gap:20px"><div style="font:800 38px/1.08 M;letter-spacing:-.02em;color:#000">Les thèmes<br>abordés</div>
   <span class=btn>{esc((cfg.get("button") or "Regarder l'épisode").capitalize())} &nbsp;↗</span></div></div>
-{_item(30, o + 46, prog[0])}{_item(C + 30, y["r1s"] + 46, prog[1])}{_item(30, y["l2s"] + 46, prog[2])}{_item(C + 30, y["r2s"] + 46, prog[3])}
+{_item(25, o + 44, prog[0])}{_item(C + 25, y["r1s"] + 44, prog[1])}{_item(25, y["l2s"] + 44, prog[2])}{_item(C + 25, y["r2s"] + 44, prog[3])}
 {_icon_cell(brand, C + C // 2, o + BH // 2 - 3, prog[0])}{_icon_cell(brand, C // 2, (y["l1e"] + y["l2s"]) // 2, prog[1])}{_icon_cell(brand, C + C // 2, (y["r1e"] + y["r2s"]) // 2, prog[2])}{_icon_cell(brand, C // 2, (y["l2e"] + st) // 2, prog[3])}
 <div style="position:absolute;left:40px;top:{st + 44}px;width:{SW - 80}px">
  <div style="font:22px/1.5 Arial;color:#000">{esc(t["closing"])}</div>
