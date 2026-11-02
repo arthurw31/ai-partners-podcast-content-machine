@@ -18,9 +18,10 @@ from .newsletter_templates import FONT, PLATFORM_LABELS, esc, shell
 
 W = 680                  # largeur de la carte du mail (px CSS) ; images rendues à 2x
 SW = 600                 # largeur de la forme blanche
-R_OUT, R_IN = 30, 7      # coins convexes arrondis, coins concaves (la jonction entre deux carrés) FINS comme sur la référence
+R_OUT, R_IN = 40, 14     # coins convexes bien arrondis ; coins des cases noires (concaves pour la forme blanche)
+OV = 6                   # recouvrement vertical de deux carrés blancs voisins = épaisseur de la jonction (fine, comme sur la référence)
 H0 = 470                 # hauteur du grand rectangle (titre, accroche, intro, bouton)
-STEP = 860               # hauteur de l'escalier du programme
+STEP = 830               # hauteur de l'escalier du programme
 H1 = 330                 # hauteur du rectangle final (mot de Thomas + réservation)
 DEFAULT_GLYPHS = ["git-compare", "zap", "network", "users"]
 INK = "#000000"
@@ -41,12 +42,20 @@ def rounded_path(pts: list, r_out: float, r_in: float) -> str:
     return " ".join(d) + " Z"
 
 
+def stair(o: int) -> dict:
+    """Ordonnées de l'escalier : chaque carré blanc commence `OV` px AVANT la fin du précédent (jonction fine)."""
+    r1s, r1e = o + 200, o + 420
+    l2s = r1e - OV
+    l2e = l2s + 230
+    return {"l1e": r1s + OV, "r1s": r1s, "r1e": r1e, "l2s": l2s, "l2e": l2e, "r2s": l2e - OV}
+
+
 def ribbon(o: int) -> list:
-    """Forme blanche : grand rectangle (0..o), puis 4 carrés en escalier reliés, puis rectangle final."""
-    end = o + STEP + H1
-    return [(0, 0), (SW, 0), (SW, o), (300, o), (300, o + 200), (SW, o + 200), (SW, o + 460), (300, o + 460), (300, o + 600),
-            (SW, o + 600), (SW, end), (0, end), (0, o + STEP), (300, o + STEP), (300, o + 660), (0, o + 660), (0, o + 400),
-            (300, o + 400), (300, o + 260), (0, o + 260)]
+    """Forme blanche : grand rectangle (0..o), puis 4 carrés en escalier reliés par un cou fin, puis rectangle final."""
+    end, y = o + STEP + H1, stair(o)
+    return [(0, 0), (SW, 0), (SW, o), (300, o), (300, y["r1s"]), (SW, y["r1s"]), (SW, y["r1e"]), (300, y["r1e"]), (300, y["r2s"]),
+            (SW, y["r2s"]), (SW, end), (0, end), (0, o + STEP), (300, o + STEP), (300, y["l2e"]), (0, y["l2e"]), (0, y["l2s"]),
+            (300, y["l2s"]), (300, y["l1e"]), (0, y["l1e"])]
 
 
 def sentences(text: str, max_chars: int, max_sentences: int = 2) -> str:
@@ -132,6 +141,7 @@ def make_mosaic(brand, d: Path, mail: dict, shot, fonts_css: str, uri, thumb: Pa
     """Images du gabarit : en-tête, miniature arrondie, forme blanche (haut puis mot de la fin), titre et tuiles des plateformes."""
     t = short_texts(mail, title)
     o, end = H0, H0 + STEP + H1
+    y = stair(o)
     prog = t["program"] + [{"time": "", "title": "", "text": "", "glyph": DEFAULT_GLYPHS[0]}] * (4 - len(t["program"]))
     ox, oy = (W - SW) // 2, 0
     stat = t["stat"] or {}
@@ -142,25 +152,25 @@ def make_mosaic(brand, d: Path, mail: dict, shot, fonts_css: str, uri, thumb: Pa
 
     # --- forme blanche, rendue d'un bloc puis coupée entre le programme et le mot de la fin (la coupe passe dans une zone pleine)
     shape = rounded_path(ribbon(o), R_OUT, R_IN)
-    stat_html = (f'<div style="position:absolute;left:30px;top:{o + 284}px;width:250px"><div class=big>{esc(stat["value"])}</div>'
+    stat_html = (f'<div style="position:absolute;left:30px;top:{(y["l1e"] + y["l2s"]) // 2 - 38}px;width:250px"><div class=big>{esc(stat["value"])}</div>'
                  f'<div class=m style="margin-top:8px;color:#8A8A8A">{esc(stat["label"])}</div></div>') if stat.get("value") else ""
     book = (f'<div style="display:flex;justify-content:space-between;align-items:center"><div style="font:800 22px/1.15 M;color:#000">'
             f'{esc(b.get("title") or "")}</div><span class=btn style="font-size:14px;padding:15px 22px">Réserver un échange&nbsp;↗</span></div>'
             ) if b.get("url") else ""
     page = f"""<html><head><meta charset="utf-8"><style>{style}body{{width:{W}px;height:{end}px}}</style></head><body>
 <div style="position:relative;width:{SW}px;height:{end}px;margin:0 {ox}px">
-<svg width="{SW}" height="{end}" style="position:absolute;left:0;top:0"><path d="{shape}" fill="#fff"/>{sphere(450, o + 530, 52)}</svg>
+<svg width="{SW}" height="{end}" style="position:absolute;left:0;top:0"><path d="{shape}" fill="#fff"/>{sphere(450, (y["r1e"] + y["r2s"]) // 2, 52)}</svg>
 <div style="position:absolute;left:40px;top:40px;width:520px">
  <div class=m style="color:#6B6B6B">{esc(host)} × {esc(mail.get("guest", ""))} · {esc(mail.get("company", ""))}</div>
  <div style="font:800 36px/1.06 M;letter-spacing:-.025em;color:#000;margin-top:16px">{esc(t["title"])}</div>
  <div style="font:17px/1.5 Arial;color:#000;margin-top:20px">{esc(t["hook"])}</div>
  <div style="font:14.5px/1.6 Arial;color:#5A5A5A;margin-top:12px">{esc(t["intro"])}</div>
  <div style="margin-top:26px"><span class=btn>{esc((cfg.get("button") or "Regarder l'épisode").capitalize())} &nbsp;↗</span></div></div>
-{_item(brand, 30, o + 34, prog[0])}{_item(brand, 330, o + 280, prog[1])}{_item(brand, 30, o + 480, prog[2])}{_item(brand, 330, o + 680, prog[3])}
+{_item(brand, 30, o + 34, prog[0])}{_item(brand, 330, y["r1s"] + 40, prog[1])}{_item(brand, 30, y["l2s"] + 40, prog[2])}{_item(brand, 330, y["r2s"] + 40, prog[3])}
 <div style="position:absolute;left:330px;top:{o + 34}px;width:250px">{_lab("Programme", "#fff")}<div class=hw style="margin-top:14px">{len(t["program"])} temps forts<br>à ne pas manquer</div></div>
 {stat_html}
-<div style="position:absolute;left:30px;top:{o + 690}px;width:120px;height:120px;border-radius:26px;background:#fff;display:flex;align-items:center;justify-content:center">{ARROW.format(s=58, c="#000")}</div>
-<div style="position:absolute;left:170px;top:{o + 712}px;width:110px"><div class=hw style="font-size:21px">Regarder<br>l'épisode</div></div>
+<div style="position:absolute;left:30px;top:{(y["l2e"] + o + STEP) // 2 - 60}px;width:120px;height:120px;border-radius:26px;background:#fff;display:flex;align-items:center;justify-content:center">{ARROW.format(s=58, c="#000")}</div>
+<div style="position:absolute;left:170px;top:{(y["l2e"] + o + STEP) // 2 - 38}px;width:110px"><div class=hw style="font-size:21px">Regarder<br>l'épisode</div></div>
 <div style="position:absolute;left:40px;top:{o + STEP + 40}px;width:520px">
  <div style="font:17px/1.55 Arial;color:#000">{esc(t["closing"])}</div>
  <div style="margin-top:18px;font:700 15px/1.4 M;color:#000">{esc(host)}</div><div class=m style="color:#6B6B6B;margin-top:6px">CEO · AI Partners</div>
@@ -187,7 +197,7 @@ def make_mosaic(brand, d: Path, mail: dict, shot, fonts_css: str, uri, thumb: Pa
         tw = SW
         th = round(tw * 9 / 16)
         pg = (f'<html><head><meta charset="utf-8"><style>{style}body{{width:{W}px;height:{th + 20}px}}</style></head><body>'
-              f'<img src="{uri(thumb)}" style="position:absolute;left:{ox}px;top:0;width:{tw}px;height:{th}px;border-radius:30px"></body></html>')
+              f'<img src="{uri(thumb)}" style="position:absolute;left:{ox}px;top:0;width:{tw}px;height:{th}px;border-radius:{R_OUT}px"></body></html>')
         png = shot(pg, W * 2, (th + 20) * 2, d / "_mosaique_miniature.png")
         Image.open(png).convert("RGB").save(d / "mosaique_miniature.jpg", quality=88)       # photo : JPEG (le PNG pesait 800 Ko)
         png.unlink(missing_ok=True)
