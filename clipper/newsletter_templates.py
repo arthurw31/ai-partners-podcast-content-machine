@@ -701,7 +701,7 @@ def context(brand_cfg: dict, mail: dict, imgs: dict, title: str) -> dict:
     return {"subject": mail.get("subject", ""), "preheader": mail.get("preheader", ""), "episode": mail.get("episode", ""),
             "guest": mail.get("guest", ""), "role": mail.get("role", ""), "theme": mail.get("theme", ""),
             "hook": mail.get("hook", ""), "intro": mail.get("intro", ""), "closing": mail.get("closing", ""),
-            "program": mail.get("program") or [], "url": default_url(brand_cfg, mail), "title": title, "img": imgs,
+            "program": mail.get("program") or [], "url": default_url(brand_cfg, mail), "title": title, "img": imgs, "mail": mail,
             "booking": brand_cfg.get("booking") or {},
             "button": brand_cfg.get("button") or "REGARDER L'ÉPISODE", "platforms": brand_cfg.get("platforms") or [],
             "host_name": brand_cfg.get("from_name") or "Thomas Spitz", "host_role": brand_cfg.get("host_role") or "CEO d'AI Partners",

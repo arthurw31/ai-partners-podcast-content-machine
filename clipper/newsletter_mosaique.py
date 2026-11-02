@@ -179,8 +179,7 @@ def make_mosaic(brand, d: Path, mail: dict, shot, fonts_css: str, uri, thumb: Pa
  <span style="font:800 20px/1 M;background:#fff;color:#000;border:1.5px solid #000;border-radius:24px;padding:12px 20px;white-space:nowrap">EP.{re.sub(r"\D", "", str(mail.get("episode", "")))}&nbsp; ↗</span></div>
 {thumb_html}
 <div style="position:absolute;left:40px;top:{TXT}px;width:520px">
- <div class=m style="color:#6B6B6B">{esc(host)} × {esc(mail.get("guest", ""))} · {esc(mail.get("company", ""))}</div>
- <div style="font:800 36px/1.06 M;letter-spacing:-.025em;color:#000;margin-top:16px">{esc(t["title"])}</div>
+ <div style="font:800 36px/1.06 M;letter-spacing:-.025em;color:#000">{esc(t["title"])}</div>
  <div style="font:17px/1.5 Arial;color:#000;margin-top:20px">{esc(t["hook"])}</div>
  <div style="font:14.5px/1.6 Arial;color:#5A5A5A;margin-top:12px">{esc(t["intro"])}</div>
  <div style="margin-top:26px"><span class=btn>{esc((cfg.get("button") or "Regarder l'épisode").capitalize())} &nbsp;↗</span></div></div>
@@ -234,7 +233,8 @@ def _slice(c: dict, key: str, alt: str, href: str) -> str:
 
 def mosaique(c: dict) -> str:
     """Gabarit mosaïque : noir et blanc, une forme blanche continue (voir l'en-tête du module)."""
-    t = short_texts({"program": c["program"], "hook": c["hook"], "intro": c["intro"], "closing": c["closing"], "theme": c["theme"]}, c["title"])
+    t = short_texts(c.get("mail") or {"program": c["program"], "hook": c["hook"], "intro": c["intro"], "closing": c["closing"], "theme": c["theme"]},
+                    c["title"])
     b = c.get("booking") or {}
     alt_main = " ".join([t["title"], t["hook"], t["intro"], "Regarder l'épisode."] +
                         [f'{p["time"]} {p["title"]} : {p["text"]}' for p in t["program"]])

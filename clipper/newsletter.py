@@ -430,7 +430,9 @@ def hubspot_module(h: str) -> str:
     body = re.sub(r"<br>Vous recevez ce mail.*?Se désinscrire</a>", "", body, flags=re.S)
     card = re.compile(r'<div class="card" style="[^"]*">(<table.*?</table>)<strong style="[^"]*">(.*?)</strong><br>(.*?)</div>', re.S)
     cards = card.findall(body)
-    if len(cards) != 4:
+    if "mosaique_haut" in body:                  # gabarit « mosaïque » : tranches d'images et tableaux, rien à refaire
+        cards = []
+    elif len(cards) != 4:
         raise RuntimeError("module HubSpot : les 4 cartes du programme n'ont pas été reconnues (gabarit modifié ?)")
     if len(cards) == 4:
         def need(c):
@@ -452,6 +454,7 @@ def hubspot_module(h: str) -> str:
         b = end + len(tail)
         body = body[:a] + grid + body[b:]
     body = re.sub(r' class="[^"]*"', "", body)
+    body = re.sub(r"<!--.*?-->", "", body, flags=re.S)         # marqueurs d'envoi (HELLO / FOOT) : inutiles dans un module
     return body.strip() + chr(10)
 
 
@@ -488,7 +491,9 @@ def send_ready(brand, ep: Path, mail: dict) -> dict:
         h = h.replace("AI Corner, le podcast d'AI Partners.</p>", "AI Corner, le podcast d'AI Partners." + unsub + "</p>", 1)
     out = d / "email_a_envoyer.html"
     out.write_text(h, encoding="utf-8")
-    if "{{lien_youtube}}" not in h:                      # module HubSpot : seulement si le lien de l'épisode est connu
+    if "mosaique_haut" in h and "{{lien_youtube}}" in h:     # mosaïque, lien pas encore connu : jeton à remplacer (HubSpot lirait {{ }} comme du HubL)
+        (d / "email_hubspot_module.html").write_text(hubspot_module(h.replace("{{lien_youtube}}", "LIEN_EPISODE_YOUTUBE")), encoding="utf-8")
+    elif "{{lien_youtube}}" not in h:                    # module HubSpot : seulement si le lien de l'épisode est connu
         try:
             (d / "email_hubspot_module.html").write_text(hubspot_module(h), encoding="utf-8")
         except RuntimeError:                             # gabarit sans les 4 cartes du Duo (ex. « mosaique », en images) : pas de module
