@@ -140,6 +140,7 @@ Puis noter la demande et sa date dans la section concernée de ce fichier.
   arrondies qui s'emboîtent) ; en-tête et miniature en couleur comme le Duo, puis UNE forme blanche à coins arrondis qui descend du titre
   (grand rectangle) en escalier de carrés reliés (le programme) jusqu'au mot de la fin ; coins concaves FINS (`R_IN` 7 px, convexes 30 px) ;
   bandeau des plateformes en noir et blanc ; pictogrammes libres de droits (Lucide, ISC, `assets/icons/`, un par point, `program[i].glyph`).
+  Contenu des 4 cases (Arthur, 02/11/2026) : carré BLANC = le thème + son petit texte (ni horodatage ni pictogramme) ; case NOIRE voisine = l'icône du point, en blanc, centrée ; plus de sphère ni de chiffre. Jonctions fines (`OV` 6 px), coins `R_OUT` 40 / `R_IN` 14.
 - `clipper/newsletter_mosaique.py` : `newsletter --render --template mosaique` ; images `mosaique_*.png` rendues par Chrome (un mail ne dessine pas
   de coins concaves), texte alternatif complet, 256 couleurs et miniature en JPEG pour rester sous ~200 Ko ; textes raccourcis dans contenu.json
   (`hook_court`, `intro_court`, `closing_court`, `program[i].court`, `stat`), à défaut le début du texte long. Défaut de la marque inchangé : `duo`.

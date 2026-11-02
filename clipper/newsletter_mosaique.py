@@ -131,9 +131,16 @@ def _lab(text: str, color: str) -> str:
     return f'<div style="display:flex;align-items:center;gap:10px">{PLUS.format(c=color)}<span class=m style="color:{color}">{esc(text)}</span></div>'
 
 
-def _item(brand, x: int, y: int, it: dict) -> str:
-    return (f'<div style="position:absolute;left:{x}px;top:{y}px;width:240px"><div style="position:absolute;right:0;top:-8px">{icon(brand, it["glyph"])}</div>'
-            f'{_lab(it["time"], INK)}<div class=bt>{esc(it["title"])}</div><div class=bx>{esc(it["text"])}</div></div>')
+def _item(x: int, y: int, it: dict) -> str:
+    """Carré blanc d'un point du programme : le thème et son petit texte (l'icône est dans la case noire voisine)."""
+    return (f'<div style="position:absolute;left:{x}px;top:{y}px;width:240px"><div class=bt style="margin-top:0">{esc(it["title"])}</div>'
+            f'<div class=bx>{esc(it["text"])}</div></div>')
+
+
+def _icon_cell(brand, cx: int, cy: int, it: dict) -> str:
+    """Case noire : l'icône du point voisin, en blanc, centrée."""
+    return (f'<div style="position:absolute;left:{cx - 45}px;top:{cy - 45}px;width:90px;height:90px">'
+            f'{icon(brand, it["glyph"], 90, "#fff", 1.1)}</div>')
 
 
 def make_mosaic(brand, d: Path, mail: dict, shot, fonts_css: str, uri, thumb: Path | None, logo_svg: str, platforms: list,
@@ -144,7 +151,6 @@ def make_mosaic(brand, d: Path, mail: dict, shot, fonts_css: str, uri, thumb: Pa
     y = stair(o)
     prog = t["program"] + [{"time": "", "title": "", "text": "", "glyph": DEFAULT_GLYPHS[0]}] * (4 - len(t["program"]))
     ox, oy = (W - SW) // 2, 0
-    stat = t["stat"] or {}
     host = cfg.get("from_name") or "Thomas Spitz"
     b = cfg.get("booking") or {}
     style = _css(fonts_css)
@@ -152,25 +158,20 @@ def make_mosaic(brand, d: Path, mail: dict, shot, fonts_css: str, uri, thumb: Pa
 
     # --- forme blanche, rendue d'un bloc puis coupée entre le programme et le mot de la fin (la coupe passe dans une zone pleine)
     shape = rounded_path(ribbon(o), R_OUT, R_IN)
-    stat_html = (f'<div style="position:absolute;left:30px;top:{(y["l1e"] + y["l2s"]) // 2 - 38}px;width:250px"><div class=big>{esc(stat["value"])}</div>'
-                 f'<div class=m style="margin-top:8px;color:#8A8A8A">{esc(stat["label"])}</div></div>') if stat.get("value") else ""
     book = (f'<div style="display:flex;justify-content:space-between;align-items:center"><div style="font:800 22px/1.15 M;color:#000">'
             f'{esc(b.get("title") or "")}</div><span class=btn style="font-size:14px;padding:15px 22px">Réserver un échange&nbsp;↗</span></div>'
             ) if b.get("url") else ""
     page = f"""<html><head><meta charset="utf-8"><style>{style}body{{width:{W}px;height:{end}px}}</style></head><body>
 <div style="position:relative;width:{SW}px;height:{end}px;margin:0 {ox}px">
-<svg width="{SW}" height="{end}" style="position:absolute;left:0;top:0"><path d="{shape}" fill="#fff"/>{sphere(450, (y["r1e"] + y["r2s"]) // 2, 52)}</svg>
+<svg width="{SW}" height="{end}" style="position:absolute;left:0;top:0"><path d="{shape}" fill="#fff"/></svg>
 <div style="position:absolute;left:40px;top:40px;width:520px">
  <div class=m style="color:#6B6B6B">{esc(host)} × {esc(mail.get("guest", ""))} · {esc(mail.get("company", ""))}</div>
  <div style="font:800 36px/1.06 M;letter-spacing:-.025em;color:#000;margin-top:16px">{esc(t["title"])}</div>
  <div style="font:17px/1.5 Arial;color:#000;margin-top:20px">{esc(t["hook"])}</div>
  <div style="font:14.5px/1.6 Arial;color:#5A5A5A;margin-top:12px">{esc(t["intro"])}</div>
  <div style="margin-top:26px"><span class=btn>{esc((cfg.get("button") or "Regarder l'épisode").capitalize())} &nbsp;↗</span></div></div>
-{_item(brand, 30, o + 34, prog[0])}{_item(brand, 330, y["r1s"] + 40, prog[1])}{_item(brand, 30, y["l2s"] + 40, prog[2])}{_item(brand, 330, y["r2s"] + 40, prog[3])}
-<div style="position:absolute;left:330px;top:{o + 34}px;width:250px">{_lab("Programme", "#fff")}<div class=hw style="margin-top:14px">{len(t["program"])} temps forts<br>à ne pas manquer</div></div>
-{stat_html}
-<div style="position:absolute;left:30px;top:{(y["l2e"] + o + STEP) // 2 - 60}px;width:120px;height:120px;border-radius:26px;background:#fff;display:flex;align-items:center;justify-content:center">{ARROW.format(s=58, c="#000")}</div>
-<div style="position:absolute;left:170px;top:{(y["l2e"] + o + STEP) // 2 - 38}px;width:110px"><div class=hw style="font-size:21px">Regarder<br>l'épisode</div></div>
+{_item(30, o + 44, prog[0])}{_item(330, y["r1s"] + 50, prog[1])}{_item(30, y["l2s"] + 54, prog[2])}{_item(330, y["r2s"] + 50, prog[3])}
+{_icon_cell(brand, 450, o + 100, prog[0])}{_icon_cell(brand, 150, (y["l1e"] + y["l2s"]) // 2, prog[1])}{_icon_cell(brand, 450, (y["r1e"] + y["r2s"]) // 2, prog[2])}{_icon_cell(brand, 150, (y["l2e"] + o + STEP) // 2, prog[3])}
 <div style="position:absolute;left:40px;top:{o + STEP + 40}px;width:520px">
  <div style="font:17px/1.55 Arial;color:#000">{esc(t["closing"])}</div>
  <div style="margin-top:18px;font:700 15px/1.4 M;color:#000">{esc(host)}</div><div class=m style="color:#6B6B6B;margin-top:6px">CEO · AI Partners</div>
