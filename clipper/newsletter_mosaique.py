@@ -20,7 +20,12 @@ W = 680                  # largeur de la carte du mail (px CSS) ; images rendues
 SW = 600                 # largeur de la forme blanche
 R_OUT, R_IN = 40, 14     # coins convexes bien arrondis ; coins des cases noires (concaves pour la forme blanche)
 OV = 6                   # recouvrement vertical de deux carrés blancs voisins = épaisseur de la jonction (fine, comme sur la référence)
-H0 = 470                 # hauteur du grand rectangle (titre, accroche, intro, bouton)
+HEAD = 96                # haut de la forme : barre « AI Corner by … » (20 px de marge, 56 px) puis 20 px
+TW = 560                 # largeur de la miniature, posée DANS le blanc (20 px de marge de chaque côté)
+TH = round(TW * 9 / 16)  # hauteur de la miniature
+TXT = HEAD + TH + 30     # début du titre, de l'accroche et du bouton
+H0 = TXT + 430           # fin du grand rectangle (titre, accroche, intro, bouton)
+TITLE_H = 84             # titre du bandeau des plateformes, dans la même forme blanche
 STEP = 830               # hauteur de l'escalier du programme
 H1 = 330                 # hauteur du rectangle final (mot de Thomas + réservation)
 DEFAULT_GLYPHS = ["git-compare", "zap", "network", "users"]
@@ -50,9 +55,9 @@ def stair(o: int) -> dict:
     return {"l1e": r1s + OV, "r1s": r1s, "r1e": r1e, "l2s": l2s, "l2e": l2e, "r2s": l2e - OV}
 
 
-def ribbon(o: int) -> list:
+def ribbon(o: int, end: int | None = None) -> list:
     """Forme blanche : grand rectangle (0..o), puis 4 carrés en escalier reliés par un cou fin, puis rectangle final."""
-    end, y = o + STEP + H1, stair(o)
+    end, y = end or o + STEP + H1, stair(o)
     return [(0, 0), (SW, 0), (SW, o), (300, o), (300, y["r1s"]), (SW, y["r1s"]), (SW, y["r1e"]), (300, y["r1e"]), (300, y["r2s"]),
             (SW, y["r2s"]), (SW, end), (0, end), (0, o + STEP), (300, o + STEP), (300, y["l2e"]), (0, y["l2e"]), (0, y["l2s"]),
             (300, y["l2s"]), (300, y["l1e"]), (0, y["l1e"])]
@@ -147,24 +152,33 @@ def make_mosaic(brand, d: Path, mail: dict, shot, fonts_css: str, uri, thumb: Pa
                 title: str, cfg: dict) -> dict:
     """Images du gabarit : en-tête, miniature arrondie, forme blanche (haut puis mot de la fin), titre et tuiles des plateformes."""
     t = short_texts(mail, title)
-    o, end = H0, H0 + STEP + H1
+    o = H0
+    fin = o + STEP + H1 + TITLE_H                  # fin de ce qui est rendu ; le blanc continue ensuite (logos, puis pied arrondi)
+    end = fin + 160                                # la forme dépasse la coupe : le bas arrondi est une image à part
     y = stair(o)
     prog = t["program"] + [{"time": "", "title": "", "text": "", "glyph": DEFAULT_GLYPHS[0]}] * (4 - len(t["program"]))
-    ox, oy = (W - SW) // 2, 0
+    ox = (W - SW) // 2
     host = cfg.get("from_name") or "Thomas Spitz"
     b = cfg.get("booking") or {}
     style = _css(fonts_css)
     out = {}
+    labels = " · ".join(PLATFORM_LABELS.get((p.get("name") or "").lower(), p.get("name", "")) for p in platforms)
 
-    # --- forme blanche, rendue d'un bloc puis coupée entre le programme et le mot de la fin (la coupe passe dans une zone pleine)
-    shape = rounded_path(ribbon(o), R_OUT, R_IN)
+    # --- UNE seule forme blanche du haut (barre du titre) au bas (plateformes) : rendue d'un bloc puis coupée en tranches
+    shape = rounded_path(ribbon(o, end), R_OUT, R_IN)
     book = (f'<div style="display:flex;justify-content:space-between;align-items:center"><div style="font:800 22px/1.15 M;color:#000">'
             f'{esc(b.get("title") or "")}</div><span class=btn style="font-size:14px;padding:15px 22px">Réserver un échange&nbsp;↗</span></div>'
             ) if b.get("url") else ""
-    page = f"""<html><head><meta charset="utf-8"><style>{style}body{{width:{W}px;height:{end}px}}</style></head><body>
+    thumb_html = (f'<img src="{uri(thumb)}" style="position:absolute;left:{(SW - TW) // 2}px;top:{HEAD}px;width:{TW}px;height:{TH}px;'
+                  f'border-radius:{R_OUT - 14}px">') if thumb else ""
+    page = f"""<html><head><meta charset="utf-8"><style>{style}body{{width:{W}px;height:{end}px}}.lg svg{{filter:brightness(0)}}</style></head><body>
 <div style="position:relative;width:{SW}px;height:{end}px;margin:0 {ox}px">
 <svg width="{SW}" height="{end}" style="position:absolute;left:0;top:0"><path d="{shape}" fill="#fff"/></svg>
-<div style="position:absolute;left:40px;top:40px;width:520px">
+<div style="position:absolute;left:30px;top:20px;width:540px;height:56px;display:flex;justify-content:space-between;align-items:center">
+ <div style="display:flex;align-items:center;gap:10px"><span style="font:800 20px M;white-space:nowrap;color:#000">AI Corner</span><span class=m style="color:#6B6B6B">by</span><span class=lg>{logo_svg}</span></div>
+ <span class=m style="background:#000;color:#fff;border-radius:20px;padding:11px 16px">EP.{re.sub(r"\D", "", str(mail.get("episode", "")))}&nbsp; ↗</span></div>
+{thumb_html}
+<div style="position:absolute;left:40px;top:{TXT}px;width:520px">
  <div class=m style="color:#6B6B6B">{esc(host)} × {esc(mail.get("guest", ""))} · {esc(mail.get("company", ""))}</div>
  <div style="font:800 36px/1.06 M;letter-spacing:-.025em;color:#000;margin-top:16px">{esc(t["title"])}</div>
  <div style="font:17px/1.5 Arial;color:#000;margin-top:20px">{esc(t["hook"])}</div>
@@ -176,41 +190,24 @@ def make_mosaic(brand, d: Path, mail: dict, shot, fonts_css: str, uri, thumb: Pa
  <div style="font:17px/1.55 Arial;color:#000">{esc(t["closing"])}</div>
  <div style="margin-top:18px;font:700 15px/1.4 M;color:#000">{esc(host)}</div><div class=m style="color:#6B6B6B;margin-top:6px">CEO · AI Partners</div>
  <div style="height:1px;background:#E2E2E2;margin:26px 0"></div>{book}</div>
+<div style="position:absolute;left:40px;top:{o + STEP + H1 - 14}px;width:520px;height:1px;background:#E2E2E2"></div>
+<div style="position:absolute;left:0;top:{o + STEP + H1 + 14}px;width:{SW}px;text-align:center"><div style="font:800 24px/1.1 M;color:#000">Écoutez AI Corner partout</div>
+ <div class=m style="color:#6B6B6B;margin-top:12px">{labels}</div></div>
 </div></body></html>"""
     full = shot(page, W * 2, end * 2, d / "_mosaique_complet.png")
     im = Image.open(full).convert("RGB")
-    cut = (o + STEP) * 2
-    for name, box in (("mosaique_haut.png", (0, 0, W * 2, cut)), ("mosaique_fin.png", (0, cut, W * 2, im.height))):
-        # 256 couleurs : noir, blanc, gris et leurs anticrénelages suffisent ; sans cela l'image dépasse 200 Ko (poids d'un mail)
-        im.crop(box).convert("P", palette=Image.Palette.ADAPTIVE, colors=256).save(d / name, optimize=True)
+    t_cut = (HEAD + TH + 16) * 2
+    pal = lambda r: r.convert("P", palette=Image.Palette.ADAPTIVE, colors=256)       # noqa: E731
+    # tranches de texte : 256 couleurs (noir, blanc, gris et anticrénelage) ; la miniature (photo) reste en JPEG
+    pal(im.crop((0, 0, W * 2, HEAD * 2))).save(d / "mosaique_entete.png", optimize=True)
+    im.crop((0, HEAD * 2, W * 2, t_cut)).save(d / "mosaique_miniature.jpg", quality=90)
+    pal(im.crop((0, t_cut, W * 2, (o + STEP) * 2))).save(d / "mosaique_haut.png", optimize=True)
+    pal(im.crop((0, (o + STEP) * 2, W * 2, fin * 2))).save(d / "mosaique_fin.png", optimize=True)
     full.unlink(missing_ok=True)
-    out["mz_main"], out["mz_close"] = d / "mosaique_haut.png", d / "mosaique_fin.png"
+    out.update(mz_header=d / "mosaique_entete.png", mz_thumb=d / "mosaique_miniature.jpg", mz_main=d / "mosaique_haut.png",
+               mz_close=d / "mosaique_fin.png")
 
-    # --- en-tête : barre BLANCHE arrondie (assortie à la forme blanche du mail), texte et logo noirs, pastille de l'épisode noire
-    head = f"""<html><head><meta charset="utf-8"><style>{style}body{{width:{W}px;height:104px}}.lg svg{{filter:brightness(0)}}</style></head><body>
-<div style="margin:28px 40px 20px;background:#fff;border-radius:28px;padding:0 10px 0 26px;height:56px;display:flex;justify-content:space-between;align-items:center">
- <div style="display:flex;align-items:center;gap:10px"><span style="font:800 20px M;white-space:nowrap;color:#000">AI Corner</span><span class=m style="color:#6B6B6B">by</span><span class=lg>{logo_svg}</span></div>
- <span class=m style="background:#000;color:#fff;border-radius:20px;padding:11px 16px">EP.{re.sub(r"\D", "", str(mail.get("episode", "")))}&nbsp; ↗</span></div></body></html>"""
-    out["mz_header"] = shot(head, W * 2, 104 * 2, d / "mosaique_entete.png")
-
-    # --- miniature en couleur, coins arrondis, sur fond noir opaque
-    if thumb:
-        tw = SW
-        th = round(tw * 9 / 16)
-        pg = (f'<html><head><meta charset="utf-8"><style>{style}body{{width:{W}px;height:{th + 20}px}}</style></head><body>'
-              f'<img src="{uri(thumb)}" style="position:absolute;left:{ox}px;top:0;width:{tw}px;height:{th}px;border-radius:{R_OUT}px"></body></html>')
-        png = shot(pg, W * 2, (th + 20) * 2, d / "_mosaique_miniature.png")
-        Image.open(png).convert("RGB").save(d / "mosaique_miniature.jpg", quality=88)       # photo : JPEG (le PNG pesait 800 Ko)
-        png.unlink(missing_ok=True)
-        out["mz_thumb"] = d / "mosaique_miniature.jpg"
-
-    # --- bandeau des plateformes : carte blanche arrondie (haut, rangée de logos, bas), logos EN COULEUR
-    labels = " · ".join(PLATFORM_LABELS.get((p.get("name") or "").lower(), p.get("name", "")) for p in platforms)
-    tit = (f'<html><head><meta charset="utf-8"><style>{style}body{{width:{W}px;height:100px}}</style></head><body>'
-           f'<div style="margin:0 40px;height:100px;background:#fff;border-radius:{R_OUT}px {R_OUT}px 0 0;text-align:center;padding-top:34px">'
-           f'<div style="font:800 24px/1.1 M;color:#000">Écoutez AI Corner partout</div>'
-           f'<div class=m style="color:#6B6B6B;margin-top:12px">{labels}</div></div></body></html>')
-    out["mz_plat_title"] = shot(tit, W * 2, 100 * 2, d / "mosaique_plateformes.png")
+    # --- bas de la forme : rangée de logos cliquables (EN COULEUR) puis pied arrondi
     cap = (f'<html><head><meta charset="utf-8"><style>{style}body{{width:{W}px;height:70px}}</style></head><body>'
            f'<div style="margin:0 40px;height:30px;background:#fff;border-radius:0 0 {R_OUT}px {R_OUT}px"></div></body></html>')
     out["mz_plat_cap"] = shot(cap, W * 2, 70 * 2, d / "mosaique_plateformes_bas.png")
@@ -249,18 +246,15 @@ def mosaique(c: dict) -> str:
         return (f'<td align="center" valign="middle" width="100" style="padding:0 4px;font-size:0;line-height:0"><a href="{esc(p["url"])}" style="text-decoration:none">'
                 f'<img src="{c["rel"]("mz_plat_" + key)}" width="100" height="100" alt="{esc(p["name"].capitalize())}" '
                 f'style="display:block;width:100px;height:100px;border:0"></a></td>')
-    body = ""
+    body = '<tr><td bgcolor="#000000" height="24" style="font-size:0;line-height:0;height:24px">&nbsp;</td></tr>'
     if c["img"].get("mz_header"):
-        body += _slice(c, "mz_header", f'AI Corner by AI Partners, épisode {c["episode"]}', c["url"])
+        body += _slice(c, "mz_header", f"AI Corner by AI Partners, épisode {c['episode']}", c["url"])
     if c["img"].get("mz_thumb"):
         body += _slice(c, "mz_thumb", c["title"], c["url"])
     body += _slice(c, "mz_main", alt_main, c["url"])
     body += _slice(c, "mz_close", alt_close, b.get("url") or c["url"])
-    if c["img"].get("mz_plat_title") and plats:
-        body += '<tr><td bgcolor="#000000" height="28" style="font-size:0;line-height:0;height:28px">&nbsp;</td></tr>'
-        body += (f'<tr><td bgcolor="#000000" style="font-size:0;line-height:0"><img src="{c["rel"]("mz_plat_title")}" width="{W}" alt="Écoutez AI Corner partout" '
-                 f'style="display:block;width:100%;max-width:{W}px;border:0"></td></tr>'
-                 f'<tr><td bgcolor="#000000" align="center" style="padding:0 40px"><table role="presentation" width="100%" bgcolor="#FFFFFF" cellpadding="0" cellspacing="0">'
+    if plats:
+        body += (f'<tr><td bgcolor="#000000" align="center" style="padding:0 40px"><table role="presentation" width="100%" bgcolor="#FFFFFF" cellpadding="0" cellspacing="0">'
                  f'<tr><td align="center" bgcolor="#FFFFFF" style="padding:0 0 4px"><table role="presentation" align="center" cellpadding="0" cellspacing="0">'
                  f'<tr>{"".join(cell(p) for p in plats)}</tr></table></td></tr></table></td></tr>')
         if c["img"].get("mz_plat_cap"):
