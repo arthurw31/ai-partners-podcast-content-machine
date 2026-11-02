@@ -176,7 +176,7 @@ def make_mosaic(brand, d: Path, mail: dict, shot, fonts_css: str, uri, thumb: Pa
 <svg width="{SW}" height="{end}" style="position:absolute;left:0;top:0"><path d="{shape}" fill="#fff"/></svg>
 <div style="position:absolute;left:30px;top:16px;width:540px;height:64px;display:flex;justify-content:space-between;align-items:center">
  <div><span class=lg>{logo_svg}</span><div style="font:800 15px/1 M;color:#000;margin-top:9px;letter-spacing:.01em">AI Corner</div></div>
- <span class=m style="background:#fff;color:#000;border:1.5px solid #000;border-radius:20px;padding:10px 15px">EP.{re.sub(r"\D", "", str(mail.get("episode", "")))}&nbsp; ↗</span></div>
+ <span style="font:800 20px/1 M;background:#fff;color:#000;border:1.5px solid #000;border-radius:24px;padding:12px 20px;white-space:nowrap">EP.{re.sub(r"\D", "", str(mail.get("episode", "")))}&nbsp; ↗</span></div>
 {thumb_html}
 <div style="position:absolute;left:40px;top:{TXT}px;width:520px">
  <div class=m style="color:#6B6B6B">{esc(host)} × {esc(mail.get("guest", ""))} · {esc(mail.get("company", ""))}</div>
