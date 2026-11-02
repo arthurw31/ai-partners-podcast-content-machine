@@ -54,7 +54,7 @@ def stair(o: int) -> dict:
     r1e = r1s + BH
     l2s = r1e - OV
     l2e = l2s + BH
-    return {"l1e": r1s + OV, "r1s": r1s, "r1e": r1e, "l2s": l2s, "l2e": l2e, "r2s": l2e - OV, "step": l2e + 230}
+    return {"l1e": r1s + OV, "r1s": r1s, "r1e": r1e, "l2s": l2s, "l2e": l2e, "r2s": l2e - OV, "step": l2e + 250}
 
 
 def ribbon(o: int, end: int | None = None) -> list:
@@ -82,7 +82,7 @@ def sentences(text: str, max_chars: int, max_sentences: int = 2) -> str:
 def short_texts(mail: dict, title: str) -> dict:
     prog = []
     for i, p in enumerate(mail.get("program") or []):
-        prog.append({"time": _tc(p.get("chapter")), "title": p.get("court_title") or p.get("title", ""), "text": p.get("court") or sentences(p.get("text", ""), 95, 1),
+        prog.append({"time": _tc(p.get("court_chapter") or p.get("chapter")), "title": p.get("court_title") or p.get("title", ""), "text": p.get("court") or sentences(p.get("text", ""), 95, 1),
                      "glyph": p.get("glyph") or DEFAULT_GLYPHS[i % len(DEFAULT_GLYPHS)]})
     return {"title": re.sub(r"^\s*AI Corner E\d+\s*\|\s*", "", title or mail.get("theme", "")),
             "hook": mail.get("hook_court") or sentences(mail.get("hook", ""), 150, 2),
