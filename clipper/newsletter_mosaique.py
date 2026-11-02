@@ -186,11 +186,11 @@ def make_mosaic(brand, d: Path, mail: dict, shot, fonts_css: str, uri, thumb: Pa
     full.unlink(missing_ok=True)
     out["mz_main"], out["mz_close"] = d / "mosaique_haut.png", d / "mosaique_fin.png"
 
-    # --- en-tête : « AI Corner by AI PARTNERS » + pastille de l'épisode, en contour fin
-    head = f"""<html><head><meta charset="utf-8"><style>{style}body{{width:{W}px;height:104px}}</style></head><body>
-<div style="margin:28px 40px 20px;border:1px solid #fff;border-radius:14px;padding:12px 14px 12px 18px;height:56px;display:flex;justify-content:space-between;align-items:center">
- <div style="display:flex;align-items:center;gap:10px"><span style="font:800 20px M;white-space:nowrap">AI Corner</span><span class=m style="color:#8A8A8A">by</span><span class=lg>{logo_svg}</span></div>
- <span class=m style="border:1px solid #fff;border-radius:10px;padding:8px 12px">EP.{re.sub(r"\D", "", str(mail.get("episode", "")))}&nbsp; ↗</span></div></body></html>"""
+    # --- en-tête : barre BLANCHE arrondie (assortie à la forme blanche du mail), texte et logo noirs, pastille de l'épisode noire
+    head = f"""<html><head><meta charset="utf-8"><style>{style}body{{width:{W}px;height:104px}}.lg svg{{filter:brightness(0)}}</style></head><body>
+<div style="margin:28px 40px 20px;background:#fff;border-radius:28px;padding:0 10px 0 26px;height:56px;display:flex;justify-content:space-between;align-items:center">
+ <div style="display:flex;align-items:center;gap:10px"><span style="font:800 20px M;white-space:nowrap;color:#000">AI Corner</span><span class=m style="color:#6B6B6B">by</span><span class=lg>{logo_svg}</span></div>
+ <span class=m style="background:#000;color:#fff;border-radius:20px;padding:11px 16px">EP.{re.sub(r"\D", "", str(mail.get("episode", "")))}&nbsp; ↗</span></div></body></html>"""
     out["mz_header"] = shot(head, W * 2, 104 * 2, d / "mosaique_entete.png")
 
     # --- miniature en couleur, coins arrondis, sur fond noir opaque
@@ -204,24 +204,28 @@ def make_mosaic(brand, d: Path, mail: dict, shot, fonts_css: str, uri, thumb: Pa
         png.unlink(missing_ok=True)
         out["mz_thumb"] = d / "mosaique_miniature.jpg"
 
-    # --- bandeau des plateformes, en noir et blanc
-    tit = (f'<html><head><meta charset="utf-8"><style>{style}body{{width:{W}px;height:150px}}</style></head><body><div style="padding:54px 40px 0">'
-           f'<div style="font:800 24px/1.1 M">Écoutez AI Corner partout</div><div class=m style="color:#8A8A8A;margin-top:12px">'
-           f'{" · ".join(PLATFORM_LABELS.get((p.get("name") or "").lower(), p.get("name", "")) for p in platforms)}</div></div></body></html>')
-    out["mz_plat_title"] = shot(tit, W * 2, 150 * 2, d / "mosaique_plateformes.png")
+    # --- bandeau des plateformes : carte blanche arrondie (haut, rangée de logos, bas), logos EN COULEUR
+    labels = " · ".join(PLATFORM_LABELS.get((p.get("name") or "").lower(), p.get("name", "")) for p in platforms)
+    tit = (f'<html><head><meta charset="utf-8"><style>{style}body{{width:{W}px;height:100px}}</style></head><body>'
+           f'<div style="margin:0 40px;height:100px;background:#fff;border-radius:{R_OUT}px {R_OUT}px 0 0;text-align:center;padding-top:34px">'
+           f'<div style="font:800 24px/1.1 M;color:#000">Écoutez AI Corner partout</div>'
+           f'<div class=m style="color:#6B6B6B;margin-top:12px">{labels}</div></div></body></html>')
+    out["mz_plat_title"] = shot(tit, W * 2, 100 * 2, d / "mosaique_plateformes.png")
+    cap = (f'<html><head><meta charset="utf-8"><style>{style}body{{width:{W}px;height:70px}}</style></head><body>'
+           f'<div style="margin:0 40px;height:30px;background:#fff;border-radius:0 0 {R_OUT}px {R_OUT}px"></div></body></html>')
+    out["mz_plat_cap"] = shot(cap, W * 2, 70 * 2, d / "mosaique_plateformes_bas.png")
     for p in platforms:
         key = (p.get("name") or "").lower()
         src = brand.asset(f"platforms/{key}.svg")
         if not src:
             continue
         glyph = src.read_text(encoding="utf-8")
-        flt = "" if key == "ausha" else "filter:brightness(0) invert(1);"
-        if key == "ausha":                    # logo Ausha en blanc : disque blanc, traits noirs
-            glyph = re.sub(r"<defs>.*?</defs>", '<defs><clipPath id="c"><circle cx="256" cy="256" r="246"/></clipPath></defs>', glyph, flags=re.S)
-            glyph = glyph.replace('fill="url(#g)"', 'fill="#fff"').replace('stroke="#fff"', 'stroke="#000"')
-        pg = (f'<html><head><meta charset="utf-8"><style>{style}body{{width:100px;height:100px;zoom:2}}</style></head><body>'
-              f'<div style="margin:14px;width:72px;height:72px;border-radius:22px;border:1px solid #3A3A3A;display:flex;align-items:center;justify-content:center">'
-              f'<div style="width:30px;height:30px;{flt}">{glyph.replace("<svg", "<svg width=30 height=30", 1)}</div></div></body></html>')
+        color = {"youtube": "#FF0000", "spotify": "#1DB954"}.get(key)       # couleurs officielles ; Ausha garde son violet
+        if color:
+            glyph = glyph.replace("<svg ", f"<svg fill='{color}' ", 1)
+        pg = (f'<html><head><meta charset="utf-8"><style>{style.replace("background:#000", "background:#fff")}body{{width:100px;height:100px;zoom:2}}</style></head><body>'
+              f'<div style="margin:14px;width:72px;height:72px;border-radius:22px;border:1px solid #D9D9D9;display:flex;align-items:center;justify-content:center">'
+              f'<div style="width:34px;height:34px">{glyph.replace("<svg", "<svg width=34 height=34", 1)}</div></div></body></html>')
         out[f"mz_plat_{key}"] = shot(pg, 200, 200, d / f"mosaique_{key}.png")
     return out
 
@@ -253,8 +257,13 @@ def mosaique(c: dict) -> str:
     body += _slice(c, "mz_main", alt_main, c["url"])
     body += _slice(c, "mz_close", alt_close, b.get("url") or c["url"])
     if c["img"].get("mz_plat_title") and plats:
+        body += '<tr><td bgcolor="#000000" height="28" style="font-size:0;line-height:0;height:28px">&nbsp;</td></tr>'
         body += (f'<tr><td bgcolor="#000000" style="font-size:0;line-height:0"><img src="{c["rel"]("mz_plat_title")}" width="{W}" alt="Écoutez AI Corner partout" '
                  f'style="display:block;width:100%;max-width:{W}px;border:0"></td></tr>'
-                 f'<tr><td bgcolor="#000000" align="center" style="padding:0 14px 44px 14px"><table role="presentation" align="center" cellpadding="0" cellspacing="0">'
-                 f'<tr>{"".join(cell(p) for p in plats)}</tr></table></td></tr>')
+                 f'<tr><td bgcolor="#000000" align="center" style="padding:0 40px"><table role="presentation" width="100%" bgcolor="#FFFFFF" cellpadding="0" cellspacing="0">'
+                 f'<tr><td align="center" bgcolor="#FFFFFF" style="padding:0 0 4px"><table role="presentation" align="center" cellpadding="0" cellspacing="0">'
+                 f'<tr>{"".join(cell(p) for p in plats)}</tr></table></td></tr></table></td></tr>')
+        if c["img"].get("mz_plat_cap"):
+            body += (f'<tr><td bgcolor="#000000" style="font-size:0;line-height:0"><img src="{c["rel"]("mz_plat_cap")}" width="{W}" alt="" '
+                     f'style="display:block;width:100%;max-width:{W}px;border:0"></td></tr>')
     return shell(c, "#000000", body, "#000000", "#8A8A8A", card_bg="#000000")
