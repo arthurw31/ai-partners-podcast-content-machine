@@ -24,7 +24,7 @@ HEAD = 96                # haut de la forme : barre « AI Corner by … » (20 p
 TW = 560                 # largeur de la miniature, posée DANS le blanc (20 px de marge de chaque côté)
 TH = round(TW * 9 / 16)  # hauteur de la miniature
 TXT = HEAD + TH + 30     # début du titre, de l'accroche et du bouton
-H0 = TXT + 430           # fin du grand rectangle (titre, accroche, intro, bouton)
+H0 = TXT + 455           # fin du grand rectangle (titre, accroche, intro, bouton)
 TITLE_H = 84             # titre du bandeau des plateformes, dans la même forme blanche
 STEP = 830               # hauteur de l'escalier du programme
 H1 = 330                 # hauteur du rectangle final (mot de Thomas + réservation)
@@ -182,7 +182,9 @@ def make_mosaic(brand, d: Path, mail: dict, shot, fonts_css: str, uri, thumb: Pa
  <div style="font:800 36px/1.06 M;letter-spacing:-.025em;color:#000">{esc(t["title"])}</div>
  <div style="font:17px/1.5 Arial;color:#000;margin-top:20px">{esc(t["hook"])}</div>
  <div style="font:14.5px/1.6 Arial;color:#5A5A5A;margin-top:12px">{esc(t["intro"])}</div>
- <div style="margin-top:26px"><span class=btn>{esc((cfg.get("button") or "Regarder l'épisode").capitalize())} &nbsp;↗</span></div></div>
+ <div style="margin-top:28px;display:flex;justify-content:space-between;align-items:center;gap:20px"><div style="width:290px">{_lab("Les thèmes abordés", "#000")}
+  <div style="font:700 14px/1.5 Arial;color:#000;margin-top:10px">{"<br>".join(esc(p["title"]) for p in t["program"])}</div></div>
+  <span class=btn>{esc((cfg.get("button") or "Regarder l'épisode").capitalize())} &nbsp;↗</span></div></div>
 {_item(30, o + 44, prog[0])}{_item(330, y["r1s"] + 50, prog[1])}{_item(30, y["l2s"] + 54, prog[2])}{_item(330, y["r2s"] + 50, prog[3])}
 {_icon_cell(brand, 450, o + 100, prog[0])}{_icon_cell(brand, 150, (y["l1e"] + y["l2s"]) // 2, prog[1])}{_icon_cell(brand, 450, (y["r1e"] + y["r2s"]) // 2, prog[2])}{_icon_cell(brand, 150, (y["l2e"] + o + STEP) // 2, prog[3])}
 <div style="position:absolute;left:40px;top:{o + STEP + 40}px;width:520px">
