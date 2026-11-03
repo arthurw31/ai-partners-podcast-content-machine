@@ -165,6 +165,18 @@ def group_words(words: list[dict], clip_start: float, clip_end: float, cfg: Cfg,
     while k < len(groups) - 1 and guard < 8 * len(groups) + 20:
         guard += 1
         g, nxt = groups[k], groups[k + 1]
+        if nxt[0]["s"] - g[0]["s"] < MIN_SHOW and g[-1]["w"][-1:] in ".?!…" and k > 0:
+            # dernier mot d'une phrase resté seul juste avant un raccord ou une pause (« FONT. » 0,29 s, short 3 E23, 03/11/2026) :
+            # il ne peut pas rejoindre le bloc d'après (autre passage), il rejoint celui d'avant, qui est la même phrase
+            if _fits(groups[k - 1] + g):
+                groups[k - 1] = groups[k - 1] + g
+                del groups[k]
+                continue
+            bal = _rebalance(groups[k - 1] + g, last_min=0.2)
+            if bal:
+                groups[k - 1], groups[k] = bal
+                k += 1
+                continue
         if nxt[0]["s"] - g[0]["s"] < MIN_SHOW and g[-1]["w"][-1:] not in ".?!…":
             if _fits(g + nxt):
                 groups[k + 1] = g + nxt

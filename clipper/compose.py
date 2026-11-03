@@ -763,6 +763,13 @@ def build_clip(brand: Brand, source: Path, transcript: dict, clip: dict, episode
             lum = logo_tone.video_luminance(src_clip, 0.0, D_speech, logo_tone.BOXES.get(zone, logo_tone.BOXES["top-right"]))
             src_logo, tone = logo_tone.pick_logo(brand, lum, cfg.logo)
             console.print(f"  logo AI Partners : fond {tone} en haut (luminosité {lum if lum is None else round(lum, 2)}) -> {src_logo.name}")
+            if tone == "clair" and guest_logo_file and src_gl:
+                # le logo de l'invité suit la même règle (Arthur, 03/11/2026 : logo Coty en bleu marine #002554 comme sur coty.com) : variante `<nom>_on_light` (couleur de la marque sur fond clair)
+                alt = next((brand.asset(f"guests/{src_gl.stem}_on_light{e}") for e in (".svg", ".png") if brand.asset(f"guests/{src_gl.stem}_on_light{e}")), None)
+                if alt:
+                    guest_logo_file = "guest_logo" + alt.suffix.lower()
+                    shutil.copy2(alt, assets / guest_logo_file) if alt.suffix.lower() == ".svg" else _copy_logo(alt, assets / guest_logo_file)
+                    console.print(f"  logo {src_gl.stem} : fond clair -> {alt.name}")
         logo_file = "logo" + src_logo.suffix.lower()
         _copy_logo(src_logo, assets / logo_file)
     logo_mode = "none" if not cfg.logo.enabled or cfg.logo.mode == "none" else ("image" if logo_file else "text")

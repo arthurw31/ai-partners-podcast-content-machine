@@ -507,5 +507,18 @@ def test_etiquettes_de_couleur_episode():
     assert src.count("*COLOR_TAGS") == 3, src.count("*COLOR_TAGS")        # plans du corps, vidéo normalisée, fin de l'épisode
 
 
+def test_dernier_mot_d_une_phrase_avant_raccord_rejoint_le_bloc_precedent():
+    """03/11/2026, short 3 E23 : « FONT. » seul (fin de phrase juste avant un raccord) affiché 0,29 s, illisible : exempté de la
+    fusion « < 0,35 s » parce qu'il finit une phrase, et impossible à fondre avec le bloc d'après (raccord)."""
+    cfg = cfg_for_format(Brand("ai-corner").cfg, "9x16")
+    ws = _words([("disponible", 0.0, 0.8), ("dans", 0.8, 1.0), ("l'environnement", 1.0, 1.7), ("que", 1.7, 1.8), ("les", 1.8, 1.9),
+                 ("utilisateurs", 1.9, 2.5), ("font.", 3.3, 3.45),
+                 ("Le", 3.6, 3.7), ("fait", 3.7, 3.9), ("d'avoir", 3.9, 4.3), ("un", 4.3, 4.4), ("seul", 4.4, 4.6)])
+    caps = group_words(ws, 0.0, 5.0, cfg, [], breaks=[3.58])
+    for a, b in zip(caps, caps[1:]):
+        assert b["start"] - a["start"] >= 0.35, f"bloc {a['id']} affiché {b['start'] - a['start']:.2f} s : " + str(
+            [" ".join(w["text"] for ln in c["lines"] for w in ln) for c in caps])
+
+
 if __name__ == "__main__":
     sys.exit(main())
