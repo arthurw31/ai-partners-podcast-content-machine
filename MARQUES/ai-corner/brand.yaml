@@ -167,7 +167,13 @@ format_overrides:
 
 # Outro des shorts (Arthur, 09/10/2026 : « mettre en outro la première des 4 outros en motion design, call to action avec la
 # miniature ») : variante A, rendue une fois par épisode APRÈS le choix de la miniature, collée à la fin de chaque short.
+# Qualité maximale des shorts (Arthur, 03/11/2026 : « render les en qualité max ») : CRF 10 au rendu (12 avant) et à la collure de l'outro (14 avant).
+# La vraie limite reste la source : rushs en 1080p, un cadre 9:16 y fait 608 px de large avant agrandissement.
+render:
+  crf: 10
+
 short_outro:
+  crf: 10
   duration: 7.0
   title: "L'épisode complet"
   cta: "Regarder l'épisode — lien en description"

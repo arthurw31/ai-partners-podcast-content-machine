@@ -1014,6 +1014,7 @@ short -> `preview` libère le port ; 16:9 inutile -> `formats: ["9x16"]` ; tél�
   (`assets/reframed_<fmt>.mp4`), jouée 1:1 par HyperFrames (`plan_render` = un seul plan plein cadre) ; rendu final
   `--crf 12` et `--video-frame-format png` (sinon images source en JPEG). Désactivé si `framing.slow_zoom` (le
   zoom lent reste animé par la timeline). Rendu ≈ 12× la durée du clip avec PNG.
+- **Qualité maximale des shorts** (Arthur, 03/11/2026 : « render les en qualité max », shorts 1, 2 et 5 de E23 refaits avec le logo noir) : `render.crf: 10` (12 avant) et `short_outro.crf: 10` (14 avant, collure de l'outro, étiquettes Rec. 709 ajoutées) dans brand.yaml d'AI Corner. Gain surtout théorique : les rushs sont en 1080p, la source reste la limite. Refaire des shorts déjà validés : `build --only N --force` puis `render --only N --force` puis `outro --only N --force`, anciennes versions déplacées dans `archives/`. Les règles de `qa` ajoutées après le 14/10 (rythme des raccords, bruit de bouche, bloc de sous-titres < 0,35 s) peuvent passer en ÉCHEC des shorts validés AVANT elles (E23 shorts 1, 2, 5, 03/11/2026) : ce n'est pas une régression du rendu, à signaler à Arthur plutôt que de retoucher des coupes déjà validées.
 - `-filter_complex_script` n'existe plus dans FFmpeg 9 : utiliser `-/filter_complex <fichier>`.
 - La vraie limite reste la source : AI Partners a accès aux épisodes en 4K (octobre 2026) — toujours partir de la
   4K. `cut_segment` garde jusqu'à `render.max_source_height` (2160) lignes ; un cadre 9:16 y fait 1215 px de large.

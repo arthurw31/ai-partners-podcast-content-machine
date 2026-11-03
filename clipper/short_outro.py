@@ -148,9 +148,9 @@ def shorts(ep: Path, only: set[int] | None = None) -> list[Path]:
     return out
 
 
-def append(short: Path, outro: Path, dst: Path, fade: float = 0.4) -> Path:
+def append(short: Path, outro: Path, dst: Path, fade: float = 0.4, crf: int = 14) -> Path:
     """short + outro -> dst. La dernière image du short est tenue `fade` s pendant que l'outro apparaît en fondu : la voix
-    n'est JAMAIS raccourcie ni fondue (règle « jamais couper une fin de phrase »). Outro muette. H.264 CRF 14, AAC."""
+    n'est JAMAIS raccourcie ni fondue (règle « jamais couper une fin de phrase »). Outro muette. H.264 CRF 14 par défaut (`short_outro.crf`), AAC, étiquettes Rec. 709."""
     d = float(probe(short)["duration"])
     fps = int(round(probe(short)["fps"])) or FPS   # cadence du SHORT : jamais reconvertie (24 -> 30 = image doublée 1 sur 5)
     # l'animation commence par ~0,6 s de noir (lignes pas encore dessinées) : collée telle quelle, ça faisait un trou noir
@@ -165,8 +165,9 @@ def append(short: Path, outro: Path, dst: Path, fade: float = 0.4) -> Path:
           f"[a][b]xfade=transition=fade:duration={fade}:offset={d:.3f},format=yuv420p[v];"
           f"[0:a]aresample=48000,apad,atrim=0:{total:.3f}[aout]")
     subprocess.run([FFMPEG, "-y", "-v", "error", "-i", str(short), "-i", str(outro), "-filter_complex", fc,
-                    "-map", "[v]", "-map", "[aout]", "-c:v", "libx264", "-crf", "14", "-preset", "medium",
-                    "-pix_fmt", "yuv420p", "-profile:v", "high", "-level", "4.2", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", str(dst)], check=True)
+                    "-map", "[v]", "-map", "[aout]", "-c:v", "libx264", "-crf", str(crf), "-preset", "medium",
+                    "-pix_fmt", "yuv420p", "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709",
+                    "-color_range", "tv", "-profile:v", "high", "-level", "4.2", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", str(dst)], check=True)
     return dst
 
 
@@ -190,7 +191,7 @@ def apply(brand, ep: Path, video: Path, only: set[int] | None = None, force: boo
             continue
         dst = ep / folder / s.name
         dst.parent.mkdir(exist_ok=True)
-        append(s, outro, dst)
+        append(s, outro, dst, crf=int((brand.cfg.get("short_outro") or {}).get("crf") or 14))
         want = float(probe(s)["duration"]) + float(probe(outro)["duration"])
         got = float(probe(dst)["duration"])
         pf = _pix_fmt(dst)   # 4:4:4 (xfade, 11/10/2026) : illisible dans le lecteur Windows, les téléphones, les réseaux sociaux
