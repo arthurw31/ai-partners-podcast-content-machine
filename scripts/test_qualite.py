@@ -496,5 +496,16 @@ def test_quatre_shorts_par_episode():
     assert int(Brand("ai-corner").cfg.selection.n_clips) == 4
 
 
+def test_etiquettes_de_couleur_episode():
+    """03/11/2026, Spotify refusait l'épisode E23 (« les informations sur les couleurs changent pendant votre vidéo ») : 99 images
+    clés (plans en écran partagé, filtre hstack) n'avaient ni primaires ni transfert, les autres oui. Tous les encodages de
+    plans, la fin et la vidéo normalisée portent désormais les mêmes étiquettes Rec. 709."""
+    from clipper import episode as ep
+    assert ep.COLOR_TAGS[ep.COLOR_TAGS.index("-color_primaries") + 1] == "bt709"
+    assert ep.COLOR_TAGS[ep.COLOR_TAGS.index("-color_trc") + 1] == "bt709"
+    src = Path(ep.__file__).read_text(encoding="utf-8")
+    assert src.count("*COLOR_TAGS") == 3, src.count("*COLOR_TAGS")        # plans du corps, vidéo normalisée, fin de l'épisode
+
+
 if __name__ == "__main__":
     sys.exit(main())

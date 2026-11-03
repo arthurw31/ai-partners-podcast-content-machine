@@ -441,6 +441,11 @@ def enforce_speaker(shots: list[dict], words: list[dict], min_shot: float = 2.0,
 
 # ------------------------------------------------------------------------------------------------ 4. rendu
 
+# Étiquettes de couleur identiques sur TOUS les plans (Rec. 709, SDR, plage limitée) : sans elles, les plans en écran partagé
+# (filtre hstack) sortaient sans primaires ni transfert, et Spotify refusait la vidéo (« les informations sur les couleurs changent
+# pendant votre vidéo », E23, 03/11/2026).
+COLOR_TAGS = ["-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-color_range", "tv"]
+
 def _face_x(video: Path, at: float) -> float:
     """Centre horizontal (0–1) du plus grand visage d'un gros plan (pour l'écran partagé)."""
     import cv2
@@ -464,7 +469,7 @@ def render_piece(spec: dict, shot: dict, dst: Path, fps: int, size: tuple[int, i
     W, H = size
     enc = (["-c:v", "libx264", "-preset", "ultrafast", "-crf", "28"] if proxy else
            ["-c:v", "libx264", "-preset", "medium", "-crf", "16"])
-    common = ["-an", "-frames:v", str(n), "-r", str(fps), "-pix_fmt", "yuv420p", "-g", str(fps * 2), *enc,
+    common = ["-an", "-frames:v", str(n), "-r", str(fps), "-pix_fmt", "yuv420p", *COLOR_TAGS, "-g", str(fps * 2), *enc,
               "-video_track_timescale", "12288", str(dst)]
     # logo en haut à droite (dernière entrée) : largeur et marge en fraction de la largeur de l'image
     lg_in, lg_tail = [], ""
@@ -852,7 +857,7 @@ def _normalize(src: Path, dst: Path, size: tuple[int, int], fps: int, proxy: boo
     W, H = size
     enc = ["-preset", "ultrafast", "-crf", "28"] if proxy else ["-preset", "medium", "-crf", "16"]
     run([FFMPEG, "-y", "-v", "error", "-i", str(src), "-an", "-vf", f"scale={W}:{H},setsar=1,fps={fps}",
-         "-r", str(fps), "-pix_fmt", "yuv420p", "-g", str(fps * 2), "-c:v", "libx264", *enc,
+         "-r", str(fps), "-pix_fmt", "yuv420p", *COLOR_TAGS, "-g", str(fps * 2), "-c:v", "libx264", *enc,
          "-video_track_timescale", "12288", str(dst)])
     return dst
 
@@ -876,7 +881,7 @@ def end_card(brand: Brand, dst: Path, size: tuple[int, int], fps: int, proxy: bo
     # -loop 1 : sans lui le PNG n'a qu'une image (t = 0, encore transparente avant le fondu) répétée -> logo invisible
     run([FFMPEG, "-y", "-v", "error", "-i", str(anim), "-loop", "1", "-i", str(logo), "-filter_complex",
          f"[1:v]scale={lw}:-1,format=rgba,fade=t=in:st=0.4:d=0.6:alpha=1[l];[0:v][l]overlay=(W-w)/2:(H-h)/2:shortest=1,format=yuv420p[v]",
-         "-map", "[v]", "-an", "-r", str(fps), "-g", str(fps * 2), "-c:v", "libx264", *enc,
+         "-map", "[v]", "-an", "-r", str(fps), *COLOR_TAGS, "-g", str(fps * 2), "-c:v", "libx264", *enc,
          "-video_track_timescale", "12288", str(dst)])
     return dst
 
