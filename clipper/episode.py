@@ -30,7 +30,7 @@ import numpy as np
 from rich.console import Console
 
 from .config import Brand
-from .media import FFMPEG, probe, run
+from .media import FFMPEG, FFPROBE, probe, run
 from .select_clips import _find_phrase
 from .transcribe import all_words, sentences, to_timed_text
 
@@ -445,6 +445,36 @@ def enforce_speaker(shots: list[dict], words: list[dict], min_shot: float = 2.0,
 # (filtre hstack) sortaient sans primaires ni transfert, et Spotify refusait la vidéo (« les informations sur les couleurs changent
 # pendant votre vidéo », E23, 03/11/2026).
 COLOR_TAGS = ["-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-color_range", "tv"]
+
+
+def platform_versions(src: Path) -> list[Path]:
+    """Versions de l'épisode final par plateforme, à côté de lui (copiées dans LIVRABLES par `livraison`) :
+    - `<base>_episode_YOUTUBE_1440p.mp4` : agrandie en 1440p. Un fichier 1080p ne reçoit de YouTube le codec VP9 que pour les
+      petites qualités tant que la vidéo a peu de vues ; Chrome sur ordinateur lit le VP9 en priorité et démarrait donc en
+      240p (le téléphone, en H.264, était en HD). En 1440p, YouTube fait le VP9 de toutes les qualités dès la mise en ligne
+      (E23, 04/11/2026 : 240p au clic sur ordinateur avec le fichier 1080p, HD avec celui-ci ; Arthur : « ça marche »).
+    - `<base>_episode_SPOTIFY.mp4` : copie sans réencodage aux specs Spotify for Creators (couleurs constantes, pas de liste
+      d'édition, audio et vidéo de même durée ; E23, 03/11/2026)."""
+    out = []
+    yt = src.with_name(f"{src.stem}_YOUTUBE_1440p.mp4")
+    if not yt.exists() or yt.stat().st_mtime < src.stat().st_mtime:
+        console.print("Version YouTube 1440p (≈ 0,8× la durée de l'épisode)…")
+        run([FFMPEG, "-y", "-v", "error", "-i", str(src), "-map", "0:v:0", "-map", "0:a:0",
+             "-vf", "scale=2560:1440:flags=lanczos,setparams=range=tv:color_primaries=bt709:color_trc=bt709:colorspace=bt709", "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
+             "-pix_fmt", "yuv420p", "-g", "48", "-bf", "2", *COLOR_TAGS,
+             "-c:a", "aac", "-b:a", "320k", "-ar", "48000", "-movflags", "+faststart", str(yt)])
+    out.append(yt)
+    sp = src.with_name(f"{src.stem}_SPOTIFY.mp4")
+    if not sp.exists() or sp.stat().st_mtime < src.stat().st_mtime:
+        v = float(subprocess.run([FFPROBE, "-v", "error", "-select_streams", "v:0",
+                                  "-show_entries", "stream=duration", "-of", "csv=p=0", str(src)],
+                                 capture_output=True, text=True).stdout.strip())
+        run([FFMPEG, "-y", "-v", "error", "-t", f"{v:.3f}", "-i", str(src), "-t", f"{v - 0.02:.3f}", "-i", str(src),
+             "-map", "0:v:0", "-map", "1:a:0", "-c", "copy", "-bsf:v",
+             "h264_metadata=video_full_range_flag=0:colour_primaries=1:transfer_characteristics=1:matrix_coefficients=1",
+             "-use_editlist", "0", "-movflags", "+faststart+negative_cts_offsets", str(sp)])
+    out.append(sp)
+    return out
 
 def _face_x(video: Path, at: float) -> float:
     """Centre horizontal (0–1) du plus grand visage d'un gros plan (pour l'écran partagé)."""

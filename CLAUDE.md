@@ -584,8 +584,15 @@ shorts il faut que la miniature soit validée »)
   HyperFrames. Toujours montrer l'aperçu (Studio pour le teaser : `preview --clip 99 --formats 16x9`, 540p pour le
   corps) et attendre la confirmation d'Arthur avant tout MP4 final.
 - **Spotify for Creators** (équipe marketing, 03/11/2026 : « cette vidéo ne peut pas être publiée : les informations sur les couleurs changent pendant votre vidéo ») : specs sur https://support.spotify.com/us/creators/article/video-specs/ (MP4 H.264, 1080p, AAC, ni liste d'édition ni piste en trop, durées audio et vidéo égales, 1re image à 50 ms de 0, couleurs constantes). Cause trouvée sur E23 : les plans en écran partagé (`hstack`) sortaient SANS primaires ni transfert (99 images clés sur 1 541), les autres en Rec. 709 -> `episode.COLOR_TAGS` sur tous les encodages (test `test_etiquettes_de_couleur_episode`). Réparation d'un fichier déjà rendu SANS recompression (30 s) : `ffmpeg -t <durée vidéo> -i F -t <durée vidéo - 0,02> -i F -map 0:v:0 -map 1:a:0 -c copy -bsf:v h264_metadata=video_full_range_flag=0:colour_primaries=1:transfer_characteristics=1:matrix_coefficients=1 -use_editlist 0 -movflags +faststart+negative_cts_offsets SPOTIFY.mp4`, puis contrôle des images clés (`ffprobe -skip_frame nokey -show_entries frame=color_primaries,color_transfer`).
-- **YouTube : fichiers de remplacement E23 (03/11/2026)** : `LIVRABLES/1_episode_youtube/…_YOUTUBE_v2.mp4` (couleurs constantes, image clé chaque seconde, audio et vidéo de même durée) puis `…_YOUTUBE_v3.mp4` = copie conforme des réglages du fichier du monteur (H.264 Main 4.1, 4,5 Mb/s, 1 image B, AAC 44,1 kHz 160 kb/s, marque mp42), pour savoir si le 240p par défaut vient du fichier. Résultat à noter ici après le test sur YouTube (vidéo à mettre en non répertorié, jamais en privé : sinon elle est illisible pour le test).
-- **YouTube : « 240p par défaut »** juste après la mise en ligne = traitement HD pas fini (18 copies = 6 qualités × 3 codecs ; E23 en avait 9 une heure après), pas un défaut du fichier : ne pas réencoder ni renvoyer, attendre quelques heures.
+- **YouTube : 240p au clic sur ordinateur -> version 1440p** (E23, 03–04/11/2026 ; Arthur : « ça marche, retiens de faire ça dans le
+  framework ») : avec le fichier 1080p, YouTube ne fabrique le codec VP9 que pour les petites qualités tant que la vidéo a peu de vues
+  (9 copies sur 18) ; Chrome sur ordinateur lit le VP9 en priorité et démarrait en 240p (le téléphone, en H.264, était en HD ; E22 du
+  monteur, avec des milliers de vues, avait déjà tout). Ni le profil H.264, ni le débit, ni les étiquettes de couleur n'y changeaient
+  rien (essais v2 / v3 du 03/11). Le même épisode agrandi en **1440p** reçoit le VP9 de toutes les qualités dès la mise en ligne et
+  démarre en HD. `episode-render` (final) écrit donc `episode/<base>_episode_YOUTUBE_1440p.mp4` (Lanczos, x264 veryfast CRF 18, AAC
+  320k, Rec. 709 ; ≈ 0,8× la durée de l'épisode, 3 Go pour 47 min) et `<base>_episode_SPOTIFY.mp4` (copie sans réencodage, 30 s) :
+  `episode.platform_versions`, refaites si l'épisode est plus récent ; `livraison` les copie dans `1_episode_youtube/`. **Le fichier
+  à mettre sur YouTube = la version 1440p.** Test `test_versions_youtube_1440p_et_spotify`.
 - E22 n'a ni teaser ni logo incrusté ; E20 a un teaser (~55 s, 4–5 phrases de l'invité) + sting logo : c'est ce
   modèle qui est reproduit.
 

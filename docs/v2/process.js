@@ -154,9 +154,12 @@ window.PROCESS = {
         { actor: "claude", title: "Relecture par un Claude sans contexte", short: "Regard neuf avant de montrer l'aperçu à l'équipe.",
           loop: { to: 5, label: "à corriger : nouvel aperçu" } },
         { actor: "equipe", title: "L'équipe valide l'aperçu", short: "Aucun MP4 final sans ce feu vert.", loop: { to: 5, label: "retouche : nouvel aperçu" } },
-        { actor: "auto", title: "Rendu 1080p et contrôle final", short: "Version finale, fin sur l'animation AI Partners (8 s).",
-          cmd: "python -m clipper episode-render …", files: ["travail/episode/<E>_episode.mp4"] },
-        { actor: "livrable", title: "Épisode 1080p", short: "Avec son teaser, ses chapitres et sa description." }
+        { actor: "auto", title: "Rendu 1080p et contrôle final", short: "Version finale, fin sur l'animation AI Partners (8 s), plus une version YouTube 1440p et une version Spotify.",
+          details: ["Version YouTube agrandie en 1440p : avec un fichier 1080p, YouTube ne prépare pas tout de suite toutes les qualités pour les ordinateurs, et la vidéo démarrait en 240p au clic. En 1440p, elle démarre en HD.",
+                    "Version Spotify : même vidéo, couleurs constantes et sans liste d'édition, comme Spotify l'exige."],
+          origin: "Arthur, 04/11/2026 : « ça marche, retiens de faire ça dans le framework »",
+          cmd: "python -m clipper episode-render …", files: ["travail/episode/<E>_episode.mp4", "travail/episode/<E>_episode_YOUTUBE_1440p.mp4", "travail/episode/<E>_episode_SPOTIFY.mp4"] },
+        { actor: "livrable", title: "Épisode 1080p", short: "Avec son teaser, ses chapitres et sa description ; à mettre sur YouTube : la version 1440p." }
       ]
     },
 

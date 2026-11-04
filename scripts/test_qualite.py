@@ -504,7 +504,7 @@ def test_etiquettes_de_couleur_episode():
     assert ep.COLOR_TAGS[ep.COLOR_TAGS.index("-color_primaries") + 1] == "bt709"
     assert ep.COLOR_TAGS[ep.COLOR_TAGS.index("-color_trc") + 1] == "bt709"
     src = Path(ep.__file__).read_text(encoding="utf-8")
-    assert src.count("*COLOR_TAGS") == 3, src.count("*COLOR_TAGS")        # plans du corps, vidéo normalisée, fin de l'épisode
+    assert src.count("*COLOR_TAGS") == 4, src.count("*COLOR_TAGS")        # plans du corps, vidéo normalisée, fin, version YouTube 1440p
 
 
 def test_dernier_mot_d_une_phrase_avant_raccord_rejoint_le_bloc_precedent():
@@ -518,6 +518,28 @@ def test_dernier_mot_d_une_phrase_avant_raccord_rejoint_le_bloc_precedent():
     for a, b in zip(caps, caps[1:]):
         assert b["start"] - a["start"] >= 0.35, f"bloc {a['id']} affiché {b['start'] - a['start']:.2f} s : " + str(
             [" ".join(w["text"] for ln in c["lines"] for w in ln) for c in caps])
+
+
+def test_versions_youtube_1440p_et_spotify():
+    """04/11/2026, E23 : l'épisode en 1080p démarrait en 240p au clic sur ordinateur (YouTube ne fait le VP9 HD d'un 1080p
+    qu'après des vues) ; la version agrandie en 1440p démarre en HD (Arthur : « ça marche, retiens de faire ça dans le
+    framework »). `episode-render` écrit donc …_YOUTUBE_1440p.mp4 et …_SPOTIFY.mp4 à côté de l'épisode final."""
+    import subprocess
+    import tempfile
+
+    from clipper.episode import platform_versions
+    from clipper.media import FFMPEG, FFPROBE
+    with tempfile.TemporaryDirectory() as d:
+        src = Path(d) / "E99_x_episode.mp4"
+        subprocess.run([FFMPEG, "-v", "error", "-f", "lavfi", "-i", "testsrc=size=1920x1080:rate=24:duration=2", "-f", "lavfi",
+                        "-i", "sine=duration=2", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", str(src)],
+                       check=True)
+        yt, sp = platform_versions(src)
+        v = subprocess.run([FFPROBE, "-v", "error", "-select_streams", "v:0", "-show_entries",
+                            "stream=width,height,pix_fmt,color_primaries", "-of", "csv=p=0", str(yt)],
+                           capture_output=True, text=True).stdout.strip()
+        assert v == "2560,1440,yuv420p,bt709", v
+        assert sp.exists() and sp.stat().st_size > 0
 
 
 if __name__ == "__main__":

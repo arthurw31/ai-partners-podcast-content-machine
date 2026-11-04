@@ -1073,6 +1073,12 @@ def cmd_episode_render(a: argparse.Namespace) -> None:
     # contrôle qualité enchaîné, comme `polish` pour les shorts (Arthur, 09/10/2026 : « entre l'aperçu 540p et la
     # validation de l'équipe, une phase de QA qui vérifie que c'est bien monté, et retouche ») : raccords réécoutés,
     # celui qui parle visible, volumes. Un ÉCHEC = retoucher le plan et refaire l'aperçu AVANT de le montrer.
+    if not proxy and not a.minutes:
+        # versions par plateforme (YouTube 1440p contre le 240p au clic sur ordinateur, Spotify) : Arthur, 04/11/2026
+        # « retiens de faire ça dans le framework à l'avenir »
+        from .episode import platform_versions
+        for v in platform_versions(out):
+            console.print(f"[green]✓ {v.name}[/green]")
     if not a.minutes:
         from .qa import qa_episode
         status, lines = qa_episode(ep, out, brand.cfg, end_len=end_duration(brand), src_wav=_wav_for(video))
