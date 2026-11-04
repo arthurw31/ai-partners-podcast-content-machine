@@ -36,7 +36,10 @@ AI Partners Podcast Content Machine/
 - **`livraison`** (`clipper/livraison.py`) : copie les versions finales dans `LIVRABLES/` avec des noms clairs (épisode +
   miniature + titre/description, shorts + posts, carrousel validé, newsletter, teaser) et écrit `LISEZMOI.md` avec l'état
   de chaque livrable (QA, titre et miniature validés, posts / carrousel / newsletter plus récents que ce dont ils dépendent).
-  Le pipeline n'écrit jamais dans `LIVRABLES/` ; relancer `livraison` après chaque retouche.
+  Le pipeline n'écrit jamais dans `LIVRABLES/` ; relancer `livraison` après chaque retouche. **Ne jamais déposer un fichier à
+  la main dans `LIVRABLES/`** : `livraison` efface tout ce qu'elle n'a pas copié (04/11/2026 : versions SPOTIFY / YOUTUBE_1440p
+  d'E23 effacées). Une version par plateforme de l'épisode se fait dans `travail/episode/<base>_episode_<PLATEFORME>.mp4` ;
+  `livraison` la copie dans `1_episode_youtube/`.
 - `docs/` reste en minuscules : GitHub Pages publie le schéma depuis ce dossier (seuls `/` ou `/docs` sont possibles).
 - Migration du 13/10/2026 (output/ -> EPISODES/…/travail, brands/ -> MARQUES/, depot/ -> DEPOT/) : 4 347 fichiers médias
   vérifiés à l'octet, 28 jonctions `assets/` recréées, chemins absolus ET relatifs des JSON réécrits, tests 14/14 et QA

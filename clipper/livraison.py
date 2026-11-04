@@ -73,6 +73,12 @@ def build(brand, video: Path, work: Path) -> tuple[Path, list[tuple[str, str, st
         _copy(epi, d1 / epi.name, done)
         st = _qa_status(work / "qa" / "episode.md")
         rows.append((OK if st == "OK" else WARN, "épisode complet", f"{epi.name} — contrôle qualité : {st or 'pas fait'}"))
+        # versions par plateforme (…_episode_SPOTIFY.mp4, …_episode_YOUTUBE_1440p.mp4), faites dans travail/episode/ :
+        # elles doivent passer par ici, sinon le ménage ci-dessous les efface (04/11/2026)
+        for v in sorted(epi.parent.glob(f"{stem}_episode_*.mp4")):
+            if "apercu" not in v.stem:
+                _copy(v, d1 / v.name, done)
+                rows.append((OK, "épisode, version plateforme", v.name))
     else:
         rows.append((MISSING, "épisode complet", "pas encore rendu en 1080p (`episode-render`)"))
     if thumb.exists() and mc.exists():
