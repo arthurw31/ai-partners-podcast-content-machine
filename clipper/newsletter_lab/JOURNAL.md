@@ -19,3 +19,4 @@
 - 10/11/2026 communiqué Select : débuts de puces en gras avec majuscule seulement au début des mots importants (et non plus tout en majuscules).
 - 10/11/2026 communiqué Select : boutons d'appel à l'action plus grands (texte 21 px, bouton plus haut et plus large).
 - 10/11/2026 communiqué Select : variante textes CENTRÉS (`select-partner-centre/`, filets courts entre les éléments à la place des barres latérales) ; la version alignée à gauche reste dans `select-partner/`.
+- 10/11/2026 communiqué Select : le bouton « Lire le communiqué de presse » devient une maquette 3D cliquable du communiqué (couverture inventée : dégradé bleu, motif montagne, logos, titre, badge) + lien texte dessous.
