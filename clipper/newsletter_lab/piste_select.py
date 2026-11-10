@@ -67,13 +67,21 @@ def build(visuel: Path = VISUEL) -> Path:
         """UNE barre verticale bleu nuit continue sur le côté gauche de la liste, les éléments empilés à droite (aucun point à aligner)."""
         body = "".join(f'<div style="padding:0 0 {0 if i == len(items) - 1 else 18}px 0">{x}</div>' for i, x in enumerate(items))
         return (f'<tr><td style="border-left:4px solid {NAVY};padding:2px 0 2px 22px;font-family:{FONT};font-size:17px;line-height:1.65;color:{INK}">{body}</td></tr>')
+    PETITS = {"de", "du", "des", "la", "le", "les", "au", "aux", "en", "et", "ou", "qui", "que", "à", "par", "pour", "sur", "dans", "avec", "sans"}
+
+    def capitales(t: str) -> str:
+        """Majuscule seulement au début des mots importants (articles et petits mots restent en minuscules, sauf en tête de phrase)."""
+        mots = t.split(" ")
+        return " ".join(m if (m.isupper() and len(m) > 1) else (m[:1].upper() + m[1:] if (i == 0 or m.lower() not in PETITS) else m.lower())
+                        for i, m in enumerate(mots))
+
     def debut(x: str, n: int = 3) -> str:
-        """Début de puce homogène (Arthur, 10/11/2026) : les premiers mots en GRAS et en MAJUSCULES (3 mots quand la puce n'a pas de titre)."""
+        """Début de puce homogène (Arthur, 10/11/2026) : les 3 premiers mots en GRAS, majuscule au début des mots importants seulement."""
         mots = x.split(" ")
-        return f'<strong style="color:{BLACK};letter-spacing:.01em">{esc(" ".join(mots[:n]).upper())}</strong> {esc(" ".join(mots[n:]))}'
+        return f'<strong style="color:{BLACK}">{esc(capitales(" ".join(mots[:n])))}</strong> {esc(" ".join(mots[n:]))}'
 
     def titre(t: str, suite: str, sep: str = "") -> str:
-        return f'<strong style="color:{BLACK};letter-spacing:.01em">{esc(t.upper().rstrip(".:"))}</strong>{sep} {esc(suite)}'
+        return f'<strong style="color:{BLACK}">{esc(capitales(t.rstrip(".:")))}</strong>{sep} {esc(suite)}'
 
     crit = puces([debut(x) for x in CRITERES])
     change = puces([titre(t, x, ".") for t, x in CHANGE])
