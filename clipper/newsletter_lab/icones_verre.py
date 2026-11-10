@@ -31,16 +31,27 @@ FORMES = {
 }
 
 
-def solide(nom: str, px: int = 240, tilt: tuple = (10, -14)) -> Path:
-    """Icône `nom` en verre 3D plein, carré de `px` px sur fond blanc -> OUT/<nom>.png."""
+# Palettes : « verre » = formes du site (blanc translucide) ; « bleu » = EXACTEMENT le même verre, mais translucide BLEU (Arthur, 10/11/2026 :
+# « refais exactement pareil, mais au lieu que nos icônes soient translucides blanches, mets-les en translucide bleu »).
+THEMES = {
+    "verre": dict(t=("#E6E9FF", "#AEBAFB", "#6F82F0"), f=("#FBFBFD", "#EEEFF5", "#E1E4F3"), halo="#4F62EE", rim="#A3B0F8",
+                  g=("#FFFFFF", "#93A2F8", "#C6CEFC")),
+    "bleu": dict(t=("#9DB7FF", "#5E83F2", "#3557DC"), f=("#DCE7FF", "#A9C2FF", "#7C9DF8"), halo="#3E63EC", rim="#C7D7FF",
+                 g=("#FFFFFF", "#5677EE", "#B9CBFF")),
+}
+
+
+def solide(nom: str, px: int = 240, tilt: tuple = (10, -14), theme: str = "verre") -> Path:
+    """Icône `nom` en verre 3D plein, carré de `px` px sur fond blanc -> OUT/[bleu/]<nom>.png."""
     from .piste_nouveau import _render
     corps, gravure = FORMES[nom]
+    c = THEMES[theme]
     ext = "".join(f'<g transform="translate({i * 0.5:.2f} {i * 0.85:.2f})" fill="url(#tranche)" fill-opacity=".85">{corps}</g>' for i in range(9, 0, -1))
     svg = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 10 190 190" width="{px}" height="{px}">
 <defs>
- <linearGradient id="tranche" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E6E9FF"/><stop offset=".5" stop-color="#AEBAFB"/><stop offset="1" stop-color="#6F82F0"/></linearGradient>
- <linearGradient id="face" x1=".1" y1="0" x2=".7" y2="1"><stop offset="0" stop-color="#FBFBFD"/><stop offset=".5" stop-color="#EEEFF5"/><stop offset="1" stop-color="#E1E4F3"/></linearGradient>
- <radialGradient id="halo" cx=".5" cy="1.02" r=".6"><stop offset="0" stop-color="#4F62EE" stop-opacity=".5"/><stop offset="1" stop-color="#5E72F0" stop-opacity="0"/></radialGradient>
+ <linearGradient id="tranche" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{c['t'][0]}"/><stop offset=".5" stop-color="{c['t'][1]}"/><stop offset="1" stop-color="{c['t'][2]}"/></linearGradient>
+ <linearGradient id="face" x1=".1" y1="0" x2=".7" y2="1"><stop offset="0" stop-color="{c['f'][0]}"/><stop offset=".5" stop-color="{c['f'][1]}"/><stop offset="1" stop-color="{c['f'][2]}"/></linearGradient>
+ <radialGradient id="halo" cx=".5" cy="1.02" r=".6"><stop offset="0" stop-color="{c['halo']}" stop-opacity=".55"/><stop offset="1" stop-color="{c['halo']}" stop-opacity="0"/></radialGradient>
  <linearGradient id="reflet" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/><stop offset=".5" stop-color="#FFFFFF" stop-opacity="0"/></linearGradient>
  <clipPath id="clip">{corps}</clipPath>
  <filter id="ombre" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="7"/></filter>
@@ -48,19 +59,20 @@ def solide(nom: str, px: int = 240, tilt: tuple = (10, -14)) -> Path:
 </defs>
 <g transform="translate(12 20)" fill="#3445C9" opacity=".16" filter="url(#ombre)">{corps}</g>
 {ext}
-<g fill="url(#face)" stroke="#A3B0F8" stroke-width="1.7" stroke-linejoin="round">{corps}</g>
+<g fill="url(#face)" stroke="{c['rim']}" stroke-width="1.7" stroke-linejoin="round">{corps}</g>
 <g clip-path="url(#clip)"><rect x="0" y="0" width="200" height="200" fill="url(#halo)" filter="url(#doux)"/>
  <g fill="none" stroke="url(#reflet)" stroke-width="5" transform="translate(-2.5 -3)">{corps}</g></g>
 <g fill="none" stroke-linecap="round" stroke-linejoin="round">
- <g stroke="#FFFFFF" stroke-width="15" transform="translate(1.6 2.2)">{gravure}</g>
- <g stroke="#93A2F8" stroke-width="13">{gravure}</g>
- <g stroke="#C6CEFC" stroke-width="7" transform="translate(1 1.5)">{gravure}</g>
+ <g stroke="{c['g'][0]}" stroke-width="15" transform="translate(1.6 2.2)">{gravure}</g>
+ <g stroke="{c['g'][1]}" stroke-width="13">{gravure}</g>
+ <g stroke="{c['g'][2]}" stroke-width="7" transform="translate(1 1.5)">{gravure}</g>
 </g>
 </svg>"""
     page = (f"<html><body style='margin:0;background:#fff'><div style='width:{px}px;height:{px}px;perspective:{px * 4}px'>"
             f"<div style='width:100%;height:100%;transform:rotateX({tilt[0]}deg) rotateY({tilt[1]}deg) scale(.82)'>{svg}</div></div></body></html>")
-    OUT.mkdir(parents=True, exist_ok=True)
-    f = OUT / f"{nom}.png"
+    d = OUT if theme == "verre" else OUT / theme
+    d.mkdir(parents=True, exist_ok=True)
+    f = d / f"{nom}.png"
     _render(page, px, px, f)
     return f
 
@@ -68,14 +80,29 @@ def solide(nom: str, px: int = 240, tilt: tuple = (10, -14)) -> Path:
 glass = solide          # ancien nom, utilisé par piste_select.py
 
 
+def forme_bleue(src: Path, out: Path) -> Path:
+    """Forme du site (A, losange, barre) passée en verre translucide BLEU : luminance -> dégradé bleu, fond blanc gardé."""
+    import numpy as np
+    from PIL import Image, ImageFilter, ImageOps
+    im = Image.open(src).convert("RGB")
+    a = np.asarray(im).astype("float32")
+    dist = np.clip((255 - a.min(axis=2)) / 40.0, 0, 1)                       # 0 = fond blanc, 1 = forme
+    mask = Image.fromarray((dist * 255).astype("uint8")).filter(ImageFilter.GaussianBlur(.6))
+    lum = ImageOps.autocontrast(ImageOps.grayscale(im), cutoff=1)
+    col = ImageOps.colorize(lum, black=(44, 79, 214), mid=(111, 149, 247), white=(214, 227, 255), midpoint=150)
+    Image.composite(col, Image.new("RGB", im.size, "white"), mask).save(out)
+    return out
+
+
 if __name__ == "__main__":
     from PIL import Image
-    files = [solide(n) for n in FORMES]
+    files = [solide(n) for n in FORMES] + [solide(n, theme="bleu") for n in FORMES]
     refs = [SITE / f"forme_{k}.png" for k in ("A", "losange", "barre")]
-    sheet = Image.new("RGB", (240 * len(files), 480), "white")
+    n = len(FORMES)
+    sheet = Image.new("RGB", (240 * n, 720), "white")
     for i, f in enumerate(files):
-        sheet.paste(Image.open(f).convert("RGB"), (i * 240, 0))
+        sheet.paste(Image.open(f).convert("RGB"), ((i % n) * 240, (i // n) * 240))
     for i, f in enumerate(refs):
-        sheet.paste(Image.open(f).convert("RGB").resize((240, 240)), (i * 240, 240))
+        sheet.paste(Image.open(f).convert("RGB").resize((240, 240)), (i * 240, 480))
     sheet.save(OUT / "_planche.png")
     print(OUT / "_planche.png")

@@ -42,9 +42,9 @@ def btn(label: str, href: str, bg: str, fg: str = "#FFFFFF") -> str:
             f'font-weight:bold;letter-spacing:.02em;color:{fg};text-decoration:none">{esc(label)}</a>' + PILL_CLOSE)
 
 
-def build(visuel: Path = VISUEL) -> Path:
+def build(visuel: Path = VISUEL, theme: str = "verre") -> Path:
     from PIL import Image, ImageDraw
-    out = ROOT / "EPISODES" / "ai-corner" / "_communiques" / "select-partner"
+    out = ROOT / "EPISODES" / "ai-corner" / "_communiques" / ("select-partner" if theme == "verre" else f"select-partner-{theme}")
     img = out / "images"
     img.mkdir(parents=True, exist_ok=True)
     # --- badge recadré dans le visuel fourni, coins arrondis
@@ -134,14 +134,18 @@ def build(visuel: Path = VISUEL) -> Path:
 
     def forme(nom: str, px: int) -> str:
         f = img / f"forme_{nom}_{px}.png"
-        Image.open(FORMES / f"forme_{nom}.png").resize((px * 2, px * 2), Image.Resampling.LANCZOS).save(f)
+        src = FORMES / f"forme_{nom}.png"
+        if theme == "bleu":
+            from .icones_verre import forme_bleue
+            src = forme_bleue(src, img / f"forme_{nom}_bleu.png")
+        Image.open(src).resize((px * 2, px * 2), Image.Resampling.LANCZOS).save(f)
         return f.name
 
     def verre(nom: str, px: int) -> str:
         """Icône « verre 3D » créée dans le style des formes du site (icones_verre.py), hors offres (Arthur, 10/11/2026)."""
         from .icones_verre import glass
         f = img / f"verre_{nom}_{px}.png"
-        Image.open(glass(nom)).resize((px * 2, px * 2), Image.Resampling.LANCZOS).save(f)
+        Image.open(glass(nom, theme=theme)).resize((px * 2, px * 2), Image.Resampling.LANCZOS).save(f)
         return f.name
 
     # 1. les 3 critères : trois colonnes, tuile bleu nuit + pictogramme blanc, intitulé, phrase du Doc
@@ -158,7 +162,7 @@ def build(visuel: Path = VISUEL) -> Path:
     # 4. « Ce que cela change » : un pictogramme bleu nuit devant chaque titre, dans la liste à barre latérale
     CHANGE_ICO = ["users", "rocket", "target", "layers"]
     change = puces([f'<img src="images/{verre(i, 42)}" width="42" height="42" alt="" style="display:inline-block;vertical-align:-14px;border:0;width:42px;height:42px;margin-right:8px">'
-                    + titre(t, x, ".") for i, (t, x) in zip(CHANGE_ICO, CHANGE)])
+                    + titre(t, x, " :") for i, (t, x) in zip(CHANGE_ICO, CHANGE)])
 
     # 3. les offres : trois tuiles bleu nuit, pictogramme blanc, nom, phrase du Doc
     OFFRE_ICO = ["barre", "losange", "A"]          # AI Factory, AI First Organization, AI Academy : mêmes formes que sur le site
@@ -210,4 +214,5 @@ def build(visuel: Path = VISUEL) -> Path:
 
 
 if __name__ == "__main__":
-    print(preview(build(Path(sys.argv[sys.argv.index("--badge") + 1]) if "--badge" in sys.argv else VISUEL), 3000))
+    th = sys.argv[sys.argv.index("--theme") + 1] if "--theme" in sys.argv else "verre"
+    print(preview(build(Path(sys.argv[sys.argv.index("--badge") + 1]) if "--badge" in sys.argv else VISUEL, th), 3000))
