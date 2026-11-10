@@ -44,6 +44,25 @@ def platform_pills(out: Path) -> None:
         _shot(page, 240, 240, out / "images" / f"pastille_{key}.png")
 
 
+def title_image(out: Path, name: str, html_text: str, px: int, lh: float = 1.14) -> tuple[int, int]:
+    """Titre dessiné en Metropolis Bold (police de la charte, impossible en texte dans un mail) : image à 2x (1280 px de large, affichée
+    en 640), rognée sur l'encre. Le texte reste dans l'attribut alt (images bloquées, lecteurs d'écran)."""
+    from PIL import Image, ImageChops
+    from ..config import Brand
+    from ..newsletter import _fonts_css, _shot
+    brand = Brand("ai-corner")
+    page = (f"<html><head><style>{_fonts_css(brand)}</style></head><body style='margin:0;background:#fff'>"
+            f"<div style=\"width:1260px;padding:20px;font-family:M;font-weight:700;font-size:{px}px;line-height:{lh};"
+            f"letter-spacing:-.015em;color:{NAVY};text-wrap:balance\">{html_text}</div></body></html>")
+    f = out / "images" / f"{name}.png"
+    _shot(page, 1300, 900, f)
+    im = Image.open(f).convert("RGB")
+    box = ImageChops.difference(im, Image.new("RGB", im.size, (255, 255, 255))).getbbox()
+    im = im.crop((0, max(0, box[1] - 8), 1300, box[3] + 8)).crop((20, 0, 1300, box[3] + 8 - max(0, box[1] - 8)))
+    im.save(f)
+    return im.size
+
+
 def build(episode: str = "E23") -> Path:
     tr = _tr(episode)
     src = tr / "newsletter"
@@ -77,6 +96,12 @@ def build(episode: str = "E23") -> Path:
         f'<td style="padding:0 10px 0 0"><img src="images/pastille_{n}.png" width="52" height="52" alt="{n.capitalize()}" '
         f'style="display:block;border:0;width:52px;height:52px"></td>' for n in ("youtube", "spotify", "ausha"))
 
+    qi = title_image(out, "titre_question", esc(question).replace("à l&#x27;impact", f'à <span style="color:{BLUE}">l&#x27;impact</span>'), 66)
+    pi = title_image(out, "titre_programme", "Au programme de cet épisode", 50, 1.2)
+    h1 = (f'<h1 style="margin:0;font-size:0;line-height:0"><img src="images/titre_question.png" width="640" height="{qi[1] // 2}" '
+          f'alt="{esc(question)}" style="display:block;width:100%;max-width:640px;height:auto;border:0"></h1>')
+    h2 = (f'<h2 style="margin:0;font-size:0;line-height:0"><img src="images/titre_programme.png" width="640" height="{pi[1] // 2}" '
+          f'alt="Au programme de cet épisode" style="display:block;width:100%;max-width:640px;height:auto;border:0"></h2>')
     page = f"""<!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light"><title>{esc(mail["subject"])}</title></head>
@@ -87,7 +112,7 @@ def build(episode: str = "E23") -> Path:
 
 <tr><td style="padding:18px 0 0 0"><img src="images/entete.png" width="640" alt="AI Corner by AI Partners · {esc(mail["episode"])}" style="display:block;width:100%;max-width:640px;border:0;border-radius:14px"></td></tr>
 
-<tr><td style="padding:34px 0 12px 0"><h1 style="font-family:{FONT};font-size:30px;line-height:1.2;font-weight:bold;letter-spacing:-.015em;color:{NAVY};margin:0;text-wrap:balance">{q}</h1></td></tr>
+<tr><td style="padding:34px 0 12px 0">{h1}</td></tr>
 <tr><td style="font-family:{FONT};font-size:16px;line-height:1.5;color:{MUTED};padding:0 0 24px 0">{legende}</td></tr>
 
 <tr><td style="padding:0 0 20px 0"><a href="{esc(url)}"><img src="images/episode_youtube.jpg" width="640" alt="Regarder l'épisode : {esc(mail["guest"])} ({esc(mail["company"])}), comment déployer l'IA à grande échelle" style="display:block;width:100%;max-width:640px;border:0;border-radius:14px"></a></td></tr>
@@ -95,7 +120,7 @@ def build(episode: str = "E23") -> Path:
 
 <tr><td>{paras}</td></tr>
 
-<tr><td style="padding:30px 0 16px 0;border-top:1px solid {RULE}"><h2 style="font-family:{FONT};font-size:24px;line-height:1.25;font-weight:bold;letter-spacing:-.01em;color:{NAVY};margin:0;text-wrap:balance">Au programme de cet épisode</h2></td></tr>
+<tr><td style="padding:30px 0 16px 0;border-top:1px solid {RULE}">{h2}</td></tr>
 <tr><td><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{bullets}</table></td></tr>
 
 <tr><td style="padding:26px 0 0 0;border-top:1px solid {RULE}"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
