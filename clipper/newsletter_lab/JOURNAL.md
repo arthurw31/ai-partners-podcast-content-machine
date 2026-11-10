@@ -4,3 +4,4 @@
 - 02/11/2026 mosaïque : écartée par l'équipe (voir CLAUDE.md)
 - 15/10/2026 maquettes ElevenLabs A Grain / B Ondes / C Affiches (`clipper/newsletter_maquettes.py`) : en attente de choix
 - 10/11/2026 piste « Article » (modèle : page blog On Train) : `piste_article.py`, sortie `travail/newsletter_lab/article/` : en cours de revue par Arthur
+- 10/11/2026 piste « Nostra » (copie de la structure du mail Nostra #3 d'On Train, couleurs AI Partners) : `piste_nostra.py`, sortie `travail/newsletter_lab/nostra/` : à valider par Arthur
