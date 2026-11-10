@@ -38,8 +38,8 @@ OFFRES = [("AI Factory", "concevoir et mettre en production des agents Claude au
 
 
 def btn(label: str, href: str, bg: str, fg: str = "#FFFFFF") -> str:
-    return (pill_open(bg, "0") + f'<a href="{esc(href)}" style="display:inline-block;padding:16px 34px;font-family:{FONT};font-size:16px;'
-            f'font-weight:bold;letter-spacing:.03em;color:{fg};text-decoration:none">{esc(label)}</a>' + PILL_CLOSE)
+    return (pill_open(bg, "0") + f'<a href="{esc(href)}" style="display:inline-block;padding:22px 46px;font-family:{FONT};font-size:21px;'
+            f'font-weight:bold;letter-spacing:.02em;color:{fg};text-decoration:none">{esc(label)}</a>' + PILL_CLOSE)
 
 
 def build(visuel: Path = VISUEL) -> Path:

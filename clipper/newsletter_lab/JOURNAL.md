@@ -17,3 +17,4 @@
 - 10/11/2026 communiqué Select : visuel pleine largeur (sans marge ni coins arrondis), puces = une barre bleu nuit continue sur le côté gauche (plus de points décalés).
 - 10/11/2026 communiqué Select : début de chaque puce en GRAS et MAJUSCULES (3 premiers mots quand la puce n'a pas de titre, titre entier sinon) pour homogénéiser les trois listes.
 - 10/11/2026 communiqué Select : débuts de puces en gras avec majuscule seulement au début des mots importants (et non plus tout en majuscules).
+- 10/11/2026 communiqué Select : boutons d'appel à l'action plus grands (texte 21 px, bouton plus haut et plus large).
