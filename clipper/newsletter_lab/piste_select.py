@@ -37,14 +37,19 @@ OFFRES = [("AI Factory", "concevoir et mettre en production des agents Claude au
           ("AI Academy", "former vos équipes, et industrialiser Claude Code dans vos équipes de développement.")]
 
 
+CENTRE = False      # version « textes centrés » (retour d'Arthur, 10/11/2026) : sortie dans select-partner-centre/
+
+
 def btn(label: str, href: str, bg: str, fg: str = "#FFFFFF") -> str:
-    return (pill_open(bg, "0") + f'<a href="{esc(href)}" style="display:inline-block;padding:22px 46px;font-family:{FONT};font-size:21px;'
+    return (pill_open(bg, "0 auto" if CENTRE else "0") + f'<a href="{esc(href)}" style="display:inline-block;padding:22px 46px;font-family:{FONT};font-size:21px;'
             f'font-weight:bold;letter-spacing:.02em;color:{fg};text-decoration:none">{esc(label)}</a>' + PILL_CLOSE)
 
 
-def build(visuel: Path = VISUEL) -> Path:
+def build(visuel: Path = VISUEL, centre: bool = False) -> Path:
+    global CENTRE
+    CENTRE = centre
     from PIL import Image, ImageDraw
-    out = ROOT / "EPISODES" / "ai-corner" / "_communiques" / "select-partner"
+    out = ROOT / "EPISODES" / "ai-corner" / "_communiques" / ("select-partner-centre" if centre else "select-partner")
     img = out / "images"
     img.mkdir(parents=True, exist_ok=True)
     # --- badge recadré dans le visuel fourni, coins arrondis
@@ -63,7 +68,13 @@ def build(visuel: Path = VISUEL) -> Path:
 
     # --- forme « courrier » (retour d'Arthur, 10/11/2026 : « une forme traditionnelle de texte comme dans le doc ») : titres simples,
     #     paragraphes, vraies puces ; pas de cartes, de frise ni de bloc coloré autour du texte.
+    al = "center" if centre else "left"
+
     def puces(items):
+        if centre:      # centré : plus de barre latérale, un court filet bleu nuit centré entre les éléments
+            sep = f'<div style="width:44px;height:4px;background:{NAVY};margin:0 auto 18px auto;font-size:0;line-height:0">&nbsp;</div>'
+            body = sep.join(f'<div style="padding:0 0 18px 0">{x}</div>' for x in items)
+            return (f'<tr><td align="center" style="padding:2px 0;text-align:center;font-family:{FONT};font-size:17px;line-height:1.65;color:{INK}">{body}</td></tr>')
         """UNE barre verticale bleu nuit continue sur le côté gauche de la liste, les éléments empilés à droite (aucun point à aligner)."""
         body = "".join(f'<div style="padding:0 0 {0 if i == len(items) - 1 else 18}px 0">{x}</div>' for i, x in enumerate(items))
         return (f'<tr><td style="border-left:4px solid {NAVY};padding:2px 0 2px 22px;font-family:{FONT};font-size:17px;line-height:1.65;color:{INK}">{body}</td></tr>')
@@ -86,13 +97,21 @@ def build(visuel: Path = VISUEL) -> Path:
     crit = puces([debut(x) for x in CRITERES])
     change = puces([titre(t, x, ".") for t, x in CHANGE])
     offres = puces([titre(t, x, " :") for t, x in OFFRES])
-    h2 = f"margin:0;font-family:{FONT};font-size:22px;line-height:1.3;font-weight:bold;color:{BLACK}"
-    p = f"font-family:{FONT};font-size:17px;line-height:1.7;color:{INK}"
+    h2 = f"margin:0;font-family:{FONT};font-size:22px;line-height:1.3;font-weight:bold;color:{BLACK};text-align:{al}"
+    p = f"font-family:{FONT};font-size:17px;line-height:1.7;color:{INK};text-align:{al}"
+    if centre:
+        sig = (f'<tr><td align="center" style="padding:0 4px;text-align:center"><img src="images/thomas_portrait.jpg" width="84" height="84" alt="Thomas Spitz, CEO d&#39;AI Partners" '
+               f'style="display:block;border:0;border-radius:42px;width:84px;height:84px;margin:0 auto 14px auto"><div style="{p}">À très bientôt,<br><strong style="color:{BLACK}">Thomas Spitz</strong><br>'
+               f'<span style="color:{MUTED}">CEO, AI Partners</span></div></td></tr>')
+    else:
+        sig = (f'<tr><td style="padding:0 4px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>'
+               f'<td valign="top" width="100" style="width:100px;padding:0 18px 0 0"><img src="images/thomas_portrait.jpg" width="84" height="84" alt="Thomas Spitz, CEO d&#39;AI Partners" style="display:block;border:0;border-radius:42px;width:84px;height:84px"></td>'
+               f'<td valign="middle" style="{p}">À très bientôt,<br><strong style="color:{BLACK}">Thomas Spitz</strong><br><span style="color:{MUTED}">CEO, AI Partners</span></td></tr></table></td></tr>')
     inner = f"""<tr><td style="padding:0"><a href="{esc(PRESSE)}"><img src="images/hero.png" width="640" alt="AI Partners est désormais partenaire Select du Claude Partner Network, le programme qui réunit les sociétés de services déployant Claude chez leurs clients" style="display:block;width:100%;max-width:640px;height:auto;border:0"></a></td></tr>
 <tr><td style="padding:0 20px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">
 <tr><td style="padding:34px 4px 14px 4px;{p}">Bonjour,</td></tr>
 <tr><td style="padding:0 4px 14px 4px;{p}">Nous avons le plaisir de vous annoncer qu'AI Partners est désormais <strong style="color:{BLACK}">partenaire Select du Claude Partner Network</strong>, le programme qui réunit les sociétés de services déployant Claude, powered by Anthropic, chez leurs clients.</td></tr>
-<tr><td style="padding:6px 4px 26px 4px">{btn("Lire le communiqué de presse", PRESSE, NAVY)}</td></tr>
+<tr><td align="{al}" style="padding:6px 4px 26px 4px;text-align:{al}">{btn("Lire le communiqué de presse", PRESSE, NAVY)}</td></tr>
 <tr><td style="padding:0 4px 30px 4px;{p}">Plus qu'une annonce, nous voulions vous expliquer ce que ce statut signifie, et ce qu'il change pour les projets que nous menons ensemble.</td></tr>
 <tr><td style="padding:0 4px 10px 4px"><h2 style="{h2}">Un statut qui se mérite</h2></td></tr>
 <tr><td style="padding:0 4px 12px 4px;{p}">Le statut Select ne s'obtient pas sur simple adhésion. Anthropic l'attribue selon des critères précis, identiques pour tous les partenaires et réévalués régulièrement :</td></tr>
@@ -104,10 +123,8 @@ def build(visuel: Path = VISUEL) -> Path:
 <tr><td style="padding:0 4px 30px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{offres}</table></td></tr>
 <tr><td style="padding:14px 4px 10px 4px"><h2 style="{h2}">Parlons de vos projets</h2></td></tr>
 <tr><td style="padding:0 4px 22px 4px;{p}">Vous avez un pilote à faire passer en production, ou un cas d'usage à cadrer ? Nos experts certifiés vous proposent un échange de 30 minutes pour en discuter.</td></tr>
-<tr><td style="padding:0 4px 38px 4px">{btn("Échanger avec un expert Claude", EXPERT, NAVY)}</td></tr>
-<tr><td style="padding:0 4px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>
-<td valign="top" width="100" style="width:100px;padding:0 18px 0 0"><img src="images/thomas_portrait.jpg" width="84" height="84" alt="Thomas Spitz, CEO d'AI Partners" style="display:block;border:0;border-radius:42px;width:84px;height:84px"></td>
-<td valign="middle" style="{p}">À très bientôt,<br><strong style="color:{BLACK}">Thomas Spitz</strong><br><span style="color:{MUTED}">CEO, AI Partners</span></td></tr></table></td></tr>
+<tr><td align="{al}" style="padding:0 4px 38px 4px;text-align:{al}">{btn("Échanger avec un expert Claude", EXPERT, NAVY)}</td></tr>
+{sig}
 </table></td></tr>
 <tr><td height="56" style="font-size:0;line-height:0">&nbsp;</td></tr>"""
     page = f"""<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -125,4 +142,6 @@ def build(visuel: Path = VISUEL) -> Path:
 
 
 if __name__ == "__main__":
-    print(preview(build(Path(sys.argv[sys.argv.index("--badge") + 1]) if "--badge" in sys.argv else VISUEL), 2500))
+    _badge = Path(sys.argv[sys.argv.index("--badge") + 1]) if "--badge" in sys.argv else VISUEL
+    print(preview(build(_badge), 2500))
+    print(preview(build(_badge, centre=True), 2750))

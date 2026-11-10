@@ -18,3 +18,4 @@
 - 10/11/2026 communiqué Select : début de chaque puce en GRAS et MAJUSCULES (3 premiers mots quand la puce n'a pas de titre, titre entier sinon) pour homogénéiser les trois listes.
 - 10/11/2026 communiqué Select : débuts de puces en gras avec majuscule seulement au début des mots importants (et non plus tout en majuscules).
 - 10/11/2026 communiqué Select : boutons d'appel à l'action plus grands (texte 21 px, bouton plus haut et plus large).
+- 10/11/2026 communiqué Select : variante textes CENTRÉS (`select-partner-centre/`, filets courts entre les éléments à la place des barres latérales) ; la version alignée à gauche reste dans `select-partner/`.
