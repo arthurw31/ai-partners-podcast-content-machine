@@ -1,0 +1,47 @@
+{
+ "question": "Comment passer de l'ère de l'expérimentation à l'ère de l'impact ?",
+ "citation_ouverture": {
+  "texte": "C'est un marché de vendeurs.",
+  "t": 315,
+  "source": "Nicolas Comestaz, transcription à 315 s (4:09 dans l'épisode monté)"
+ },
+ "intro_thomas": "Aujourd'hui, j'accueille Nicolas Comestaz, en charge du Data & AI Center of Excellence de Coty, l'un des leaders mondiaux de la beauté. Il raconte comment Coty a fait adopter l'IA, ce qui fonctionne et ce qui ne fonctionne pas.",
+ "etapes": [
+  {
+   "titre": "Écouter les métiers d'abord",
+   "phrase": "Son premier chantier : comprendre l'écosystème data et IA de Coty, déjà présent dans la supply chain, la finance et la R&D, en écoutant d'abord les métiers.",
+   "citation": "mon premier chantier a été de comprendre l'écosystème data and AI dans l'organisation",
+   "t": 226
+  },
+  {
+   "titre": "Laisser les équipes expérimenter",
+   "phrase": "Coty signe un contrat avec Microsoft et source près de 1000 licences Copilot pour démarrer, puis étend le nombre de licences.",
+   "citation": "on a sourcé près de 1000 licences pour démarrer, Copilot",
+   "t": 680
+  },
+  {
+   "titre": "Former sur le terrain",
+   "phrase": "Supercharge with AI : des formations de terrain et en ligne, du générique aux sessions avancées sur Copilot, répétées pour mettre le plus grand nombre à niveau.",
+   "citation": "un programme un peu plus structuré qu'on a appelé Supercharge with AI",
+   "t": 723
+  },
+  {
+   "titre": "Organiser un modèle distribué",
+   "phrase": "Une équipe centrale de quatre capabilities, et des Data & AI domain owners dans chacune des fonctions : un modèle Hub & Spoke.",
+   "citation": "des data and AI domain owner dans chacune des fonctions",
+   "t": 1469
+  },
+  {
+   "titre": "Cadrer les usages",
+   "phrase": "Une charte IA globale et un AI Board : chaque cas d'usage proposé par une fonction passe par une revue de sécurité et de conformité.",
+   "citation": "revoir les cas d'usage proposés par les équipes sous le prisme de la sécurité",
+   "t": 1651
+  },
+  {
+   "titre": "Passer à un agenda par le haut",
+   "phrase": "Selon Nicolas, Coty compte plus de 3000 agents, dont dix qui font la même chose d'un marché à l'autre : l'agenda devient top-down.",
+   "citation": "il y a 10 agents qui font la même chose d'un marché à l'autre",
+   "t": 2044
+  }
+ ]
+}
