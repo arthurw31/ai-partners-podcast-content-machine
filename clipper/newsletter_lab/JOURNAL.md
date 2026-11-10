@@ -21,3 +21,4 @@
 - 10/11/2026 communiqué Select : variante textes CENTRÉS (`select-partner-centre/`, filets courts entre les éléments à la place des barres latérales) ; la version alignée à gauche reste dans `select-partner/`.
 - 10/11/2026 communiqué Select : le bouton « Lire le communiqué de presse » devient une maquette 3D cliquable du communiqué (couverture inventée : dégradé bleu, motif montagne, logos, titre, badge) + lien texte dessous.
 - 10/11/2026 communiqué Select : visuels (idées 1, 3, 4 d'Arthur) : 3 critères en colonnes avec tuile-pictogramme bleu nuit, pictogramme devant chaque point de « Ce que cela change », offres en 3 tuiles bleu nuit illustrées (Lucide, ISC, ajoutés à assets/icons/).
+- 10/11/2026 communiqué Select : pictogrammes remplacés par les formes 3D « verre » du site (A = Academy, losange = First Organization, barre = Factory, assemblage = les trois), dans MARQUES/ai-corner/assets/formes_site/ ; offres en cartes blanches comme sur le site.

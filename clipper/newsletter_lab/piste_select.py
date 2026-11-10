@@ -127,30 +127,40 @@ def build(visuel: Path = VISUEL) -> Path:
         _render(page, px, px, f)
         return f.name
 
+    # Formes 3D « verre » du site weareaipartners.com (section « Our Approach » : A = AI Academy, losange = AI First Organization, barre =
+    # AI Factory), recadrées dans la capture d'Arthur et rangées dans MARQUES/ai-corner/assets/formes_site/ (10/11/2026 : « reprends ces
+    # éléments et quand tu as besoin d'icônes, crée-les à partir de ceux-là ») ; « assemblage » = les trois réunies, comme le logo.
+    FORMES = ROOT / "MARQUES" / "ai-corner" / "assets" / "formes_site"
+
+    def forme(nom: str, px: int) -> str:
+        f = img / f"forme_{nom}_{px}.png"
+        Image.open(FORMES / f"forme_{nom}.png").resize((px * 2, px * 2), Image.Resampling.LANCZOS).save(f)
+        return f.name
+
     # 1. les 3 critères : trois colonnes, tuile bleu nuit + pictogramme blanc, intitulé, phrase du Doc
-    CRIT_ICO = [("badge-check", "Experts certifiés"), ("server", "Déploiements en production"), ("building-2", "Référence client publique")]
+    CRIT_ICO = [("A", "Experts certifiés"), ("barre", "Déploiements en production"), ("losange", "Référence client publique")]
     cols = []
     for (ico, lab), x in zip(CRIT_ICO, CRITERES):
         texte = x[0].upper() + x[1:].rstrip(" ;.") + "."
         cols.append(f'<td valign="top" width="33%" style="width:33%;padding:0 8px">'
-                    f'<img src="images/{icone(ico, "#FFFFFF", NAVY, 128, 30, 30)}" width="64" height="64" alt="" style="display:block;border:0;width:64px;height:64px">'
+                    f'<img src="images/{forme(ico, 72)}" width="72" height="72" alt="" style="display:block;border:0;width:72px;height:72px">'
                     f'<div style="padding:14px 0 6px 0;font-family:{FONT};font-size:17px;line-height:1.3;font-weight:bold;color:{BLACK}">{esc(lab)}</div>'
                     f'<div style="font-family:{FONT};font-size:15px;line-height:1.55;color:{INK}">{esc(texte)}</div></td>')
     crit = f'<tr>{"".join(cols)}</tr>'
 
     # 4. « Ce que cela change » : un pictogramme bleu nuit devant chaque titre, dans la liste à barre latérale
-    CHANGE_ICO = ["users", "rocket", "target", "layers"]
-    change = puces([f'<img src="images/{icone(i, NAVY, "#FFFFFF", 56, 0, 2)}" width="28" height="28" alt="" style="display:inline-block;vertical-align:-7px;border:0;width:28px;height:28px;margin-right:8px">'
+    CHANGE_ICO = ["A", "barre", "losange", "assemblage"]
+    change = puces([f'<img src="images/{forme(i, 42)}" width="42" height="42" alt="" style="display:inline-block;vertical-align:-14px;border:0;width:42px;height:42px;margin-right:8px">'
                     + titre(t, x, ".") for i, (t, x) in zip(CHANGE_ICO, CHANGE)])
 
     # 3. les offres : trois tuiles bleu nuit, pictogramme blanc, nom, phrase du Doc
-    OFFRE_ICO = ["factory", "compass", "graduation-cap"]
+    OFFRE_ICO = ["barre", "losange", "A"]          # AI Factory, AI First Organization, AI Academy : mêmes formes que sur le site
     tiles = []
     for ico, (t, x) in zip(OFFRE_ICO, OFFRES):
-        tiles.append(f'<td valign="top" width="32%" bgcolor="{NAVY}" style="width:32%;background-color:{NAVY};border-radius:16px;padding:22px 18px 24px 18px">'
-                     f'<img src="images/{icone(ico, "#FFFFFF", NAVY, 112, 0, 4)}" width="56" height="56" alt="" style="display:block;border:0;width:56px;height:56px">'
-                     f'<div style="padding:16px 0 8px 0;font-family:{FONT};font-size:18px;line-height:1.25;font-weight:bold;color:#FFFFFF">{esc(t)}</div>'
-                     f'<div style="font-family:{FONT};font-size:15px;line-height:1.55;color:#D3DAF2">{esc(x[0].upper() + x[1:])}</div></td>')
+        tiles.append(f'<td valign="top" width="32%" bgcolor="#FFFFFF" style="width:32%;background-color:#FFFFFF;border:1px solid {RULE};border-radius:18px;padding:18px 16px 22px 16px">'
+                     f'<img src="images/{forme(ico, 96)}" width="96" height="96" alt="" style="display:block;border:0;width:96px;height:96px;margin:0 auto">'
+                     f'<div style="padding:16px 0 8px 0;font-family:{FONT};font-size:18px;line-height:1.25;font-weight:bold;color:{BLACK}">{esc(t)}</div>'
+                     f'<div style="font-family:{FONT};font-size:15px;line-height:1.55;color:{INK}">{esc(x[0].upper() + x[1:])}</div></td>')
     gap = '<td width="2%" style="width:2%;font-size:0;line-height:0">&nbsp;</td>'
     offres = f"<tr>{gap.join(tiles)}</tr>"
     h2 = f"margin:0;font-family:{FONT};font-size:22px;line-height:1.3;font-weight:bold;color:{BLACK}"
@@ -193,4 +203,4 @@ def build(visuel: Path = VISUEL) -> Path:
 
 
 if __name__ == "__main__":
-    print(preview(build(Path(sys.argv[sys.argv.index("--badge") + 1]) if "--badge" in sys.argv else VISUEL), 2850))
+    print(preview(build(Path(sys.argv[sys.argv.index("--badge") + 1]) if "--badge" in sys.argv else VISUEL), 3000))
