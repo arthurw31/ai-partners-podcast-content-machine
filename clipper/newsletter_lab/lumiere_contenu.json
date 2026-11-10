@@ -43,5 +43,15 @@
    "citation": "il y a 10 agents qui font la même chose d'un marché à l'autre",
    "t": 2044
   }
- ]
+ ],
+ "accroche": "Les agents IA se multiplient, les cas d'usage s'accumulent, et pourtant l'impact reste difficile à mesurer.",
+ "intro_paragraphes": [
+  "Pour ce nouvel épisode d'AI Corner, j'ai le plaisir de recevoir Nicolas Comestaz, en charge du Data & AI Center of Excellence de Coty, un des leaders mondiaux de la beauté.",
+  "Il a pris cette fonction, créée il y a deux ans, après avoir mené une transformation data et IA côté métier sur le média et le marketing digital, et il a passé les vingt dernières années au contact des grandes transformations digitales, notamment chez LVMH.",
+  "Avec lui, j'ai voulu comprendre concrètement ce qu'il a mis en place chez Coty : l'évangélisation, la gouvernance, puis ce passage délicat de l'expérimentation à l'impact réel sur les processus."
+ ],
+ "rejoignez": {
+  "titre": "Rejoignez l'aventure AI Corner",
+  "texte": "Ce podcast s'adresse aux dirigeants et aux équipes qui déploient l'IA dans leur entreprise. Pour ne manquer aucun épisode, abonnez-vous dès aujourd'hui sur votre plateforme d'écoute préférée."
+ }
 }

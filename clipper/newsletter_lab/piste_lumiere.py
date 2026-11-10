@@ -95,6 +95,7 @@ def build(episode: str = "E23") -> Path:
             f"</div></body></html>")
     _render(hero, 1280, 1200, img / "hero.png")
 
+    paras = "".join(f'<p style="margin:0 0 14px 0">{esc(x)}</p>' for x in c["intro_paragraphes"])
     steps = ""
     n = len(c["etapes"])
     for i, e in enumerate(c["etapes"]):
@@ -107,7 +108,8 @@ def build(episode: str = "E23") -> Path:
     inner = f"""<tr><td style="padding:16px 0 0 0"><a href="{esc(yt)}"><img src="images/hero.png" width="640" alt="AI Corner, épisode 23 : Nicolas Comestaz, Data &amp; AI Center of Excellence chez Coty" style="display:block;width:100%;max-width:640px;height:auto;border:0"></a></td></tr>
 <tr><td style="padding:6px 0 0 0"><img src="images/onde.gif" width="640" alt="" style="display:block;width:100%;max-width:640px;height:auto;border:0"></td></tr>
 <tr><td style="padding:22px 4px 10px 4px"><h1 style="margin:0;font-family:{FONT};font-size:28px;line-height:1.22;font-weight:bold;letter-spacing:-.01em;color:{BLACK}">{esc(c["question"])}</h1></td></tr>
-<tr><td style="padding:0 4px 26px 4px;font-family:{FONT};font-size:17px;line-height:1.65;color:{INK}">{esc(c["intro_thomas"])}</td></tr>
+<tr><td style="padding:0 4px 18px 4px;font-family:{FONT};font-size:19px;line-height:1.55;font-weight:bold;color:{INK}">{esc(c["accroche"])}</td></tr>
+<tr><td style="padding:0 4px 12px 4px;font-family:{FONT};font-size:17px;line-height:1.65;color:{INK}">{paras}</td></tr>
 <tr><td style="padding:0 4px 44px 4px">{btn("Regarder l'épisode", yt, NAVY)}</td></tr>
 <tr><td style="padding:0 4px 24px 4px;font-family:{FONT};font-size:14px;font-weight:bold;letter-spacing:.14em;color:{MUTED}">CE QUE COTY A MIS EN PLACE</td></tr>
 <tr><td style="padding:0 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{steps}</table></td></tr>
@@ -118,7 +120,8 @@ def build(episode: str = "E23") -> Path:
 <div style="font-family:{FONT};font-size:25px;line-height:1.25;font-weight:bold;letter-spacing:-.01em;color:#FFFFFF;padding-bottom:10px">Vos équipes testent l'IA. Et après ?</div>
 <div style="font-family:{FONT};font-size:16px;line-height:1.6;color:#C9D0EC;padding-bottom:22px">Passons de l'expérimentation à l'impact : 30 minutes avec moi pour en parler.</div>
 {btn("Réserver un échange avec Thomas", "https://calendly.com/", "#FFFFFF", NAVY)}</td></tr></table></td></tr>
-<tr><td style="padding:40px 4px 10px 4px;font-family:{FONT};font-size:14px;font-weight:bold;letter-spacing:.14em;color:{MUTED}">ÉCOUTEZ AI CORNER SUR VOTRE PLATEFORME</td></tr>
+<tr><td style="padding:44px 4px 10px 4px;font-family:{FONT};font-size:22px;line-height:1.3;font-weight:bold;color:{BLACK}">{esc(c["rejoignez"]["titre"])}</td></tr>
+<tr><td style="padding:0 4px 20px 4px;font-family:{FONT};font-size:17px;line-height:1.65;color:{INK}">{esc(c["rejoignez"]["texte"])}</td></tr>
 <tr><td style="padding:6px 4px 0 4px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>{plats}</tr></table></td></tr>
 <tr><td height="48" style="font-size:0;line-height:0">&nbsp;</td></tr>"""
     page = f"""<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -134,4 +137,4 @@ def build(episode: str = "E23") -> Path:
 
 
 if __name__ == "__main__":
-    print(preview(build(sys.argv[sys.argv.index("--episode") + 1] if "--episode" in sys.argv else "E23"), 2500))
+    print(preview(build(sys.argv[sys.argv.index("--episode") + 1] if "--episode" in sys.argv else "E23"), 3050))
