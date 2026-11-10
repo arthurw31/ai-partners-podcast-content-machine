@@ -59,21 +59,30 @@ def build(episode: str = "E23") -> Path:
     mont = _uri(Path(__file__).resolve().parents[2] / "MARQUES" / "ai-corner" / "assets" / "outro_bg.png")
     waveform_gif(img / "onde.gif")
 
-    quote = c["citation_ouverture"]["texte"].rstrip(".")
-    words = quote.split()
-    big = " ".join(words)
-    hero = (f"<html><head><style>{_fonts()}body{{margin:0}}</style></head><body><div style=\"position:relative;width:1280px;height:1260px;"
-            f"background:#fff;overflow:hidden;font-family:M\">"
-            f"<div style='position:absolute;left:660px;top:120px;width:560px;height:1140px;border-radius:280px 280px 0 0;background:{NAVY};overflow:hidden'>"
-            f"<img src='{mont}' style='position:absolute;left:-380px;top:-60px;width:1400px;mix-blend-mode:screen;opacity:.7'>"
-            f"<img src='{_uri(guest)}' style='position:absolute;left:-390px;bottom:0;height:980px'></div>"
-            f"<div style='position:absolute;left:60px;top:60px;color:{INK};font-weight:800;font-size:40px;letter-spacing:.04em'>AI CORNER · ÉPISODE 23</div>"
-            f"<div style='position:absolute;left:60px;top:280px;width:600px;font-weight:800;font-size:112px;line-height:1.04;letter-spacing:-.03em;color:{BLACK}'>"
-            f"<span style='color:transparent;-webkit-text-stroke:3px {BLACK}'>«</span>&nbsp;{esc(big)}.</div>"
-            f"<div style='position:absolute;left:60px;bottom:110px;color:{INK};font-weight:800;font-size:46px'>Nicolas Comestaz</div>"
-            f"<div style='position:absolute;left:60px;bottom:56px;color:{MUTED};font-weight:400;font-size:30px'>Coty · Data &amp; AI Center of Excellence</div>"
+    # --- ouverture « couverture » : panneau bleu nuit (marque + nom de l'invité) à gauche, photo EN COULEUR de la caméra de Nicolas à droite
+    #     (modèle : la couverture carrée de « Nostra » d'On Train). Image extraite du rush à 2913 s, recadrée sur le visage.
+    from PIL import Image
+    frame = tr.parent / "rushs" / "cameras" / "cam1_nicolas.mp4"
+    cand = img / "nicolas_2913.jpg"
+    if not cand.exists():
+        import subprocess
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-ss", "2913", "-i", str(frame), "-frames:v", "1", "-q:v", "2", str(cand)],
+                       check=True, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    Image.open(cand).convert("RGB").crop((486, 0, 1134, 1080)).resize((720, 1200), Image.Resampling.LANCZOS).save(img / "nicolas_couleur.jpg", quality=92)
+    logo = _uri(Path(__file__).resolve().parents[2] / "MARQUES" / "ai-corner" / "assets" / "logo.png")
+    quote = c["citation_ouverture"]["texte"].rstrip(".")      # gardée dans le contenu, plus utilisée en ouverture
+    hero = (f"<html><head><style>{_fonts()}body{{margin:0}}</style></head><body><div style=\"position:relative;width:1280px;height:1200px;"
+            f"background:{NAVY};overflow:hidden;font-family:M;border-radius:36px\">"
+            f"<img src='{mont}' style='position:absolute;left:-420px;top:380px;width:1300px;mix-blend-mode:screen;opacity:.55'>"
+            f"<img src='{_uri(img / 'nicolas_couleur.jpg')}' style='position:absolute;right:0;top:0;width:720px;height:1200px'>"
+            f"<div style='position:absolute;left:72px;top:96px;color:#fff;font-weight:800;font-size:108px;line-height:1;letter-spacing:-.03em'>AI Corner</div>"
+            f"<img src='{logo}' style='position:absolute;left:76px;top:236px;height:44px'>"
+            f"<div style='position:absolute;left:76px;top:400px;width:110px;height:8px;background:#fff'></div>"
+            f"<div style='position:absolute;left:72px;top:480px;width:480px;color:#fff;font-weight:800;font-size:78px;line-height:1.08;letter-spacing:-.01em'>NICOLAS<br>COMESTAZ</div>"
+            f"<div style='position:absolute;left:76px;top:700px;color:#C9D0EC;font-weight:400;font-size:36px;line-height:1.3;width:470px'>Data &amp; AI Center of Excellence, Coty</div>"
+            f"<div style='position:absolute;left:76px;bottom:80px;border:4px solid #fff;border-radius:999px;padding:10px 34px;color:#fff;font-weight:800;font-size:34px;letter-spacing:.1em'>ÉPISODE 23</div>"
             f"</div></body></html>")
-    _render(hero, 1280, 1260, img / "hero.png")
+    _render(hero, 1280, 1200, img / "hero.png")
 
     steps = ""
     n = len(c["etapes"])
@@ -84,7 +93,7 @@ def build(episode: str = "E23") -> Path:
                   f'<td valign="top" style="{line}padding:0 0 {0 if last else 30}px 24px;margin-left:-8px;font-family:{FONT};font-size:16px;line-height:1.65;color:{INK}">'
                   f'<strong style="color:{BLACK};font-size:20px;line-height:1.3">{esc(e["titre"])}</strong><br>{esc(e["phrase"])}</td></tr>')
 
-    inner = f"""<tr><td style="padding:16px 0 0 0"><a href="{esc(yt)}"><img src="images/hero.png" width="640" alt="« {esc(quote)}. » Nicolas Comestaz, Data &amp; AI Center of Excellence chez Coty, invité d'AI Corner, épisode 23" style="display:block;width:100%;max-width:640px;height:auto;border:0"></a></td></tr>
+    inner = f"""<tr><td style="padding:16px 0 0 0"><a href="{esc(yt)}"><img src="images/hero.png" width="640" alt="AI Corner, épisode 23 : Nicolas Comestaz, Data &amp; AI Center of Excellence chez Coty" style="display:block;width:100%;max-width:640px;height:auto;border:0"></a></td></tr>
 <tr><td style="padding:6px 0 0 0"><img src="images/onde.gif" width="640" alt="" style="display:block;width:100%;max-width:640px;height:auto;border:0"></td></tr>
 <tr><td style="padding:22px 4px 10px 4px"><h1 style="margin:0;font-family:{FONT};font-size:28px;line-height:1.22;font-weight:bold;letter-spacing:-.01em;color:{BLACK}">{esc(c["question"])}</h1></td></tr>
 <tr><td style="padding:0 4px 26px 4px;font-family:{FONT};font-size:17px;line-height:1.65;color:{INK}">{esc(c["intro_thomas"])}</td></tr>
