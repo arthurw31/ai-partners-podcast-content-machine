@@ -57,32 +57,20 @@ def build(visuel: Path = VISUEL) -> Path:
     thomas = ROOT / "EPISODES" / "ai-corner" / "E23_nicolas-comestaz_coty" / "travail" / "photos_profil_thomas" / "profil_large_04.png"
     Image.open(thomas).convert("RGB").crop((180, 20, 920, 760)).resize((280, 280), Image.Resampling.LANCZOS).save(img / "thomas_portrait.jpg", quality=92)
     logo = _uri(ROOT / "MARQUES" / "ai-corner" / "assets" / "logo.png")
-    # --- ouverture 16:9 : dégradé bleu grainé, badge, logos, titre avec expression surlignée
-    hero = (f"<html><head><style>{_fonts()}body{{margin:0}}</style></head><body><div style=\"position:relative;width:1280px;height:720px;overflow:hidden;"
-            f"font-family:M;background:linear-gradient(105deg,#0B1450 0%,#1B2E8C 38%,#3E58B8 68%,#9AA3D6 100%)\">"
-            f"<img src='{_uri(img / 'badge.png')}' style='position:absolute;left:150px;top:96px;height:528px;border-radius:12px;box-shadow:0 18px 50px rgba(5,7,40,.45)'>"
-            f"<div style='position:absolute;left:520px;top:112px;display:flex;align-items:center;gap:22px;color:#fff;font-weight:800;font-size:40px;letter-spacing:.01em'>"
-            f"<img src='{logo}' style='height:46px'><span style='font-weight:300;font-size:56px;line-height:1;opacity:.9'>/</span>"
-            f"<span style='letter-spacing:.02em'>ANTHROP\\C</span></div>"
-            f"<div style='position:absolute;left:520px;top:236px;width:760px;color:#fff;font-weight:800;font-size:57px;line-height:1.18;letter-spacing:-.015em'>"
-            f"AI Partners est désormais <span style='background:{ORANGE};padding:2px 14px;margin-left:-14px;display:inline-block;line-height:1.18'>partenaire Select.</span></div>"
-            f"<div style='position:absolute;left:520px;top:470px;width:60px;height:5px;background:{ORANGE}'></div>"
-            f"<div style='position:absolute;left:520px;top:508px;width:640px;color:#EEF0FA;font-weight:400;font-size:29px;line-height:1.5'>"
-            f"AI Partners rejoint le Claude Partner Network, le programme qui réunit les sociétés de services déployant Claude chez leurs clients.</div>"
-            f"</div></body></html>")
-    f = img / "hero.png"
-    _render(hero, 1280, 720, f)
-    import numpy as np
-    a = np.asarray(Image.open(f).convert("RGB")).astype("float32")
-    a += np.random.default_rng(3).normal(0, 6, a.shape[:2])[..., None]
-    Image.fromarray(np.clip(a, 0, 255).astype("uint8")).save(f)
+    # --- ouverture : le visuel LinkedIn de l'équipe, STRICTEMENT inchangé (Arthur, 10/11/2026 : « laisse le screen inchangé même s'il est en
+    #     anglais ») ; simple conversion en PNG.
+    Image.open(visuel).convert("RGB").save(img / "hero.png")
 
     # --- forme « courrier » (retour d'Arthur, 10/11/2026 : « une forme traditionnelle de texte comme dans le doc ») : titres simples,
     #     paragraphes, vraies puces ; pas de cartes, de frise ni de bloc coloré autour du texte.
     def puces(items):
-        return "".join(
-            f'<tr><td valign="top" width="26" style="width:26px;padding:0 0 12px 0;font-family:{FONT};font-size:19px;line-height:1.5;color:{NAVY}">&bull;</td>'
-            f'<td style="padding:0 0 12px 0;font-family:{FONT};font-size:17px;line-height:1.65;color:{INK}">{x}</td></tr>' for x in items)
+        """Barre verticale bleu nuit à gauche + un point par ligne (comme la frise du mail « Lumière »)."""
+        rows, n = "", len(items)
+        for i, x in enumerate(items):
+            last = i == n - 1
+            rows += (f'<tr><td valign="top" width="30" style="width:30px;padding:8px 0 0 0"><div style="width:12px;height:12px;border-radius:6px;background:{NAVY}"></div></td>'
+                     f'<td valign="top" style="border-left:2px solid {"#FFFFFF" if last else NAVY};padding:0 0 {0 if last else 20}px 24px;font-family:{FONT};font-size:17px;line-height:1.65;color:{INK}">{x}</td></tr>')
+        return rows
     crit = puces([esc(x) for x in CRITERES])
     change = puces([f'<strong style="color:{BLACK}">{esc(t)}</strong> {esc(x)}' for t, x in CHANGE])
     offres = puces([f'<strong style="color:{BLACK}">{esc(t)}</strong> : {esc(x)}' for t, x in OFFRES])
@@ -96,11 +84,11 @@ def build(visuel: Path = VISUEL) -> Path:
 <tr><td style="padding:0 4px 10px 4px"><h2 style="{h2}">Un statut qui se mérite</h2></td></tr>
 <tr><td style="padding:0 4px 12px 4px;{p}">Le statut Select ne s'obtient pas sur simple adhésion. Anthropic l'attribue selon des critères précis, identiques pour tous les partenaires et réévalués régulièrement :</td></tr>
 <tr><td style="padding:0 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{crit}</table></td></tr>
-<tr><td style="padding:2px 4px 30px 4px;{p}">En clair : il reconnaît une pratique de Claude déjà construite sur le terrain, pas une intention.</td></tr>
+<tr><td style="padding:26px 4px 34px 4px;{p}"><strong style="color:{BLACK}">En clair :</strong> il reconnaît une pratique de Claude déjà construite sur le terrain, pas une intention.</td></tr>
 <tr><td style="padding:0 4px 12px 4px"><h2 style="{h2}">Ce que cela change pour vous</h2></td></tr>
-<tr><td style="padding:0 4px 18px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{change}</table></td></tr>
+<tr><td style="padding:0 4px 30px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{change}</table></td></tr>
 <tr><td style="padding:14px 4px 12px 4px"><h2 style="{h2}">Comment nous pouvons vous accompagner avec Claude</h2></td></tr>
-<tr><td style="padding:0 4px 18px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{offres}</table></td></tr>
+<tr><td style="padding:0 4px 30px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{offres}</table></td></tr>
 <tr><td style="padding:14px 4px 10px 4px"><h2 style="{h2}">Parlons de vos projets</h2></td></tr>
 <tr><td style="padding:0 4px 22px 4px;{p}">Vous avez un pilote à faire passer en production, ou un cas d'usage à cadrer ? Nos experts certifiés vous proposent un échange de 30 minutes pour en discuter.</td></tr>
 <tr><td style="padding:0 4px 38px 4px">{btn("Échanger avec un expert Claude", EXPERT, NAVY)}</td></tr>
