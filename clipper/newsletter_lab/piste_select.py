@@ -114,9 +114,45 @@ def build(visuel: Path = VISUEL) -> Path:
     def titre(t: str, suite: str, sep: str = "") -> str:
         return f'<strong style="color:{BLACK}">{esc(capitales(t.rstrip(".:")))}</strong>{sep} {esc(suite)}'
 
-    crit = puces([debut(x) for x in CRITERES])
-    change = puces([titre(t, x, ".") for t, x in CHANGE])
-    offres = puces([titre(t, x, " :") for t, x in OFFRES])
+    # --- visuels (Arthur, 10/11/2026 : « trop texty », idées 1, 3 et 4 retenues) : pictogrammes Lucide (ISC, assets/icons/) rendus en PNG
+    ICONS = ROOT / "MARQUES" / "ai-corner" / "assets" / "icons"
+
+    def icone(nom: str, fg: str, bg: str, px: int, radius: int = 0, pad: int = 0) -> str:
+        """Pictogramme Lucide en PNG à 2x : trait `fg`, fond `bg` (tuile arrondie si radius), marge intérieure `pad`."""
+        svg = (ICONS / f"lucide_{nom}.svg").read_text(encoding="utf-8").replace('stroke="currentColor"', f'stroke="{fg}"')
+        svg = svg.replace('width="24"', 'width="100%"').replace('height="24"', 'height="100%"').replace('stroke-width="2"', 'stroke-width="1.8"')
+        page = (f"<html><body style='margin:0;background:{bg}'><div style='width:{px}px;height:{px}px;box-sizing:border-box;padding:{pad}px;"
+                f"background:{bg};border-radius:{radius}px'>{svg}</div></body></html>")
+        f = img / f"ico_{nom}_{fg.strip('#')}_{bg.strip('#')}.png"
+        _render(page, px, px, f)
+        return f.name
+
+    # 1. les 3 critères : trois colonnes, tuile bleu nuit + pictogramme blanc, intitulé, phrase du Doc
+    CRIT_ICO = [("badge-check", "Experts certifiés"), ("server", "Déploiements en production"), ("building-2", "Référence client publique")]
+    cols = []
+    for (ico, lab), x in zip(CRIT_ICO, CRITERES):
+        texte = x[0].upper() + x[1:].rstrip(" ;.") + "."
+        cols.append(f'<td valign="top" width="33%" style="width:33%;padding:0 8px">'
+                    f'<img src="images/{icone(ico, "#FFFFFF", NAVY, 128, 30, 30)}" width="64" height="64" alt="" style="display:block;border:0;width:64px;height:64px">'
+                    f'<div style="padding:14px 0 6px 0;font-family:{FONT};font-size:17px;line-height:1.3;font-weight:bold;color:{BLACK}">{esc(lab)}</div>'
+                    f'<div style="font-family:{FONT};font-size:15px;line-height:1.55;color:{INK}">{esc(texte)}</div></td>')
+    crit = f'<tr>{"".join(cols)}</tr>'
+
+    # 4. « Ce que cela change » : un pictogramme bleu nuit devant chaque titre, dans la liste à barre latérale
+    CHANGE_ICO = ["users", "rocket", "target", "layers"]
+    change = puces([f'<img src="images/{icone(i, NAVY, "#FFFFFF", 56, 0, 2)}" width="28" height="28" alt="" style="display:inline-block;vertical-align:-7px;border:0;width:28px;height:28px;margin-right:8px">'
+                    + titre(t, x, ".") for i, (t, x) in zip(CHANGE_ICO, CHANGE)])
+
+    # 3. les offres : trois tuiles bleu nuit, pictogramme blanc, nom, phrase du Doc
+    OFFRE_ICO = ["factory", "compass", "graduation-cap"]
+    tiles = []
+    for ico, (t, x) in zip(OFFRE_ICO, OFFRES):
+        tiles.append(f'<td valign="top" width="32%" bgcolor="{NAVY}" style="width:32%;background-color:{NAVY};border-radius:16px;padding:22px 18px 24px 18px">'
+                     f'<img src="images/{icone(ico, "#FFFFFF", NAVY, 112, 0, 4)}" width="56" height="56" alt="" style="display:block;border:0;width:56px;height:56px">'
+                     f'<div style="padding:16px 0 8px 0;font-family:{FONT};font-size:18px;line-height:1.25;font-weight:bold;color:#FFFFFF">{esc(t)}</div>'
+                     f'<div style="font-family:{FONT};font-size:15px;line-height:1.55;color:#D3DAF2">{esc(x[0].upper() + x[1:])}</div></td>')
+    gap = '<td width="2%" style="width:2%;font-size:0;line-height:0">&nbsp;</td>'
+    offres = f"<tr>{gap.join(tiles)}</tr>"
     h2 = f"margin:0;font-family:{FONT};font-size:22px;line-height:1.3;font-weight:bold;color:{BLACK}"
     p = f"font-family:{FONT};font-size:17px;line-height:1.7;color:{INK}"
     inner = f"""<tr><td style="padding:0"><a href="{esc(PRESSE)}"><img src="images/hero.png" width="640" alt="AI Partners est désormais partenaire Select du Claude Partner Network, le programme qui réunit les sociétés de services déployant Claude chez leurs clients" style="display:block;width:100%;max-width:640px;height:auto;border:0"></a></td></tr>
@@ -128,12 +164,12 @@ def build(visuel: Path = VISUEL) -> Path:
 <tr><td style="padding:0 4px 30px 4px;{p}">Plus qu'une annonce, nous voulions vous expliquer ce que ce statut signifie, et ce qu'il change pour les projets que nous menons ensemble.</td></tr>
 <tr><td style="padding:0 4px 10px 4px"><h2 style="{h2}">Un statut qui se mérite</h2></td></tr>
 <tr><td style="padding:0 4px 12px 4px;{p}">Le statut Select ne s'obtient pas sur simple adhésion. Anthropic l'attribue selon des critères précis, identiques pour tous les partenaires et réévalués régulièrement :</td></tr>
-<tr><td style="padding:0 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{crit}</table></td></tr>
+<tr><td style="padding:10px 0 0 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{crit}</table></td></tr>
 <tr><td style="padding:26px 4px 34px 4px;{p}"><strong style="color:{BLACK}">En clair :</strong> il reconnaît une pratique de Claude déjà construite sur le terrain, pas une intention.</td></tr>
 <tr><td style="padding:0 4px 12px 4px"><h2 style="{h2}">Ce que cela change pour vous</h2></td></tr>
 <tr><td style="padding:0 4px 30px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{change}</table></td></tr>
 <tr><td style="padding:14px 4px 12px 4px"><h2 style="{h2}">Comment nous pouvons vous accompagner avec Claude</h2></td></tr>
-<tr><td style="padding:0 4px 30px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{offres}</table></td></tr>
+<tr><td style="padding:4px 4px 34px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate">{offres}</table></td></tr>
 <tr><td style="padding:14px 4px 10px 4px"><h2 style="{h2}">Parlons de vos projets</h2></td></tr>
 <tr><td style="padding:0 4px 22px 4px;{p}">Vous avez un pilote à faire passer en production, ou un cas d'usage à cadrer ? Nos experts certifiés vous proposent un échange de 30 minutes pour en discuter.</td></tr>
 <tr><td style="padding:0 4px 38px 4px">{btn("Échanger avec un expert Claude", EXPERT, NAVY)}</td></tr>
