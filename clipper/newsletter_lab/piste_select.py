@@ -1,0 +1,128 @@
+"""Newsletter « communiqué » du labo (10/11/2026) : AI Partners devient partenaire Select du Claude Partner Network (services track).
+
+Texte : le Google Doc « Partner Anthropic - Newsletter » (fourni par l'équipe, repris tel quel). Design : même famille que « Lumière » (page
+blanche, bleu nuit, frise à points, bloc de réservation), avec l'ouverture inspirée du visuel LinkedIn de l'équipe : dégradé bleu grainé, carte du
+badge « Select Services Partner » à gauche, logos AI PARTNERS / ANTHROPIC, titre blanc avec une expression surlignée en orange.
+Badge : recadré dans le visuel LinkedIn fourni (basse définition : à remplacer par le fichier d'origine d'Anthropic).
+Placeholders à remplacer : lien du communiqué de presse, lien du bouton « Échanger avec un expert Claude ».
+
+EXPLORATION : non branchée sur la production. Sortie : EPISODES/ai-corner/_communiques/select-partner/.
+Lancer : python -m clipper.newsletter_lab.piste_select [--badge chemin_du_visuel]
+"""
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+from ..newsletter_templates import FONT, NAVY, PILL_CLOSE, esc, pill_open
+from .piste_nouveau import _fonts, _render, _uri, preview
+
+ROOT = Path(__file__).resolve().parents[2]
+BLACK, INK, MUTED, RULE = "#05070F", "#141B45", "#4A5683", "#D9DEEE"
+ORANGE = "#D8843C"          # surlignage du visuel de l'équipe (couleur Claude / Anthropic)
+VISUEL = Path(r"C:\Users\arthu\AppData\Local\Temp\claude\4f2b225def50f385\97d4e06a-96f5-4c6b-aae2-472258e11062\images\4.webp")
+PRESSE = "https://www.weareaipartners.com/"          # PLACEHOLDER : lien du communiqué de presse
+EXPERT = "https://calendly.com/"                      # PLACEHOLDER : lien « Échanger avec un expert Claude »
+
+OBJET = "AI Partners devient partenaire Select du Claude Partner Network"
+CRITERES = ["des experts certifiés par l'Anthropic Partner Academy, qui utilisent activement Claude ;",
+            "des déploiements clients réellement en production, au-delà des POC et des expérimentations ;",
+            "au moins une référence client publique."]
+CHANGE = [("Des équipes certifiées.", "12 consultants et ingénieurs AI Partners sont certifiés sur Claude et l'utilisent au quotidien, y compris Claude Code dans notre propre travail d'ingénierie."),
+          ("Une expérience de la production.", "Nous avons déjà mis Claude en production chez nos clients : nous connaissons les questions d'intégration, de sécurité, d'évaluation et de gouvernance qui se posent après le pilote."),
+          ("Le bon outil au bon endroit.", "Tous les usages ne nécessitent pas un agent. Nous vous aidons à identifier les cas où Claude apporte réellement de la valeur, avant d'engager les développements."),
+          ("Une architecture qui dure.", "Nos systèmes sont conçus pour que les modèles puissent évoluer sans reconstruire vos agents. Partenaires de plusieurs éditeurs, nous choisissons avec vous la technologie la plus adaptée à chaque contexte.")]
+OFFRES = [("AI Factory", "concevoir et mettre en production des agents Claude au cœur de vos processus métier."),
+          ("AI First Organization", "définir la stratégie, la gouvernance et le cadre de sécurité de vos usages de Claude."),
+          ("AI Academy", "former vos équipes, et industrialiser Claude Code dans vos équipes de développement.")]
+
+
+def btn(label: str, href: str, bg: str, fg: str = "#FFFFFF") -> str:
+    return (pill_open(bg, "0") + f'<a href="{esc(href)}" style="display:inline-block;padding:16px 34px;font-family:{FONT};font-size:16px;'
+            f'font-weight:bold;letter-spacing:.03em;color:{fg};text-decoration:none">{esc(label)}</a>' + PILL_CLOSE)
+
+
+def build(visuel: Path = VISUEL) -> Path:
+    from PIL import Image, ImageDraw
+    out = ROOT / "EPISODES" / "ai-corner" / "_communiques" / "select-partner"
+    img = out / "images"
+    img.mkdir(parents=True, exist_ok=True)
+    # --- badge recadré dans le visuel fourni, coins arrondis
+    b = Image.open(visuel).convert("RGB").crop((134, 98, 360, 549))
+    mask = Image.new("L", b.size, 0)
+    ImageDraw.Draw(mask).rounded_rectangle([0, 0, b.size[0] - 1, b.size[1] - 1], 12, fill=255)
+    b = b.convert("RGBA")
+    b.putalpha(mask)
+    b.save(img / "badge.png")
+    thomas = ROOT / "EPISODES" / "ai-corner" / "E23_nicolas-comestaz_coty" / "travail" / "photos_profil_thomas" / "profil_large_04.png"
+    Image.open(thomas).convert("RGB").crop((180, 20, 920, 760)).resize((280, 280), Image.Resampling.LANCZOS).save(img / "thomas_portrait.jpg", quality=92)
+    logo = _uri(ROOT / "MARQUES" / "ai-corner" / "assets" / "logo.png")
+    # --- ouverture 16:9 : dégradé bleu grainé, badge, logos, titre avec expression surlignée
+    hero = (f"<html><head><style>{_fonts()}body{{margin:0}}</style></head><body><div style=\"position:relative;width:1280px;height:720px;overflow:hidden;"
+            f"font-family:M;background:linear-gradient(105deg,#0B1450 0%,#1B2E8C 38%,#3E58B8 68%,#9AA3D6 100%)\">"
+            f"<img src='{_uri(img / 'badge.png')}' style='position:absolute;left:150px;top:96px;height:528px;border-radius:12px;box-shadow:0 18px 50px rgba(5,7,40,.45)'>"
+            f"<div style='position:absolute;left:520px;top:112px;display:flex;align-items:center;gap:22px;color:#fff;font-weight:800;font-size:40px;letter-spacing:.01em'>"
+            f"<img src='{logo}' style='height:46px'><span style='font-weight:300;font-size:56px;line-height:1;opacity:.9'>/</span>"
+            f"<span style='letter-spacing:.02em'>ANTHROP\\C</span></div>"
+            f"<div style='position:absolute;left:520px;top:236px;width:760px;color:#fff;font-weight:800;font-size:57px;line-height:1.18;letter-spacing:-.015em'>"
+            f"AI Partners est désormais <span style='background:{ORANGE};padding:2px 14px;margin-left:-14px;display:inline-block;line-height:1.18'>partenaire Select.</span></div>"
+            f"<div style='position:absolute;left:520px;top:470px;width:60px;height:5px;background:{ORANGE}'></div>"
+            f"<div style='position:absolute;left:520px;top:508px;width:640px;color:#EEF0FA;font-weight:400;font-size:29px;line-height:1.5'>"
+            f"AI Partners rejoint le Claude Partner Network, le programme qui réunit les sociétés de services déployant Claude chez leurs clients.</div>"
+            f"</div></body></html>")
+    f = img / "hero.png"
+    _render(hero, 1280, 720, f)
+    import numpy as np
+    a = np.asarray(Image.open(f).convert("RGB")).astype("float32")
+    a += np.random.default_rng(3).normal(0, 6, a.shape[:2])[..., None]
+    Image.fromarray(np.clip(a, 0, 255).astype("uint8")).save(f)
+
+    crit = "".join(
+        f'<tr><td valign="top" width="28" style="width:28px;padding:7px 0 0 0"><div style="width:12px;height:12px;border-radius:6px;background:{NAVY}"></div></td>'
+        f'<td style="padding:0 0 12px 0;font-family:{FONT};font-size:17px;line-height:1.6;color:{INK}">{esc(x)}</td></tr>' for x in CRITERES)
+    change = "".join(
+        f'<tr><td style="padding:0 0 18px 0;font-family:{FONT};font-size:17px;line-height:1.65;color:{INK}"><strong style="color:{BLACK};font-size:18px">{esc(t)}</strong> {esc(x)}</td></tr>'
+        for t, x in CHANGE)
+    offres = "".join(
+        f'<tr><td style="padding:0 0 14px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:2px solid {NAVY};border-radius:14px"><tr>'
+        f'<td style="padding:18px 22px;font-family:{FONT};font-size:17px;line-height:1.6;color:{INK}"><strong style="color:{NAVY};font-size:20px">{esc(t)}</strong><br>{esc(x[0].upper() + x[1:])}</td></tr></table></td></tr>'
+        for t, x in OFFRES)
+    h2 = f"margin:0;font-family:{FONT};font-size:26px;line-height:1.25;font-weight:bold;letter-spacing:-.01em;color:{BLACK}"
+    p = f"font-family:{FONT};font-size:17px;line-height:1.65;color:{INK}"
+    inner = f"""<tr><td style="padding:16px 0 0 0"><a href="{esc(PRESSE)}"><img src="images/hero.png" width="640" alt="AI Partners est désormais partenaire Select du Claude Partner Network, le programme qui réunit les sociétés de services déployant Claude chez leurs clients" style="display:block;width:100%;max-width:640px;height:auto;border:0;border-radius:14px"></a></td></tr>
+<tr><td style="padding:34px 4px 14px 4px;{p}">Bonjour,</td></tr>
+<tr><td style="padding:0 4px 14px 4px;{p};font-size:19px;font-weight:bold;color:{BLACK}">Nous avons le plaisir de vous annoncer qu'AI Partners est désormais partenaire Select du Claude Partner Network, le programme qui réunit les sociétés de services déployant Claude, powered by Anthropic, chez leurs clients.</td></tr>
+<tr><td style="padding:6px 4px 30px 4px">{btn("Lire le communiqué de presse", PRESSE, NAVY)}</td></tr>
+<tr><td style="padding:0 4px 38px 4px;{p}">Plus qu'une annonce, nous voulions vous expliquer ce que ce statut signifie, et ce qu'il change pour les projets que nous menons ensemble.</td></tr>
+<tr><td style="padding:30px 4px 12px 4px;border-top:1px solid {RULE}"><h2 style="{h2}">Un statut qui se mérite</h2></td></tr>
+<tr><td style="padding:0 4px 16px 4px;{p}">Le statut Select ne s'obtient pas sur simple adhésion. Anthropic l'attribue selon des critères précis, identiques pour tous les partenaires et réévalués régulièrement :</td></tr>
+<tr><td style="padding:0 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{crit}</table></td></tr>
+<tr><td style="padding:6px 4px 38px 4px;{p}"><strong style="color:{BLACK}">En clair :</strong> il reconnaît une pratique de Claude déjà construite sur le terrain, pas une intention.</td></tr>
+<tr><td style="padding:30px 4px 16px 4px;border-top:1px solid {RULE}"><h2 style="{h2}">Ce que cela change pour vous</h2></td></tr>
+<tr><td style="padding:0 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{change}</table></td></tr>
+<tr><td style="padding:20px 4px 16px 4px;border-top:1px solid {RULE}"><h2 style="{h2}">Comment nous pouvons vous accompagner avec Claude</h2></td></tr>
+<tr><td style="padding:0 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{offres}</table></td></tr>
+<tr><td style="padding:30px 0 0 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="{NAVY}" style="background-color:{NAVY};border-radius:18px"><tr><td style="padding:34px 30px 36px 30px">
+<div style="font-family:{FONT};font-size:26px;line-height:1.25;font-weight:bold;letter-spacing:-.01em;color:#FFFFFF;padding-bottom:12px">Parlons de vos projets</div>
+<div style="font-family:{FONT};font-size:17px;line-height:1.65;color:#D3DAF2;padding-bottom:24px">Vous avez un pilote à faire passer en production, ou un cas d'usage à cadrer ? Nos experts certifiés vous proposent un échange de 30 minutes pour en discuter.</div>
+{btn("Échanger avec un expert Claude", EXPERT, "#FFFFFF", NAVY)}</td></tr></table></td></tr>
+<tr><td style="padding:34px 4px 0 4px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>
+<td valign="top" width="100" style="width:100px;padding:0 18px 0 0"><img src="images/thomas_portrait.jpg" width="84" height="84" alt="Thomas Spitz, CEO d'AI Partners" style="display:block;border:0;border-radius:42px;width:84px;height:84px"></td>
+<td valign="middle" style="{p}">À très bientôt,<br><strong style="color:{BLACK}">Thomas Spitz</strong><br><span style="color:{MUTED}">CEO, AI Partners</span></td></tr></table></td></tr>
+<tr><td height="56" style="font-size:0;line-height:0">&nbsp;</td></tr>"""
+    page = f"""<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light"><title>{esc(OBJET)}</title></head>
+<body style="margin:0;padding:0;background:#FFFFFF">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">Plus qu'une annonce : ce que ce statut signifie, et ce qu'il change pour vos projets.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF"><tr><td align="center" style="padding:0 16px">
+<table role="presentation" width="640" cellpadding="0" cellspacing="0" style="width:100%;max-width:640px;text-align:left">
+{inner}
+</table></td></tr></table></body></html>"""
+    page = page.replace(" ?", "&nbsp;?").replace(" :", "&nbsp;:")      # typographie française : pas de ? ni de : orphelin en début de ligne
+    (out / "email.html").write_text(page, encoding="utf-8")
+    (out / "objet.txt").write_text(OBJET, encoding="utf-8")
+    return out
+
+
+if __name__ == "__main__":
+    print(preview(build(Path(sys.argv[sys.argv.index("--badge") + 1]) if "--badge" in sys.argv else VISUEL), 3300))
