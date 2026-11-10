@@ -19,6 +19,7 @@ from ..newsletter_templates import FONT, NAVY, PILL_CLOSE, esc, pill_open
 from .piste_nouveau import _fonts, _render, _tr, _uri, preview
 from .piste_wahou import duotone
 
+NOMS = {"youtube": "YouTube", "spotify": "Spotify", "ausha": "Ausha"}
 BLACK, INK, MUTED, RULE = "#05070F", "#141B45", "#4A5683", "#D9DEEE"
 
 
@@ -54,7 +55,17 @@ def build(episode: str = "E23") -> Path:
     out = tr / "newsletter_lab" / "lumiere"
     img = out / "images"
     img.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(tr / "newsletter" / "images" / "thomas_rond.jpg", img / "thomas_rond.jpg")
+    # portrait de Thomas : la photo de profil que Arthur a choisie (E23, 1:56 du rush), recadrée carré centré sur le visage (la photo ronde
+    # du gabarit actuel était trop serrée et décentrée)
+    from PIL import Image
+    Image.open(tr / "photos_profil_thomas" / "profil_large_04.png").convert("RGB").crop((180, 20, 920, 760)).resize((280, 280), Image.Resampling.LANCZOS).save(img / "thomas_portrait.jpg", quality=92)
+    from .piste_nostra_v2 import platform_pills
+    platform_pills(out)
+    plat_urls = {"youtube": mail["youtube_url"], "spotify": "https://open.spotify.com/show/4chUmiipM4KiK4sEdL9BeP", "ausha": "https://podcast.ausha.co/ai-partners-podcast"}
+    plats = "".join(
+        f'<td align="center" style="padding:0 18px 0 0"><a href="{esc(u)}" style="text-decoration:none"><img src="images/pastille_{k}.png" width="60" height="60" alt="{NOMS[k]}" '
+        f'style="display:block;border:0;width:60px;height:60px;margin:0 auto"><span style="display:block;padding-top:6px;font-family:{FONT};font-size:13px;color:{MUTED}">{NOMS[k]}</span></a></td>'
+        for k, u in plat_urls.items())
     guest = duotone(tr / "carrousel" / "assets" / "guest.png", img / "guest_duo.png", grain=4)
     mont = _uri(Path(__file__).resolve().parents[2] / "MARQUES" / "ai-corner" / "assets" / "outro_bg.png")
     waveform_gif(img / "onde.gif")
@@ -101,13 +112,15 @@ def build(episode: str = "E23") -> Path:
 <tr><td style="padding:0 4px 24px 4px;font-family:{FONT};font-size:14px;font-weight:bold;letter-spacing:.14em;color:{MUTED}">CE QUE COTY A MIS EN PLACE</td></tr>
 <tr><td style="padding:0 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{steps}</table></td></tr>
 <tr><td style="padding:44px 4px 0 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid {RULE}"><tr>
-<td valign="top" width="64" style="width:64px;padding:28px 16px 0 0"><img src="images/thomas_rond.jpg" width="56" height="56" alt="Thomas Spitz" style="display:block;border:0;border-radius:28px;width:56px;height:56px"></td>
+<td valign="top" width="100" style="width:100px;padding:28px 18px 0 0"><img src="images/thomas_portrait.jpg" width="84" height="84" alt="Thomas Spitz, CEO et fondateur d'AI Partners" style="display:block;border:0;border-radius:42px;width:84px;height:84px"></td>
 <td valign="top" style="padding-top:28px;font-family:{FONT};font-size:18px;line-height:1.6;color:{INK}">{esc(mail["closing"])}<br><strong style="color:{BLACK}">Thomas Spitz</strong><span style="color:{MUTED}">, CEO et fondateur d'AI Partners</span></td></tr></table></td></tr>
 <tr><td style="padding:34px 0 0 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="{NAVY}" style="background-color:{NAVY};border-radius:18px"><tr><td style="padding:32px 30px 34px 30px">
 <div style="font-family:{FONT};font-size:25px;line-height:1.25;font-weight:bold;letter-spacing:-.01em;color:#FFFFFF;padding-bottom:10px">Vos équipes testent l'IA. Et après ?</div>
 <div style="font-family:{FONT};font-size:16px;line-height:1.6;color:#C9D0EC;padding-bottom:22px">Passons de l'expérimentation à l'impact : 30 minutes avec moi pour en parler.</div>
 {btn("Réserver un échange avec Thomas", "https://calendly.com/", "#FFFFFF", NAVY)}</td></tr></table></td></tr>
-<tr><td height="40" style="font-size:0;line-height:0">&nbsp;</td></tr>"""
+<tr><td style="padding:40px 4px 10px 4px;font-family:{FONT};font-size:14px;font-weight:bold;letter-spacing:.14em;color:{MUTED}">ÉCOUTEZ AI CORNER SUR VOTRE PLATEFORME</td></tr>
+<tr><td style="padding:6px 4px 0 4px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>{plats}</tr></table></td></tr>
+<tr><td height="48" style="font-size:0;line-height:0">&nbsp;</td></tr>"""
     page = f"""<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light"><title>{esc(mail["subject"])}</title></head>
 <body style="margin:0;padding:0;background:#FFFFFF">
