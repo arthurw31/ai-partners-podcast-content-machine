@@ -575,7 +575,9 @@ def _platforms(c: dict) -> str:
     def cell(p):
         key = (p["name"] or "").lower()
         label = p.get("label") or PLATFORM_LABELS.get(key, p["name"])
-        return (f'<td align="center" valign="middle" width="96" style="padding:0 8px"><a href="{esc(p["url"])}" style="text-decoration:none">'
+        # icône YouTube = lien de l'ÉPISODE (Arthur, 10/11/2026), jamais la playlist ; Spotify / Ausha = l'émission
+        href = c["url"] if key == "youtube" else p["url"]
+        return (f'<td align="center" valign="middle" width="96" style="padding:0 8px"><a href="{esc(href)}" style="text-decoration:none">'
                 f'<img src="{c["rel"]("plat_" + key)}" width="80" height="80" alt="{esc(label)}" '
                 f'style="display:block;width:80px;height:80px;border:0"></a></td>')
     return (f'<tr><td bgcolor="{BAND_BG}"><a href="{esc(show_url(c))}" style="text-decoration:none"><img src="{c["rel"]("plat_title")}" width="680" '
