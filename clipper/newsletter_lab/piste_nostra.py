@@ -25,18 +25,34 @@ def _tr(episode: str) -> Path:
     return next((ROOT / "EPISODES" / "ai-corner").glob(f"{episode}_*")) / "travail"
 
 
+def platform_tiles(out: Path) -> None:
+    """Logos YouTube / Spotify / Ausha en tuiles de couleur sur FOND BLANC (la page est blanche : les PNG du gabarit actuel sont
+    posés sur un bandeau bleu nuit et gardaient un cadre sombre)."""
+    from ..newsletter import _shot, _uri
+    from ..newsletter_templates import _TILES, _glyph
+    from ..config import Brand
+    brand = Brand("ai-corner")
+    for key, (c1, _c2, fg) in _TILES.items():
+        edge = "box-shadow:inset 0 0 0 2px #D9E1F2;" if key == "ausha" else ""
+        page = (f"<html><body style='margin:0;background:#fff'><div style='width:240px;height:240px;display:flex;align-items:center;"
+                f"justify-content:center'><div style='width:208px;height:208px;border-radius:48px;background:{c1};{edge}display:flex;"
+                f"align-items:center;justify-content:center'><div style='width:112px;height:112px'>{_glyph(brand, key, fg, _uri)}</div>"
+                f"</div></div></body></html>")
+        _shot(page, 240, 240, out / "images" / f"tuile_{key}.png")
+
+
 def build(episode: str = "E23") -> Path:
     tr = _tr(episode)
     src = tr / "newsletter"
     mail = json.loads((src / "contenu.json").read_text(encoding="utf-8"))
     out = tr / "newsletter_lab" / "nostra"
     (out / "images").mkdir(parents=True, exist_ok=True)
-    for n in ["entete.png", "invite.jpg", "episode_youtube.jpg", "plateforme_youtube.png", "plateforme_spotify.png",
-              "plateforme_ausha.png", "bouton_play.png"]:
+    for n in ["entete.png", "invite.jpg", "episode_youtube.jpg", "bouton_play.png"]:
         shutil.copy2(src / "images" / n, out / "images" / n)
 
+    platform_tiles(out)
     url = mail["youtube_url"] or "{{lien_youtube}}"
-    cell = f"font-family:{FONT};color:{INK};font-size:16px;line-height:1.6"
+    cell = f"font-family:{FONT};color:{INK};font-size:16px;line-height:1.65;text-wrap:pretty"
     pt = lambda x: f'<span style="color:{BLUE}">{x}</span>'                       # noqa: E731  point final coloré (comme le point jaune d'On Train)
 
     def btn(label: str, href: str, play: bool = False) -> str:
@@ -55,8 +71,8 @@ def build(episode: str = "E23") -> Path:
     first = esc(paras[0])
     rest = "".join(f'<p style="{cell};margin:0 0 14px 0">{esc(x)}</p>' for x in paras[1:])
     plats = "".join(
-        f'<td style="padding:0 7px"><img src="images/plateforme_{n}.png" width="52" height="52" alt="{n.capitalize()}" '
-        f'style="display:block;border:0;width:52px;height:52px"></td>' for n in ("youtube", "spotify", "ausha"))
+        f'<td style="padding:0 7px"><img src="images/tuile_{n}.png" width="56" height="56" alt="{n.capitalize()}" '
+        f'style="display:block;border:0;width:56px;height:56px"></td>' for n in ("youtube", "spotify", "ausha"))
     hook = mail["hook"].split(" Vos équipes")[0]
 
     page = f"""<!doctype html>
@@ -69,19 +85,19 @@ def build(episode: str = "E23") -> Path:
 
 <tr><td style="padding:18px 0 0 0"><img src="images/entete.png" width="640" alt="AI Corner by AI Partners · {esc(mail["episode"])}" style="display:block;width:100%;max-width:640px;border:0;border-radius:14px"></td></tr>
 
-<tr><td align="center" style="padding:34px 12px 8px 12px;font-family:{FONT};font-size:25px;line-height:1.3;font-weight:bold;color:{NAVY}">{esc(mail["guest"])} ({esc(mail["company"])})</td></tr>
-<tr><td align="center" style="padding:0 12px 26px 12px;font-family:{FONT};font-size:20px;line-height:1.35;color:{BLUE};font-weight:bold">{esc(mail["theme"])}{pt(".")}</td></tr>
+<tr><td align="center" style="padding:34px 12px 8px 12px;font-family:{FONT};font-size:28px;line-height:1.2;font-weight:bold;letter-spacing:-.01em;color:{NAVY};text-wrap:balance">{esc(mail["guest"])} ({esc(mail["company"])})</td></tr>
+<tr><td align="center" style="padding:0 12px 26px 12px;font-family:{FONT};font-size:21px;line-height:1.3;color:{BLUE};font-weight:bold;text-wrap:balance">{esc(mail["theme"])}{pt(".")}</td></tr>
 
 <tr><td style="{cell};padding:0 0 22px 0;font-weight:bold;color:{NAVY};font-size:18px;line-height:1.5">{esc(hook)}</td></tr>
 
 <tr><td style="padding:0 0 8px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
 <td valign="top" style="padding:0 20px 0 0"><p style="{cell};margin:0 0 14px 0">{first}</p>{rest}</td>
-<td valign="top" width="170" style="width:170px"><img src="images/invite.jpg" width="170" alt="{esc(mail["guest"])}" style="display:block;width:170px;height:auto;border:0;border-radius:14px"></td>
+<td valign="top" width="140" style="width:140px"><img src="images/invite.jpg" width="140" alt="{esc(mail["guest"])}" style="display:block;width:140px;height:auto;border:0;border-radius:14px"></td>
 </tr></table></td></tr>
 
 <tr><td align="center" style="padding:14px 0 30px 0">{btn("Regarder l'épisode", url, play=True)}</td></tr>
 
-<tr><td align="center" style="padding:6px 0 18px 0;font-family:{FONT};font-size:25px;line-height:1.3;font-weight:bold;color:{NAVY}">Au programme de cet épisode{pt(".")}</td></tr>
+<tr><td align="center" style="padding:6px 0 18px 0;font-family:{FONT};font-size:26px;line-height:1.25;font-weight:bold;letter-spacing:-.01em;color:{NAVY};text-wrap:balance">Au programme de cet épisode{pt(".")}</td></tr>
 <tr><td><table role="presentation" width="100%" cellpadding="0" cellspacing="0">{bullets}</table></td></tr>
 
 <tr><td style="{cell};padding:10px 0 12px 0">Retrouvez l'épisode complet sur YouTube</td></tr>
@@ -90,18 +106,18 @@ def build(episode: str = "E23") -> Path:
 <tr><td style="{cell};padding:0 0 26px 0">{esc(mail["closing"])}</td></tr>
 
 <tr><td bgcolor="{SOFT}" align="center" style="background-color:{SOFT};border-radius:16px;padding:30px 26px 32px 26px">
-<div style="font-family:{FONT};font-size:25px;line-height:1.3;font-weight:bold;color:{NAVY};padding-bottom:12px">Vos équipes testent l'IA. Et après{pt("&nbsp;?")}</div>
+<div style="font-family:{FONT};font-size:26px;line-height:1.25;font-weight:bold;letter-spacing:-.01em;color:{NAVY};text-wrap:balance;padding-bottom:12px">Vos équipes testent l'IA. Et après{pt("&nbsp;?")}</div>
 <div style="{cell};padding-bottom:20px">Passons de l'expérimentation à l'impact : 30 minutes avec moi pour en parler.</div>
 {btn("Réserver un échange avec Thomas", "https://calendly.com/")}
 </td></tr>
 
-<tr><td align="center" style="padding:34px 0 8px 0;font-family:{FONT};font-size:25px;line-height:1.3;font-weight:bold;color:{NAVY}">Rejoignez l'aventure AI Corner{pt("&nbsp;!")}</td></tr>
+<tr><td align="center" style="padding:34px 0 8px 0;font-family:{FONT};font-size:26px;line-height:1.25;font-weight:bold;letter-spacing:-.01em;color:{NAVY};text-wrap:balance">Rejoignez l'aventure AI Corner{pt("&nbsp;!")}</td></tr>
 <tr><td align="center" style="{cell};padding:0 10px 20px 10px">Ce podcast s'adresse aux dirigeants et aux équipes qui déploient l'IA dans leur entreprise.<br>Pour ne manquer aucun épisode, retrouvez-nous sur votre plateforme préférée.</td></tr>
 <tr><td align="center" style="padding:0 0 26px 0"><table role="presentation" cellpadding="0" cellspacing="0"><tr>{plats}</tr></table></td></tr>
 
 <tr><td bgcolor="{SOFT}" align="center" style="background-color:{SOFT};border-radius:16px;padding:26px 20px">
 <div style="font-family:{FONT};font-size:18px;font-weight:bold;color:{NAVY}">AI Partners</div>
-<div style="font-family:{FONT};font-size:13px;line-height:1.5;color:#55618F;padding-top:6px">AI Corner, le podcast d'AI Partners<br>Se désinscrire (pied de page standard HubSpot)</div>
+<div style="font-family:{FONT};font-size:13px;line-height:1.5;color:#55618F;padding-top:6px">AI Corner, le podcast d'AI Partners</div>
 </td></tr>
 <tr><td height="28" style="font-size:0;line-height:0">&nbsp;</td></tr>
 </table></td></tr></table></body></html>"""
