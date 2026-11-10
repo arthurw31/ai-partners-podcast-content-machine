@@ -14,3 +14,4 @@
 - 10/11/2026 newsletter communiqué « AI Partners partenaire Select du Claude Partner Network » (`piste_select.py`, sortie `EPISODES/ai-corner/_communiques/select-partner/`) : texte du Google Doc de l'équipe, ouverture inspirée du visuel LinkedIn. Placeholders : lien du communiqué, lien expert Claude ; badge recadré du visuel (basse définition).
 - 10/11/2026 communiqué Select : version « courrier » (titres simples, paragraphes, vraies puces, un seul bouton par appel, pas de cartes ni de bloc coloré), comme le Google Doc.
 - 10/11/2026 communiqué Select : visuel d'ouverture = le screen de l'équipe STRICTEMENT inchangé (en anglais) ; puces en frise (point + barre bleu nuit à gauche) comme le mail Lumière.
+- 10/11/2026 communiqué Select : visuel pleine largeur (sans marge ni coins arrondis), puces = une barre bleu nuit continue sur le côté gauche (plus de points décalés).

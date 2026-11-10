@@ -64,19 +64,16 @@ def build(visuel: Path = VISUEL) -> Path:
     # --- forme « courrier » (retour d'Arthur, 10/11/2026 : « une forme traditionnelle de texte comme dans le doc ») : titres simples,
     #     paragraphes, vraies puces ; pas de cartes, de frise ni de bloc coloré autour du texte.
     def puces(items):
-        """Barre verticale bleu nuit à gauche + un point par ligne (comme la frise du mail « Lumière »)."""
-        rows, n = "", len(items)
-        for i, x in enumerate(items):
-            last = i == n - 1
-            rows += (f'<tr><td valign="top" width="30" style="width:30px;padding:8px 0 0 0"><div style="width:12px;height:12px;border-radius:6px;background:{NAVY}"></div></td>'
-                     f'<td valign="top" style="border-left:2px solid {"#FFFFFF" if last else NAVY};padding:0 0 {0 if last else 20}px 24px;font-family:{FONT};font-size:17px;line-height:1.65;color:{INK}">{x}</td></tr>')
-        return rows
+        """UNE barre verticale bleu nuit continue sur le côté gauche de la liste, les éléments empilés à droite (aucun point à aligner)."""
+        body = "".join(f'<div style="padding:0 0 {0 if i == len(items) - 1 else 18}px 0">{x}</div>' for i, x in enumerate(items))
+        return (f'<tr><td style="border-left:4px solid {NAVY};padding:2px 0 2px 22px;font-family:{FONT};font-size:17px;line-height:1.65;color:{INK}">{body}</td></tr>')
     crit = puces([esc(x) for x in CRITERES])
     change = puces([f'<strong style="color:{BLACK}">{esc(t)}</strong> {esc(x)}' for t, x in CHANGE])
     offres = puces([f'<strong style="color:{BLACK}">{esc(t)}</strong> : {esc(x)}' for t, x in OFFRES])
     h2 = f"margin:0;font-family:{FONT};font-size:22px;line-height:1.3;font-weight:bold;color:{BLACK}"
     p = f"font-family:{FONT};font-size:17px;line-height:1.7;color:{INK}"
-    inner = f"""<tr><td style="padding:16px 0 0 0"><a href="{esc(PRESSE)}"><img src="images/hero.png" width="640" alt="AI Partners est désormais partenaire Select du Claude Partner Network, le programme qui réunit les sociétés de services déployant Claude chez leurs clients" style="display:block;width:100%;max-width:640px;height:auto;border:0;border-radius:14px"></a></td></tr>
+    inner = f"""<tr><td style="padding:0"><a href="{esc(PRESSE)}"><img src="images/hero.png" width="640" alt="AI Partners est désormais partenaire Select du Claude Partner Network, le programme qui réunit les sociétés de services déployant Claude chez leurs clients" style="display:block;width:100%;max-width:640px;height:auto;border:0"></a></td></tr>
+<tr><td style="padding:0 20px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">
 <tr><td style="padding:34px 4px 14px 4px;{p}">Bonjour,</td></tr>
 <tr><td style="padding:0 4px 14px 4px;{p}">Nous avons le plaisir de vous annoncer qu'AI Partners est désormais <strong style="color:{BLACK}">partenaire Select du Claude Partner Network</strong>, le programme qui réunit les sociétés de services déployant Claude, powered by Anthropic, chez leurs clients.</td></tr>
 <tr><td style="padding:6px 4px 26px 4px">{btn("Lire le communiqué de presse", PRESSE, NAVY)}</td></tr>
@@ -95,12 +92,13 @@ def build(visuel: Path = VISUEL) -> Path:
 <tr><td style="padding:0 4px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>
 <td valign="top" width="100" style="width:100px;padding:0 18px 0 0"><img src="images/thomas_portrait.jpg" width="84" height="84" alt="Thomas Spitz, CEO d'AI Partners" style="display:block;border:0;border-radius:42px;width:84px;height:84px"></td>
 <td valign="middle" style="{p}">À très bientôt,<br><strong style="color:{BLACK}">Thomas Spitz</strong><br><span style="color:{MUTED}">CEO, AI Partners</span></td></tr></table></td></tr>
+</table></td></tr>
 <tr><td height="56" style="font-size:0;line-height:0">&nbsp;</td></tr>"""
     page = f"""<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light"><title>{esc(OBJET)}</title></head>
 <body style="margin:0;padding:0;background:#FFFFFF">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0">Plus qu'une annonce : ce que ce statut signifie, et ce qu'il change pour vos projets.</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF"><tr><td align="center" style="padding:0 16px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF"><tr><td align="center" style="padding:0">
 <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="width:100%;max-width:640px;text-align:left">
 {inner}
 </table></td></tr></table></body></html>"""
