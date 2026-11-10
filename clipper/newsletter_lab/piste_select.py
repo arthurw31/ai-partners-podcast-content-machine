@@ -67,9 +67,17 @@ def build(visuel: Path = VISUEL) -> Path:
         """UNE barre verticale bleu nuit continue sur le côté gauche de la liste, les éléments empilés à droite (aucun point à aligner)."""
         body = "".join(f'<div style="padding:0 0 {0 if i == len(items) - 1 else 18}px 0">{x}</div>' for i, x in enumerate(items))
         return (f'<tr><td style="border-left:4px solid {NAVY};padding:2px 0 2px 22px;font-family:{FONT};font-size:17px;line-height:1.65;color:{INK}">{body}</td></tr>')
-    crit = puces([esc(x) for x in CRITERES])
-    change = puces([f'<strong style="color:{BLACK}">{esc(t)}</strong> {esc(x)}' for t, x in CHANGE])
-    offres = puces([f'<strong style="color:{BLACK}">{esc(t)}</strong> : {esc(x)}' for t, x in OFFRES])
+    def debut(x: str, n: int = 3) -> str:
+        """Début de puce homogène (Arthur, 10/11/2026) : les premiers mots en GRAS et en MAJUSCULES (3 mots quand la puce n'a pas de titre)."""
+        mots = x.split(" ")
+        return f'<strong style="color:{BLACK};letter-spacing:.01em">{esc(" ".join(mots[:n]).upper())}</strong> {esc(" ".join(mots[n:]))}'
+
+    def titre(t: str, suite: str, sep: str = "") -> str:
+        return f'<strong style="color:{BLACK};letter-spacing:.01em">{esc(t.upper().rstrip(".:"))}</strong>{sep} {esc(suite)}'
+
+    crit = puces([debut(x) for x in CRITERES])
+    change = puces([titre(t, x, ".") for t, x in CHANGE])
+    offres = puces([titre(t, x, " :") for t, x in OFFRES])
     h2 = f"margin:0;font-family:{FONT};font-size:22px;line-height:1.3;font-weight:bold;color:{BLACK}"
     p = f"font-family:{FONT};font-size:17px;line-height:1.7;color:{INK}"
     inner = f"""<tr><td style="padding:0"><a href="{esc(PRESSE)}"><img src="images/hero.png" width="640" alt="AI Partners est désormais partenaire Select du Claude Partner Network, le programme qui réunit les sociétés de services déployant Claude chez leurs clients" style="display:block;width:100%;max-width:640px;height:auto;border:0"></a></td></tr>
