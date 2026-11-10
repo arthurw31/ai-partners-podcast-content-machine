@@ -137,20 +137,27 @@ def build(visuel: Path = VISUEL) -> Path:
         Image.open(FORMES / f"forme_{nom}.png").resize((px * 2, px * 2), Image.Resampling.LANCZOS).save(f)
         return f.name
 
+    def verre(nom: str, px: int) -> str:
+        """Icône « verre 3D » créée dans le style des formes du site (icones_verre.py), hors offres (Arthur, 10/11/2026)."""
+        from .icones_verre import glass
+        f = img / f"verre_{nom}_{px}.png"
+        Image.open(glass(nom)).resize((px * 2, px * 2), Image.Resampling.LANCZOS).save(f)
+        return f.name
+
     # 1. les 3 critères : trois colonnes, tuile bleu nuit + pictogramme blanc, intitulé, phrase du Doc
-    CRIT_ICO = [("A", "Experts certifiés"), ("barre", "Déploiements en production"), ("losange", "Référence client publique")]
+    CRIT_ICO = [("badge-check", "Experts certifiés"), ("server", "Déploiements en production"), ("message-square-quote", "Référence client publique")]
     cols = []
     for (ico, lab), x in zip(CRIT_ICO, CRITERES):
         texte = x[0].upper() + x[1:].rstrip(" ;.") + "."
         cols.append(f'<td valign="top" width="33%" style="width:33%;padding:0 8px">'
-                    f'<img src="images/{forme(ico, 72)}" width="72" height="72" alt="" style="display:block;border:0;width:72px;height:72px">'
+                    f'<img src="images/{verre(ico, 72)}" width="72" height="72" alt="" style="display:block;border:0;width:72px;height:72px">'
                     f'<div style="padding:14px 0 6px 0;font-family:{FONT};font-size:17px;line-height:1.3;font-weight:bold;color:{BLACK}">{esc(lab)}</div>'
                     f'<div style="font-family:{FONT};font-size:15px;line-height:1.55;color:{INK}">{esc(texte)}</div></td>')
     crit = f'<tr>{"".join(cols)}</tr>'
 
     # 4. « Ce que cela change » : un pictogramme bleu nuit devant chaque titre, dans la liste à barre latérale
-    CHANGE_ICO = ["A", "barre", "losange", "assemblage"]
-    change = puces([f'<img src="images/{forme(i, 42)}" width="42" height="42" alt="" style="display:inline-block;vertical-align:-14px;border:0;width:42px;height:42px;margin-right:8px">'
+    CHANGE_ICO = ["users", "rocket", "target", "layers"]
+    change = puces([f'<img src="images/{verre(i, 42)}" width="42" height="42" alt="" style="display:inline-block;vertical-align:-14px;border:0;width:42px;height:42px;margin-right:8px">'
                     + titre(t, x, ".") for i, (t, x) in zip(CHANGE_ICO, CHANGE)])
 
     # 3. les offres : trois tuiles bleu nuit, pictogramme blanc, nom, phrase du Doc
