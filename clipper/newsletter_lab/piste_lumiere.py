@@ -52,6 +52,8 @@ def build(episode: str = "E23") -> Path:
     mail = json.loads((tr / "newsletter" / "contenu.json").read_text(encoding="utf-8"))
     c = json.loads((Path(__file__).with_name("lumiere_contenu.json")).read_text(encoding="utf-8"))
     yt = mail["youtube_url"]
+    import yaml
+    BOOKING = yaml.safe_load((Path(__file__).resolve().parents[2] / "MARQUES" / "ai-corner" / "brand.yaml").read_text(encoding="utf-8"))["newsletter"]["booking"]["url"]   # agenda de Thomas (comme la production)
     out = tr / "newsletter_lab" / "lumiere"
     img = out / "images"
     img.mkdir(parents=True, exist_ok=True)
@@ -119,7 +121,7 @@ def build(episode: str = "E23") -> Path:
 <tr><td style="padding:34px 0 0 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="{NAVY}" style="background-color:{NAVY};border-radius:18px"><tr><td style="padding:32px 30px 34px 30px">
 <div style="font-family:{FONT};font-size:25px;line-height:1.25;font-weight:bold;letter-spacing:-.01em;color:#FFFFFF;padding-bottom:10px">Vos équipes testent l'IA. Et après ?</div>
 <div style="font-family:{FONT};font-size:16px;line-height:1.6;color:#C9D0EC;padding-bottom:22px">Passons de l'expérimentation à l'impact : 30 minutes avec moi pour en parler.</div>
-{btn("Réserver un échange avec Thomas", "https://calendly.com/", "#FFFFFF", NAVY)}</td></tr></table></td></tr>
+{btn("Réserver un échange avec Thomas", BOOKING, "#FFFFFF", NAVY)}</td></tr></table></td></tr>
 <tr><td style="padding:44px 4px 10px 4px;font-family:{FONT};font-size:22px;line-height:1.3;font-weight:bold;color:{BLACK}">{esc(c["rejoignez"]["titre"])}</td></tr>
 <tr><td style="padding:0 4px 20px 4px;font-family:{FONT};font-size:17px;line-height:1.65;color:{INK}">{esc(c["rejoignez"]["texte"])}</td></tr>
 <tr><td style="padding:6px 4px 0 4px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>{plats}</tr></table></td></tr>
