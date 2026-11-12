@@ -98,14 +98,12 @@ def build(episode: str = "E23") -> Path:
     _render(hero, 1280, 1200, img / "hero.png")
 
     paras = "".join(f'<p style="margin:0 0 14px 0">{esc(x)}</p>' for x in c["intro_paragraphes"])
-    steps = ""
+    # frise : UNE barre bleu nuit continue jusqu'à la dernière étape, étapes empilées à droite, sans points à aligner
+    #          (Arthur, 12/11/2026 : « problème sur les alignements et les bullet points, la ligne ne va pas au bout »)
     n = len(c["etapes"])
-    for i, e in enumerate(c["etapes"]):
-        last = i == n - 1
-        line = f"border-left:2px solid {'#FFFFFF' if last else NAVY};"
-        steps += (f'<tr><td valign="top" width="30" style="width:30px;padding:6px 0 0 0"><div style="width:14px;height:14px;border-radius:7px;background:{NAVY}"></div></td>'
-                  f'<td valign="top" style="{line}padding:0 0 {0 if last else 30}px 24px;margin-left:-8px;font-family:{FONT};font-size:16px;line-height:1.65;color:{INK}">'
-                  f'<strong style="color:{BLACK};font-size:20px;line-height:1.3">{esc(e["titre"])}</strong><br>{esc(e["phrase"])}</td></tr>')
+    items = "".join(f'<div style="padding:0 0 {0 if i == n - 1 else 26}px 0"><strong style="color:{BLACK};font-size:20px;line-height:1.3">{esc(e["titre"])}</strong><br>{esc(e["phrase"])}</div>'
+                    for i, e in enumerate(c["etapes"]))
+    steps = f'<tr><td style="border-left:4px solid {NAVY};padding:2px 0 2px 22px;font-family:{FONT};font-size:16px;line-height:1.65;color:{INK}">{items}</td></tr>'
 
     inner = f"""<tr><td style="padding:16px 0 0 0"><a href="{esc(yt)}"><img src="images/hero.png" width="640" alt="AI Corner, épisode 23 : Nicolas Comestaz, Data &amp; AI Center of Excellence chez Coty" style="display:block;width:100%;max-width:640px;height:auto;border:0"></a></td></tr>
 <tr><td style="padding:6px 0 0 0"><img src="images/onde.gif" width="640" alt="" style="display:block;width:100%;max-width:640px;height:auto;border:0"></td></tr>
