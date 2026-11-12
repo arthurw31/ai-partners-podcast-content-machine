@@ -25,3 +25,4 @@
 - 10/11/2026 communiqué Select : formes du site gardées UNIQUEMENT pour les 3 offres ; autres icônes créées dans le même style « verre 3D » (`icones_verre.py`, tracés Lucide en tube, MARQUES/ai-corner/assets/icones_verre/) : badge certifié, serveurs, citation, équipe, fusée, cible, couches.
 - 10/11/2026 icônes verre refaites en SOLIDES pleins (face blanche dépolie, tranche bleue translucide, liseré, halo au pied, détails gravés) pour coller aux formes du site ; planche de comparaison avec les formes du site.
 - 10/11/2026 communiqué Select : « : » après les titres des 4 points ; version de test `select-partner-bleu/` (`--theme bleu`) : mêmes icônes, en verre translucide BLEU au lieu de blanc (offres comprises).
+- 12/11/2026 DÉCISION : l'équipe préfère le gabarit Duo (production) ; il reste le défaut. Lumière et les autres pistes restent de côté.
