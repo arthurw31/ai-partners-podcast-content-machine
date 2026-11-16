@@ -72,25 +72,30 @@ def card(top: str, title: str, text: str) -> str:
 
 
 def clients() -> str:
-    cards = [("client_loreal.png", "L'Oréal", "150 experts tech et produit formés en trois jours de build."),
-             ("client_isagri.png", "ISAGRI", "Une chaîne de développement en production sur Claude Code, désormais utilisée au "
-                                            "quotidien par les équipes produit."),
-             ("client_trench.png", "Trench Group", "12 applications construites en trois jours, dont 3 en production, qui économisent "
-                                                   "plus de 200 heures de travail par an.")]
-    cells = GAP.join(card(img(f, 130, 34, n, "margin:0 auto"), n, t) for f, n, t in cards)
+    # ni logo ni nom de client (retours du 16/11/2026) : le résultat seul, son chiffre en gras
+    texts = [strong("150 experts") + " tech et produit formés en trois jours de build.",
+             "Une " + strong("chaîne de développement en production") + " sur Claude Code, désormais utilisée au quotidien par les "
+             "équipes produit.",
+             strong("12 applications") + " construites en trois jours, dont 3 en production, qui économisent " + strong("plus de 200 "
+             "heures") + " de travail par an."]
+    cells = GAP.join(f'<td valign="top" width="32%" bgcolor="#FFFFFF" style="width:32%;background-color:#FFFFFF;border:1px solid {BORDER};'
+                     f'border-radius:18px;padding:20px 16px 22px 16px;{F};font-size:15px;line-height:1.55;color:{TEXT}">{t}</td>'
+                     for t in texts)
     return (f'<tr><td style="padding:4px 4px 34px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
             f'style="border-collapse:separate"><tr>{cells}</tr></table></td></tr>')
 
 
 def stats() -> str:
     """Les 3 chiffres dans 3 encadrés côte à côte, comme les cartes clients, sans icône (Arthur, 16/11/2026)."""
-    data = [("12", "experts certifiés par Anthropic"), ("5", "déploiements clients validés par Anthropic"),
-            ("3", "références publiques")]
+    data = [("verre_badge-check_72.png", "12", "experts certifiés par Anthropic"),
+            ("verre_server_72.png", "5", "déploiements clients validés par Anthropic"),
+            ("verre_message-square-quote_72.png", "3", "références publiques")]
     cells = GAP.join(
         f'<td valign="top" width="32%" align="center" bgcolor="#FFFFFF" style="width:32%;background-color:#FFFFFF;border:1px solid {BORDER};'
-        f'border-radius:18px;padding:22px 12px 22px 12px;text-align:center"><div style="{F};font-size:44px;line-height:1;font-weight:bold;'
-        f'color:{NAVY}">{n}</div><div style="padding-top:10px;{F};font-size:15px;line-height:1.5;color:{TEXT}">{t}</div></td>'
-        for n, t in data)
+        f'border-radius:18px;padding:18px 12px 22px 12px;text-align:center"><img src="images/{i}" width="56" height="56" alt="" '
+        f'style="display:block;border:0;width:56px;height:56px;margin:0 auto 10px auto"><div style="{F};font-size:44px;line-height:1;'
+        f'font-weight:bold;color:{NAVY}">{n}</div><div style="padding-top:10px;{F};font-size:15px;line-height:1.5;color:{TEXT}">{t}</div></td>'
+        for i, n, t in data)
     return (f'<tr><td style="padding:6px 4px 26px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
             f'style="border-collapse:separate"><tr>{cells}</tr></table></td></tr>')
 
@@ -107,7 +112,7 @@ def bar_list(items: list) -> str:
                     f'<td valign="top" style="padding:0 0 {bottom} 0;{F};font-size:17px;line-height:1.65;color:{TEXT}">'
                     f'{strong(lead)} {text}</td></tr></table>')
     return (f'<tr><td style="padding:0 4px 26px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
-            f'<td style="border-left:4px solid {NAVY};padding:2px 0 2px 22px;{F};font-size:17px;line-height:1.65;color:{TEXT}">'
+            f'<td style="padding:2px 0 2px 0;{F};font-size:17px;line-height:1.65;color:{TEXT}">'
             + "".join(rows) + "</td></tr></table></td></tr>")
 
 
@@ -128,12 +133,14 @@ def independence() -> str:
              f'{partner("partenaire_openai.png", "OpenAI Select Partner", 124, 54)}{GAP}{partner("partenaire_dust.png", "Dust Partner", 130, 46)}'
              f'{GAP}{partner("partenaire_google.png", "Google Cloud Partner", 110, 56)}</tr></table>')
     return (h2("Ce qui ne change pas&nbsp;: notre indépendance", 0)
-            + para("Ce statut renforce notre expertise sur Claude, sans rien changer à notre position. AI Partners reste indépendant et "
-                   "agnostique. Nous sommes également partenaires d'OpenAI, de Dust et de Google.", "0 4px 16px 4px")
-            + f'<tr><td style="padding:0 4px">{new}<div style="height:12px;font-size:0;line-height:0">&nbsp;</div>{small}</td></tr>'
-            + para("Nous ne percevons aucune commission d'apport de la part des éditeurs. Notre seul critère reste votre besoin réel&nbsp;: "
-                   "nous vous recommandons la solution la plus adaptée, y compris quand ce n'est pas Claude. "
-                   + strong("Je m'y engage personnellement."), "18px 4px 34px 4px"))
+            + para("Ce statut ne change rien à notre position&nbsp;: AI Partners reste un acteur indépendant. Il nous permet en revanche "
+                   "d'aller plus loin dans la maîtrise de Claude, au plus près des équipes d'Anthropic et de leurs dernières avancées.",
+                   "0 4px 14px 4px")
+            + para("Cette expertise, nous la mettons au service d'une seule ambition&nbsp;: vous aider à choisir la solution la plus adaptée "
+                   "à vos besoins réels, et non à une technologie en particulier. C'est pourquoi ce partenariat s'inscrit dans une démarche "
+                   "plus large, construite avec les acteurs de référence du marché. Il vient compléter nos partenariats avec OpenAI, Dust "
+                   "et Google.", "0 4px 16px 4px")
+            + f'<tr><td style="padding:0 4px 34px 4px">{new}<div style="height:12px;font-size:0;line-height:0">&nbsp;</div>{small}</td></tr>')
 
 
 FONTS = ROOT / "MARQUES" / "ai-corner" / "assets" / "fonts"
@@ -173,11 +180,10 @@ def header_background(out: Path) -> Path:
     return out
 
 
-def partner_box(out: Path) -> Path:
+def partner_box(out: Path, fond: Path) -> Path:
     """Encadré « Nouveau partenaire » rendu par Chrome (1184 px = 2 x 592) : dégradé bleu grainé repris des couleurs de l'en-tête
     fourni (bleu nuit en bas à gauche, bleu clair en haut à droite), titre blanc, « Claude Partner Network » sur pavé orange
     comme dans l'en-tête, badge officiel à plat."""
-    fond = header_background(HERE / "_fond_entete.png")
     css = "".join(f'@font-face{{font-family:M;src:url("{_uri(FONTS / f"Metropolis-{n}.ttf")}");font-weight:{w}}}'
                   for n, w in (("Regular", 400), ("Bold", 700), ("ExtraBold", 800)))
     noise = ("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'>"
@@ -196,7 +202,46 @@ h1 span{{background:#F28A32;padding:0 12px}}
 <h1>Select Services Partner<br>du <span>Claude Partner Network</span></h1>
 <img class='badge' src='{_uri(IMG / "partenaire_anthropic.png")}'></div></div></body></html>"""
     _shot(page, 1184, 500, out)
-    fond.unlink()
+    return out
+
+
+def badge_cutout(out: Path) -> Path:
+    """Badge vertical de l'en-tête fourni, découpé avec ses coins arrondis (fond transparent autour)."""
+    from PIL import ImageDraw
+    im = Image.open(HERE / "sources" / "entete_fourni.webp").convert("RGB").crop((140, 92, 438, 666))
+    m = Image.new("L", im.size, 0)
+    ImageDraw.Draw(m).rounded_rectangle((0, 0, im.width - 1, im.height - 1), 18, fill=255)
+    im.putalpha(m)
+    im.save(out)
+    return out
+
+
+def banner(out: Path, fond: Path) -> Path:
+    """Bannière du haut, même mise en page que l'en-tête fourni (badge à gauche, logo, titre, filet orange, paragraphe), texte des
+    retours du 16/11/2026 : « AI Partners rejoint le Claude Partner Network comme partenaire Select. », surlignage orange sur
+    « Claude Partner Network »."""
+    badge = badge_cutout(HERE / "_badge.png")
+    css = "".join(f'@font-face{{font-family:M;src:url("{_uri(FONTS / f"Metropolis-{n}.ttf")}");font-weight:{w}}}'
+                  for n, w in (("Regular", 400), ("Bold", 700), ("ExtraBold", 800)))
+    logo = ROOT / "MARQUES" / "ai-corner" / "assets" / "logo_horizontal.svg"
+    page = f"""<html><head><meta charset='utf-8'><style>{css}*{{margin:0;box-sizing:border-box}}
+body{{width:1280px;height:720px;background:url("{_uri(fond)}") 0 0/1280px 720px no-repeat;font-family:M,Arial;color:#FFFFFF;
+position:relative;overflow:hidden}}
+.badge{{position:absolute;left:140px;top:92px;width:298px;height:574px}}
+.col{{position:absolute;left:518px;top:0;width:700px;height:720px;display:flex;flex-direction:column;justify-content:center}}
+.logo{{height:34px;width:auto;align-self:flex-start;filter:brightness(0) invert(1)}}
+h1{{font-weight:800;font-size:44px;line-height:1.2;margin:34px 0 26px}}
+h1 span{{background:#F28A32;padding:0 8px;box-decoration-break:clone;-webkit-box-decoration-break:clone}}
+.rule{{width:60px;height:4px;background:#F28A32;margin:0 0 26px}}
+p{{font-weight:400;font-size:24px;line-height:1.5}}
+</style></head><body><img class='badge' src='{_uri(badge)}'><div class='col'><img class='logo' src='{_uri(logo)}'>
+<h1>AI Partners rejoint le <span>Claude Partner Network</span> comme partenaire Select.</h1><div class='rule'></div>
+<p>Le programme d'Anthropic réunit les sociétés qui déploient Claude chez leurs clients. Notre mission&nbsp;: faire passer vos
+projets IA de l'expérimentation à la production.</p></div></body></html>"""
+    _shot(page, 1280, 720, HERE / "_banniere.png")
+    Image.open(HERE / "_banniere.png").convert("RGB").save(out, quality=90)
+    (HERE / "_banniere.png").unlink()
+    badge.unlink()
     return out
 
 
@@ -207,15 +252,17 @@ def images() -> None:
     for n in ("client_loreal.png", "client_isagri.png", "client_trench.png", "partenaire_anthropic.png", "partenaire_openai.png",
               "partenaire_dust.png", "partenaire_google.png"):
         shutil.copy2(V1 / "images" / n, IMG / n)
-    head = Image.open(HERE / "sources" / "entete_fourni.webp").convert("RGB")   # en-tête fourni par Arthur (1280 × 720)
-    head.save(IMG / "entete_select.jpg", quality=90)
-    partner_box(IMG / "encadre_nouveau_partenaire.png")
+    fond = header_background(HERE / "_fond_entete.png")    # fond de l'en-tête fourni, sans badge ni texte
+    banner(IMG / "banniere_select.jpg", fond)
+    partner_box(IMG / "encadre_nouveau_partenaire.png", fond)
+    fond.unlink()
+    (IMG / "entete_select.jpg").unlink(missing_ok=True)
     (IMG / "hero.png").unlink(missing_ok=True)
 
 
 def build() -> str:
-    hero = ('<tr><td style="padding:0"><img src="images/entete_select.jpg" width="640" alt="AI Partners est officiellement Partenaire '
-            'de Services Select au sein du Claude Partner Network" style="display:block;width:100%;max-width:640px;height:auto;border:0">'
+    hero = ('<tr><td style="padding:0"><img src="images/banniere_select.jpg" width="640" alt="AI Partners rejoint le Claude Partner '
+            'Network comme partenaire Select" style="display:block;width:100%;max-width:640px;height:auto;border:0">'
             '</td></tr>')
     sig = (f'<tr><td style="padding:0 4px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>'
            f'<td valign="middle" width="100" style="width:100px;padding:0 18px 0 0"><img src="images/thomas_portrait.jpg" width="84" '
@@ -225,19 +272,14 @@ def build() -> str:
     rows = [
         para("Bonjour,", "34px 4px 14px 4px"),
         para("Je tenais à vous partager une étape importante pour AI Partners&nbsp;: nous avons obtenu le statut de "
-             + strong("partenaire Select du Claude Partner Network") + " (Services Track), le programme d'Anthropic dédié aux sociétés "
+             + strong("partenaire Select du Claude Partner Network") + ", le programme d'Anthropic dédié aux sociétés "
              "qui déploient Claude, powered by Anthropic, chez leurs clients.", "0 4px 14px 4px"),
-        para("Ce statut valide une pratique Claude éprouvée sur le terrain&nbsp;: des équipes certifiées, des clients en production et "
-             "des cas publics. Cette reconnaissance vient consacrer deux années de travail aux côtés de nos clients, et une conviction "
+        para("Cette reconnaissance vient consacrer deux années de travail aux côtés de nos clients, et une conviction "
              "qui ne m'a pas quitté depuis la création d'AI Partners&nbsp;: la valeur de l'IA se joue en production, au-delà des pilotes.",
              "0 4px 30px 4px"),
         h2("Une expertise reconnue, et déjà à l'œuvre chez nos clients", 0),
         stats(),
-        bar_list([("verre_users_42.png", "Des experts qui pratiquent.", "Nos consultants et ingénieurs utilisent Claude au quotidien, "
-                   "y compris Claude Code dans notre propre ingénierie."),
-                  ("verre_rocket_42.png", "Des projets en production.", "Nos 5 déploiements clients validés par Anthropic vont au-delà "
-                   "des POC et des expérimentations.")]),
-        para(strong("Des résultats mesurés") + ", sur 3 références publiques&nbsp;:", "0 4px 14px 4px"),
+        h2("Des résultats mesurés", 0),
         clients(),
         independence(),
         h2("Ce que nous pouvons faire pour vous", 0),
