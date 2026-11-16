@@ -226,7 +226,7 @@ def body(i: dict, src) -> str:
 <tr><td><img src="{src(i["hero"])}" width="680" alt="AI Partners devient Select Services Partner in the Claude Partner Network" style="display:block;width:100%;max-width:680px;height:auto;border:0"></td></tr>
 <tr><td style="padding:34px 40px 0 40px">
 <p {P}>Bonjour,</p>
-<p {P}>Je tenais à vous partager une étape importante pour AI Partners : nous avons obtenu le statut de <strong style="color:{NAVY}">partenaire Select du <span style="color:{CLAUDE}">Claude Partner Network</span></strong> (Services Track), le programme d'Anthropic dédié aux sociétés qui déploient Claude, powered by Anthropic, chez leurs clients.</p>
+<p {P}>Je tenais à vous partager une étape importante pour AI Partners : nous avons obtenu le statut de <strong style="color:{NAVY}">partenaire Select du Claude Partner Network</strong> (Services Track), le programme d'Anthropic dédié aux sociétés qui déploient Claude, powered by Anthropic, chez leurs clients.</p>
 <p {P}>Ce statut valide une pratique Claude éprouvée sur le terrain : des équipes certifiées, des clients en production et des cas publics. Cette reconnaissance vient consacrer deux années de travail aux côtés de nos clients, et une conviction qui ne m'a pas quitté depuis la création d'AI Partners : la valeur de l'IA se joue en production, au-delà des pilotes.</p>
 </td></tr>
 {h2("Une expertise reconnue, et déjà à l'œuvre chez nos clients", 18)}
