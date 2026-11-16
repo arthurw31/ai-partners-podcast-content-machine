@@ -507,7 +507,8 @@ h2 .hl, .card .hl { background: none; color: #258AF3; padding: 0; margin: 0; }
 .st { flex: 1; border-radius: 18px; padding: 14px 14px 16px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; }
 .st b { font-size: 25px; line-height: 1.1; font-weight: 800; }
 .st i { font-size: 19px; line-height: 1.15; font-style: normal; }
-.st .lg img { height: 58px; width: auto; margin-bottom: 8px; display: block; }
+.st .lg { display: block; }
+.st .lg img { height: 40px; width: 40px; object-fit: contain; display: block; background: #fff; border-radius: 14px; padding: 9px; box-sizing: content-box; margin-bottom: 10px; }
 .st.s0 { height: 150px; background: #E6EEFE; color: #151D53; }
 .st.s1 { height: 185px; background: #C6DAFB; color: #151D53; }
 .st.s2 { height: 215px; background: #8DB8F8; color: #0E1440; }
