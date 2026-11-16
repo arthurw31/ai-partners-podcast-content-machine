@@ -71,34 +71,56 @@ def card(top: str, title: str, text: str) -> str:
             f'<div style="{F};font-size:15px;line-height:1.55;color:{TEXT}">{text}</div></td>')
 
 
+ICONS = ROOT / "MARQUES" / "ai-corner" / "assets" / "icons"
+
+
+def tile_icon(name: str) -> str:
+    """Pictogramme Lucide (ISC) en traits bleus sur une pastille bleu très pâle, rendu par Chrome en 2x (88 px pour 44 px affichés).
+    Arthur, 16/11/2026 : des icônes qui correspondent au contenu, en haut à gauche des carrés (pas d'icônes en verre, « des emoji »)."""
+    out = IMG / f"pastille_{name}.png"
+    svg = (ICONS / f"lucide_{name}.svg").read_text(encoding="utf-8").replace("currentColor", BLUE)
+    tmp = HERE / f"_{name}.svg"
+    tmp.write_text(svg, encoding="utf-8")
+    page = (f"<html><body style='margin:0;background:#FFFFFF'><div style='width:88px;height:88px;border-radius:22px;background:#EAF1FD;"
+            f"display:flex;align-items:center;justify-content:center'><img src='{_uri(tmp)}' style='width:48px;height:48px'></div>"
+            f"</body></html>")
+    _shot(page, 88, 88, out)
+    tmp.unlink()
+    return out.name
+
+
+def square(icon: str, inner: str) -> str:
+    """Carré à bord fin, pastille d'icône en haut à gauche, contenu aligné à gauche dessous."""
+    return (f'<td valign="top" width="32%" bgcolor="#FFFFFF" style="width:32%;background-color:#FFFFFF;border:1px solid {BORDER};'
+            f'border-radius:18px;padding:18px 16px 22px 16px;{F};font-size:15px;line-height:1.55;color:{TEXT};text-align:left">'
+            f'<img src="images/{tile_icon(icon)}" width="44" height="44" alt="" style="display:block;border:0;width:44px;height:44px;'
+            f'margin:0 0 14px 0">{inner}</td>')
+
+
+def row(cells: list, pad: str) -> str:
+    return (f'<tr><td style="padding:{pad}"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
+            f'style="border-collapse:separate"><tr>{GAP.join(cells)}</tr></table></td></tr>')
+
+
 def clients() -> str:
-    # ni logo ni nom de client (retours du 16/11/2026) : le résultat seul, son chiffre en gras
     # clients ANONYMISÉS : « une entreprise de tel secteur » à la place du nom et du logo (Arthur, 16/11/2026)
-    texts = [("Un leader mondial de la cosmétique", strong("150 experts") + " tech et produit formés en trois jours de build."),
-             ("Un éditeur de logiciels agricoles", "Une " + strong("chaîne de développement en production") + " sur Claude Code, "
-              "désormais utilisée au quotidien par les équipes produit."),
-             ("Un industriel de l'équipement électrique", strong("12 applications") + " construites en trois jours, dont 3 en "
-              "production, qui économisent " + strong("plus de 200 heures") + " de travail par an.")]
-    cells = GAP.join(f'<td valign="top" width="32%" bgcolor="#FFFFFF" style="width:32%;background-color:#FFFFFF;border:1px solid {BORDER};'
-                     f'border-radius:18px;padding:20px 16px 22px 16px;{F};font-size:15px;line-height:1.55;color:{TEXT}">'
-                     f'<div style="padding:0 0 10px 0;font-size:16px;line-height:1.3;font-weight:bold;color:{NAVY}">{who}</div>{t}</td>'
-                     for who, t in texts)
-    return (f'<tr><td style="padding:4px 4px 34px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
-            f'style="border-collapse:separate"><tr>{cells}</tr></table></td></tr>')
+    data = [("graduation-cap", "Un leader mondial de la cosmétique", strong("150 experts") + " tech et produit formés en trois jours "
+             "de build."),
+            ("git-compare", "Un éditeur de logiciels agricoles", "Une " + strong("chaîne de développement en production") + " sur "
+             "Claude Code, désormais utilisée au quotidien par les équipes produit."),
+            ("zap", "Un industriel de l'équipement électrique", strong("12 applications") + " construites en trois jours, dont 3 en "
+             "production, qui économisent " + strong("plus de 200 heures") + " de travail par an.")]
+    return row([square(i, f'<div style="padding:0 0 10px 0;font-size:16px;line-height:1.3;font-weight:bold;color:{NAVY}">{who}</div>{t}')
+                for i, who, t in data], "4px 4px 34px 4px")
 
 
 def stats() -> str:
-    """Les 3 chiffres dans 3 encadrés côte à côte, comme les cartes clients, sans icône (Arthur, 16/11/2026)."""
-    data = [("", "12", "experts certifiés par Anthropic"),
-            ("", "5", "déploiements clients validés par Anthropic"),
-            ("", "3", "références publiques")]
-    cells = GAP.join(
-        f'<td valign="top" width="32%" align="center" bgcolor="#FFFFFF" style="width:32%;background-color:#FFFFFF;border:1px solid {BORDER};'
-        f'border-radius:18px;padding:22px 12px 22px 12px;text-align:center"><div style="{F};font-size:44px;line-height:1;'
-        f'font-weight:bold;color:{NAVY}">{n}</div><div style="padding-top:10px;{F};font-size:15px;line-height:1.5;color:{TEXT}">{t}</div></td>'
-        for i, n, t in data)
-    return (f'<tr><td style="padding:6px 4px 26px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
-            f'style="border-collapse:separate"><tr>{cells}</tr></table></td></tr>')
+    """Les 3 chiffres dans 3 carrés, pastille d'icône en haut à gauche (Arthur, 16/11/2026)."""
+    data = [("badge-check", "12", "experts certifiés par Anthropic"),
+            ("rocket", "5", "déploiements clients validés par Anthropic"),
+            ("message-square-quote", "3", "références publiques")]
+    return row([square(i, f'<div style="font-size:44px;line-height:1;font-weight:bold;color:{NAVY}">{n}</div>'
+                          f'<div style="padding-top:10px">{t}</div>') for i, n, t in data], "6px 4px 26px 4px")
 
 
 def bar_list(items: list) -> str:
