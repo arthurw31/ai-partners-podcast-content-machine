@@ -211,7 +211,7 @@ def write_slides(brand, transcript: dict, ep: Path, angle: dict, meta: dict, not
 def post_text(brand, content: dict) -> str:
     """Post LinkedIn final = texte de Claude + ligne de réservation (lien cliquable : le seul endroit où il l'est, LinkedIn
     affiche les pages d'un document comme des images ; Arthur, 12/10/2026 : « mets le lien dans le post »)."""
-    cta = {**CTA_DEFAULT, **(_cfg(brand).get("cta") or {})}
+    cta = {**CTA_DEFAULT, **(_cfg(brand).get("cta") or {}), **(content.get("cta") or {})}
     body = (content.get("post") or "").rstrip()
     if not cta.get("booking_url"):
         return body
@@ -226,6 +226,7 @@ def check_slides(content: dict, segments: list[dict]) -> list[dict]:
     def add(i, level, msg):
         out.append({"slide": i, "level": level, "msg": msg})
     slides = content["slides"]
+    framework = content.get("source") == "framework"       # carrousel sur la machine elle-même : rien à retrouver dans l'épisode
     n = len(slides) + 1
     if not (RULES["min_slides"] <= n <= RULES["max_slides"] + 1):
         add(0, "ATTENTION", f"{n} slides avec le CTA (attendu : 7 à 9)")
@@ -251,7 +252,7 @@ def check_slides(content: dict, segments: list[dict]) -> list[dict]:
                 if score < 0.9:
                     add(i, "ÉCHEC" if score < 0.75 else "ATTENTION",
                         f"citation non retrouvée mot pour mot ({score:.0%}) : « {part[:70]} »")
-        if s.get("kind") not in ("cover", "recap"):
+        if s.get("kind") not in ("cover", "recap") and not framework:
             ev = s.get("evidence") or {}
             _, score = find_evidence(segments, ev.get("quote", ""), _num(ev.get("t")))
             if score < 0.6:
@@ -260,7 +261,7 @@ def check_slides(content: dict, segments: list[dict]) -> list[dict]:
                 add(i, "ATTENTION", f"passage de preuve approximatif ({score:.0%})")
         shown = " ".join(_plain(str(s.get(k, ""))) for k in ("title", "body", "value", "label", "quote", "text"))
         shown += " " + " ".join(_plain(x) for x in s.get("items") or [])
-        for num in re.findall(r"\d[\d  .,]*\d|\d", _digits(shown)):
+        for num in ([] if framework else re.findall(r"\d[\d  .,]*\d|\d", _digits(shown))):
             d = re.sub(r"[  .,]", "", num)
             if len(d) >= 2 and d not in re.sub(r"[  .,]", "", full):
                 add(i, "ÉCHEC", f"chiffre « {num} » absent de la transcription")
@@ -347,6 +348,9 @@ def _logo_svg(path: Path, color: str) -> str:
 def portraits(brand, ep: Path, video: Path, company: str) -> dict:
     """Photos détourées de l'invité et de l'animateur : les mêmes que pour les miniatures (sourire, regard), en cache."""
     out = {}
+    cached = {r: ep / "carrousel" / "assets" / f"{r}.png" for r in ("guest", "host")}
+    if all(f.exists() for f in cached.values()):          # photos déjà détourées : pas besoin de relire les rushs (ni de Chrome)
+        return cached
     try:
         from .multicam import load_spec
         from .thumbnail import _context, _cut_cached
@@ -561,7 +565,7 @@ def _slide_html(s: dict, i: int, n: int, style: str, ctx: dict) -> str:
     if style == "mix":                      # couverture « portrait » + slides « cas client » (choix d'Arthur, 12/10/2026)
         if kind == "cover" and ctx.get("guest_img"):
             deco = f'<img class="person" src="{ctx["guest_img"]}">'
-        elif kind == "cta":
+        elif kind == "cta" and ctx.get("decor", True):
             deco = f'<img class="glass2" src="{ctx["icon"]}"><img class="glass" src="{ctx["icon"]}">'
         style = "usecase"
     elif style == "usecase" and kind in ("cover", "cta"):
@@ -618,7 +622,7 @@ def render(brand, ep: Path, content: dict, styles: list[str], portraits_: dict |
     """Rend chaque style -> carrousel/<style>/slide_NN.png + <E>_carrousel_<style>.pdf. Retourne {style: [png…]}."""
     from .thumbnail import _browser, guest_logo_path
     cfg = _cfg(brand)
-    cta = {**CTA_DEFAULT, **(cfg.get("cta") or {})}
+    cta = {**CTA_DEFAULT, **(cfg.get("cta") or {}), **(content.get("cta") or {})}      # la slide finale peut être propre au carrousel
     cta["episode"] = cta["episode"].format(number=content["episode"])
     slides = list(content["slides"]) + [{"kind": "cta", **cta}]
     fonts = brand.assets_dir / "fonts"
@@ -634,7 +638,7 @@ def render(brand, ep: Path, content: dict, styles: list[str], portraits_: dict |
     ctx = {"number": content["episode"], "guest_line": content.get("guest_line", ""),
            "guest_short": content["guest"], "icon": _uri(brand.asset("logo_icon.png")),
            "lines": _uri(brand.asset("outro_bg.png")), "guest_logo": _uri(glogo_png),
-           "guest_img": _uri((portraits_ or {}).get("guest")),
+           "guest_img": _uri((portraits_ or {}).get("guest")), "decor": content.get("decor", True),
            "logo_white": _logo_svg(logo_svg, "#FFFFFF"), "logo_dark": _logo_svg(logo_svg, "#151D53")}
     root = out_root or ep / "carrousel"
     result = {}
