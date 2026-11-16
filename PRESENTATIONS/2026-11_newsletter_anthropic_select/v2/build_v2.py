@@ -119,7 +119,7 @@ def stats() -> str:
     """Les 3 chiffres dans 3 carrés, pastille d'icône en haut à gauche (Arthur, 16/11/2026)."""
     data = [("badge-check", "12", "experts certifiés par Anthropic"),
             ("rocket", "5", "déploiements clients validés par Anthropic"),
-            ("message-square-quote", "3", "références clients")]
+            ("message-square-quote", "3", "références publiques")]
     return row([square(i, f'<div style="font-size:44px;line-height:1;font-weight:bold;color:{NAVY}">{n}</div>'
                           f'<div style="padding-top:10px">{t}</div>') for i, n, t in data], "6px 4px 26px 4px")
 
