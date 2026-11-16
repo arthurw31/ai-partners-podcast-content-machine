@@ -103,15 +103,16 @@ def row(cells: list, pad: str) -> str:
 
 
 def clients() -> str:
-    # clients ANONYMISÉS : « une entreprise de tel secteur » à la place du nom et du logo (Arthur, 16/11/2026)
-    data = [("graduation-cap", "Un leader mondial de la cosmétique", strong("150 experts") + " tech et produit formés en trois jours "
-             "de build."),
-            ("code", "Un éditeur de logiciels agricoles", "Une " + strong("chaîne de développement en production") + " sur "
-             "Claude Code, désormais utilisée au quotidien par les équipes produit."),
-            ("zap", "Un industriel de l'équipement électrique", strong("12 applications") + " construites en trois jours, dont 3 en "
-             "production, qui économisent " + strong("plus de 200 heures") + " de travail par an.")]
-    return row([square(i, f'<div style="padding:0 0 10px 0;font-size:16px;line-height:1.3;font-weight:bold;color:{NAVY}">{who}</div>{t}')
-                for i, who, t in data], "4px 4px 34px 4px")
+    # LOGO du client à la place du nom, puis directement le résultat (Arthur, 16/11/2026 : Thomas ne voulait pas anonymiser, seulement
+    # le logo et ne pas redire « L'Oréal » dessous)
+    data = [("graduation-cap", "client_loreal.png", "L'Oréal", "150 experts tech et produit formés en trois jours de build."),
+            ("code", "client_isagri.png", "ISAGRI", "Une chaîne de développement en production sur Claude Code, désormais utilisée au "
+             "quotidien par les équipes produit."),
+            ("zap", "client_trench.png", "Trench Group", "12 applications construites en trois jours, dont 3 en production, qui "
+             "économisent plus de 200 heures de travail par an.")]
+    return row([square(i, f'<table role="presentation" cellpadding="0" cellspacing="0"><tr><td height="34" valign="middle" '
+                          f'style="height:34px;padding:0 0 10px 0">{img(logo, 130, 30, name)}</td></tr></table>{t}')
+                for i, logo, name, t in data], "4px 4px 34px 4px")
 
 
 def stats() -> str:
