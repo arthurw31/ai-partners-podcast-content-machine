@@ -75,17 +75,17 @@ ICONS = ROOT / "MARQUES" / "ai-corner" / "assets" / "icons"
 
 
 def tile_icon(name: str) -> str:
-    """Pictogramme Lucide (ISC) en traits bleus sur une pastille bleu très pâle, rendu par Chrome en 2x (88 px pour 44 px affichés).
-    Arthur, 16/11/2026 : des icônes qui correspondent au contenu, en haut à gauche des carrés (pas d'icônes en verre, « des emoji »)."""
-    out = IMG / f"pastille_{name}.png"
-    svg = (ICONS / f"lucide_{name}.svg").read_text(encoding="utf-8").replace("currentColor", BLUE)
-    tmp = HERE / f"_{name}.svg"
-    tmp.write_text(svg, encoding="utf-8")
-    page = (f"<html><body style='margin:0;background:#FFFFFF'><div style='width:88px;height:88px;border-radius:22px;background:#EAF1FD;"
-            f"display:flex;align-items:center;justify-content:center'><img src='{_uri(tmp)}' style='width:48px;height:48px'></div>"
-            f"</body></html>")
-    _shot(page, 88, 88, out)
-    tmp.unlink()
+    """Icône en VERRE 3D, même style que celles de la liste du bas (Arthur, 16/11/2026 : « mets le même style d'icône qu'en bas »),
+    sujet choisi d'après le carré ; fabriquée par clipper.newsletter_lab.icones_verre (pictogramme Lucide en verre), 2x pour 48 px."""
+    from clipper.newsletter_lab.icones_verre import FORMES, glass
+    # formes ajoutées pour les carrés résultats (même dessin en verre que les autres : silhouette pleine + gravure)
+    FORMES.setdefault("zap", ('<path d="M114 26 L48 114 L96 114 L82 174 L152 84 L104 84 Z"/>', ''))
+    FORMES.setdefault("graduation-cap", ('<path d="M100 42 L178 80 L100 118 L22 80 Z"/><path d="M56 102 L56 142 Q100 170 144 142 '
+                                         'L144 102 L100 124 Z"/>', '<path d="M166 88 L166 132"/>'))
+    FORMES.setdefault("code", ('<rect x="30" y="38" width="140" height="124" rx="28"/>',
+                               '<path d="M86 74 L60 100 L86 126 M114 74 L140 100 L114 126"/>'))
+    out = IMG / f"verre_{name}_48.png"
+    Image.open(glass(name, theme="verre")).resize((96, 96), Image.Resampling.LANCZOS).save(out)
     return out.name
 
 
@@ -93,8 +93,8 @@ def square(icon: str, inner: str) -> str:
     """Carré à bord fin, pastille d'icône en haut à gauche, contenu aligné à gauche dessous."""
     return (f'<td valign="top" width="32%" bgcolor="#FFFFFF" style="width:32%;background-color:#FFFFFF;border:1px solid {BORDER};'
             f'border-radius:18px;padding:18px 16px 22px 16px;{F};font-size:15px;line-height:1.55;color:{TEXT};text-align:left">'
-            f'<img src="images/{tile_icon(icon)}" width="44" height="44" alt="" style="display:block;border:0;width:44px;height:44px;'
-            f'margin:0 0 14px 0">{inner}</td>')
+            f'<img src="images/{tile_icon(icon)}" width="48" height="48" alt="" style="display:block;border:0;width:48px;height:48px;'
+            f'margin:0 0 12px 0">{inner}</td>')
 
 
 def row(cells: list, pad: str) -> str:
@@ -106,7 +106,7 @@ def clients() -> str:
     # clients ANONYMISÉS : « une entreprise de tel secteur » à la place du nom et du logo (Arthur, 16/11/2026)
     data = [("graduation-cap", "Un leader mondial de la cosmétique", strong("150 experts") + " tech et produit formés en trois jours "
              "de build."),
-            ("git-compare", "Un éditeur de logiciels agricoles", "Une " + strong("chaîne de développement en production") + " sur "
+            ("code", "Un éditeur de logiciels agricoles", "Une " + strong("chaîne de développement en production") + " sur "
              "Claude Code, désormais utilisée au quotidien par les équipes produit."),
             ("zap", "Un industriel de l'équipement électrique", strong("12 applications") + " construites en trois jours, dont 3 en "
              "production, qui économisent " + strong("plus de 200 heures") + " de travail par an.")]
