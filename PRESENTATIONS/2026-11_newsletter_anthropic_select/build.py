@@ -92,7 +92,7 @@ h1{{position:absolute;left:96px;top:272px;width:1180px;font-weight:800;font-size
 h1 span{{color:{CLAUDE}}}
 .badge{{position:absolute;left:96px;top:560px;height:180px}}   /* badge à plat : ni ombre ni arrondi (guidelines Anthropic) */
 </style></head><body><img class='bg' src='{_uri(ASSETS / "outro_bg.png")}'><img class='logo' src='{_uri(logo)}'>
-<div class='kick'>Annonce</div><h1>AI Partners devient<br>Select Services Partner<br>in the <span>Claude Partner Network</span></h1>
+<div class='kick'>Annonce</div><h1>AI Partners devient<br>Select Services Partner<br>du <span>Claude Partner Network</span></h1>
 <img class='badge' src='{_uri(badge)}'></body></html>"""
     _shot(page, 1360, 820, out)
     Image.open(out).convert("RGB").save(out.with_suffix(".jpg"), quality=88)
@@ -109,7 +109,7 @@ def thomas(out: Path) -> Path:
 
 def make_images() -> dict:
     i = {
-        "hero": hero(IMG / "annonce_titre.png"),   # nouveau nom : pas d'ancienne version en cache
+        "hero": hero(IMG / "annonce_titre_fr.png"),   # nouveau nom : pas d'ancienne version en cache
         "p_anthropic": IMG / "partenaire_anthropic.png",
         "p_openai": crop_badge(SRC / "capture_openai_google.png", (12, 78, 304, 188), IMG / "partenaire_openai.png"),
         "p_dust": crop_badge(SRC / "capture_dust.png", (12, 78, 306, 188), IMG / "partenaire_dust.png", pad=4, thr=8),
@@ -193,7 +193,7 @@ def body(i: dict, src) -> str:
            f'<td bgcolor="{NAVY}" align="center" style="background-color:{NAVY};border:2px solid {BLUE};border-radius:16px;'
            f'padding:22px 20px 26px 20px;font-family:{FONT};text-align:center">'
            f'<div style="font-size:12px;line-height:1;font-weight:bold;letter-spacing:.16em;color:{SKY}">NOUVEAU PARTENAIRE</div>'
-           f'<div style="font-size:20px;line-height:1.3;font-weight:bold;color:#FFFFFF;padding:8px 0 16px 0">Select Services Partner<br>in the <span style="color:{CLAUDE}">Claude Partner Network</span></div>'
+           f'<div style="font-size:20px;line-height:1.3;font-weight:bold;color:#FFFFFF;padding:8px 0 16px 0">Select Services Partner<br>du <span style="color:{CLAUDE}">Claude Partner Network</span></div>'
            f'<table role="presentation" align="center" cellpadding="0" cellspacing="0"><tr><td align="center">'
            f'{img("p_anthropic", 330, 110, "Select Services Partner, Claude Partner Network", "")}</td></tr></table>'
            f'</td></tr></table>')
@@ -223,7 +223,7 @@ def body(i: dict, src) -> str:
 
     a, b = size(i["hero"], 680)
     return f"""<table role="presentation" width="680" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF" style="width:100%;max-width:680px;background-color:#FFFFFF;border-radius:16px;overflow:hidden">
-<tr><td><img src="{src(i["hero"])}" width="680" alt="AI Partners devient Select Services Partner in the Claude Partner Network" style="display:block;width:100%;max-width:680px;height:auto;border:0"></td></tr>
+<tr><td><img src="{src(i["hero"])}" width="680" alt="AI Partners devient Select Services Partner du Claude Partner Network" style="display:block;width:100%;max-width:680px;height:auto;border:0"></td></tr>
 <tr><td style="padding:34px 40px 0 40px">
 <p {P}>Bonjour,</p>
 <p {P}>Je tenais à vous partager une étape importante pour AI Partners : nous avons obtenu le statut de <strong style="color:{NAVY}">partenaire Select du Claude Partner Network</strong> (Services Track), le programme d'Anthropic dédié aux sociétés qui déploient Claude, powered by Anthropic, chez leurs clients.</p>
