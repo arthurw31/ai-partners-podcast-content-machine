@@ -130,7 +130,13 @@ def build() -> str:
     h = h[:a] + clients() + h[a:]
     b = h.index('<tr><td style="padding:14px 4px 12px 4px"><h2 style="margin:0;font-family:Helvetica, Arial, sans-serif;font-size:22px;'
                 'line-height:1.3;font-weight:bold;color:#05070F">Comment nous pouvons vous accompagner')
-    return h[:b] + independence() + h[b:]
+    h = h[:b] + independence() + h[b:]
+    # pas de bouton d'agenda : une simple indication (Arthur, 16/11/2026 : « Répondez au mail », comme dans la V6 de Thomas)
+    i = h.index('<tr><td style="padding:0 4px 38px 4px"><table role="presentation" cellpadding="0" cellspacing="0" style="margin:0">')
+    j = h.index("</td></tr></table></td></tr></table></td></tr>", i) + len("</td></tr></table></td></tr></table></td></tr>")
+    assert "calendly" in h[i:j]
+    return (h[:i] + f'<tr><td style="padding:0 4px 38px 4px;{F};font-size:19px;line-height:1.4;font-weight:bold;color:{NAVY}">'
+            f'Répondez simplement à ce mail &rarr;</td></tr>' + h[j:])
 
 
 def module(h: str) -> str:
