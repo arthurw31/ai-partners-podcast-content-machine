@@ -593,7 +593,8 @@ def _slide_html(s: dict, i: int, n: int, style: str, ctx: dict) -> str:
                  f'<div class="statl">{_hl(s.get("label", ""))}</div>'
                  f'<div class="body fit" style="margin-top:30px;height:260px">{_hl(s.get("body", ""))}</div>{card_close}')
     elif kind == "quote":
-        inner = (f'<div class="bigq"><span class="mark">“</span><span class="fit" style="display:block;height:560px">'
+        lab = f'<div class="sub" style="margin-bottom:18px">{_hl(s["label"])}</div>' if s.get("label") else ""     # contexte de la citation
+        inner = (f'<div class="bigq">{lab}<span class="mark">“</span><span class="fit" style="display:block;height:560px">'
                  f'{_hl(s.get("text"))}</span><span class="by">— {html.escape(ctx["guest_line"])}</span></div>')
     elif kind == "recap":
         items = "".join(f"<li><b>{k:02d}</b><span>{_hl(x)}</span></li>" for k, x in enumerate(s.get("items") or [], 1))
