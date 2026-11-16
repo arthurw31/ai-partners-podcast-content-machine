@@ -452,17 +452,23 @@ def _style_css(style: str) -> str:
             flex-direction: column; justify-content: flex-end; }
 .cover .who { margin-top: 40px; font-size: 30px; color: #E3EAFF; display: flex; gap: 22px; align-items: center; }
 .cover .who .gl { height: 54px; background: #fff; border-radius: 16px; padding: 10px 18px; }
-h2 { font-weight: 800; font-size: 70px; line-height: 1.08; height: 240px; display: flex; flex-direction: column; justify-content: flex-end; }
+h2 { font-weight: 800; font-size: 70px; line-height: 1.08; height: 190px; display: flex; flex-direction: column; justify-content: flex-end; }
 h2 .hl, .card .hl { background: none; color: #258AF3; padding: 0; margin: 0; }
 .sub { color: #258AF3; font-weight: 700; font-size: 30px; margin-top: 14px; letter-spacing: .02em; }
-.card { background: #fff; color: #151D53; border-radius: 34px; padding: 52px 56px; margin-top: 48px; }
-.card .body { font-size: 40px; line-height: 1.32; height: 310px; }
+.card { background: #fff; color: #151D53; border-radius: 34px; padding: 44px 52px; margin-top: 44px; }
+.card .body { font-size: 40px; line-height: 1.32; height: 270px; }
+.take { margin-top: 24px; padding-top: 22px; border-top: 2px solid #E6EEFE; font-size: 32px; line-height: 1.28; font-weight: 700; color: #151D53; }
+.take b { display: block; color: #258AF3; font-size: 22px; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 8px; }
+.slide.stat { justify-content: center; }
+.stat .card { padding: 64px 60px; }
+.stat .statv { font-size: 210px; white-space: nowrap; }
+.stat .statl { font-size: 60px; }
 .num { width: 96px; height: 96px; border-radius: 26px; background: #E6EEFE; color: #258AF3; font-weight: 800; font-size: 50px;
        display: flex; align-items: center; justify-content: center; margin-bottom: 30px; }
-.qt { margin-top: 34px; background: #F1F6FD; color: #1D2C76; border-radius: 34px; padding: 64px 50px 36px; font-size: 34px;
-      line-height: 1.35; height: 330px; position: relative; }
+.qt { margin-top: 30px; background: #F1F6FD; color: #1D2C76; border-radius: 34px; padding: 60px 46px 30px; font-size: 30px;
+      line-height: 1.33; height: 262px; position: relative; }
 .qt::before { content: "“"; position: absolute; left: 34px; top: -30px; font-size: 140px; font-weight: 800; color: #258AF3; }
-.qt .by { display: block; margin-top: 18px; font-size: 26px; font-weight: 700; color: #258AF3; }
+.qt .by { display: block; margin-top: 14px; font-size: 24px; font-weight: 700; color: #258AF3; }
 .statv { font-weight: 800; font-size: 210px; color: #258AF3; line-height: 1; margin-top: 30px; }
 .statl { font-weight: 800; font-size: 54px; margin-top: 10px; color: #151D53; }
 .bigq { margin-top: auto; margin-bottom: auto; font-weight: 800; font-size: 66px; line-height: 1.18; height: 760px;
@@ -480,6 +486,13 @@ h2 .hl, .card .hl { background: none; color: #258AF3; padding: 0; margin: 0; }
        border-radius: 999px; padding: 30px 56px; text-transform: uppercase; letter-spacing: .03em; }
 .url { margin-top: 26px; font-size: 32px; font-weight: 700; color: #fff; }
 .ep { margin-top: 60px; font-size: 28px; color: #CFDBFF; }
+.cta.thumbed h1 { margin-top: 0; height: 300px; font-size: 88px; }
+.cta.thumbed p { margin-top: 30px; height: 110px; font-size: 36px; }
+.cta.thumbed .btn { margin-top: 34px; }
+.eprow { margin-top: 44px; display: flex; gap: 28px; align-items: center; }
+.eprow img { width: 480px; height: 270px; object-fit: cover; border-radius: 22px; box-shadow: 0 18px 40px rgba(5,15,60,.5); flex: none; }
+.eprow b { display: block; color: #9DB8FF; font-size: 24px; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 10px; }
+.eprow span { display: block; color: #fff; font-size: 32px; font-weight: 700; line-height: 1.25; }
 .foot { color: #fff; } .foot .logo { color: #fff; } .foot .page { color: #9DB8FF; }
 """
     if style == "lignes":
@@ -610,13 +623,15 @@ def _slide_html(s: dict, i: int, n: int, style: str, ctx: dict) -> str:
     elif kind == "cta":
         inner = (f'<h1 class="fit"><span>{_hl(s.get("title"))}</span></h1><p class="fit"><span>{_hl(s.get("text"))}</span></p>'
                  f'<div class="btn">{html.escape(s.get("button", ""))} →</div><div class="url">{html.escape(s.get("note") or s.get("url", ""))}</div>'
-                 f'<div class="ep">{html.escape(s.get("episode", ""))}</div>')
+                 + (f'<div class="eprow"><img src="{ctx["thumb"]}"><div><b>À écouter sur YouTube</b><span>{html.escape(s.get("episode", ""))}</span></div></div>'
+                    if ctx.get("thumb") else f'<div class="ep">{html.escape(s.get("episode", ""))}</div>'))
     else:                                   # intro / point
         label = "Le contexte" if kind == "intro" else f"Idée {s.get('n') or i - 1}"
         if style == "usecase":
-            num = f'<div class="num">{int(s.get("n") or i - 1)}</div>' if kind == "point" else ""
+            tk = (f'<div class="take"><b>À retenir</b>{_hl(s["takeaway"])}</div>' if s.get("takeaway") else "")
+            num = f'<div class="num">{int(s.get("n") or i - 1)}</div>' if kind == "point" and not tk else ""   # le numéro est dans « Idée n »
             inner = (f'<h2 class="fit"><span>{_hl(s.get("title"))}</span></h2><div class="sub">{label}</div>'
-                     f'<div class="card">{num}<div class="body fit">{_hl(s.get("body"))}</div></div>{q}')
+                     f'<div class="card">{num}<div class="body fit">{_hl(s.get("body"))}</div>{tk}</div>{q}')
         elif style == "lignes":
             big = f'<div class="bignum">{int(s.get("n") or i - 1):02d}</div>' if kind == "point" else '<div class="sub">Le contexte</div>'
             inner = (f'{big}<h2 class="fit"><span>{_hl(s.get("title"))}</span></h2><div class="rule"></div>'
@@ -625,7 +640,8 @@ def _slide_html(s: dict, i: int, n: int, style: str, ctx: dict) -> str:
             num = f'<div class="num">{int(s.get("n") or i - 1):02d}</div>' if kind == "point" else ""
             inner = (f'{num}<div class="sub">{label}</div><h2 class="fit"><span>{_hl(s.get("title"))}</span></h2>'
                      f'<div class="body fit">{_hl(s.get("body"))}</div>{q}')
-    return f'<section class="slide {kind}">{deco}{inner}{foot}</section>'
+    extra = " thumbed" if kind == "cta" and ctx.get("thumb") else ""
+    return f'<section class="slide {kind}{extra}">{deco}{inner}{foot}</section>'
 
 
 def render(brand, ep: Path, content: dict, styles: list[str], portraits_: dict | None = None,
@@ -650,6 +666,7 @@ def render(brand, ep: Path, content: dict, styles: list[str], portraits_: dict |
            "guest_short": content["guest"], "icon": _uri(brand.asset("logo_icon.png")),
            "lines": _uri(brand.asset("outro_bg.png")), "guest_logo": _uri(glogo_png),
            "guest_img": _uri((portraits_ or {}).get("guest")), "decor": content.get("decor", True),
+           "thumb": _uri(ep / "miniatures" / "miniature_finale.jpg") if cta.get("thumbnail", True) and (ep / "miniatures" / "miniature_finale.jpg").exists() else "",
            "logo_white": _logo_svg(logo_svg, "#FFFFFF"), "logo_dark": _logo_svg(logo_svg, "#151D53")}
     root = out_root or ep / "carrousel"
     result = {}
