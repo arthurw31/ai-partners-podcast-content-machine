@@ -83,17 +83,16 @@ def clients() -> str:
 
 
 def stats() -> str:
-    """Les 3 chiffres, dans le style des 3 colonnes du mail de référence : icône en verre, grand chiffre, libellé."""
-    data = [("verre_badge-check_72.png", "12", "experts certifiés par Anthropic"),
-            ("verre_server_72.png", "5", "déploiements clients validés par Anthropic"),
-            ("verre_message-square-quote_72.png", "3", "références publiques")]
-    cells = "".join(
-        f'<td valign="top" width="33%" style="width:33%;padding:0 8px"><img src="images/{i}" width="72" height="72" alt="" '
-        f'style="display:block;border:0;width:72px;height:72px"><div style="padding:12px 0 4px 0;{F};font-size:40px;line-height:1;'
-        f'font-weight:bold;color:{NAVY}">{n}</div><div style="{F};font-size:15px;line-height:1.5;color:{TEXT}">{t}</div></td>'
-        for i, n, t in data)
-    return (f'<tr><td style="padding:6px 0 26px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>{cells}'
-            f'</tr></table></td></tr>')
+    """Les 3 chiffres dans 3 encadrés côte à côte, comme les cartes clients, sans icône (Arthur, 16/11/2026)."""
+    data = [("12", "experts certifiés par Anthropic"), ("5", "déploiements clients validés par Anthropic"),
+            ("3", "références publiques")]
+    cells = GAP.join(
+        f'<td valign="top" width="32%" align="center" bgcolor="#FFFFFF" style="width:32%;background-color:#FFFFFF;border:1px solid {BORDER};'
+        f'border-radius:18px;padding:22px 12px 22px 12px;text-align:center"><div style="{F};font-size:44px;line-height:1;font-weight:bold;'
+        f'color:{NAVY}">{n}</div><div style="padding-top:10px;{F};font-size:15px;line-height:1.5;color:{TEXT}">{t}</div></td>'
+        for n, t in data)
+    return (f'<tr><td style="padding:6px 4px 26px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
+            f'style="border-collapse:separate"><tr>{cells}</tr></table></td></tr>')
 
 
 def bar_list(items: list) -> str:
