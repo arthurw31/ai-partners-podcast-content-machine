@@ -738,8 +738,9 @@ def cmd_carousel(a: argparse.Namespace) -> None:
                 sys.exit(f"Angle {a.pick} introuvable (1 à {len(angles['angles'])})")
             content = write_slides(brand, transcript, ep, angle,
                                    {"number": number, "guest": guest, "company": company, "role": role}, a.note)
+        content.setdefault("episode_url", meta.get("episode_url", ""))
         content["post_final"] = post_text(brand, content)
-        md = save_content(ep, content, transcript["segments"], base)
+        md = save_content(ep, content, transcript["segments"], base, brand.assets_dir)
         for c in content["checks"]:
             color = "red" if c["level"] == "ÉCHEC" else "yellow"
             console.print(f"  [{color}]{c['level']}[/{color}] slide {c['slide']} : {c['msg']}")

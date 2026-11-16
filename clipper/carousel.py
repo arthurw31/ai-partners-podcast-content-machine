@@ -164,30 +164,68 @@ def write_angles_md(res: dict, out: Path, command: str) -> Path:
 # 2. Slides
 # ---------------------------------------------------------------------------------------------------------------
 
-SLIDES_PROMPT = """Tu rédiges un carrousel LinkedIn (PDF) tiré d'un épisode du podcast AI Corner (AI Partners), en français.
-Brief de la marque, à suivre à la lettre :
+SLIDES_PROMPT = """Tu rédiges un carrousel LinkedIn (PDF) tiré d'un épisode du podcast AI Corner (AI Partners), en français, dans le FORMAT
+STANDARD validé par l'équipe le 16/11/2026 (modèle : le carrousel E23 Coty). Brief de la marque, à suivre à la lettre :
 
 {brief}
 
 ANGLE CHOISI PAR L'ÉQUIPE MARKETING :
 {angle}
 {note}
-Rédige 6 à 8 slides (la slide CTA finale est ajoutée automatiquement : ne l'écris pas). Types de slide :
-- "cover" (1re, obligatoire) : "title" = la promesse claire (≤ 10 mots, voir le brief), 1 à 3 mots clés entre [[ ]] ;
-  "subtitle" facultatif (vide par défaut) ;
-- "intro" : "title" + "body" (contexte, pourquoi c'est important) ;
-- "point" : "n" (numéro), "title" (≤ 60 caractères, une action ou une idée) + "body" (≤ 35 mots) + "quote" facultative
-  (citation COURTE de l'invité, mot pour mot, « […] » pour couper) ;
-- "stat" : "value" (le chiffre tel que dit dans l'épisode), "label" (ce qu'il mesure, ≤ 8 mots) + "body" ;
-- "quote" : "text" (citation de l'invité mot pour mot, ≤ 30 mots, « […] » pour couper) ;
-- "recap" (avant-dernière, conseillée) : "title" + "items" (3 à 6 éléments de ≤ 8 mots).
-Dans "title" et "body", 1 à 3 mots clés par slide peuvent être entre [[ ]] (mis en valeur en bleu).
-Chaque slide sauf "cover" et "recap" porte "evidence" : {{"t": secondes, "quote": "passage EXACT de la transcription qui la prouve"}}.
-Rien qui ne soit dans la transcription (chiffres, outils, noms). Citations : seulement les phrases de l'invité.
+ÉLÉMENTS DE CONTENU DÉJÀ VALIDÉS POUR CET ÉPISODE (newsletter ; source prioritaire : reprends ses points du programme, son chiffre et
+ses preuves, sans rien y ajouter qui ne soit dans la transcription) :
+{newsletter}
+
+STRUCTURE EXACTE (6 à 8 slides ; la slide CTA finale est ajoutée automatiquement : ne l'écris pas) :
+1. "cover" : "title" = la promesse claire (≤ 8 mots, c'est le titre YouTube validé en plus court), 1 à 3 mots clés entre [[ ]] ;
+   "subtitle" ≤ 6 mots (ex. « Ce que Coty a mis en place »).
+2. "stat" : le chiffre marquant de l'épisode EN ACCROCHE (s'il y en a un) : "title" = « Le constat », "value" (tel que dit, ex. « 3 000+ »),
+   "label" (≤ 5 mots), "body" ≤ 28 mots (le revers du chiffre, puis l'enjeu de l'invité). JAMAIS de "visual" ici (pas de robots ni de
+   pictogrammes d'agents : trop enfantin). Sans chiffre marquant : une slide "intro" (title + body ≤ 28 mots) à la place.
+3. 3 ou 4 slides "point" (les points du programme de l'épisode, pas des étapes dans un ordre que l'invité n'a pas donné) :
+   "n", "title" ≤ 45 caractères (une action ou une décision du lecteur : « Former ses équipes à [[Copilot]] »),
+   "body" ≤ 22 mots (le schéma porte le détail), "takeaway" ≤ 16 mots (« À retenir » : la leçon, tirée de ce que dit l'invité, jamais inventée),
+   "quote" = UNE phrase entière et forte de l'invité (8 à 28 mots, mot pour mot, « […] » pour couper ; jamais un fragment sans sens),
+   "visual" (voir plus bas), "evidence".
+4. "quote" (avant-dernière) : "text" = la phrase la plus marquante de l'invité (≤ 30 mots, mot pour mot), "label" (≤ 5 mots : à quoi elle
+   répond, ex. « Le rôle du Head of AI »), "icon" (un pictogramme de la liste), "evidence".
+PAS de slide "recap" (refusée par l'équipe).
+
+SCHÉMAS ("visual", un par slide "point" ; ils doivent rendre l'idée visible d'un coup d'œil) :
+- {{"type": "flow", "nodes": [{{"icon": "users", "label": "≤ 3 mots", "sub": "≤ 2 mots (facultatif)", "logo": "(facultatif)"}}, …], "note": "(facultatif)"}} :
+  3 à 5 étapes reliées par des flèches (un parcours : formation, validation d'un cas d'usage…) ;
+- {{"type": "stairs", "items": [{{"label": "…", "sub": "(facultatif)", "logo": "(facultatif)"}}, …]}} : 3 à 4 marches de plus en plus hautes
+  (une gamme, un écosystème, une montée en puissance) ;
+- {{"type": "hub", "hub": "Équipe centrale", "hub_sub": "4 capabilities", "spokes": 4 à 8, "caption": "…"}} : un noyau et des relais.
+RÈGLE D'OR : un schéma ne montre QUE ce que l'invité dit (aucun nom, nombre ou étape qui ne soit dans la transcription, aucun nom de fonction non cité).
+Pictogrammes autorisés (champ "icon") : {icons}.
+Logos de marque autorisés (champ "logo", noms de fichiers déjà déposés ; jamais d'autre) : {logos}.
+
+Dans "title" et "body", 1 à 2 mots clés par slide peuvent être entre [[ ]] (mis en évidence). Les majuscules en tête de citation sont ajoutées par le rendu.
+Chaque slide sauf "cover" porte "evidence" : {{"t": secondes, "quote": "passage EXACT de la transcription qui la prouve"}}.
+Rien qui ne soit dans la transcription (chiffres, outils, noms). Citations : seulement les phrases de l'invité. Jamais de tiret cadratin.
 
 Réponds UNIQUEMENT en JSON :
 {{"guest_line": "Prénom Nom · rôle en français, Entreprise", "slides": [{{"kind": "cover", "title": "…"}}, …],
-  "post": "texte du post LinkedIn qui présente le carrousel, SANS lien (le lien de réservation est ajouté automatiquement)"}}"""
+  "post": "post LinkedIn en 4 blocs courts : (1) la question ou promesse de l'épisode ; (2) « Prénom Nom, rôle chez X, était l'invité d'AI Corner. Au programme : … » ; (3) l'enjeu de l'invité en une phrase ; (4) « Les points clés dans le carrousel 👇 ». SANS lien (le lien de l'épisode puis le lien de réservation sont ajoutés automatiquement)"}}"""
+
+
+def _allowed(brand) -> tuple[str, str]:
+    """Pictogrammes et logos réellement disponibles dans les assets de la marque (donnés à Claude, qui ne peut rien inventer)."""
+    ic = sorted({f.stem.replace("lucide_", "") for f in (brand.assets_dir / "icons").glob("lucide_*.svg")} | set(EXTRA_ICONS))
+    lg = sorted(f.stem for f in (brand.assets_dir / "logos").glob("*") if f.suffix.lower() in (".svg", ".png"))
+    return ", ".join(ic), (", ".join(lg) or "(aucun)")
+
+
+def _newsletter_brief(ep: Path) -> str:
+    """Contenu validé de la newsletter de l'épisode (thème, accroche, points du programme, chiffre, preuves), s'il existe."""
+    f = ep / "newsletter" / "contenu.json"
+    if not f.exists():
+        return "(pas de newsletter pour cet épisode : tire les points directement de la transcription)"
+    d = json.loads(f.read_text(encoding="utf-8"))
+    keep = {k: d.get(k) for k in ("theme", "hook", "program", "stat", "closing", "evidence") if d.get(k)}
+    keep["program"] = [{k: p.get(k) for k in ("title", "text")} for p in d.get("program") or []]
+    return json.dumps(keep, ensure_ascii=False, indent=1)
 
 
 def write_slides(brand, transcript: dict, ep: Path, angle: dict, meta: dict, note: str = "") -> dict:
@@ -197,8 +235,10 @@ def write_slides(brand, transcript: dict, ep: Path, angle: dict, meta: dict, not
     user = (f"Épisode {meta['number']}. Invité : {meta['guest']}, {meta['role']} ({meta['company']}). "
             f"Animateur : Thomas Spitz.\n\nTRANSCRIPTION (une phrase par ligne, [début en s] orateur : texte) :\n"
             f"{speaker_text(transcript, ep, meta['guest'])}")
+    icons, logos = _allowed(brand)
     system = SLIDES_PROMPT.format(brief=brief(brand), angle=json.dumps(a, ensure_ascii=False, indent=1),
-                                  note=f"\nPRÉCISION DE L'ÉQUIPE : {note}\n" if note else "")
+                                  note=f"\nPRÉCISION DE L'ÉQUIPE : {note}\n" if note else "",
+                                  newsletter=_newsletter_brief(ep), icons=icons, logos=logos)
     data = ask_json(system, user, model=_model(brand), backend=brand.cfg.selection.llm_backend, max_tokens=8000)
     content = {"episode": meta["number"], "guest": meta["guest"], "company": meta["company"], "role": meta["role"],
                "angle": angle.get("rank"), "angle_type": angle.get("type"), "note": note,
@@ -213,12 +253,44 @@ def post_text(brand, content: dict) -> str:
     affiche les pages d'un document comme des images ; Arthur, 12/10/2026 : « mets le lien dans le post »)."""
     cta = {**CTA_DEFAULT, **(_cfg(brand).get("cta") or {}), **(content.get("cta") or {})}
     body = (content.get("post") or "").rstrip()
+    url = (content.get("episode_url") or "").strip()
+    if url and url not in body:                              # lien de l'ÉPISODE (jamais la playlist), avant la ligne de réservation
+        body += f"\n\n🎙️ L'épisode complet : {url}"
     if not cta.get("booking_url"):
         return body
     return f"{body}\n\n{cta['post_line'].format(url=cta['booking_url'])}"
 
 
-def check_slides(content: dict, segments: list[dict]) -> list[dict]:
+VISUAL_TYPES = {"flow": (3, 5, "nodes"), "stairs": (3, 4, "items")}
+
+
+def _check_visual(v: dict, icons: set[str] | None, logos: set[str] | None) -> list[str]:
+    """Problèmes d'un schéma (type connu, bon nombre d'éléments, pictogrammes et logos qui existent)."""
+    out = []
+    t = v.get("type")
+    if t == "agents":
+        return ["rangée d'agents / robots : refusée par l'équipe (« trop enfantin »)"]
+    if t == "hub":
+        if not 3 <= int(v.get("spokes", 6)) <= 8:
+            out.append("hub : 3 à 8 relais")
+        return out
+    if t not in VISUAL_TYPES:
+        return [f"schéma de type inconnu « {t} » (flow, stairs ou hub)"]
+    lo, hi, key = VISUAL_TYPES[t]
+    items = v.get(key) or []
+    if not lo <= len(items) <= hi:
+        out.append(f"{t} : {lo} à {hi} éléments ({len(items)} donnés)")
+    for it in items:
+        if it.get("icon") and icons is not None and it["icon"] not in icons:
+            out.append(f"pictogramme « {it['icon']} » absent des assets")
+        if it.get("logo") and logos is not None and it["logo"] not in logos:
+            out.append(f"logo « {it['logo']} » absent de assets/logos (jamais de logo inventé)")
+        if len((it.get("label") or "").split()) > 4:
+            out.append(f"libellé trop long : « {it.get('label')} »")
+    return out
+
+
+def check_slides(content: dict, segments: list[dict], assets_dir: Path | None = None) -> list[dict]:
     """Contrôles par slide (texte affiché, citations, chiffres). Chaque entrée : {slide, level, msg}."""
     full = _digits(norm(" ".join(s["text"] for s in segments)))
     out: list[dict] = []
@@ -232,7 +304,28 @@ def check_slides(content: dict, segments: list[dict]) -> list[dict]:
         add(0, "ATTENTION", f"{n} slides avec le CTA (attendu : 7 à 9)")
     if not slides or slides[0].get("kind") != "cover":
         add(1, "ÉCHEC", "la 1re slide doit être la couverture")
+    icons = ({f.stem.replace("lucide_", "") for f in (assets_dir / "icons").glob("lucide_*.svg")} | set(EXTRA_ICONS)) if assets_dir else None
+    logos = {f.stem for f in (assets_dir / "logos").glob("*")} if assets_dir and (assets_dir / "logos").exists() else (set() if assets_dir else None)
     for i, s in enumerate(slides, 1):
+        # ---- format standard (16/11/2026) : à retenir, citation entière, schéma, pas de récapitulatif
+        if s.get("kind") == "recap":
+            add(i, "ATTENTION", "slide récapitulatif : refusée par l'équipe (format standard sans récapitulatif)")
+        if s.get("kind") == "point":
+            if not s.get("takeaway"):
+                add(i, "ATTENTION", "point sans « À retenir » (champ takeaway : une phrase tirée de ce que dit l'invité)")
+            elif len(s["takeaway"].split()) > 20:
+                add(i, "ATTENTION", f"« À retenir » trop long ({len(s['takeaway'].split())} mots, ≤ 16 conseillé)")
+            if s.get("quote") and len(_plain(s["quote"]).split()) < 6:
+                add(i, "ATTENTION", "citation trop courte : une phrase entière et forte, pas un fragment")
+            if not s.get("visual"):
+                add(i, "ATTENTION", "point sans schéma (champ visual : flow, stairs ou hub)")
+            if s.get("visual") and len(_plain(s.get("body", "")).split()) > 28:
+                add(i, "ATTENTION", "texte trop long pour une slide à schéma (≤ 22 mots conseillé : le schéma porte le détail)")
+        if s.get("visual"):
+            for msg in _check_visual(s["visual"], icons, logos):
+                add(i, "ATTENTION", msg)
+        if s.get("kind") == "quote" and not s.get("label"):
+            add(i, "ATTENTION", "citation sans contexte (champ label : « Le rôle du Head of AI »)")
         title = _plain(s.get("title", ""))
         if len(title) > RULES["title_hard"]:
             add(i, "ÉCHEC", f"titre trop long ({len(title)} caractères)")
@@ -273,8 +366,8 @@ def _status(checks: list[dict]) -> str:
     return "ÉCHEC" if "ÉCHEC" in levels else "ATTENTION" if "ATTENTION" in levels else "OK"
 
 
-def save_content(ep: Path, content: dict, segments: list[dict], command: str) -> Path:
-    content["checks"] = check_slides(content, segments)
+def save_content(ep: Path, content: dict, segments: list[dict], command: str, assets_dir: Path | None = None) -> Path:
+    content["checks"] = check_slides(content, segments, assets_dir)
     if not content.get("post_final", "").strip():
         content["checks"].append({"slide": 0, "level": "ÉCHEC", "msg": "post LinkedIn vide"})
     elif "http" not in content["post_final"]:
@@ -770,6 +863,11 @@ def render(brand, ep: Path, content: dict, styles: list[str], portraits_: dict |
     cfg = _cfg(brand)
     cta = {**CTA_DEFAULT, **(cfg.get("cta") or {}), **(content.get("cta") or {})}      # la slide finale peut être propre au carrousel
     cta["episode"] = cta["episode"].format(number=content["episode"])
+    if not (content.get("cta") or {}).get("episode"):            # par défaut : le titre YouTube VALIDÉ par l'équipe
+        from .titles import load_validated
+        val = load_validated(ep)
+        if val:
+            cta["episode"] = val["youtube"]
     slides = list(content["slides"]) + [{"kind": "cta", **cta}]
     fonts = brand.assets_dir / "fonts"
     gp = guest_logo_path(brand, content["company"])

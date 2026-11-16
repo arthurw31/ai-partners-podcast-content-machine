@@ -28,21 +28,34 @@ page AI Partners. Ils veulent savoir ce qui marche VRAIMENT dans les entreprises
   On retire les tics oraux (« euh », « en fait », « voilà ») d'une citation seulement en coupant avec « […] ».
 - Pas de nom de l'animateur dans les slides de contenu (Thomas Spitz n'apparaît que si sa question est l'idée).
 
-## Structure (7 à 9 slides, format 1080 × 1350)
+## FORMAT STANDARD (validé par l'équipe le 16/11/2026, « jusqu'à nouvel ordre » : tout carrousel de podcast suit ce modèle)
 
-1. Couverture : la PROMESSE claire, ≤ 10 mots, entreprise + chiffre + bénéfice, 1 à 3 mots mis en valeur ; photo de
-   l'invité, sur-titre « AI Corner · E<n> », invité + entreprise en bas. Référence validée par Arthur (12/10/2026) :
-   « Coty : la méthode en [[5 étapes]] pour adopter l'IA ». Des accroches « choc » lui ont été proposées (« 3 000 agents
-   IA. Dont 10 qui font la même chose. », « Avant d'acheter de l'IA, Coty a d'abord écouté. ») : il a préféré la
-   promesse claire (« en vrai le titre de base était bien »). Pas de sous-titre par défaut.
-   - Jamais : question générique (« Et si l'IA changeait tout ? »), superlatif, « Découvrez… ».
-2. Pourquoi c'est important / le contexte : la situation de l'invité en 2 phrases (chiffre clé si l'épisode en donne).
-3 à 7. Le cœur : leçons, étapes ou idées reçues démontées — selon l'angle choisi. Chaque slide : titre-action + 1 à 2
-   phrases d'explication + (si possible) une citation courte de l'invité. Une slide « chiffre » ou « citation » au
-   milieu casse le rythme.
-8. Récapitulatif : les idées en une liste courte (le lecteur la sauvegarde).
-9. CTA (écrit par le framework depuis `carousel.cta` de brand.yaml, pas par Claude) : réserver un échange avec AI
-   Partners + rappel de l'épisode complet.
+Référence vivante : le carrousel E23 Coty (`references/carrousel_E23/`). Règles détaillées : `docs/CARROUSEL_STANDARD.md`.
+
+**Le carrousel parle du CONTENU de l'épisode, jamais de la machine** (pas de « comment on a monté ce podcast avec Claude »).
+Source : le contenu validé de la newsletter de l'épisode (thème, points du programme, chiffre) + la transcription pour les preuves.
+
+Structure (format 1080 × 1350, 6 à 8 slides + la slide CTA ajoutée par le framework) :
+1. **Couverture** : la promesse claire (≤ 8 mots, version courte du titre YouTube validé), 1 à 3 mots clés en évidence, sous-titre ≤ 6 mots
+   (« Ce que Coty a mis en place »), photo détourée de l'invité, carte logo de l'entreprise invitée + ligne invité, « AI CORNER · E<n> ».
+2. **Le chiffre en accroche** (slide `stat`, titre « Le constat ») : le chiffre marquant en très grand (« 3 000+ »), libellé court, 1 phrase
+   sur son revers, puis l'enjeu de l'invité. AUCUN pictogramme ici (les rangées de robots / d'agents ont été refusées : « trop enfantin »).
+   Sans chiffre marquant : une slide `intro`.
+3. **3 à 4 slides « point »** (les points du programme de la newsletter), chacune = titre-action (≤ 45 car., ce que le lecteur doit faire ou
+   décider) + « Idée n » + carte blanche contenant un **schéma** (flow, stairs ou hub) + 1 phrase (≤ 22 mots) + **« À retenir »** (≤ 16 mots,
+   la leçon, tirée de ce que dit l'invité) + une **citation entière et forte** de l'invité (8 à 28 mots, mot pour mot, `[…]` pour couper).
+4. **Une slide citation** (l'idée la plus marquante de l'invité) avec un libellé de contexte (« Le rôle du Head of AI ») et un pictogramme.
+5. **CTA** (framework) : « Vos équipes testent l'IA. Et après ? », bouton « Réserver un échange », « Lien dans le post 👇 », miniature
+   de l'épisode + son titre validé (`miniatures/miniature_finale.jpg`, `titres/titre_valide.json`).
+PAS de slide récapitulatif (refusée par l'équipe, 16/11/2026).
+
+Schémas (un par point, `visual`) : ils montrent QUE ce que l'épisode dit. `flow` = 3 à 5 étapes reliées (un parcours), `stairs` = 3 à 4
+marches de plus en plus hautes (une gamme, un écosystème), `hub` = un noyau et ses relais. Pictogrammes : Lucide (`assets/icons/`).
+Logos de marque : uniquement les fichiers officiels déposés dans `assets/logos/` (sources dans `SOURCES.md`), en pastille blanche, et
+seulement quand le produit est le sujet de la slide (pas de logo Copilot sur un chiffre dont l'épisode ne dit pas qu'il concerne Copilot).
+
+Charte visuelle (style `mix`) : fond bleu nuit partout (couverture et CTA comme les autres slides, plus de bleu clair `#258AF3`), accents
+`#24317F`, blanc sur fond sombre, aucun décor ni filet ni filigrane, textes aérés dans les cadres, Metropolis. Majuscule en tête de toute citation.
 
 ## Angles possibles (Claude en propose 3, l'équipe en choisit un)
 
@@ -57,8 +70,8 @@ page AI Partners. Ils veulent savoir ce qui marche VRAIMENT dans les entreprises
 
 Il présente VITE le carrousel (Arthur, 12/10/2026 : « le texte LinkedIn qui présente vite fait le carrousel et qui donne
 le lien ») : 3 à 5 lignes courtes — l'accroche (la promesse de la couverture, reformulée), l'invité nommé (Prénom Nom,
-rôle, entreprise), 1 phrase sur ce que le lecteur va trouver, « Les N étapes dans le carrousel 👇 ». Pas de hashtags, pas
-de lien : la ligne « 📅 Réserver un échange avec nous : <lien> » est ajoutée automatiquement à la fin (`carousel.cta`).
+rôle, entreprise), l'enjeu de l'invité, « Les points clés dans le carrousel 👇 ». Pas de hashtags. Ajoutés AUTOMATIQUEMENT à la fin : « 🎙️ L'épisode
+complet : <lien YouTube de l'épisode> » (jamais la playlist) puis « 📅 Réserver un échange avec nous : <lien> » (`carousel.cta`).
 Emojis autorisés : 👇 🎙️ 📅 seulement.
 
 ## À éviter

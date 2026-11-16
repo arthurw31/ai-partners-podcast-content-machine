@@ -324,6 +324,7 @@ Brief éditorial : `MARQUES/<marque>/carousel.md` ; CTA final : `carousel.cta` d
 1. `python -m clipper carousel --brand <marque> --input <E>.mp4` : 3 angles de types différents (méthode, leçons, idées
    reçues, erreurs, cas, chiffres), chacun prouvé par des citations retrouvées dans l'épisode -> `carrousel/angles.md`.
    Donne les 3 angles à Arthur pour l'équipe marketing.
+**FORMAT STANDARD (16/11/2026, jusqu'à nouvel ordre)** : tout carrousel de podcast suit le modèle E23 Coty, décrit dans `docs/CARROUSEL_STANDARD.md` et `MARQUES/<marque>/carousel.md` (références : `MARQUES/ai-corner/references/carrousel_E23/`) : contenu de l'épisode tiré de la newsletter, chiffre en accroche, 3 à 4 points avec schéma + « À retenir » + citation entière, slide citation, CTA avec miniature, bleu nuit partout, PAS de récapitulatif. Sans newsletter, partir de la transcription.
 2. L'équipe choisit : `carousel … --pick N [--note "précision"]` : Claude rédige 6 à 8 slides + le post, contrôlés (citations
    mot pour mot, chiffres présents dans l'épisode, longueurs), puis rendu PNG + PDF dans le style de la marque
    (`carousel.style` ; AI Corner : `mix`, couverture photo de l'invité + slides navy à cartes blanches) avec une planche

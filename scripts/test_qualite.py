@@ -542,5 +542,32 @@ def test_versions_youtube_1440p_et_spotify():
         assert sp.exists() and sp.stat().st_size > 0
 
 
+def test_format_standard_du_carrousel():
+    """16/11/2026 : le carrousel E23 (Coty) est le format standard validé par l'équipe. Son contenu de référence passe tous les
+    contrôles de format ; un récapitulatif, un point sans « À retenir », un logo inconnu, une rangée d'agents sont signalés."""
+    import json
+    from copy import deepcopy
+
+    from clipper import carousel as c
+    from clipper.config import Brand
+    brand = Brand("ai-corner")
+    ref = json.loads((ROOT / "MARQUES/ai-corner/references/carrousel_E23/contenu.json").read_text(encoding="utf-8"))
+    # sans transcription : on ne teste ici que les contrôles de format (les citations sont contrôlées ailleurs)
+    segs = [{"start": 0, "end": 1, "text": " ".join(s.get("evidence", {}).get("quote", "") for s in ref["slides"])}]
+    fmt = lambda content: [r["msg"] for r in c.check_slides(content, segs, brand.assets_dir)
+                           if any(k in r["msg"] for k in ("récapitulatif", "retenir", "schéma", "logo", "pictogramme", "agents", "contexte", "citation trop"))]
+    assert fmt(ref) == [], fmt(ref)
+    bad = deepcopy(ref)
+    bad["slides"].append({"kind": "recap", "title": "Récap"})
+    bad["slides"][2].pop("takeaway")
+    bad["slides"][3]["visual"]["items"][0]["logo"] = "logo_inconnu"
+    bad["slides"][4]["visual"] = {"type": "agents"}
+    bad["slides"][6].pop("label")
+    msgs = " | ".join(fmt(bad))
+    for mot in ("récapitulatif", "retenir", "logo", "agents", "contexte"):
+        assert mot in msgs, (mot, msgs)
+    assert c._cap("avec formation") == "Avec formation"
+
+
 if __name__ == "__main__":
     sys.exit(main())

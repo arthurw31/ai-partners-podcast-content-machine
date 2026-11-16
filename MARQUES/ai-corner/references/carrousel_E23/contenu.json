@@ -1,0 +1,175 @@
+{
+ "episode": "E23",
+ "guest": "Nicolas Comestaz",
+ "company": "Coty",
+ "role": "VP Global Data & AI Center of Excellence at Coty",
+ "angle": 1,
+ "angle_type": "methode",
+ "decor": false,
+ "note": "Version du 16/11/2026 (v3) : contenu de l'épisode (éléments de la newsletter), chiffre en accroche, « à retenir » par point, citations complètes, miniature sur la dernière slide.",
+ "generated": "2026-11-16",
+ "guest_line": "Nicolas Comestaz · VP Global Data & AI Center of Excellence, Coty",
+ "slides": [
+  {
+   "kind": "cover",
+   "title": "Comment Coty [[déploie l'IA]] à grande échelle",
+   "subtitle": "Ce que Coty a mis en place"
+  },
+  {
+   "kind": "stat",
+   "title": "Le constat",
+   "value": "3 000+",
+   "label": "agents IA chez Coty",
+   "body": "Dont dix qui font la même chose d'un marché à l'autre. Pour Nicolas Comestaz, l'enjeu : [[passer de l'ère de l'expérimentation à l'ère de l'impact]].",
+   "evidence": {
+    "t": 2044.7,
+    "quote": "Je crois qu'on est plus de 3000 agents aujourd'hui dans l'organisation. Et si on regarde un petit peu, en fait, on se rend compte qu'il y a 10 agents qui font la même chose d'un marché à l'autre."
+   }
+  },
+  {
+   "kind": "point",
+   "n": 1,
+   "title": "Former ses équipes à [[Copilot]]",
+   "body": "Près de [[1 000 licences]] sur la demande des collaborateurs, puis le programme Supercharge with AI.",
+   "takeaway": "Partir de la demande, puis former en continu pour mettre vite tout le monde à niveau.",
+   "quote": "on a répété, répété, répété avec formation terrain, formation online […] à mettre à niveau la plupart des collaborateurs dans l'entreprise de manière assez rapide",
+   "evidence": {
+    "t": 723.4,
+    "quote": "la mise en place d'un programme un peu plus structuré qu'on a appelé Supercharge with AI dans l'organisation donc avec au sein de ce programme des formations terrain où on allait à la rencontre des collaborateurs"
+   },
+   "visual": {
+    "type": "flow",
+    "nodes": [
+     {
+      "icon": "users",
+      "label": "1 000 licences",
+      "sub": "à la demande"
+     },
+     {
+      "icon": "graduation-cap",
+      "label": "Formations terrain"
+     },
+     {
+      "icon": "monitor",
+      "label": "Formations en ligne"
+     },
+     {
+      "icon": "badge-check",
+      "label": "Équipes à niveau",
+      "sub": "assez vite"
+     }
+    ],
+    "note": "Répété, répété, répété"
+   }
+  },
+  {
+   "kind": "point",
+   "n": 2,
+   "title": "Choisir [[Microsoft]] Copilot",
+   "body": "Un écosystème complet, jusqu'à [[Azure Foundry]] : plus de 20 000 modèles pour créer ses propres applications.",
+   "takeaway": "Regarder l'écosystème dans son ensemble : du chat à la création de ses propres applications.",
+   "quote": "ce que j'ai appris au sein de cette phase, c'est vraiment la complémentarité de l'écosystème Microsoft",
+   "evidence": {
+    "t": 977.7,
+    "quote": "ce que j'ai appris au sein de cette phase, c'est vraiment la complémentarité de l'écosystème Microsoft entre Copilot Chat, la licence de Copilot, Copilot Studio mais surtout Azure Foundry"
+   },
+   "visual": {
+    "type": "stairs",
+    "items": [
+     {
+      "label": "Copilot Chat",
+      "logo": "microsoft_copilot"
+     },
+     {
+      "label": "Licence Copilot",
+      "logo": "microsoft_copilot"
+     },
+     {
+      "label": "Copilot Studio",
+      "logo": "copilot_studio"
+     },
+     {
+      "label": "Azure Foundry",
+      "sub": "20 000+ modèles",
+      "logo": "azure_ai_foundry"
+     }
+    ]
+   }
+  },
+  {
+   "kind": "point",
+   "n": 3,
+   "title": "Organiser son [[équipe IA]]",
+   "body": "Une équipe centrale de [[4 capabilities]] et des Data & AI domain owners dans chaque fonction.",
+   "takeaway": "Un noyau central, et des relais dans chaque fonction pour évangéliser.",
+   "quote": "l'idée étant d'avoir une organisation distribuée, je dirais, pour évangéliser et commencer à orienter les fonctions dans l'utilisation de la data et de l'AI",
+   "evidence": {
+    "t": 1434.7,
+    "quote": "on a commencé à structurer une organisation Data and AI au niveau groupe, avec une organisation basée sur un modèle Hub & Spock. Une équipe centrale composée de 4 capabilities"
+   },
+   "visual": {
+    "type": "hub",
+    "hub": "Équipe centrale",
+    "hub_sub": "4 capabilities",
+    "spokes": 6,
+    "caption": "Un domain owner Data & AI dans chaque fonction"
+   }
+  },
+  {
+   "kind": "point",
+   "n": 4,
+   "title": "Valider les [[cas d'usage]]",
+   "body": "Chaque cas d'usage est présenté à l'[[AI Board]], qui le revoit sous l'angle sécurité et compliance.",
+   "takeaway": "Passer chaque cas d'usage au crible sécurité et compliance avant déploiement.",
+   "quote": "revoir les cas d'usage proposés par les équipes sous le prisme de la sécurité, de la compliance […] et que l'on ne mette pas l'organisation à risque",
+   "evidence": {
+    "t": 1651.1,
+    "quote": "Un AI Board qui est une instance de gouvernance qui permet de revoir les cas d'usage proposés par les équipes sous le prisme de la sécurité, de la compliance"
+   },
+   "visual": {
+    "type": "flow",
+    "nodes": [
+     {
+      "icon": "users",
+      "label": "Les équipes",
+      "sub": "soumettent"
+     },
+     {
+      "icon": "landmark",
+      "label": "AI Board",
+      "sub": "revoit"
+     },
+     {
+      "icon": "shield-check",
+      "label": "Sécurité"
+     },
+     {
+      "icon": "badge-check",
+      "label": "Compliance"
+     },
+     {
+      "icon": "rocket",
+      "label": "Déploiement"
+     }
+    ]
+   }
+  },
+  {
+   "kind": "quote",
+   "label": "Le rôle du Head of AI",
+   "text": "Je fais souvent le parallèle avec un architecte […] l'architecte va coordonner des chantiers très complexes […] mais lui il ne va pas savoir poser le carrelage",
+   "evidence": {
+    "t": 2688.4,
+    "quote": "l'architecte va coordonner des chantiers très complexes qui impliquent une multitude de métiers ou d'expertise mais lui il ne va pas savoir poser le carrelage"
+   },
+   "icon": "compass"
+  }
+ ],
+ "cta": {
+  "episode": "AI Corner {number} | Comment Coty déploie l'IA à grande échelle avec Microsoft Copilot"
+ },
+ "post": "Comment Coty déploie l'IA à grande échelle ?\n\nNicolas Comestaz, VP Global Data & AI Center of Excellence chez Coty, était l'invité d'AI Corner. Au programme : former ses équipes à Copilot, choisir Microsoft Copilot, organiser son équipe IA et valider les cas d'usage.\n\nSon enjeu : passer de l'ère de l'expérimentation à l'ère de l'impact, alors que Coty compte déjà plus de 3 000 agents.\n\nLes points clés dans le carrousel 👇\n\n🎙️ L'épisode complet : https://youtu.be/9dn-9GafAX8",
+ "post_final": "Comment Coty déploie l'IA à grande échelle ?\n\nNicolas Comestaz, VP Global Data & AI Center of Excellence chez Coty, était l'invité d'AI Corner. Au programme : former ses équipes à Copilot, choisir Microsoft Copilot, organiser son équipe IA et valider les cas d'usage.\n\nSon enjeu : passer de l'ère de l'expérimentation à l'ère de l'impact, alors que Coty compte déjà plus de 3 000 agents.\n\nLes points clés dans le carrousel 👇\n\n🎙️ L'épisode complet : https://youtu.be/9dn-9GafAX8\n\n📅 Réserver un échange avec nous : https://calendar.google.com/calendar/appointments/schedules/AcZssZ0_yeSZr-eANdqFosuQLg2jE2smXxRU-eIMCXBA0WC3CynV7uSHwNeGX8FK-0MHDtpLcNiC4f9_?gv=true",
+ "checks": [],
+ "status": "OK"
+}

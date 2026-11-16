@@ -110,3 +110,7 @@ Réglages : `montage.long_hesitation` (1,6 s), `strict.merge_phrase_cuts`, `stri
 7. Aucune fenêtre ne s'ouvre chez Arthur (pas de Chrome, pas de console) ; tout est vérifié par images et par écoute.
 8. Plusieurs sessions Claude peuvent travailler en parallèle sur le dépôt : ne committer que ses propres fichiers,
    jamais de modèle d'IA dans le dépôt (public).
+
+## 7. Le carrousel LinkedIn de podcast
+
+Format standard validé le 16/11/2026 (E23 Coty), à reproduire « jusqu'à nouvel ordre » : contenu de l'épisode (jamais la machine), chiffre en accroche, un schéma + « À retenir » + citation entière par point, bleu nuit partout, pas de récapitulatif, CTA avec la miniature. Détail et historique des retours : [CARROUSEL_STANDARD.md](CARROUSEL_STANDARD.md).
