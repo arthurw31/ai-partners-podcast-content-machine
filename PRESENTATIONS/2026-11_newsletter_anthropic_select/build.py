@@ -100,7 +100,8 @@ h1 span{{color:#5CA8FF}}
 
 
 def thomas(out: Path) -> Path:
-    src = ROOT / "EPISODES" / "ai-corner" / "E23_nicolas-comestaz_coty" / "travail" / "newsletter" / "images" / "thomas_rond.jpg"
+    # photo de FACE, souriant (Arthur, 16/11/2026 : « met celle de face qui est mieux ») : photo 04 de la planche des photos de profil
+    src = SRC / "thomas_face.jpg"
     Image.open(src).convert("RGB").save(out, quality=90)
     return out
 
@@ -115,7 +116,7 @@ def make_images() -> dict:
         "c_loreal": svg_png(SRC / "loreal.svg", IMG / "client_loreal.png", 56),
         "c_isagri": svg_png(SRC / "isagri.svg", IMG / "client_isagri.png", 64),
         "c_trench": IMG / "client_trench.png",
-        "thomas": thomas(IMG / "thomas.jpg"),
+        "thomas": thomas(IMG / "thomas_face.jpg"),   # nouveau nom : pas de vieille photo en cache
     }
     Image.open(SRC / "badge_claude_partner_network_select.png").save(i["p_anthropic"])
     t = Image.open(SRC / "trench.png").convert("RGBA")
@@ -159,7 +160,7 @@ def body(i: dict, src) -> str:
              ("3", "références publiques")]
     stat_cells = '<td width="2%" style="font-size:0">&nbsp;</td>'.join(
         f'<td width="32%" valign="top" bgcolor="{NAVY}" style="width:32%;background-color:{NAVY};border-radius:14px;padding:20px 12px;'
-        f'text-align:center;font-family:{FONT}"><div style="font-size:42px;line-height:1;font-weight:bold;color:{SKY}">{n}</div>'
+        f'text-align:center;font-family:{FONT}"><div style="font-size:42px;line-height:1;font-weight:bold;color:#FFFFFF">{n}</div>'
         f'<div style="font-size:14px;line-height:1.35;color:#FFFFFF;padding-top:8px">{esc(t)}</div></td>' for n, t in stats)
 
     # cas clients
