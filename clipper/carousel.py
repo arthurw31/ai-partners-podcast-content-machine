@@ -422,14 +422,13 @@ document.fonts.ready.then(() => {
 MIX_COVER = """
 /* Arthur, 16/11/2026 : « première et dernière page en bleu foncé comme les autres, on n'utilise plus le bleu clair dans notre charte » */
 .slide.cover, .slide.cta { background: radial-gradient(120% 80% at 80% 0%, #24317F 0%, #151D53 55%, #0E1440 100%); }
-.cta .hl { background: #258AF3; }
 .person { position: absolute; right: -150px; bottom: 0; height: 800px; filter: drop-shadow(0 30px 60px rgba(5,15,60,.45)); }
 .cover .kicker { color: #fff; background: rgba(255,255,255,.16); align-self: flex-start; padding: 12px 22px;
                  border-radius: 999px; font-size: 24px; }
 .cover h1 { margin-top: 56px; font-size: 100px; line-height: 1.06; width: 680px; height: auto; max-height: 560px; justify-content: flex-start;
             text-shadow: 0 4px 30px rgba(5,15,60,.35); }
-.cover .hl { background: #258AF3; }
-.cover .subt { font-size: 38px; font-weight: 700; line-height: 1.25; width: 560px; color: #E3EAFF; margin-top: 36px; }
+.cover .hl { background: #fff; color: #151D53; }
+.cover .subt { font-size: 38px; font-weight: 700; line-height: 1.25; width: 560px; color: rgba(255,255,255,.85); margin-top: 36px; }
 .cover .who { position: absolute; left: 88px; bottom: 150px; margin: 0; background: #fff; color: #151D53; border-radius: 22px;
               padding: 20px 28px; font-size: 26px; font-weight: 700; max-width: 620px; z-index: 3; }
 .cover .who .gl { height: 40px; padding: 0; border-radius: 0; }
@@ -453,76 +452,79 @@ def _style_css(style: str) -> str:
 .cover .who { margin-top: 40px; font-size: 30px; color: #E3EAFF; display: flex; gap: 22px; align-items: center; }
 .cover .who .gl { height: 54px; background: #fff; border-radius: 16px; padding: 10px 18px; }
 h2 { font-weight: 800; font-size: 70px; line-height: 1.08; height: 190px; display: flex; flex-direction: column; justify-content: flex-end; }
-h2 .hl, .card .hl { background: none; color: #258AF3; padding: 0; margin: 0; }
-.sub { color: #258AF3; font-weight: 700; font-size: 30px; margin-top: 14px; letter-spacing: .02em; }
+h2 .hl { background: none; color: #fff; padding: 0; margin: 0; }
+h2 { color: rgba(255,255,255,.8); }
+.card .hl { background: none; color: #24317F; font-weight: 800; padding: 0; margin: 0; }
+.sub { color: rgba(255,255,255,.62); font-weight: 700; font-size: 30px; margin-top: 14px; letter-spacing: .02em; }
 .card { background: #fff; color: #151D53; border-radius: 34px; padding: 44px 52px; margin-top: 44px; }
 .card .body { font-size: 40px; line-height: 1.32; height: 270px; }
-.take { margin-top: 24px; padding-top: 22px; border-top: 2px solid #E6EEFE; font-size: 32px; line-height: 1.28; font-weight: 700; color: #151D53; }
-.take b { display: block; color: #258AF3; font-size: 22px; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 8px; }
+.take { margin-top: 24px; padding-top: 22px; border-top: 2px solid #E8EAF3; font-size: 32px; line-height: 1.28; font-weight: 700; color: #151D53; }
+.take b { display: block; color: #24317F; font-size: 22px; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 8px; }
 .slide.stat { justify-content: center; }
 .stat .card { padding: 64px 60px; }
 .stat .statv { font-size: 210px; white-space: nowrap; }
 .stat .statl { font-size: 60px; }
-.num { width: 96px; height: 96px; border-radius: 26px; background: #E6EEFE; color: #258AF3; font-weight: 800; font-size: 50px;
+.num { width: 96px; height: 96px; border-radius: 26px; background: #ECEEF8; color: #24317F; font-weight: 800; font-size: 50px;
        display: flex; align-items: center; justify-content: center; margin-bottom: 30px; }
-.qt { margin-top: 30px; background: #F1F6FD; color: #1D2C76; border-radius: 34px; padding: 60px 46px 30px; font-size: 30px;
+.qt { margin-top: 30px; background: #F3F4FA; color: #1D2C76; border-radius: 34px; padding: 60px 46px 30px; font-size: 30px;
       line-height: 1.33; height: 262px; position: relative; }
-.qt::before { content: "“"; position: absolute; left: 34px; top: -30px; font-size: 140px; font-weight: 800; color: #258AF3; }
-.qt .by { display: block; margin-top: 14px; font-size: 24px; font-weight: 700; color: #258AF3; }
-.statv { font-weight: 800; font-size: 210px; color: #258AF3; line-height: 1; margin-top: 30px; }
+.qt::before { content: "“"; position: absolute; left: 34px; top: -30px; font-size: 140px; font-weight: 800; color: #24317F; }
+.qt .by { display: block; margin-top: 14px; font-size: 24px; font-weight: 700; color: #24317F; }
+.statv { font-weight: 800; font-size: 210px; color: #24317F; line-height: 1; margin-top: 30px; }
 .statl { font-weight: 800; font-size: 54px; margin-top: 10px; color: #151D53; }
 .bigq { margin-top: auto; margin-bottom: auto; font-weight: 800; font-size: 66px; line-height: 1.18; height: 760px;
         display: flex; flex-direction: column; justify-content: center; }
-.bigq .mark { color: #258AF3; font-size: 200px; line-height: .6; }
-.bigq .by { font-size: 32px; font-weight: 700; color: #9DB8FF; margin-top: 30px; }
+.bigq .mark { color: rgba(255,255,255,.55); font-size: 200px; line-height: .6; }
+.bigq .by { font-size: 32px; font-weight: 700; color: rgba(255,255,255,.7); margin-top: 30px; }
 .rlist { list-style: none; margin-top: 50px; display: flex; flex-direction: column; gap: 22px; height: 760px; }
 .rlist li { background: #fff; color: #151D53; border-radius: 26px; padding: 30px 40px; font-size: 38px; font-weight: 700;
             display: flex; gap: 26px; align-items: center; }
-.rlist li b { color: #258AF3; font-size: 40px; min-width: 44px; }
+.rlist li b { color: #24317F; font-size: 40px; min-width: 44px; }
 .cta h1 { font-weight: 800; font-size: 96px; line-height: 1.08; margin-top: 120px; height: 470px; display: flex;
           flex-direction: column; justify-content: flex-end; }
-.cta p { font-size: 38px; line-height: 1.35; margin-top: 44px; color: #E3EAFF; height: 160px; }
-.btn { margin-top: 50px; align-self: flex-start; background: #fff; color: #258AF3; font-weight: 800; font-size: 42px;
+.cta p { font-size: 38px; line-height: 1.35; margin-top: 44px; color: rgba(255,255,255,.85); height: 160px; }
+.btn { margin-top: 50px; align-self: flex-start; background: #fff; color: #151D53; font-weight: 800; font-size: 42px;
        border-radius: 999px; padding: 30px 56px; text-transform: uppercase; letter-spacing: .03em; }
 .url { margin-top: 26px; font-size: 32px; font-weight: 700; color: #fff; }
-.ep { margin-top: 60px; font-size: 28px; color: #CFDBFF; }
+.ep { margin-top: 60px; font-size: 28px; color: rgba(255,255,255,.75); }
+.cta .hl { background: #fff; color: #151D53; }
 .cta.thumbed h1 { margin-top: 0; height: 300px; font-size: 88px; }
 .cta.thumbed p { margin-top: 30px; height: 110px; font-size: 36px; }
 .cta.thumbed .btn { margin-top: 34px; }
 .eprow { margin-top: 44px; display: flex; gap: 28px; align-items: center; }
 .eprow img { width: 480px; height: 270px; object-fit: cover; border-radius: 22px; box-shadow: 0 18px 40px rgba(5,15,60,.5); flex: none; }
-.eprow b { display: block; color: #9DB8FF; font-size: 24px; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 10px; }
+.eprow b { display: block; color: rgba(255,255,255,.65); font-size: 24px; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 10px; }
 .eprow span { display: block; color: #fff; font-size: 32px; font-weight: 700; line-height: 1.25; }
-.foot { color: #fff; } .foot .logo { color: #fff; } .foot .page { color: #9DB8FF; }
-.vis { height: 270px; display: flex; flex-direction: column; justify-content: center; }
+.foot { color: #fff; } .foot .logo { color: #fff; } .foot .page { color: rgba(255,255,255,.6); }
+.vis { height: 250px; display: flex; flex-direction: column; justify-content: center; }
 .flow { display: flex; align-items: flex-start; justify-content: space-between; }
 .nd { width: 150px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
-.nd .ci { width: 96px; height: 96px; border-radius: 50%; background: #E6EEFE; color: #258AF3; display: flex; align-items: center; justify-content: center; }
+.nd .ci { width: 96px; height: 96px; border-radius: 50%; background: #ECEEF8; color: #24317F; display: flex; align-items: center; justify-content: center; }
 .nd .ci img { width: 60px; height: 60px; object-fit: contain; }
 .nd b { font-size: 23px; line-height: 1.15; color: #151D53; font-weight: 800; }
-.nd i { font-size: 19px; line-height: 1.15; color: #4A5A92; font-style: normal; }
+.nd i { font-size: 19px; line-height: 1.15; color: #5B6490; font-style: normal; }
 .ar { padding-top: 33px; flex: none; }
-.vnote { margin-top: 14px; text-align: center; font-size: 23px; font-weight: 700; color: #258AF3; }
-.stairs { display: flex; align-items: flex-end; gap: 12px; height: 250px; }
-.st { flex: 1; border-radius: 18px; padding: 14px 14px 16px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; }
+.vnote { margin-top: 14px; text-align: center; font-size: 23px; font-weight: 700; color: #24317F; }
+.stairs { display: flex; align-items: flex-end; gap: 14px; height: 236px; }
+.st { flex: 1; border-radius: 18px; padding: 18px 18px 20px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; }
 .st b { font-size: 25px; line-height: 1.1; font-weight: 800; }
 .st i { font-size: 19px; line-height: 1.15; font-style: normal; }
 .st .lg { display: block; }
 .st .lg img { height: 40px; width: 40px; object-fit: contain; display: block; background: #fff; border-radius: 14px; padding: 9px; box-sizing: content-box; margin-bottom: 10px; }
-.st.s0 { height: 150px; background: #E6EEFE; color: #151D53; }
-.st.s1 { height: 185px; background: #C6DAFB; color: #151D53; }
-.st.s2 { height: 215px; background: #8DB8F8; color: #0E1440; }
-.st.s3 { height: 250px; background: #258AF3; color: #fff; }
+.st.s0 { height: 140px; background: #E9EBF4; color: #151D53; }
+.st.s1 { height: 172px; background: #CBD0E7; color: #151D53; }
+.st.s2 { height: 204px; background: #9CA6D6; color: #0E1440; }
+.st.s3 { height: 236px; background: #24317F; color: #fff; }
 .agents { display: flex; justify-content: space-between; margin-top: 26px; color: #258AF3; }
 .agents span { width: 52px; height: 52px; }
 .slide.hasvis h2 { height: 160px; }
 .slide.hasvis .sub { margin-top: 8px; }
-.slide.hasvis .card { margin-top: 24px; padding: 32px 48px 34px; }
-.slide.hasvis .card .body { height: 150px; font-size: 38px; }
-.slide.hasvis .vis + .body { margin-top: 14px; }
-.slide.hasvis .take { margin-top: 14px; padding-top: 14px; font-size: 30px; }
-.slide.hasvis .qt { margin-top: 22px; padding: 54px 44px 22px; font-size: 28px; height: 232px; }
-.qic { width: 96px; height: 96px; border-radius: 50%; background: #258AF3; color: #fff; display: flex; align-items: center; justify-content: center; margin-bottom: 22px; flex: none; }
+.slide.hasvis .card { margin-top: 22px; padding: 36px 52px 38px; }
+.slide.hasvis .card .body { height: 146px; font-size: 36px; line-height: 1.36; }
+.slide.hasvis .vis + .body { margin-top: 26px; }
+.slide.hasvis .take { margin-top: 18px; padding-top: 20px; font-size: 29px; line-height: 1.32; }
+.slide.hasvis .qt { margin-top: 22px; padding: 62px 46px 30px; font-size: 27px; line-height: 1.36; height: 252px; }
+.qic { width: 96px; height: 96px; border-radius: 50%; background: #fff; color: #151D53; display: flex; align-items: center; justify-content: center; margin-bottom: 22px; flex: none; }
 """
     if style == "lignes":
         return """
@@ -657,7 +659,7 @@ def _visual_html(v: dict | None, ctx: dict) -> str:
             sub = f'<i>{html.escape(n["sub"])}</i>' if n.get("sub") else ""
             parts.append(f'<div class="nd"><div class="ci">{glyph}</div><b>{html.escape(n["label"])}</b>{sub}</div>')
             if k < len(v["nodes"]) - 1:
-                parts.append('<div class="ar"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#258AF3" stroke-width="3" '
+                parts.append('<div class="ar"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#24317F" stroke-width="3" '
                              'stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></div>')
         return f'<div class="vis"><div class="flow">{"".join(parts)}</div>{note}</div>'
     if t == "stairs":
@@ -675,14 +677,14 @@ def _visual_html(v: dict | None, ctx: dict) -> str:
         for k in range(n):
             a = math.radians(360 * k / n)
             x, y = cx + 305 * math.cos(a), cy + 82 * math.sin(a)
-            lines.append(f'<line x1="{cx}" y1="{cy}" x2="{x:.0f}" y2="{y:.0f}" stroke="#BFD4FB" stroke-width="4"/>')
-            nodes.append(f'<circle cx="{x:.0f}" cy="{y:.0f}" r="38" fill="#E6EEFE"/><g transform="translate({x - 19:.0f},{y - 19:.0f}) scale(1.58)" '
-                         f'fill="none" stroke="#258AF3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{inner}</g>')
+            lines.append(f'<line x1="{cx}" y1="{cy}" x2="{x:.0f}" y2="{y:.0f}" stroke="#C9CEE6" stroke-width="4"/>')
+            nodes.append(f'<circle cx="{x:.0f}" cy="{y:.0f}" r="38" fill="#ECEEF8"/><g transform="translate({x - 19:.0f},{y - 19:.0f}) scale(1.58)" '
+                         f'fill="none" stroke="#24317F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{inner}</g>')
         return (f'<div class="vis"><svg viewBox="0 0 800 250" width="100%" height="250">{"".join(lines)}{"".join(nodes)}'
-                f'<circle cx="{cx}" cy="{cy}" r="90" fill="#258AF3"/>'
+                f'<circle cx="{cx}" cy="{cy}" r="90" fill="#24317F"/>'
                 + "".join(f'<text x="{cx}" y="{cy - 14 + 28 * j}" text-anchor="middle" font-size="23" font-weight="800" fill="#fff">{html.escape(w)}</text>'
                           for j, w in enumerate(v.get("hub", "").split(" ", 1)))
-                + f'<text x="{cx}" y="{cy + 42}" text-anchor="middle" font-size="21" font-weight="700" fill="#DCE8FF">{html.escape(v.get("hub_sub", ""))}</text>'
+                + f'<text x="{cx}" y="{cy + 42}" text-anchor="middle" font-size="21" font-weight="700" fill="#D6DAF0">{html.escape(v.get("hub_sub", ""))}</text>'
                 f'<text x="{cx}" y="244" text-anchor="middle" font-size="23" font-weight="700" fill="#151D53">{html.escape(v.get("caption", ""))}</text>'
                 f'</svg></div>')
     if t == "agents":
