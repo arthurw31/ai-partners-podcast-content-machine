@@ -1,9 +1,11 @@
-"""Mail d'annonce, version 2 (Arthur, 16/11/2026 : « repars plus sur ce style ») : on part du mail
-`EPISODES/ai-corner/_communiques/select-partner/email.html` (en-tête, communiqué 3D, icônes en verre, cartes des offres)
-et on y ajoute :
-  1. l'en-tête fourni par Arthur (badge + « AI Partners est officiellement Partenaire de Services Select… ») ;
-  2. une section « Des résultats mesurés » : 3 cartes dans le style des cartes d'offres, avec le LOGO du client à la place de l'icône ;
-  3. le bloc « Ce qui ne change pas : notre indépendance » (encadré du nouveau partenaire + OpenAI, Dust, Microsoft).
+"""Mail d'annonce, version 2 (Arthur, 16/11/2026).
+
+Style : celui du mail `EPISODES/ai-corner/_communiques/select-partner/email.html` (« repars plus sur ce style » : fond blanc,
+640 px, icônes en verre, listes à filet bleu nuit, cartes à bord fin). Texte : la V6 de Thomas (« reprends le wording de la
+dernière version de Thomas »). Ajouts d'Arthur : l'en-tête fourni (badge + « AI Partners est officiellement Partenaire de
+Services Select… »), les cartes clients avec LOGO, le bloc « Ce qui ne change pas » (OpenAI, Dust, Google). Retirés : le
+communiqué de presse et son lien, la section AI Factory / AI First Organization / AI Academy, le bouton d'agenda (remplacé
+par « Répondez simplement à ce mail »).
 
 Lancer depuis la racine du dépôt :  python PRESENTATIONS/2026-11_newsletter_anthropic_select/v2/build_v2.py
 """
@@ -14,7 +16,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageChops
 
 HERE = Path(__file__).resolve().parent
 V1 = HERE.parent
@@ -27,8 +29,11 @@ IMG = HERE / "images"
 IMG.mkdir(exist_ok=True)
 PUBLIC = "https://arthurw31.github.io/ai-partners-podcast-content-machine/newsletters/anthropic-select/v2"
 
+SUBJECT = "AI Partners devient partenaire Select du Claude Partner Network"
+PREHEADER = "Une reconnaissance d'Anthropic, et ce qu'elle change pour vos projets IA."
 F = "font-family:Helvetica, Arial, sans-serif"
 TITLE, TEXT, NAVY, BORDER, BLUE, CLAUDE = "#05070F", "#141B45", "#151D53", "#D9DEEE", "#258AF3", "#D97757"
+GAP = '<td width="2%" style="width:2%;font-size:0;line-height:0">&nbsp;</td>'
 
 
 def size(p: Path, w: int, h: int) -> tuple[int, int]:
@@ -52,11 +57,12 @@ def para(t: str, pad: str = "0 4px 18px 4px") -> str:
     return f'<tr><td style="padding:{pad};{F};font-size:17px;line-height:1.7;color:{TEXT}">{t}</td></tr>'
 
 
-GAP = '<td width="2%" style="width:2%;font-size:0;line-height:0">&nbsp;</td>'
+def strong(t: str) -> str:
+    return f'<strong style="color:{TITLE}">{t}</strong>'
 
 
 def card(top: str, title: str, text: str) -> str:
-    """Carte au style des cartes « Comment nous pouvons vous accompagner » (bord fin, coins arrondis, visuel centré en haut)."""
+    """Carte au style des cartes d'offres du mail de référence (bord fin, coins arrondis, visuel centré en haut)."""
     return (f'<td valign="top" width="32%" bgcolor="#FFFFFF" style="width:32%;background-color:#FFFFFF;border:1px solid {BORDER};'
             f'border-radius:18px;padding:18px 16px 22px 16px">'
             f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td height="96" align="center" valign="middle" '
@@ -72,10 +78,35 @@ def clients() -> str:
              ("client_trench.png", "Trench Group", "12 applications construites en trois jours, dont 3 en production, qui économisent "
                                                    "plus de 200 heures de travail par an.")]
     cells = GAP.join(card(img(f, 130, 34, n, "margin:0 auto"), n, t) for f, n, t in cards)
-    return (h2("Des résultats mesurés")
-            + para("Sur nos 3 références publiques&nbsp;:", "0 4px 14px 4px")
-            + f'<tr><td style="padding:4px 4px 34px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
-              f'style="border-collapse:separate"><tr>{cells}</tr></table></td></tr>')
+    return (f'<tr><td style="padding:4px 4px 34px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
+            f'style="border-collapse:separate"><tr>{cells}</tr></table></td></tr>')
+
+
+def stats() -> str:
+    """Les 3 chiffres, dans le style des 3 colonnes du mail de référence : icône en verre, grand chiffre, libellé."""
+    data = [("verre_badge-check_72.png", "12", "experts certifiés par Anthropic"),
+            ("verre_server_72.png", "5", "déploiements clients validés par Anthropic"),
+            ("verre_message-square-quote_72.png", "3", "références publiques")]
+    cells = "".join(
+        f'<td valign="top" width="33%" style="width:33%;padding:0 8px"><img src="images/{i}" width="72" height="72" alt="" '
+        f'style="display:block;border:0;width:72px;height:72px"><div style="padding:12px 0 4px 0;{F};font-size:40px;line-height:1;'
+        f'font-weight:bold;color:{NAVY}">{n}</div><div style="{F};font-size:15px;line-height:1.5;color:{TEXT}">{t}</div></td>'
+        for i, n, t in data)
+    return (f'<tr><td style="padding:6px 0 26px 0"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>{cells}'
+            f'</tr></table></td></tr>')
+
+
+def bar_list(items: list) -> str:
+    """Liste à filet bleu nuit à gauche, icône en verre devant chaque point (style « Ce que cela change pour vous » de la référence)."""
+    rows = []
+    for k, (icon, lead, text) in enumerate(items):
+        ico = (f'<img src="images/{icon}" width="42" height="42" alt="" style="display:inline-block;vertical-align:-14px;border:0;'
+               f'width:42px;height:42px;margin-right:8px">')
+        pad = "0" if k == len(items) - 1 else "0 0 18px 0"
+        rows.append(f'<div style="padding:{pad}">{ico}{strong(lead)} {text}</div>')
+    return (f'<tr><td style="padding:0 4px 26px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
+            f'<td style="border-left:4px solid {NAVY};padding:2px 0 2px 22px;{F};font-size:17px;line-height:1.65;color:{TEXT}">'
+            + "".join(rows) + "</td></tr></table></td></tr>")
 
 
 def independence() -> str:
@@ -98,17 +129,17 @@ def independence() -> str:
     small = (f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate"><tr>'
              f'{partner("partenaire_openai.png", "OpenAI Select Partner", 124, 54)}{GAP}{partner("partenaire_dust.png", "Dust Partner", 130, 46)}'
              f'{GAP}{partner("partenaire_google.png", "Google Cloud Partner", 110, 56)}</tr></table>')
-    return (h2("Ce qui ne change pas&nbsp;: notre indépendance")
+    return (h2("Ce qui ne change pas&nbsp;: notre indépendance", 0)
             + para("Ce statut renforce notre expertise sur Claude, sans rien changer à notre position. AI Partners reste indépendant et "
                    "agnostique. Nous sommes également partenaires d'OpenAI, de Dust et de Google.", "0 4px 16px 4px")
             + f'<tr><td style="padding:0 4px">{new}<div style="height:12px;font-size:0;line-height:0">&nbsp;</div>{small}</td></tr>'
             + para("Nous ne percevons aucune commission d'apport de la part des éditeurs. Notre seul critère reste votre besoin réel&nbsp;: "
                    "nous vous recommandons la solution la plus adaptée, y compris quand ce n'est pas Claude. "
-                   f'<strong style="color:{TITLE}">Je m\'y engage personnellement.</strong>', "18px 4px 34px 4px"))
+                   + strong("Je m'y engage personnellement."), "18px 4px 34px 4px"))
 
 
 def images() -> None:
-    for p in (REF / "images").iterdir():                      # images du mail de référence
+    for p in (REF / "images").iterdir():                      # images du mail de référence (icônes en verre, photo de Thomas)
         if p.suffix in (".png", ".jpg") and not p.name.startswith("_"):
             shutil.copy2(p, IMG / p.name)
     for n in ("client_loreal.png", "client_isagri.png", "client_trench.png", "partenaire_anthropic.png", "partenaire_openai.png",
@@ -120,30 +151,63 @@ def images() -> None:
 
 
 def build() -> str:
-    h = (REF / "email.html").read_text(encoding="utf-8")
-    h = h.replace('src="images/hero.png"', 'src="images/entete_select.jpg"')
-    h = h.replace('alt="AI Partners est désormais partenaire Select du Claude Partner Network, le programme qui réunit les sociétés de '
-                  'services déployant Claude chez leurs clients"',
-                  'alt="AI Partners est officiellement Partenaire de Services Select au sein du Claude Partner Network"')
-    a = h.index('<tr><td style="padding:0 4px 12px 4px"><h2 style="margin:0;font-family:Helvetica, Arial, sans-serif;font-size:22px;'
-                'line-height:1.3;font-weight:bold;color:#05070F">Ce que cela change pour vous')
-    h = h[:a] + clients() + h[a:]
-    b = h.index('<tr><td style="padding:14px 4px 12px 4px"><h2 style="margin:0;font-family:Helvetica, Arial, sans-serif;font-size:22px;'
-                'line-height:1.3;font-weight:bold;color:#05070F">Comment nous pouvons vous accompagner')
-    h = h[:b] + independence() + h[b:]
-    # section « Comment nous pouvons vous accompagner avec Claude » (AI Factory, AI First Organization, AI Academy) retirée
-    # (Arthur, 16/11/2026 : « enlève AI Factory et les deux autres »)
-    k = h.index("Comment nous pouvons vous accompagner avec Claude")
-    k = h.rindex("<tr>", 0, k)
-    m = h.index('<tr><td style="padding:14px 4px 10px 4px"><h2', k)          # titre suivant : « Parlons de vos projets »
-    assert "AI Academy" in h[k:m] and "Parlons" not in h[k:m]
-    h = h[:k] + h[m:]
-    # pas de bouton d'agenda : une simple indication (Arthur, 16/11/2026 : « Répondez au mail », comme dans la V6 de Thomas)
-    i = h.index('<tr><td style="padding:0 4px 38px 4px"><table role="presentation" cellpadding="0" cellspacing="0" style="margin:0">')
-    j = h.index("</td></tr></table></td></tr></table></td></tr>", i) + len("</td></tr></table></td></tr></table></td></tr>")
-    assert "calendly" in h[i:j]
-    return (h[:i] + f'<tr><td style="padding:0 4px 38px 4px;{F};font-size:19px;line-height:1.4;font-weight:bold;color:{NAVY}">'
-            f'Répondez simplement à ce mail &rarr;</td></tr>' + h[j:])
+    hero = ('<tr><td style="padding:0"><img src="images/entete_select.jpg" width="640" alt="AI Partners est officiellement Partenaire '
+            'de Services Select au sein du Claude Partner Network" style="display:block;width:100%;max-width:640px;height:auto;border:0">'
+            '</td></tr>')
+    sig = (f'<tr><td style="padding:0 4px"><table role="presentation" cellpadding="0" cellspacing="0"><tr>'
+           f'<td valign="middle" width="100" style="width:100px;padding:0 18px 0 0"><img src="images/thomas_portrait.jpg" width="84" '
+           f'height="84" alt="Thomas Spitz" style="display:block;border:0;border-radius:42px;width:84px;height:84px"></td>'
+           f'<td valign="middle" style="{F};font-size:17px;line-height:1.7;color:{TEXT}">{strong("Thomas Spitz")}<br>'
+           f'<span style="color:#4A5683">Co-founder &amp; CEO, AI Partners</span></td></tr></table></td></tr>')
+    rows = [
+        para("Bonjour,", "34px 4px 14px 4px"),
+        para("Je tenais à vous partager une étape importante pour AI Partners&nbsp;: nous avons obtenu le statut de "
+             + strong("partenaire Select du Claude Partner Network") + " (Services Track), le programme d'Anthropic dédié aux sociétés "
+             "qui déploient Claude, powered by Anthropic, chez leurs clients.", "0 4px 14px 4px"),
+        para("Ce statut valide une pratique Claude éprouvée sur le terrain&nbsp;: des équipes certifiées, des clients en production et "
+             "des cas publics. Cette reconnaissance vient consacrer deux années de travail aux côtés de nos clients, et une conviction "
+             "qui ne m'a pas quitté depuis la création d'AI Partners&nbsp;: la valeur de l'IA se joue en production, au-delà des pilotes.",
+             "0 4px 30px 4px"),
+        h2("Une expertise reconnue, et déjà à l'œuvre chez nos clients", 0),
+        stats(),
+        bar_list([("verre_users_42.png", "Des experts qui pratiquent.", "Nos consultants et ingénieurs utilisent Claude au quotidien, "
+                   "y compris Claude Code dans notre propre ingénierie."),
+                  ("verre_rocket_42.png", "Des projets en production.", "Nos 5 déploiements clients validés par Anthropic vont au-delà "
+                   "des POC et des expérimentations.")]),
+        para(strong("Des résultats mesurés") + ", sur 3 références publiques&nbsp;:", "0 4px 14px 4px"),
+        clients(),
+        independence(),
+        h2("Ce que nous pouvons faire pour vous", 0),
+        bar_list([("verre_target_42.png", "Stratégie et gouvernance&nbsp;:", "identifier les cas d'usage où l'IA crée réellement de "
+                   "la valeur, et poser le cadre de sécurité et de gouvernance pour passer à l'échelle."),
+                  ("verre_rocket_42.png", "Build et production&nbsp;:", "concevoir, déployer et industrialiser des agents au cœur de "
+                   "vos processus métier."),
+                  ("verre_layers_42.png", "Déploiement de Claude Enterprise et Claude Team&nbsp;:", "configurer les accès, les niveaux "
+                   "d'usage et l'administration, puis faire adopter l'outil par vos équipes. Sur certains déploiements Claude Enterprise, "
+                   "Anthropic peut cofinancer une partie de l'accompagnement à l'adoption, sous réserve d'éligibilité déterminée par "
+                   "Anthropic. Nous vous indiquons si votre projet peut en bénéficier."),
+                  ("verre_users_42.png", "Adoption et montée en compétences&nbsp;:", "des programmes de build où vos équipes construisent "
+                   "leurs propres usages, de Claude Cowork aux équipes de développement sur Claude Code.")]),
+        h2("Parlons de vos projets", 8),
+        para("Vous avez un pilote à faire passer en production, un déploiement Claude à réussir, ou un cas d'usage à cadrer&nbsp;? "
+             "Je vous propose un échange de 30 minutes avec l'un de nos experts.", "0 4px 16px 4px"),
+        f'<tr><td style="padding:0 4px 30px 4px;{F};font-size:19px;line-height:1.4;font-weight:bold;color:{NAVY}">'
+        f'Répondez simplement à ce mail &rarr;</td></tr>',
+        para("Merci pour votre confiance. C'est avec vous que cette étape s'est construite.", "0 4px 22px 4px"),
+        sig,
+    ]
+    return f"""<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light"><title>{SUBJECT}</title></head>
+<body style="margin:0;padding:0;background:#FFFFFF">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0">{PREHEADER}</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" bgcolor="#FFFFFF"><tr><td align="center" style="padding:0">
+<table role="presentation" width="640" cellpadding="0" cellspacing="0" style="width:100%;max-width:640px;text-align:left">
+{hero}
+<tr><td style="padding:0 20px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+{chr(10).join(rows)}
+</table></td></tr>
+<tr><td height="56" style="font-size:0;line-height:0">&nbsp;</td></tr>
+</table></td></tr></table></body></html>"""
 
 
 def module(h: str) -> str:
@@ -156,9 +220,8 @@ def preview(h: str, width: int, out: Path, inner: int = 640) -> None:
     page = h.replace('src="images/', f'src="{_uri(IMG)}/').replace("max-width:640px;text-align:left", f"max-width:{inner}px;text-align:left")
     tmp = HERE / "_tmp.png"
     _shot(page, width, 7000, tmp)
-    from PIL import ImageChops
     im = Image.open(tmp).convert("RGB")
-    box = ImageChops.difference(im, Image.new("RGB", im.size, im.getpixel((0, im.height - 1)))).getbbox()   # ligne entière, pas le centre
+    box = ImageChops.difference(im, Image.new("RGB", im.size, im.getpixel((0, im.height - 1)))).getbbox()   # ligne entière
     im.crop((0, 0, im.width, min(im.height, (box[3] if box else im.height) + 30))).save(out)
     tmp.unlink()
 
@@ -170,9 +233,8 @@ def main():
         raise SystemExit("tiret cadratin dans le mail")
     (HERE / "email.html").write_text(h, encoding="utf-8")
     (HERE / "email_hubspot_module.html").write_text(module(h), encoding="utf-8")
-    shutil.copy2(REF / "objet.txt", HERE / "objet.txt")
-    (HERE / "preheader.txt").write_text("Plus qu'une annonce : ce que ce statut signifie, et ce qu'il change pour vos projets.\n",
-                                        encoding="utf-8")
+    (HERE / "objet.txt").write_text(SUBJECT + "\n", encoding="utf-8")
+    (HERE / "preheader.txt").write_text(PREHEADER + "\n", encoding="utf-8")
     preview(h, 700, HERE / "apercu.png")
     preview(h, 520, HERE / "apercu_hubspot_480px.png", 480)
     used = sorted(set(re.findall(r'src="images/([^"]+)"', h)))
