@@ -412,13 +412,15 @@ document.fonts.ready.then(() => {
 
 
 MIX_COVER = """
-.slide.cover { background: linear-gradient(170deg, #258AF3 0%, #0A47B6 70%, #151D53 100%); }
+/* Arthur, 16/11/2026 : « première et dernière page en bleu foncé comme les autres, on n'utilise plus le bleu clair dans notre charte » */
+.slide.cover, .slide.cta { background: radial-gradient(120% 80% at 80% 0%, #24317F 0%, #151D53 55%, #0E1440 100%); }
+.cta .hl { background: #258AF3; }
 .person { position: absolute; right: -150px; bottom: 0; height: 800px; filter: drop-shadow(0 30px 60px rgba(5,15,60,.45)); }
 .cover .kicker { color: #fff; background: rgba(255,255,255,.16); align-self: flex-start; padding: 12px 22px;
                  border-radius: 999px; font-size: 24px; }
 .cover h1 { margin-top: 56px; font-size: 100px; line-height: 1.06; width: 680px; height: auto; max-height: 560px; justify-content: flex-start;
             text-shadow: 0 4px 30px rgba(5,15,60,.35); }
-.cover .hl { background: #151D53; }
+.cover .hl { background: #258AF3; }
 .cover .subt { font-size: 38px; font-weight: 700; line-height: 1.25; width: 560px; color: #E3EAFF; margin-top: 36px; }
 .cover .who { position: absolute; left: 88px; bottom: 150px; margin: 0; background: #fff; color: #151D53; border-radius: 22px;
               padding: 20px 28px; font-size: 26px; font-weight: 700; max-width: 620px; z-index: 3; }
