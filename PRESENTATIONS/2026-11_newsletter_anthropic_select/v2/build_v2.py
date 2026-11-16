@@ -73,14 +73,16 @@ def card(top: str, title: str, text: str) -> str:
 
 def clients() -> str:
     # ni logo ni nom de client (retours du 16/11/2026) : le résultat seul, son chiffre en gras
-    texts = [strong("150 experts") + " tech et produit formés en trois jours de build.",
-             "Une " + strong("chaîne de développement en production") + " sur Claude Code, désormais utilisée au quotidien par les "
-             "équipes produit.",
-             strong("12 applications") + " construites en trois jours, dont 3 en production, qui économisent " + strong("plus de 200 "
-             "heures") + " de travail par an."]
+    # clients ANONYMISÉS : « une entreprise de tel secteur » à la place du nom et du logo (Arthur, 16/11/2026)
+    texts = [("Un leader mondial de la cosmétique", strong("150 experts") + " tech et produit formés en trois jours de build."),
+             ("Un éditeur de logiciels agricoles", "Une " + strong("chaîne de développement en production") + " sur Claude Code, "
+              "désormais utilisée au quotidien par les équipes produit."),
+             ("Un industriel de l'équipement électrique", strong("12 applications") + " construites en trois jours, dont 3 en "
+              "production, qui économisent " + strong("plus de 200 heures") + " de travail par an.")]
     cells = GAP.join(f'<td valign="top" width="32%" bgcolor="#FFFFFF" style="width:32%;background-color:#FFFFFF;border:1px solid {BORDER};'
-                     f'border-radius:18px;padding:20px 16px 22px 16px;{F};font-size:15px;line-height:1.55;color:{TEXT}">{t}</td>'
-                     for t in texts)
+                     f'border-radius:18px;padding:20px 16px 22px 16px;{F};font-size:15px;line-height:1.55;color:{TEXT}">'
+                     f'<div style="padding:0 0 10px 0;font-size:16px;line-height:1.3;font-weight:bold;color:{NAVY}">{who}</div>{t}</td>'
+                     for who, t in texts)
     return (f'<tr><td style="padding:4px 4px 34px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
             f'style="border-collapse:separate"><tr>{cells}</tr></table></td></tr>')
 
