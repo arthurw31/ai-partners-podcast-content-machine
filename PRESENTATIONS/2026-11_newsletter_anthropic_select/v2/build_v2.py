@@ -89,13 +89,12 @@ def clients() -> str:
 
 def stats() -> str:
     """Les 3 chiffres dans 3 encadrés côte à côte, comme les cartes clients, sans icône (Arthur, 16/11/2026)."""
-    data = [("verre_badge-check_72.png", "12", "experts certifiés par Anthropic"),
-            ("verre_server_72.png", "5", "déploiements clients validés par Anthropic"),
-            ("verre_message-square-quote_72.png", "3", "références publiques")]
+    data = [("", "12", "experts certifiés par Anthropic"),
+            ("", "5", "déploiements clients validés par Anthropic"),
+            ("", "3", "références publiques")]
     cells = GAP.join(
         f'<td valign="top" width="32%" align="center" bgcolor="#FFFFFF" style="width:32%;background-color:#FFFFFF;border:1px solid {BORDER};'
-        f'border-radius:18px;padding:18px 12px 22px 12px;text-align:center"><img src="images/{i}" width="56" height="56" alt="" '
-        f'style="display:block;border:0;width:56px;height:56px;margin:0 auto 10px auto"><div style="{F};font-size:44px;line-height:1;'
+        f'border-radius:18px;padding:22px 12px 22px 12px;text-align:center"><div style="{F};font-size:44px;line-height:1;'
         f'font-weight:bold;color:{NAVY}">{n}</div><div style="padding-top:10px;{F};font-size:15px;line-height:1.5;color:{TEXT}">{t}</div></td>'
         for i, n, t in data)
     return (f'<tr><td style="padding:6px 4px 26px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
