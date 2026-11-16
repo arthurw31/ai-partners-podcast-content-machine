@@ -139,10 +139,45 @@ def independence() -> str:
 FONTS = ROOT / "MARQUES" / "ai-corner" / "assets" / "fonts"
 
 
+def header_background(out: Path) -> Path:
+    """Fond de l'en-tête fourni, À L'IDENTIQUE, sans le badge ni le texte (Arthur, 16/11/2026 : « refais exactement le même gradient,
+    avec les petits points blancs légers ») : dégradé lissé (polynôme de degré 3 ajusté sur les zones vides de l'en-tête) + le VRAI
+    grain de l'en-tête (résidu pris dans la bande vide du haut, recopié par blocs dans les zones masquées)."""
+    import numpy as np
+    im = np.asarray(Image.open(HERE / "sources" / "entete_fourni.webp").convert("RGB")).astype(float)
+    H, W, _ = im.shape
+    mask = np.ones((H, W), bool)
+    mask[80:680, 130:450] = False                              # badge
+    mask[160:600, 500:1230] = False                            # logo et textes
+    yy, xx = np.mgrid[0:H, 0:W]
+    X, Y = xx / W, yy / H
+    basis = lambda X, Y: np.stack([np.ones_like(X), X, Y, X * X, X * Y, Y * Y, X ** 3, X * X * Y, X * Y * Y, Y ** 3], -1)  # noqa: E731
+    B = basis(X, Y)
+    smooth = np.stack([B @ np.linalg.lstsq(B[mask], im[..., c][mask], rcond=None)[0] for c in range(3)], -1)
+    res = im - smooth
+    band = res[2:78, :, :]                                     # bande vide du haut : grain réel
+    # on ne garde que le GRAIN (passe-haut) : sans ça, les écarts lents de la bande se voyaient en carreaux
+    k = np.ones(13) / 13                                       # flou séparable (moyenne glissante 13 px)
+    low = np.apply_along_axis(lambda v: np.convolve(np.pad(v, 6, mode="edge"), k, "valid"), 1, band)
+    low = np.apply_along_axis(lambda v: np.convolve(np.pad(v, 6, mode="edge"), k, "valid"), 0, low)
+    band = band - low
+    rng = np.random.default_rng(7)
+    fill = np.zeros_like(res)
+    for y0 in range(0, H, 76):
+        for x0 in range(0, W, 256):
+            sx = int(rng.integers(0, W - 256))
+            h, w = min(76, H - y0), min(256, W - x0)
+            fill[y0:y0 + h, x0:x0 + w] = band[:h, sx:sx + w]
+    out_img = smooth + fill                                    # tout le fond recalculé : aucune couture entre zones
+    Image.fromarray(np.clip(out_img, 0, 255).astype("uint8")).save(out)
+    return out
+
+
 def partner_box(out: Path) -> Path:
     """Encadré « Nouveau partenaire » rendu par Chrome (1184 px = 2 x 592) : dégradé bleu grainé repris des couleurs de l'en-tête
     fourni (bleu nuit en bas à gauche, bleu clair en haut à droite), titre blanc, « Claude Partner Network » sur pavé orange
     comme dans l'en-tête, badge officiel à plat."""
+    fond = header_background(HERE / "_fond_entete.png")
     css = "".join(f'@font-face{{font-family:M;src:url("{_uri(FONTS / f"Metropolis-{n}.ttf")}");font-weight:{w}}}'
                   for n, w in (("Regular", 400), ("Bold", 700), ("ExtraBold", 800)))
     noise = ("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'>"
@@ -151,17 +186,17 @@ def partner_box(out: Path) -> Path:
     page = f"""<html><head><meta charset='utf-8'><style>{css}*{{margin:0;box-sizing:border-box}}
 body{{width:1184px;height:500px;background:#FFFFFF}}
 .box{{position:relative;width:1184px;height:500px;border-radius:36px;overflow:hidden;text-align:center;font-family:M,Arial;
-background:linear-gradient(32deg,#12203A 0%,#082E72 28%,#0A4B9C 52%,#3F7BC0 76%,#93A3CE 100%)}}
-.grain{{position:absolute;inset:0;background:url("{noise}");mix-blend-mode:overlay;opacity:.45}}
+background:url("{_uri(fond)}") 0 0/1184px 500px no-repeat}}
 .in{{position:relative;padding-top:46px}}
 .k{{font-weight:700;font-size:24px;letter-spacing:.2em;color:#FFFFFF;opacity:.85}}
 h1{{font-weight:800;font-size:46px;line-height:1.25;color:#FFFFFF;margin:14px 0 30px}}
 h1 span{{background:#F28A32;padding:0 12px}}
 .badge{{height:200px;display:block;margin:0 auto}}
-</style></head><body><div class='box'><div class='grain'></div><div class='in'><div class='k'>NOUVEAU PARTENAIRE</div>
+</style></head><body><div class='box'><div class='in'><div class='k'>NOUVEAU PARTENAIRE</div>
 <h1>Select Services Partner<br>du <span>Claude Partner Network</span></h1>
 <img class='badge' src='{_uri(IMG / "partenaire_anthropic.png")}'></div></div></body></html>"""
     _shot(page, 1184, 500, out)
+    fond.unlink()
     return out
 
 
