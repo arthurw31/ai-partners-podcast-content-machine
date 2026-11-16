@@ -97,10 +97,10 @@ def independence() -> str:
            f'{img("partenaire_anthropic.png", 330, 110, "Select Services Partner, Claude Partner Network")}</td></tr></table></td></tr></table>')
     small = (f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate"><tr>'
              f'{partner("partenaire_openai.png", "OpenAI Select Partner", 124, 54)}{GAP}{partner("partenaire_dust.png", "Dust Partner", 130, 46)}'
-             f'{GAP}{partner("partenaire_microsoft.png", "Microsoft Partner", 120, 30)}</tr></table>')
+             f'{GAP}{partner("partenaire_google.png", "Google Cloud Partner", 110, 56)}</tr></table>')
     return (h2("Ce qui ne change pas&nbsp;: notre indépendance")
             + para("Ce statut renforce notre expertise sur Claude, sans rien changer à notre position. AI Partners reste indépendant et "
-                   "agnostique. Nous sommes également partenaires d'OpenAI, de Dust et de Microsoft.", "0 4px 16px 4px")
+                   "agnostique. Nous sommes également partenaires d'OpenAI, de Dust et de Google.", "0 4px 16px 4px")
             + f'<tr><td style="padding:0 4px">{new}<div style="height:12px;font-size:0;line-height:0">&nbsp;</div>{small}</td></tr>'
             + para("Nous ne percevons aucune commission d'apport de la part des éditeurs. Notre seul critère reste votre besoin réel&nbsp;: "
                    "nous vous recommandons la solution la plus adaptée, y compris quand ce n'est pas Claude. "
@@ -112,7 +112,7 @@ def images() -> None:
         if p.suffix in (".png", ".jpg") and not p.name.startswith("_"):
             shutil.copy2(p, IMG / p.name)
     for n in ("client_loreal.png", "client_isagri.png", "client_trench.png", "partenaire_anthropic.png", "partenaire_openai.png",
-              "partenaire_dust.png", "partenaire_microsoft.png"):
+              "partenaire_dust.png", "partenaire_google.png"):
         shutil.copy2(V1 / "images" / n, IMG / n)
     head = Image.open(HERE / "sources" / "entete_fourni.webp").convert("RGB")   # en-tête fourni par Arthur (1280 × 720)
     head.save(IMG / "entete_select.jpg", quality=90)
@@ -131,6 +131,13 @@ def build() -> str:
     b = h.index('<tr><td style="padding:14px 4px 12px 4px"><h2 style="margin:0;font-family:Helvetica, Arial, sans-serif;font-size:22px;'
                 'line-height:1.3;font-weight:bold;color:#05070F">Comment nous pouvons vous accompagner')
     h = h[:b] + independence() + h[b:]
+    # section « Comment nous pouvons vous accompagner avec Claude » (AI Factory, AI First Organization, AI Academy) retirée
+    # (Arthur, 16/11/2026 : « enlève AI Factory et les deux autres »)
+    k = h.index("Comment nous pouvons vous accompagner avec Claude")
+    k = h.rindex("<tr>", 0, k)
+    m = h.index('<tr><td style="padding:14px 4px 10px 4px"><h2', k)          # titre suivant : « Parlons de vos projets »
+    assert "AI Academy" in h[k:m] and "Parlons" not in h[k:m]
+    h = h[:k] + h[m:]
     # pas de bouton d'agenda : une simple indication (Arthur, 16/11/2026 : « Répondez au mail », comme dans la V6 de Thomas)
     i = h.index('<tr><td style="padding:0 4px 38px 4px"><table role="presentation" cellpadding="0" cellspacing="0" style="margin:0">')
     j = h.index("</td></tr></table></td></tr></table></td></tr>", i) + len("</td></tr></table></td></tr></table></td></tr>")
