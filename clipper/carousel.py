@@ -494,6 +494,34 @@ h2 .hl, .card .hl { background: none; color: #258AF3; padding: 0; margin: 0; }
 .eprow b { display: block; color: #9DB8FF; font-size: 24px; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 10px; }
 .eprow span { display: block; color: #fff; font-size: 32px; font-weight: 700; line-height: 1.25; }
 .foot { color: #fff; } .foot .logo { color: #fff; } .foot .page { color: #9DB8FF; }
+.vis { height: 270px; display: flex; flex-direction: column; justify-content: center; }
+.flow { display: flex; align-items: flex-start; justify-content: space-between; }
+.nd { width: 150px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
+.nd .ci { width: 96px; height: 96px; border-radius: 50%; background: #E6EEFE; color: #258AF3; display: flex; align-items: center; justify-content: center; }
+.nd .ci img { width: 60px; height: 60px; object-fit: contain; }
+.nd b { font-size: 23px; line-height: 1.15; color: #151D53; font-weight: 800; }
+.nd i { font-size: 19px; line-height: 1.15; color: #4A5A92; font-style: normal; }
+.ar { padding-top: 33px; flex: none; }
+.vnote { margin-top: 14px; text-align: center; font-size: 23px; font-weight: 700; color: #258AF3; }
+.stairs { display: flex; align-items: flex-end; gap: 12px; height: 250px; }
+.st { flex: 1; border-radius: 18px; padding: 14px 14px 16px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; }
+.st b { font-size: 25px; line-height: 1.1; font-weight: 800; }
+.st i { font-size: 19px; line-height: 1.15; font-style: normal; }
+.st .lg img { height: 40px; width: auto; margin-bottom: 6px; display: block; }
+.st.s0 { height: 105px; background: #E6EEFE; color: #151D53; }
+.st.s1 { height: 150px; background: #C6DAFB; color: #151D53; }
+.st.s2 { height: 200px; background: #8DB8F8; color: #0E1440; }
+.st.s3 { height: 250px; background: #258AF3; color: #fff; }
+.agents { display: flex; justify-content: space-between; margin-top: 26px; color: #258AF3; }
+.agents span { width: 52px; height: 52px; }
+.slide.hasvis h2 { height: 160px; }
+.slide.hasvis .sub { margin-top: 8px; }
+.slide.hasvis .card { margin-top: 24px; padding: 32px 48px 34px; }
+.slide.hasvis .card .body { height: 150px; font-size: 38px; }
+.slide.hasvis .vis + .body { margin-top: 14px; }
+.slide.hasvis .take { margin-top: 14px; padding-top: 14px; font-size: 30px; }
+.slide.hasvis .qt { margin-top: 22px; padding: 54px 44px 22px; font-size: 28px; height: 232px; }
+.qic { width: 96px; height: 96px; border-radius: 50%; background: #258AF3; color: #fff; display: flex; align-items: center; justify-content: center; margin-bottom: 22px; flex: none; }
 """
     if style == "lignes":
         return """
@@ -578,6 +606,91 @@ h2 { font-weight: 800; font-size: 70px; line-height: 1.08; margin-top: 10px; hei
 """
 
 
+# ---------------------------------------------------------------------------------------------------------------
+# Schémas dans les slides (Arthur, 16/11/2026 : « imager schématiquement, que ce soit très visuel pour le lecteur »)
+# ---------------------------------------------------------------------------------------------------------------
+
+# Pictogrammes Lucide (ISC) absents du dossier assets/icons, tracés dans le même style (24 x 24, trait de 2)
+EXTRA_ICONS = {
+    "monitor": '<rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/>',
+    "bot": '<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>',
+}
+
+
+def _icon_inner(name: str, icons_dir: Path | None) -> str:
+    """Tracés d'un pictogramme (sans la balise svg) : dossier assets/icons de la marque, sinon EXTRA_ICONS."""
+    f = (icons_dir / f"lucide_{name}.svg") if icons_dir else None
+    if f and f.exists():
+        t = re.sub(r"<!--.*?-->", "", f.read_text(encoding="utf-8"), flags=re.S)
+        return t[t.index(">") + 1:t.rindex("</svg>")].strip()
+    return EXTRA_ICONS.get(name, "")
+
+
+def _svg(name: str, icons_dir: Path | None, size: int = 48) -> str:
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{size}" height="{size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+            f'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{_icon_inner(name, icons_dir)}</svg>')
+
+
+def _logo_img(name: str, logos_dir: Path | None) -> str:
+    """Logo officiel déposé dans assets/logos/<name>.svg|png (jamais tracé à la main) ; vide s'il n'existe pas."""
+    if not (name and logos_dir):
+        return ""
+    for e in (".svg", ".png"):
+        f = logos_dir / f"{name}{e}"
+        if f.exists():
+            return f'<img src="{_uri(f)}">'
+    return ""
+
+
+def _visual_html(v: dict | None, ctx: dict) -> str:
+    """Schéma d'une slide : flow (étapes reliées), stairs (marches), hub (équipe centrale + relais), agents (rangée de robots)."""
+    if not v:
+        return ""
+    icons, logos = ctx.get("icons_dir"), ctx.get("logos_dir")
+    t = v.get("type")
+    note = f'<div class="vnote">{html.escape(v["note"])}</div>' if v.get("note") else ""
+    if t == "flow":
+        parts = []
+        for k, n in enumerate(v["nodes"]):
+            glyph = _logo_img(n.get("logo", ""), logos) or _svg(n.get("icon", "zap"), icons, 44)
+            sub = f'<i>{html.escape(n["sub"])}</i>' if n.get("sub") else ""
+            parts.append(f'<div class="nd"><div class="ci">{glyph}</div><b>{html.escape(n["label"])}</b>{sub}</div>')
+            if k < len(v["nodes"]) - 1:
+                parts.append('<div class="ar"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="#258AF3" stroke-width="3" '
+                             'stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></div>')
+        return f'<div class="vis"><div class="flow">{"".join(parts)}</div>{note}</div>'
+    if t == "stairs":
+        cols = []
+        for k, n in enumerate(v["items"]):
+            logo = _logo_img(n.get("logo", ""), logos)
+            sub = f'<i>{html.escape(n["sub"])}</i>' if n.get("sub") else ""
+            cols.append(f'<div class="st s{k}"><span class="lg">{logo}</span><b>{html.escape(n["label"])}</b>{sub}</div>')
+        return f'<div class="vis"><div class="stairs">{"".join(cols)}</div>{note}</div>'
+    if t == "hub":
+        import math
+        cx, cy, n = 400, 120, int(v.get("spokes", 6))
+        lines, nodes = [], []
+        inner = _icon_inner(v.get("spoke_icon", "users"), icons)
+        for k in range(n):
+            a = math.radians(360 * k / n)
+            x, y = cx + 305 * math.cos(a), cy + 82 * math.sin(a)
+            lines.append(f'<line x1="{cx}" y1="{cy}" x2="{x:.0f}" y2="{y:.0f}" stroke="#BFD4FB" stroke-width="4"/>')
+            nodes.append(f'<circle cx="{x:.0f}" cy="{y:.0f}" r="38" fill="#E6EEFE"/><g transform="translate({x - 19:.0f},{y - 19:.0f}) scale(1.58)" '
+                         f'fill="none" stroke="#258AF3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">{inner}</g>')
+        return (f'<div class="vis"><svg viewBox="0 0 800 250" width="100%" height="250">{"".join(lines)}{"".join(nodes)}'
+                f'<circle cx="{cx}" cy="{cy}" r="90" fill="#258AF3"/>'
+                + "".join(f'<text x="{cx}" y="{cy - 14 + 28 * j}" text-anchor="middle" font-size="23" font-weight="800" fill="#fff">{html.escape(w)}</text>'
+                          for j, w in enumerate(v.get("hub", "").split(" ", 1)))
+                + f'<text x="{cx}" y="{cy + 42}" text-anchor="middle" font-size="21" font-weight="700" fill="#DCE8FF">{html.escape(v.get("hub_sub", ""))}</text>'
+                f'<text x="{cx}" y="244" text-anchor="middle" font-size="23" font-weight="700" fill="#151D53">{html.escape(v.get("caption", ""))}</text>'
+                f'</svg></div>')
+    if t == "agents":
+        bots = "".join(f'<span>{_svg("bot", icons, 52)}</span>' for _ in range(int(v.get("count", 10))))
+        cap = f'<div class="vnote">{html.escape(v["caption"])}</div>' if v.get("caption") else ""
+        return f'<div class="agents">{bots}</div>{cap}'
+    return ""
+
+
 def _slide_html(s: dict, i: int, n: int, style: str, ctx: dict) -> str:
     kind = s.get("kind", "point")
     dark_logo = style == "portrait" and kind not in ("cover", "cta", "quote")
@@ -600,6 +713,7 @@ def _slide_html(s: dict, i: int, n: int, style: str, ctx: dict) -> str:
             deco = f'<img class="person" src="{ctx["guest_img"]}">'
         elif kind not in ("cta",):
             deco = '<div class="bar"></div>'
+    vis = _visual_html(s.get("visual"), ctx) if kind in ("intro", "point") else ""
     gl = f'<img class="gl" src="{ctx["guest_logo"]}">' if ctx.get("guest_logo") else ""
     by = html.escape(ctx["guest_short"])
     q = (f'<div class="qt fit">{_hl(_cap(s["quote"]))}<span class="by">— {by}</span></div>' if s.get("quote") else "")
@@ -611,10 +725,12 @@ def _slide_html(s: dict, i: int, n: int, style: str, ctx: dict) -> str:
         card_open, card_close = ('<div class="card">', '</div>') if style == "usecase" else ("", "")
         inner = (f'<div class="sub">{_hl(s.get("title") or "Le chiffre")}</div>{card_open}'
                  f'<div class="statv">{html.escape(str(s.get("value", "")))}</div>'
-                 f'<div class="statl">{_hl(s.get("label", ""))}</div>'
-                 f'<div class="body fit" style="margin-top:30px;height:260px">{_hl(s.get("body", ""))}</div>{card_close}')
+                 f'<div class="statl">{_hl(s.get("label", ""))}</div>{_visual_html(s.get("visual"), ctx)}'
+                 f'<div class="body fit" style="margin-top:30px;height:{130 if s.get("visual") else 260}px">{_hl(s.get("body", ""))}</div>{card_close}')
     elif kind == "quote":
         lab = f'<div class="sub" style="margin-bottom:18px">{_hl(s["label"])}</div>' if s.get("label") else ""     # contexte de la citation
+        if s.get("icon"):
+            lab = f'<div class="qic">{_svg(s["icon"], ctx.get("icons_dir"), 52)}</div>' + lab
         inner = (f'<div class="bigq">{lab}<span class="mark">“</span><span class="fit" style="display:block;height:560px">'
                  f'{_hl(_cap(s.get("text")))}</span><span class="by">— {html.escape(ctx["guest_line"])}</span></div>')
     elif kind == "recap":
@@ -631,7 +747,7 @@ def _slide_html(s: dict, i: int, n: int, style: str, ctx: dict) -> str:
             tk = (f'<div class="take"><b>À retenir</b>{_hl(s["takeaway"])}</div>' if s.get("takeaway") else "")
             num = f'<div class="num">{int(s.get("n") or i - 1)}</div>' if kind == "point" and not tk else ""   # le numéro est dans « Idée n »
             inner = (f'<h2 class="fit"><span>{_hl(s.get("title"))}</span></h2><div class="sub">{label}</div>'
-                     f'<div class="card">{num}<div class="body fit">{_hl(s.get("body"))}</div>{tk}</div>{q}')
+                     f'<div class="card">{vis}{num}<div class="body fit">{_hl(s.get("body"))}</div>{tk}</div>{q}')
         elif style == "lignes":
             big = f'<div class="bignum">{int(s.get("n") or i - 1):02d}</div>' if kind == "point" else '<div class="sub">Le contexte</div>'
             inner = (f'{big}<h2 class="fit"><span>{_hl(s.get("title"))}</span></h2><div class="rule"></div>'
@@ -640,7 +756,7 @@ def _slide_html(s: dict, i: int, n: int, style: str, ctx: dict) -> str:
             num = f'<div class="num">{int(s.get("n") or i - 1):02d}</div>' if kind == "point" else ""
             inner = (f'{num}<div class="sub">{label}</div><h2 class="fit"><span>{_hl(s.get("title"))}</span></h2>'
                      f'<div class="body fit">{_hl(s.get("body"))}</div>{q}')
-    extra = " thumbed" if kind == "cta" and ctx.get("thumb") else ""
+    extra = (" thumbed" if kind == "cta" and ctx.get("thumb") else "") + (" hasvis" if vis else "")
     return f'<section class="slide {kind}{extra}">{deco}{inner}{foot}</section>'
 
 
@@ -666,6 +782,7 @@ def render(brand, ep: Path, content: dict, styles: list[str], portraits_: dict |
            "guest_short": content["guest"], "icon": _uri(brand.asset("logo_icon.png")),
            "lines": _uri(brand.asset("outro_bg.png")), "guest_logo": _uri(glogo_png),
            "guest_img": _uri((portraits_ or {}).get("guest")), "decor": content.get("decor", True),
+           "icons_dir": brand.assets_dir / "icons", "logos_dir": brand.assets_dir / "logos",
            "thumb": _uri(ep / "miniatures" / "miniature_finale.jpg") if cta.get("thumbnail", True) and (ep / "miniatures" / "miniature_finale.jpg").exists() else "",
            "logo_white": _logo_svg(logo_svg, "#FFFFFF"), "logo_dark": _logo_svg(logo_svg, "#151D53")}
     root = out_root or ep / "carrousel"
