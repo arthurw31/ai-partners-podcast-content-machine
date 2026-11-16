@@ -507,10 +507,10 @@ h2 .hl, .card .hl { background: none; color: #258AF3; padding: 0; margin: 0; }
 .st { flex: 1; border-radius: 18px; padding: 14px 14px 16px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; }
 .st b { font-size: 25px; line-height: 1.1; font-weight: 800; }
 .st i { font-size: 19px; line-height: 1.15; font-style: normal; }
-.st .lg img { height: 40px; width: auto; margin-bottom: 6px; display: block; }
-.st.s0 { height: 105px; background: #E6EEFE; color: #151D53; }
-.st.s1 { height: 150px; background: #C6DAFB; color: #151D53; }
-.st.s2 { height: 200px; background: #8DB8F8; color: #0E1440; }
+.st .lg img { height: 58px; width: auto; margin-bottom: 8px; display: block; }
+.st.s0 { height: 150px; background: #E6EEFE; color: #151D53; }
+.st.s1 { height: 185px; background: #C6DAFB; color: #151D53; }
+.st.s2 { height: 215px; background: #8DB8F8; color: #0E1440; }
 .st.s3 { height: 250px; background: #258AF3; color: #fff; }
 .agents { display: flex; justify-content: space-between; margin-top: 26px; color: #258AF3; }
 .agents span { width: 52px; height: 52px; }
