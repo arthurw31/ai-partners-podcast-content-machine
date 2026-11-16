@@ -27,7 +27,8 @@ ASSETS = ROOT / "MARQUES" / "ai-corner" / "assets"
 PUBLIC = "https://arthurw31.github.io/ai-partners-podcast-content-machine/newsletters/anthropic-select"
 
 NAVY, NAVY_MID, BLUE, LIGHT, LINE = "#151D53", "#1D2C76", "#258AF3", "#F1F6FD", "#E3E8F2"
-SKY, LINE_DARK, ON_NAVY = "#5CA8FF", "#B9C4E2", "#D6DEF5"     # plus de contraste en bleu nuit (Arthur, 16/11/2026)
+SKY, LINE_DARK, ON_NAVY = "#5CA8FF", "#B9C4E2", "#D6DEF5"
+CLAUDE = "#D97757"     # orange Claude (l'astérisque du badge) : « Claude Partner Network » en orange (Arthur, 16/11/2026)     # plus de contraste en bleu nuit (Arthur, 16/11/2026)
 FONT = "Helvetica, Arial, sans-serif"
 FONTS_CSS = "".join(f'@font-face{{font-family:M;src:url("{_uri(ASSETS / "fonts" / f"Metropolis-{n}.ttf")}");font-weight:{w}}}'
                     for n, w in (("Regular", 400), ("Bold", 700), ("ExtraBold", 800)))
@@ -88,7 +89,7 @@ position:relative;overflow:hidden;color:#fff}}
 .logo{{position:absolute;left:96px;top:84px;height:52px;filter:brightness(0) invert(1)}}
 .kick{{position:absolute;left:96px;top:236px;font-weight:700;font-size:26px;letter-spacing:.16em;color:#9DB8FF;text-transform:uppercase}}
 h1{{position:absolute;left:96px;top:290px;width:1100px;font-weight:800;font-size:72px;line-height:1.12}}
-h1 span{{color:#5CA8FF}}
+h1 span{{color:{CLAUDE}}}
 .badge{{position:absolute;left:96px;top:560px;height:180px}}   /* badge à plat : ni ombre ni arrondi (guidelines Anthropic) */
 </style></head><body><img class='bg' src='{_uri(ASSETS / "outro_bg.png")}'><img class='logo' src='{_uri(logo)}'>
 <div class='kick'>Annonce</div><h1>Select Services Partner<br>in the <span>Claude Partner Network</span></h1>
@@ -108,7 +109,7 @@ def thomas(out: Path) -> Path:
 
 def make_images() -> dict:
     i = {
-        "hero": hero(IMG / "annonce.png"),
+        "hero": hero(IMG / "annonce_cpn.png"),   # nouveau nom : pas d'ancienne version en cache
         "p_anthropic": IMG / "partenaire_anthropic.png",
         "p_openai": crop_badge(SRC / "capture_openai_google.png", (12, 78, 304, 188), IMG / "partenaire_openai.png"),
         "p_dust": crop_badge(SRC / "capture_dust.png", (12, 78, 306, 188), IMG / "partenaire_dust.png", pad=4, thr=8),
@@ -192,7 +193,7 @@ def body(i: dict, src) -> str:
            f'<td bgcolor="{NAVY}" align="center" style="background-color:{NAVY};border:2px solid {BLUE};border-radius:16px;'
            f'padding:22px 20px 26px 20px;font-family:{FONT};text-align:center">'
            f'<div style="font-size:12px;line-height:1;font-weight:bold;letter-spacing:.16em;color:{SKY}">NOUVEAU PARTENAIRE</div>'
-           f'<div style="font-size:20px;line-height:1.3;font-weight:bold;color:#FFFFFF;padding:8px 0 16px 0">Select Services Partner<br>in the Claude Partner Network</div>'
+           f'<div style="font-size:20px;line-height:1.3;font-weight:bold;color:#FFFFFF;padding:8px 0 16px 0">Select Services Partner<br>in the <span style="color:{CLAUDE}">Claude Partner Network</span></div>'
            f'<table role="presentation" align="center" cellpadding="0" cellspacing="0"><tr><td align="center">'
            f'{img("p_anthropic", 330, 110, "Select Services Partner, Claude Partner Network", "")}</td></tr></table>'
            f'</td></tr></table>')
@@ -225,7 +226,7 @@ def body(i: dict, src) -> str:
 <tr><td><img src="{src(i["hero"])}" width="680" alt="AI Partners, Select Services Partner in the Claude Partner Network" style="display:block;width:100%;max-width:680px;height:auto;border:0"></td></tr>
 <tr><td style="padding:34px 40px 0 40px">
 <p {P}>Bonjour,</p>
-<p {P}>Je tenais à vous partager une étape importante pour AI Partners : nous avons obtenu le statut de <strong style="color:{NAVY}">partenaire Select du Claude Partner Network</strong> (Services Track), le programme d'Anthropic dédié aux sociétés qui déploient Claude, powered by Anthropic, chez leurs clients.</p>
+<p {P}>Je tenais à vous partager une étape importante pour AI Partners : nous avons obtenu le statut de <strong style="color:{NAVY}">partenaire Select du <span style="color:{CLAUDE}">Claude Partner Network</span></strong> (Services Track), le programme d'Anthropic dédié aux sociétés qui déploient Claude, powered by Anthropic, chez leurs clients.</p>
 <p {P}>Ce statut valide une pratique Claude éprouvée sur le terrain : des équipes certifiées, des clients en production et des cas publics. Cette reconnaissance vient consacrer deux années de travail aux côtés de nos clients, et une conviction qui ne m'a pas quitté depuis la création d'AI Partners : la valeur de l'IA se joue en production, au-delà des pilotes.</p>
 </td></tr>
 {h2("Une expertise reconnue, et déjà à l'œuvre chez nos clients", 18)}
