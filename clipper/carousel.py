@@ -317,6 +317,14 @@ def _hl(text: str) -> str:
     return re.sub(r"\[\[(.+?)\]\]", r'<span class="hl">\1</span>', html.escape(str(text or "")))
 
 
+def _cap(text: str) -> str:
+    """Majuscule à la première lettre d'une citation affichée (Arthur, 16/11/2026 : « sur les citations, mets une majuscule au début
+    de la phrase ») ; les marques [[ ]] des mots clés ne comptent pas."""
+    t = text or ""
+    m = re.search(r"[A-Za-zÀ-ÿ]", t)
+    return t if not m else t[:m.start()] + t[m.start()].upper() + t[m.start() + 1:]
+
+
 def _plain(text: str) -> str:
     return re.sub(r"\[\[(.+?)\]\]", r"\1", str(text or ""))
 
@@ -581,7 +589,7 @@ def _slide_html(s: dict, i: int, n: int, style: str, ctx: dict) -> str:
             deco = '<div class="bar"></div>'
     gl = f'<img class="gl" src="{ctx["guest_logo"]}">' if ctx.get("guest_logo") else ""
     by = html.escape(ctx["guest_short"])
-    q = (f'<div class="qt fit">{_hl(s["quote"])}<span class="by">— {by}</span></div>' if s.get("quote") else "")
+    q = (f'<div class="qt fit">{_hl(_cap(s["quote"]))}<span class="by">— {by}</span></div>' if s.get("quote") else "")
     if kind == "cover":
         sub = f'<div class="subt">{_hl(s["subtitle"])}</div>' if s.get("subtitle") else ""
         inner = (f'<div class="kicker">AI Corner · {html.escape(ctx["number"])}</div><h1 class="fit"><span>{_hl(s.get("title"))}</span></h1>'
@@ -595,7 +603,7 @@ def _slide_html(s: dict, i: int, n: int, style: str, ctx: dict) -> str:
     elif kind == "quote":
         lab = f'<div class="sub" style="margin-bottom:18px">{_hl(s["label"])}</div>' if s.get("label") else ""     # contexte de la citation
         inner = (f'<div class="bigq">{lab}<span class="mark">“</span><span class="fit" style="display:block;height:560px">'
-                 f'{_hl(s.get("text"))}</span><span class="by">— {html.escape(ctx["guest_line"])}</span></div>')
+                 f'{_hl(_cap(s.get("text")))}</span><span class="by">— {html.escape(ctx["guest_line"])}</span></div>')
     elif kind == "recap":
         items = "".join(f"<li><b>{k:02d}</b><span>{_hl(x)}</span></li>" for k, x in enumerate(s.get("items") or [], 1))
         inner = f'<h2 class="fit" style="height:200px"><span>{_hl(s.get("title") or "À retenir")}</span></h2><ul class="rlist fit">{items}</ul>'
