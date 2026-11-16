@@ -97,12 +97,15 @@ def stats() -> str:
 
 def bar_list(items: list) -> str:
     """Liste à filet bleu nuit à gauche, icône en verre devant chaque point (style « Ce que cela change pour vous » de la référence)."""
+    # icône dans sa propre colonne, texte dans la colonne de droite : aucune ligne ne repasse sous l'icône (Arthur, 16/11/2026)
     rows = []
     for k, (icon, lead, text) in enumerate(items):
-        ico = (f'<img src="images/{icon}" width="42" height="42" alt="" style="display:inline-block;vertical-align:-14px;border:0;'
-               f'width:42px;height:42px;margin-right:8px">')
-        pad = "0" if k == len(items) - 1 else "0 0 18px 0"
-        rows.append(f'<div style="padding:{pad}">{ico}{strong(lead)} {text}</div>')
+        bottom = "0" if k == len(items) - 1 else "18px"
+        rows.append(f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
+                    f'<td valign="top" width="52" style="width:52px;padding:0 10px 0 0"><img src="images/{icon}" width="42" height="42" '
+                    f'alt="" style="display:block;border:0;width:42px;height:42px;margin-top:-6px"></td>'
+                    f'<td valign="top" style="padding:0 0 {bottom} 0;{F};font-size:17px;line-height:1.65;color:{TEXT}">'
+                    f'{strong(lead)} {text}</td></tr></table>')
     return (f'<tr><td style="padding:0 4px 26px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>'
             f'<td style="border-left:4px solid {NAVY};padding:2px 0 2px 22px;{F};font-size:17px;line-height:1.65;color:{TEXT}">'
             + "".join(rows) + "</td></tr></table></td></tr>")
