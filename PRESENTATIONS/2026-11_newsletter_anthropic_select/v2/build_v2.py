@@ -117,14 +117,10 @@ def independence() -> str:
                 f'<td width="50" height="2" bgcolor="{BLUE}" style="width:50px;height:2px;font-size:0;line-height:0">&nbsp;</td></tr></table>'
                 f'<table role="presentation" align="center" cellpadding="0" cellspacing="0"><tr><td height="56" valign="middle" align="center" '
                 f'style="height:56px">{img(f, w, h, title)}</td></tr></table></td>')
-    new = (f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate"><tr>'
-           f'<td bgcolor="{NAVY}" align="center" style="background-color:{NAVY};border:2px solid {BLUE};border-radius:18px;'
-           f'padding:22px 20px 26px 20px;{F};text-align:center">'
-           f'<div style="font-size:12px;line-height:1;font-weight:bold;letter-spacing:.16em;color:#5CA8FF">NOUVEAU PARTENAIRE</div>'
-           f'<div style="font-size:20px;line-height:1.3;font-weight:bold;color:#FFFFFF;padding:8px 0 16px 0">Select Services Partner<br>'
-           f'du <span style="color:{CLAUDE}">Claude Partner Network</span></div>'
-           f'<table role="presentation" align="center" cellpadding="0" cellspacing="0"><tr><td align="center">'
-           f'{img("partenaire_anthropic.png", 330, 110, "Select Services Partner, Claude Partner Network")}</td></tr></table></td></tr></table>')
+    # encadré du nouveau partenaire = une image, sur le MÊME fond que l'en-tête (dégradé bleu grainé ; Arthur, 16/11/2026) :
+    # un dégradé CSS n'est pas gardé par Gmail / Outlook, l'image l'est partout
+    new = img("encadre_nouveau_partenaire.png", 592, 400, "Nouveau partenaire : Select Services Partner du Claude Partner Network",
+              "width:100%;max-width:592px;height:auto")
     small = (f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate"><tr>'
              f'{partner("partenaire_openai.png", "OpenAI Select Partner", 124, 54)}{GAP}{partner("partenaire_dust.png", "Dust Partner", 130, 46)}'
              f'{GAP}{partner("partenaire_google.png", "Google Cloud Partner", 110, 56)}</tr></table>')
@@ -137,6 +133,35 @@ def independence() -> str:
                    + strong("Je m'y engage personnellement."), "18px 4px 34px 4px"))
 
 
+FONTS = ROOT / "MARQUES" / "ai-corner" / "assets" / "fonts"
+
+
+def partner_box(out: Path) -> Path:
+    """Encadré « Nouveau partenaire » rendu par Chrome (1184 px = 2 x 592) : dégradé bleu grainé repris des couleurs de l'en-tête
+    fourni (bleu nuit en bas à gauche, bleu clair en haut à droite), titre blanc, « Claude Partner Network » sur pavé orange
+    comme dans l'en-tête, badge officiel à plat."""
+    css = "".join(f'@font-face{{font-family:M;src:url("{_uri(FONTS / f"Metropolis-{n}.ttf")}");font-weight:{w}}}'
+                  for n, w in (("Regular", 400), ("Bold", 700), ("ExtraBold", 800)))
+    noise = ("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'>"
+             "<feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter>"
+             "<rect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/></svg>")
+    page = f"""<html><head><meta charset='utf-8'><style>{css}*{{margin:0;box-sizing:border-box}}
+body{{width:1184px;height:500px;background:#FFFFFF}}
+.box{{position:relative;width:1184px;height:500px;border-radius:36px;overflow:hidden;text-align:center;font-family:M,Arial;
+background:linear-gradient(32deg,#12203A 0%,#082E72 28%,#0A4B9C 52%,#3F7BC0 76%,#93A3CE 100%)}}
+.grain{{position:absolute;inset:0;background:url("{noise}");mix-blend-mode:overlay;opacity:.45}}
+.in{{position:relative;padding-top:46px}}
+.k{{font-weight:700;font-size:24px;letter-spacing:.2em;color:#FFFFFF;opacity:.85}}
+h1{{font-weight:800;font-size:46px;line-height:1.25;color:#FFFFFF;margin:14px 0 30px}}
+h1 span{{background:#F28A32;padding:0 12px}}
+.badge{{height:200px;display:block;margin:0 auto}}
+</style></head><body><div class='box'><div class='grain'></div><div class='in'><div class='k'>NOUVEAU PARTENAIRE</div>
+<h1>Select Services Partner<br>du <span>Claude Partner Network</span></h1>
+<img class='badge' src='{_uri(IMG / "partenaire_anthropic.png")}'></div></div></body></html>"""
+    _shot(page, 1184, 500, out)
+    return out
+
+
 def images() -> None:
     for p in (REF / "images").iterdir():                      # images du mail de référence (icônes en verre, photo de Thomas)
         if p.suffix in (".png", ".jpg") and not p.name.startswith("_"):
@@ -146,6 +171,7 @@ def images() -> None:
         shutil.copy2(V1 / "images" / n, IMG / n)
     head = Image.open(HERE / "sources" / "entete_fourni.webp").convert("RGB")   # en-tête fourni par Arthur (1280 × 720)
     head.save(IMG / "entete_select.jpg", quality=90)
+    partner_box(IMG / "encadre_nouveau_partenaire.png")
     (IMG / "hero.png").unlink(missing_ok=True)
 
 
