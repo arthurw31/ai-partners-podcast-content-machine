@@ -116,7 +116,8 @@ def design(lettre: str, fond: Path, titre: str, mot: str, invite: Path | None = 
                    f"text-shadow:0 4px 30px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.4);text-wrap:balance'>{acc}</div></div>"
                    f"<div style='position:absolute;left:0;right:0;bottom:300px;display:flex;flex-direction:column;align-items:center;gap:26px'>"
                    f"<div style='color:#fff;font-weight:700;font-size:30px;letter-spacing:.14em;text-shadow:0 2px 12px rgba(0,0,0,.5)'>{label} AVEC</div>"
-                   + (f"<img src='{_uri(invite)}' style='height:62px;filter:drop-shadow(0 2px 10px rgba(0,0,0,.45))'>" if invite else "")
+                   + (f"<div style='background:#fff;border-radius:999px;padding:22px 46px;box-shadow:0 8px 28px rgba(0,0,0,.35)'>"
+                      f"<img src='{_uri(invite)}' style='display:block;height:54px'></div>" if invite else "")
                    + "</div></div></body></html>")
 
 
@@ -135,7 +136,11 @@ def main(episode: str = "E23") -> Path:
         shorts.append((n, _frame(mp4, 14.0, out / f"fond_short_{n}.jpg"), titre))
     # design E retenu par Arthur (19/11/2026) + « extrait du podcast AI Corner avec » le logo de l'entreprise invitée (blanc)
     company = json.loads((ep / "travail" / "clips.json").read_text(encoding="utf-8")).get("company", "")
-    invite = next((f for f in [BRAND / "assets" / "guests" / f"{company.lower()}.{x}" for x in ("svg", "png")] if f.exists()), None)
+    # logo de l'invité TOUJOURS dans la couleur officielle de son site (Arthur, 19/11/2026) : variante `<nom>_on_light` (couleur relevée sur
+    # le site, ex. Coty bleu marine #002554), posée sur une pastille blanche pour rester lisible sur le fond flouté ; à défaut, le logo blanc
+    g = BRAND / "assets" / "guests"
+    cands = [g / f"{company.lower()}_on_light.{x}" for x in ("svg", "png")] + [g / f"{company.lower()}.{x}" for x in ("svg", "png")]
+    invite = next((f for f in cands if f.exists()), None)
     if "--final" in sys.argv:
         files = [_shot(design("E", fond, titre, MOTS_CLES.get(n, ""), invite), out / f"short_{n}_miniature.png") for n, fond, titre in shorts]
         tw, th = 360, 640

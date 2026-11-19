@@ -351,6 +351,11 @@ la valeur à la commu qui nous suit, et sur la dernière slide un call to action
   -> `:where(.slide > *) { position: relative; z-index: 2 }` ; jamais le même nom de classe pour une slide et un élément
   (`.recap` écrasait la slide récapitulatif à 760 px de haut).
 
+## Miniatures des shorts (Arthur, 19/11/2026 : « par défaut la plateforme prend la première image du short comme miniature, c'est mauvais des fois »)
+
+- Essai `clipper/lab_miniatures_shorts.py` (pas encore branché sur le pipeline) : `python -m clipper.lab_miniatures_shorts --final` -> `travail/miniatures_shorts/short_N_miniature.png` (1080 × 1920) + `planche_miniatures.jpg`. Design **E retenu** : image du short floutée, voile sombre, logo AI Partners en haut, thème du short en capitales Metropolis Bold avec le mot-clé en Lora italique jaune (style des sous-titres), en bas « EXTRAIT DU PODCAST AI CORNER AVEC » + logo de l'entreprise invitée. Texte gardé dans la zone sûre centrale (grille Instagram recadrée en 3:4, boutons TikTok en bas à droite).
+- **Logo de l'invité TOUJOURS dans la couleur officielle de son site** (Arthur, 19/11/2026 : « à chaque fois, il faut que tu mettes le logo dans la couleur officielle de leur website ») : variante `assets/guests/<nom>_on_light.svg|png` (couleur relevée sur le site de l'entreprise, ex. Coty bleu marine `#002554`), posée sur une pastille blanche pour rester lisible ; à créer pour chaque nouvel invité. Vaut pour tout visuel où paraît le logo de l'invité.
+
 ## Mail podcast de Thomas : `newsletter` (idée de Thomas, 08/10/2026 ; Arthur, 12/10/2026 : « rajoute un 5e workflow, une
 newsletter dans ce style-là : un mail qui part direct de la part du founder »)
 
