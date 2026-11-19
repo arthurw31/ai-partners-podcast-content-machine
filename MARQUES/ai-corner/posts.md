@@ -4,23 +4,27 @@ Ce fichier est lu tel quel par le modèle qui rédige les textes accompagnant ch
 C'est un brief de community manager : la méthode (déduite des posts réellement publiés par AI Partners
 pour les shorts de l'épisode Dust, octobre 2026), puis les textes de référence.
 
-## Trois textes par short (Arthur, 21/10/2026 : « comme on poste sur plusieurs plateformes »)
+## Trois textes par short ET par teaser (Arthur, 21/10/2026, revu le 19/11/2026 : « pour chaque short et teaser, un texte en anglais pour le LinkedIn d'AI Partners, un texte en français pour Insta / YouTube, et un texte en français pour le LinkedIn de Thomas, comme si Thomas parlait »)
 
-1. **Post LinkedIn en anglais** (`linkedin_post`) : la méthode en 5 temps ci-dessous, voix « we ».
-2. **Post LinkedIn en français** (`linkedin_post_fr`) : le même post, même idée, même structure, même CTA avec le même lien,
-   écrit naturellement en français (pas une traduction mot à mot), voix « nous ».
+1. **Post LinkedIn d'AI PARTNERS, en anglais** (`linkedin_post`) : la méthode en 5 temps ci-dessous, voix de la page (« we »).
+2. **Post LinkedIn de THOMAS, en français** (`linkedin_thomas_fr`) : écrit comme si Thomas Spitz, l'animateur, parlait sur son
+   propre profil (voir la section « Post LinkedIn de Thomas » : style et 5 exemples publiés). Il remplace l'ancien « même post
+   en français » de la page.
 3. **Texte Instagram / TikTok / YouTube Shorts en français** (`social_post_fr`) : même idée, dans le style des exemples de la
    dernière section. Le programme ajoute LUI-MÊME à la fin la présentation d'AI PARTNERS , l'invitation à s'abonner à la
    chaîne YouTube avec le dernier podcast, puis le LIEN du podcast YouTube (`publication.social_fr` de brand.yaml) : ne pas les écrire.
 
+Le TEASER de l'épisode (montage de plusieurs moments forts) a les mêmes trois textes : ils présentent l'épisode à travers ce
+que disent ces moments, sans inventer de contenu que le teaser ne contient pas.
+
 ## Règles générales (valables pour les trois)
 - **Jamais de tiret cadratin « — » ni demi-cadratin « – »** (Arthur, 14/10/2026, redit le 21/10/2026 : on poste sur plusieurs
   plateformes) : une virgule, deux-points, des parenthèses ou deux phrases. Même dans les citations.
-- Voix : la page AI Partners (« we » / « nous », « our latest podcast » / « notre dernier podcast »). Professionnelle,
+- Voix : la page AI Partners pour le post anglais et le texte réseaux (« we » / « nous ») ; Thomas Spitz pour son post LinkedIn (voir sa section). Professionnelle,
   confiante, concrète, tournée vers l'exécution. Pas de hype, pas de superlatifs creux, pas de jargon gratuit.
 - Le texte porte **l'idée du short**, pas l'épisode en général : c'est la thèse de la personne qui parle, développée.
 - Toujours nommer l'invité : « Prénom Nom, <Rôle> at <Entreprise> » / « Prénom Nom, <Rôle> chez <Entreprise> » (une seule fois).
-- Longueur des posts LinkedIn : 90 à 190 mots (anglais), 100 à 220 mots (français). Une idée par paragraphe, paragraphes de
+- Longueur des posts LinkedIn : 90 à 190 mots (anglais), 130 à 230 mots (post de Thomas). Une idée par paragraphe, paragraphes de
   1 à 3 lignes, une ligne vide entre chaque.
 - **Pas de hashtags**, nulle part. LinkedIn : au plus un emoji dans l'accroche (souvent aucun) et un emoji devant le CTA.
   Instagram / TikTok / YouTube Shorts : aucun emoji.
@@ -127,14 +131,108 @@ AI does not replace judgment. It gives people the information and time to use th
 
 🎙 Watch the full podcast here: https://lnkd.in/eZ3awS9Z
 
-## Post LinkedIn en français : même modèle
+## Post LinkedIn de Thomas (français, à la première personne de Thomas)
 
-Mêmes 5 temps et mêmes formes d'accroche que l'anglais, en français naturel. CTA en français vers l'épisode complet, avec le lien
-sur la même ligne ou à la ligne :
-- « 🎬 Épisode complet ici : <lien> »
-- « 🎙️ Retrouvez notre échange avec <Invité>, <Rôle> chez <Entreprise>, dans l'épisode complet : <lien> »
-- « 🎙️ Nous avons parlé de <sujet> avec <Invité>, <Rôle> chez <Entreprise> dans notre dernier podcast : <lien> »
-Si l'URL n'est pas fournie : « Lien en commentaire 👇 ».
+Thomas Spitz, CEO d'AI PARTNERS, publie sur son profil. Le texte est écrit comme s'il parlait : c'est lui qui a mené l'échange
+(« lors de notre échange », « il nous a donné un exemple très concret »), mais le sujet reste l'idée de l'invité. Pas de « je »
+à chaque phrase : un « nous » d'AI PARTNERS seulement si Thomas le dit lui-même dans le clip (« Chez AI PARTNERS, nous pensons
+que… »), jamais une position inventée. Longueur : 130 à 230 mots.
+
+Structure observée dans les 5 posts publiés ci-dessous :
+1. **Accroche en une ligne** : la thèse (« L'adoption de l'IA passe d'une transformation technologique à une transformation
+   humaine et process. »), une citation exacte de l'invité entre « », ou une question (« Comment rémunérer les personnes pour la
+   propriété intellectuelle qu'elles transmettent à l'IA ? »).
+2. **Une ligne de contraste ou d'enjeu** : « Ce n'est plus seulement un sujet tech. », « C'est une question que peu d'entreprises
+   se posent encore. Mais elles devront bientôt y répondre. »
+3. **L'invité, nommé une fois** : « Prénom Nom, <Rôle> chez <Entreprise>, le résume ainsi : », « …, a soulevé ce sujet lors de
+   notre échange. », « …, nous a donné un exemple très concret lors de notre échange : ». Écrire le nom en clair : Thomas le
+   transforme en mention LinkedIn (@) au moment de publier.
+4. **Le développement** en 2 à 4 paragraphes courts, avec les faits du clip : « Son idée : … », « Le pari de <Prénom> : … »,
+   le chiffre, l'exemple concret.
+5. **La chute** en une ou deux lignes, qui reformule l'idée (« L'expérimentation, c'est bien. Ce n'est pas le job principal. »).
+6. **Le CTA**, seul sur sa ligne, emoji devant : « 🎬 Retrouvez l'épisode complet ici : <lien> », « 🎙️ Retrouvez le podcast
+   complet ici : <lien> », « 🎬 Épisode complet ici : <lien> ». Si l'URL n'est pas fournie : « Lien en commentaire 👇 ».
+
+### Post de Thomas 1 (short E23 « De la transformation tech à la transformation humaine »)
+L'adoption de l'IA passe d'une transformation technologique à une transformation humaine et process.
+
+Ce n'est plus seulement un sujet tech.
+
+Nicolas Comestaz, VP Global Data & AI Center of Excellence chez Coty, le résume ainsi : la transformation à adresser dans les années à venir est celle-là, humaine et process.
+
+Son idée : il va falloir redéployer les collaborateurs sur de nouvelles tâches, en complément de ce qu'offrent les capacités d'automatisation de l'intelligence artificielle.
+
+Et cela doit se faire dans un écosystème technologique qui continue d'évoluer à une vitesse fascinante. Il faut donc continuer à apprendre et maintenir son agilité et sa capacité d'innovation, tout en gardant la dimension humaine et la dimension process de l'entreprise.
+
+La technologie continue d'avancer. Les dimensions humaine et process doivent avancer avec elle.
+
+🎬 Épisode complet ici : https://lnkd.in/evDyyYZc
+
+### Post de Thomas 2 (short E23 « 3000 agents IA chez Coty : l'urgence de gouverner »)
+« L'expérimentation, c'est bien, mais ce n'est pas leur job principal. »
+
+Environ 3 000 agents IA dans l'organisation. Et dix agents qui font la même chose d'un marché à l'autre.
+
+Nicolas Comestaz, VP Global Data & AI Center of Excellence chez Coty, explique que c'est pour cela qu'il faut gouverner : mettre en place certaines méthodes de travail pour gagner réellement l'efficacité dont on a besoin.
+
+Il y a un second point qu'il commence à expliquer aux équipes. Expérimenter avec l'IA est une bonne chose, mais ce n'est pas leur rôle principal. Leur job principal, c'est de vendre des produits aux consommateurs.
+
+Le nombre d'agents montre l'enjeu : quand le même agent existe dix fois selon les marchés, l'effort est dupliqué au lieu d'être partagé.
+
+L'expérimentation, c'est bien. Ce n'est pas le job principal.
+
+🎙️ Retrouvez le podcast complet ici : https://lnkd.in/evDyyYZc
+
+### Post de Thomas 3 (short E22, souveraineté technologique)
+Nous parlons beaucoup des agents IA. Mais que se passe-t-il lorsque les entreprises souhaitent changer d'outils d'IA après avoir créé leurs agents et leurs processus ?
+
+Quentin Amaudry, cofondateur et CEO de Mendo, a soulevé ce problème : dès lors que vous commencez à créer des agents et des processus au sein d'outils d'IA, passer d'un outil à un autre devient beaucoup plus difficile.
+
+Chez AI PARTNERS, nous pensons que les entreprises ne devraient pas avoir à choisir entre tirer parti de l'IA et garder le contrôle de leur propre technologie.
+
+C'est pourquoi nous travaillons sur le concept de souveraineté technologique.
+
+Par exemple, l'un de nos clients stocke toutes ses compétences et ses sous-agents dans un dépôt GitHub. Cela lui permet de changer d'outils d'IA sans perdre ses connaissances métier.
+
+Car la souveraineté technologique signifie garder le contrôle de son expertise, quel que soit l'outil utilisé.
+
+🎙️ Regardez l'épisode complet ici : https://lnkd.in/eYshnYnE
+
+### Post de Thomas 4 (short E22, adoption des agents)
+Déployer un agent IA, c'est la partie facile. Le véritable défi, c'est de faire en sorte que vos équipes l'adoptent réellement.
+
+La plupart des discussions autour des agents IA se concentrent sur leurs capacités. Leur précision. Leur aptitude à exécuter une tâche.
+
+Mais tout cela ne sert à rien si les personnes qui travaillent avec ces agents ne les adoptent pas.
+
+Quentin Amaudry, cofondateur et CEO de Mendo, nous a donné un exemple très concret lors de notre échange : un agent IA dédié aux achats qui automatise la moitié du processus.
+
+Bien sûr, il offre une expérience plus personnalisée. Mais il transforme aussi la façon dont l'équipe travaille, et ses membres ne seront pas forcément d'accord avec toutes les décisions de l'agent.
+
+C'est là que les déploiements échouent. Pas à cause du modèle, mais de la manière dont il est déployé et adopté.
+
+Il faut embarquer vos équipes : les accompagner dans l'adoption de l'agent, les encourager à garder un regard critique, recueillir leurs retours concrets et apprendre à travailler avec lui au quotidien.
+
+Sans accompagnement au changement, vous risquez de compromettre l'adoption dès le départ.
+
+🎬 Retrouvez l'épisode complet ici : https://lnkd.in/eYshnYnE
+
+### Post de Thomas 5 (short E22, propriété intellectuelle transmise à l'IA)
+Comment rémunérer les personnes pour la propriété intellectuelle qu'elles transmettent à l'IA ?
+
+C'est une question que peu d'entreprises se posent encore. Mais elles devront bientôt y répondre.
+
+Quentin Amaudry, cofondateur et CEO de Mendo, a soulevé ce sujet lors de notre échange.
+
+Lorsqu'une personne automatise une partie de son travail en transmettant son savoir-faire à un agent IA, que fait-elle réellement ? Elle transmet à l'entreprise une partie de son expertise et de sa propriété intellectuelle, lui permettant de reproduire ce savoir-faire à grande échelle.
+
+En contrepartie, la promesse est qu'elle pourra prendre de la hauteur, devenir plus stratégique et accomplir davantage. C'est une perspective intéressante. Mais elle ne doit pas faire oublier la valeur de ce que cette personne a transmis.
+
+Le pari de Quentin : demain, les entreprises assumeront ouvertement cette réalité. Si vous contribuez à automatiser votre propre travail en transmettant votre expertise à l'IA, vous pourriez recevoir une véritable prime en contrepartie.
+
+Transmettre son savoir-faire à un agent IA n'est pas un simple détail technique. C'est une contribution qui crée de la valeur pour l'entreprise et qui mérite d'être reconnue et rémunérée à sa juste valeur.
+
+🎙️ Retrouvez l'épisode complet ici : https://lnkd.in/eYshnYnE
 
 ## Instagram / TikTok / YouTube Shorts (français) : le style à suivre
 

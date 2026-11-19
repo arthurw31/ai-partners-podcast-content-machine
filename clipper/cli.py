@@ -432,8 +432,12 @@ def cmd_posts(a: argparse.Namespace) -> dict:
         clips["guest_role"] = a.guest_role
     if getattr(a, "guest_role_fr", ""):
         clips["guest_role_fr"] = a.guest_role_fr
+    tf = ep / "teaser_clip.json"          # le teaser a aussi ses trois textes (Arthur, 19/11/2026)
+    teaser = json.loads(tf.read_text(encoding="utf-8")) if tf.exists() else None
     clips = write_posts(brand, ep, clips, transcript, episode_url=getattr(a, "episode_url", "") or "",
-                        only=_parse_only(getattr(a, "only", "")), force=a.force)
+                        only=_parse_only(getattr(a, "only", "")), force=a.force, teaser=teaser)
+    if teaser is not None and teaser.get("linkedin_post"):
+        tf.write_text(json.dumps(teaser, ensure_ascii=False, indent=1), encoding="utf-8")
     _write_summary(ep, clips)
     return clips
 
@@ -466,7 +470,7 @@ def _write_summary(ep: Path, clips: dict, projects: list[Path] | None = None) ->
                   f"- **Mots-clés** : {', '.join(c.get('keywords', []))}",
                   f"- **B-roll** : {', '.join(b['query'] for b in c.get('broll', [])) or '—'}", ""]
         if c.get("linkedin_post"):
-            lines += ["**Post LinkedIn (français) :**", "", "```", c.get("linkedin_post_fr", ""), "```", "",
+            lines += ["**Post LinkedIn de Thomas (français) :**", "", "```", c.get("linkedin_thomas_fr") or c.get("linkedin_post_fr", ""), "```", "",
                       "**Post LinkedIn (English) :**", "", "```", c["linkedin_post"], "```", "",
                       "**Instagram / TikTok / YouTube Shorts (français) :**", "", "```", c.get("social_post_fr", ""), "```", ""]
         else:

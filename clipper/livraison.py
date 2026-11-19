@@ -5,8 +5,8 @@ finales de chaque livrable, pour qu'on n'ait plus qu'à le copier dans le Drive 
 `python -m clipper livraison --brand <m> --input <E>.mp4` -> EPISODES/<marque>/<épisode>/LIVRABLES/ :
     LISEZMOI.md              quoi publier où, titre, état des contrôles, ce qui manque
     1_episode_youtube/       épisode .mp4 · miniature.jpg / _HD.png · titre_et_description.md
-    2_shorts/short_N/        UN dossier par short : short_N_<titre>.mp4 + ses 3 textes (short_N_linkedin_FR.txt,
-                             short_N_linkedin_EN.txt, short_N_instagram_tiktok_youtube_FR.txt : à coller tels quels)
+    2_shorts/short_N/        UN dossier par short : short_N_<titre>.mp4 + ses 3 textes (short_N_linkedin_thomas_FR.txt,
+                             short_N_linkedin_AIPARTNERS_EN.txt, short_N_instagram_tiktok_youtube_FR.txt : à coller tels quels)
     3_carrousel_linkedin/    carrousel.pdf · slides/ · post_linkedin.md
     4_newsletter/            email.html · email.txt · objet.txt · apercu.png · images/
     5_teaser/                teaser .mp4
@@ -120,7 +120,11 @@ def build(brand, video: Path, work: Path) -> tuple[Path, list[tuple[str, str, st
         rows.append((WARN if problems else OK, f"short {n}", f"« {label} » ({st or 'qa ?'})" + (" — " + "; ".join(problems) if problems else "")))
         # trois textes par short (Arthur, 21/10/2026) : LinkedIn FR, LinkedIn EN, Instagram / TikTok / YouTube Shorts FR
         from .posts import check_texts
-        names = (("linkedin_post_fr", "linkedin_FR"), ("linkedin_post", "linkedin_EN"), ("social_post_fr", "instagram_tiktok_youtube_FR"))
+        # 19/11/2026 : le post français est celui du LinkedIn de THOMAS (« comme si Thomas parlait ») ; les épisodes livrés avant
+        # gardent leur ancien « même post en français » (linkedin_post_fr -> linkedin_FR.txt)
+        fr = ("linkedin_thomas_fr", "linkedin_thomas_FR") if c.get("linkedin_thomas_fr") or not c.get("linkedin_post_fr") else ("linkedin_post_fr", "linkedin_FR")
+        en = "linkedin_EN" if fr[0] == "linkedin_post_fr" else "linkedin_AIPARTNERS_EN"     # noms d'avant gardés pour les épisodes livrés
+        names = (fr, ("linkedin_post", en), ("social_post_fr", "instagram_tiktok_youtube_FR"))
         post = next(iter(sorted((work / "posts").glob(f"clip_{n:02d}_*.md"))), None) if (work / "posts").exists() else None
         have = [(k, nm) for k, nm in names if (c.get(k) or "").strip()]
         for k, nm in have:
@@ -130,11 +134,11 @@ def build(brand, video: Path, work: Path) -> tuple[Path, list[tuple[str, str, st
             done.append(f)
         if len(have) == len(names):
             stale = bool(post) and post.stat().st_mtime < mp4.stat().st_mtime - 6 * 3600
-            issues = check_texts(c, brand.cfg.get("publication") or {}, str(clips.get("episode_url") or ""))
-            rows.append((WARN if stale or issues else OK, f"textes short {n} (LinkedIn FR + EN, Instagram / TikTok / YouTube Shorts)",
+            issues = [] if fr[0] == "linkedin_post_fr" else check_texts(c, brand.cfg.get("publication") or {}, str(clips.get("episode_url") or ""))
+            rows.append((WARN if stale or issues else OK, f"textes short {n} (LinkedIn de Thomas FR, LinkedIn AI PARTNERS EN, Instagram / TikTok / YouTube Shorts)",
                          "; ".join(issues) if issues else ("écrits avant le dernier montage du short : à relire (`posts --only N --force`)" if stale else "à jour")))
         elif have:
-            rows.append((WARN, f"textes short {n}", "il manque des textes (LinkedIn FR, ou Instagram / TikTok / YouTube Shorts) : `posts --only N --force`"))
+            rows.append((WARN, f"textes short {n}", "il manque des textes (LinkedIn de Thomas, LinkedIn AI PARTNERS ou Instagram / TikTok / YouTube Shorts) : `posts --only N --force`"))
         else:
             rows.append((MISSING, f"textes short {n}", "pas encore rédigés (`posts`)"))
 
@@ -184,6 +188,17 @@ def build(brand, video: Path, work: Path) -> tuple[Path, list[tuple[str, str, st
     if t.exists():
         _copy(t, out / "5_teaser" / "teaser.mp4", done)
         rows.append((OK, "teaser", "inclus au début de l'épisode ; ici à part si besoin"))
+        # ses 3 textes, comme un short (Arthur, 19/11/2026) : écrits par `posts` dans teaser_clip.json
+        tj = work / "teaser_clip.json"
+        tc = json.loads(tj.read_text(encoding="utf-8")) if tj.exists() else {}
+        tnames = (("linkedin_thomas_fr", "linkedin_thomas_FR"), ("linkedin_post", "linkedin_AIPARTNERS_EN"), ("social_post_fr", "instagram_tiktok_youtube_FR"))
+        have_t = [(k, nm) for k, nm in tnames if (tc.get(k) or "").strip()]
+        for k, nm in have_t:
+            f = out / "5_teaser" / f"teaser_{nm}.txt"
+            f.write_text(tc[k].strip() + "\n", encoding="utf-8")
+            done.append(f)
+        rows.append((OK if len(have_t) == 3 else MISSING, "textes du teaser (LinkedIn de Thomas FR, LinkedIn AI PARTNERS EN, Instagram / YouTube)",
+                     "à jour" if len(have_t) == 3 else "pas encore rédigés (`posts --force`)"))
 
     # ---- ménage : ce qui n'est plus un livrable actuel (copies seulement)
     keep = {p.resolve() for p in done}
@@ -202,11 +217,12 @@ def build(brand, video: Path, work: Path) -> tuple[Path, list[tuple[str, str, st
     lines += [f"| {icon[s]} | {what} | {detail.replace('|', '¦')} |" for s, what, detail in rows]
     lines += ["", "## Où publier", "",
               "- `1_episode_youtube/` : la vidéo, la miniature et le titre + la description (avec les chapitres) sur YouTube.",
-              "- `2_shorts/short_N/` : un dossier par short, avec la vidéo (outro comprise) et ses 3 textes : `linkedin_FR.txt` et `linkedin_EN.txt` pour LinkedIn,",
+              "- `2_shorts/short_N/` : un dossier par short, avec la vidéo (outro comprise) et ses 3 textes : `linkedin_thomas_FR.txt` pour le",
+              "  LinkedIn de Thomas (mentionner l'invité et son entreprise avec @ en publiant), `linkedin_AIPARTNERS_EN.txt` pour la page AI PARTNERS,",
               "  `instagram_tiktok_youtube_FR.txt` pour Instagram, TikTok et YouTube Shorts (à coller tels quels, sans tiret cadratin).",
               "- `3_carrousel_linkedin/` : le PDF en document LinkedIn, avec `post_linkedin.md` (le lien est dans le post).",
               "- `4_newsletter/` : le mail de Thomas (`email.html`, objet dans `objet.txt`) — à envoyer après la mise en ligne.",
-              "- `5_teaser/` : le teaser seul (il est déjà au début de l'épisode)."]
+              "- `5_teaser/` : le teaser seul (il est déjà au début de l'épisode) et ses 3 textes, comme pour un short."]
     # jamais de tiret cadratin dans un texte écrit pour l'équipe (Arthur, 14/10/2026)
     text = re.sub("\\s*[\u2014\u2013]\\s*", ", ", "\n".join(lines) + "\n")
     (out / "LISEZMOI.md").write_text(text, encoding="utf-8")

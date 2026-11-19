@@ -37,7 +37,7 @@ l'ancien schéma Mermaid est archivé dans [docs/ancien/](docs/ancien/).</sub>
 
 Aucune vidéo finale n'est rendue sans validation sur un aperçu.
 
-**Livrables d'un épisode** : 4 shorts MP4 (avec outro) et leurs textes de publication (LinkedIn FR + EN, Instagram / TikTok / YouTube Shorts) · l'épisode 1080p avec son teaser, sa
+**Livrables d'un épisode** : 4 shorts MP4 (avec outro) et leurs textes de publication (LinkedIn de Thomas FR, LinkedIn AI PARTNERS EN, Instagram / TikTok / YouTube Shorts ; les mêmes pour le teaser) · l'épisode 1080p avec son teaser, sa
 description YouTube et ses chapitres · le titre validé et la miniature choisie · le carrousel LinkedIn (PDF) et la
 description LinkedIn qui l'accompagne (avec le lien de réservation) · le mail podcast de Thomas, prêt à envoyer.
 

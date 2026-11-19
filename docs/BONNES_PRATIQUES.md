@@ -41,7 +41,7 @@ Résultat jugé « franchement plutôt bien » par Arthur (09/10/2026) : `EPISOD
   gratte l'oreille », 09/10).
 - **Aucun zoom** (« pour les shorts, ne pas mettre de zoom », 08/10).
 - Flash lumineux de transition **seulement quand l'angle de caméra change** (08/10).
-- **Trois textes par short** (« comme on poste sur plusieurs plateformes », 21/10) : post LinkedIn en français, le même en anglais,
+- **Trois textes par short et pour le teaser** (« comme on poste sur plusieurs plateformes », 21/10 ; revu le 19/11 : « un texte en anglais pour le LinkedIn d'AI Partners, un en français pour Insta / YouTube, et un en français pour le LinkedIn de Thomas, comme si Thomas parlait ») : post LinkedIn de Thomas en français (à sa 1re personne, modèle et 5 exemples dans `MARQUES/ai-corner/posts.md`), post LinkedIn de la page AI PARTNERS en anglais,
   et un texte français pour Instagram / TikTok / YouTube Shorts (1re ligne = la thèse entre « », sans emoji ni lien, fin fixe
   « Chez AI PARTNERS… Abonnez-vous à la chaîne YouTube… notre dernier podcast avec <invité> », puis « Écoutez le podcast complet : <lien YouTube> »
   en dernière ligne ; le même lien dans le CTA des deux posts LinkedIn). **Jamais de tiret cadratin.**

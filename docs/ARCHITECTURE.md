@@ -88,7 +88,7 @@ flowchart TB
 | `short_outro.py` | Commande `outro`, une fois la miniature choisie : rend une seule fois par épisode la carte de fin des shorts (« carte YouTube » : miniature validée, bouton « Regarder l'épisode — lien en description », animation AI Partners), puis la colle à la fin de chaque short rendu (dernière image tenue 0,4 s et fondu, voix jamais raccourcie) -> `livrables/`. Les shorts 9:16 sont montés et rendus SANS carte de fin (`format_overrides.9x16.outro.enabled: false`). |
 | `titles.py` | Titre de l'épisode (un seul, pour YouTube et la vignette) : Claude écrit ~12 candidats d'après `MARQUES/<m>/titles.md` (relevé des 16 titres publiés), chacun adossé à un passage réel de l'épisode ; contrôles automatiques (longueur, chiffres et noms présents dans la transcription, pas de nom d'invité, pas de copie d'un titre publié ou refusé) ; jury qui garde 5 titres de formules variées, proposés en texte (`--planche` : sur des vignettes, facultatif) ; `--pick N` = validation par l'équipe marketing, avant toute miniature. |
 | `thumbnail.py`, `canva_template.py` | Miniatures YouTube : photos où les deux sourient en se regardant (détecteur d'expressions + jury visuel Claude), détourage, composition sur le gabarit Canva importé du PPTX de l'équipe. |
-| `posts.py` | Rédige les TROIS textes de chaque short avec `posts.md` : post LinkedIn FR, post LinkedIn EN, texte Instagram / TikTok / YouTube Shorts FR (fin fixe ajoutée par le programme), sans tiret cadratin ; `check_texts` les contrôle. |
+| `posts.py` | Rédige les TROIS textes de chaque short ET du teaser (`teaser_clip.json`, index 99) avec `posts.md` : post LinkedIn de Thomas en français (à la 1re personne de Thomas, `linkedin_thomas_fr`, depuis le 19/11/2026), post LinkedIn d'AI PARTNERS en anglais, texte Instagram / TikTok / YouTube Shorts FR (fin fixe ajoutée par le programme), sans tiret cadratin ; `check_texts` les contrôle. |
 
 ## 2. Le parcours d'un épisode, fichier par fichier
 
@@ -117,7 +117,7 @@ flowchart TD
     B -->|qa puis preview --mp4| PV["Aperçu MP4 (apercus/)<br/>+ qa --render (planche d'images)<br/>validation par l'équipe"]
     PV -->|retouche : clips.json puis polish --only N| CJ
     PV -->|validé : render + qa --render<br/>HyperFrames + Chrome| R["renders/clip_NN_titre_9x16.mp4<br/>1080×1920"]
-    CJ -->|posts<br/>Claude + posts.md| P["posts/clip_NN_titre.md<br/>3 textes : LinkedIn FR + EN, Insta / TikTok / YT Shorts FR"]
+    CJ -->|posts<br/>Claude + posts.md| P["posts/clip_NN_titre.md + teaser.md<br/>3 textes : LinkedIn de Thomas FR, LinkedIn AI PARTNERS EN, Insta / TikTok / YT Shorts FR"]
     R --> OUT["Livraison : 4 MP4 + 12 textes<br/>+ summary.md"]
     P --> OUT
 ```

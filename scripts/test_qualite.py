@@ -388,7 +388,7 @@ def test_textes_de_publication():
     assert guest_line(clips) == "Quentin Amaudry, Cofondateur et CEO chez Mendo"
     url = "https://youtu.be/x"
     c = {"linkedin_post": f"We used to use tools.\n\nThe team said that. 🎙️ Watch the full podcast: {url}",
-         "linkedin_post_fr": f"Avant, nous utilisions des outils.\n\n🎙️ Retrouvez l'épisode complet : {url}",
+         "linkedin_thomas_fr": f"Avant, nous utilisions des outils.\n\n🎙️ Retrouvez l'épisode complet ici : {url}",
          "social_post_fr": "« Avant on utilisait des outils. »\n\nNous avons changé de méthode."}
     _add_social_outro([c], pub, clips, url)
     # lien du podcast YouTube en dernière ligne, sans ponctuation collée (Arthur, 21/10/2026 : « en lien cliquable »)
@@ -406,6 +406,14 @@ def test_textes_de_publication():
     for needle in ("tiret cadratin", "hashtag", "entre", "emoji", "lien", "abonnement"):
         assert needle in why, (needle, why)
     assert "manquant" in " ".join(check_texts({"linkedin_post": "x"}, pub, ""))
+    # 19/11/2026, Arthur : « pour chaque short et teaser : un texte en anglais pour le LinkedIn d'AI Partners, un en français pour
+    # Insta / YouTube, et un en français pour le LinkedIn de Thomas, comme si Thomas parlait »
+    from clipper.posts import SYSTEM_PROMPT, TEXT_KEYS
+    assert TEXT_KEYS == ("linkedin_post", "linkedin_thomas_fr", "social_post_fr"), TEXT_KEYS
+    assert "THOMAS" in SYSTEM_PROMPT and "99" in SYSTEM_PROMPT and "linkedin_thomas_fr" in SYSTEM_PROMPT
+    assert "linkedin_thomas_fr : lien de l'épisode absent" in check_texts(dict(c, linkedin_thomas_fr="Sans lien."), pub, url)
+    brief = (ROOT / "MARQUES" / "ai-corner" / "posts.md").read_text(encoding="utf-8")
+    assert "## Post LinkedIn de Thomas" in brief and brief.count("### Post de Thomas") >= 5
 
 
 def test_rythme_des_coupes_juste_milieu():

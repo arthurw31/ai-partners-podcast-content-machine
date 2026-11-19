@@ -260,9 +260,15 @@ exporter `PYTHONIOENCODING=utf-8` avant tout `print` contenant des accents ou de
    pris à des endroits différents de l'épisode ; `clip["segments"]` (liste ordonnée), `compose` découpe chaque
    segment, les concatène (`media.concat_segments`) et remappe mots/tours de parole/B-roll en temps relatif
    (`abs_to_rel`). `montage.join_transition: cut|flash`.
-6. **TROIS textes par clip** (Arthur, 21/10/2026 : « comme on poste sur plusieurs plateformes »), `clipper/posts.py`, commande
-   `posts`, lancée par `run` : (1) post LinkedIn en ANGLAIS (`linkedin_post`), (2) le même en FRANÇAIS (`linkedin_post_fr`,
-   même idée, même structure, même lien), (3) texte INSTAGRAM / TIKTOK / YOUTUBE SHORTS en français (`social_post_fr`) :
+6. **TROIS textes par short ET pour le teaser** (Arthur, 21/10/2026 : « comme on poste sur plusieurs plateformes » ; revu le 19/11/2026 :
+   « pour chaque short et teaser : 1 texte en anglais pour le LinkedIn d'AI Partners, un texte en français pour Insta / YouTube, et un
+   texte en français pour le LinkedIn de Thomas, donc comme si Thomas parlait »), `clipper/posts.py`, commande `posts`, lancée par `run`
+   (le teaser = `teaser_clip.json`, index 99, mêmes 3 textes, écrits dans ce fichier ; `livraison` les copie dans `5_teaser/`) :
+   (1) post LinkedIn de la page AI PARTNERS en ANGLAIS (`linkedin_post`), (2) post LinkedIn de THOMAS en FRANÇAIS (`linkedin_thomas_fr`,
+   à la 1re personne de Thomas : accroche, contraste, invité nommé une fois « lors de notre échange », développement, chute, CTA
+   « 🎬/🎙️ Retrouvez l'épisode complet ici : <lien> » ; modèle et 5 posts publiés dans `MARQUES/ai-corner/posts.md` ; l'invité et son
+   entreprise sont écrits en clair, Thomas les mentionne avec @ en publiant ; il remplace l'ancien `linkedin_post_fr`, « même post en
+   français », gardé pour les épisodes déjà livrés), (3) texte INSTAGRAM / TIKTOK / YOUTUBE SHORTS en français (`social_post_fr`) :
    1re ligne = la thèse entre « », paragraphes courts, chute ; aucun emoji, hashtag, lien ni CTA ; le programme ajoute
    LUI-MÊME la fin fixe (présentation d'AI PARTNERS + « Abonnez-vous à la chaîne YouTube AI PARTNERS… notre dernier podcast
    avec <Invité>, <Rôle> chez <Entreprise> » + « Écoutez le podcast complet : <lien YouTube de l'épisode> » en DERNIÈRE ligne,
@@ -272,7 +278,7 @@ exporter `PYTHONIOENCODING=utf-8` avant tout `print` contenant des accents ou de
    **JAMAIS de tiret cadratin** dans aucun des trois (`llm._no_dash` + `posts.check_texts`). La chute reformule le clip, elle
    n'invente ni définition ni morale. `check_texts` contrôle : 3 textes présents, tirets, hashtags, langue de chaque texte,
    lien de l'épisode, format du texte réseaux ; `livraison` range chaque short dans son SOUS-DOSSIER `LIVRABLES/2_shorts/short_N/` (Arthur, 21/10/2026 : « pour que ce
-   soit structuré ») avec la vidéo et `short_N_linkedin_FR.txt`, `_linkedin_EN.txt`, `_instagram_tiktok_youtube_FR.txt` (à coller tels quels). Test `test_textes_de_publication`. Chaque post est rédigé dans le ton de
+   soit structuré ») avec la vidéo et `short_N_linkedin_FR.txt`, `_linkedin_EN.txt`, `_instagram_tiktok_youtube_FR.txt` (à coller tels quels) ; depuis le 19/11/2026 : `short_N_linkedin_thomas_FR.txt`, `short_N_linkedin_AIPARTNERS_EN.txt`, `short_N_instagram_tiktok_youtube_FR.txt`, et `5_teaser/teaser_<…>.txt`. Test `test_textes_de_publication`. Chaque post est rédigé dans le ton de
    `MARQUES/<slug>/posts.md` (règles + posts réellement publiés par la marque, à ne jamais recopier), porte l'idée
    du clip, n'invente rien qui ne soit dans la transcription de l'extrait. AI Corner : **méthode « post d'un short »**
    déduite des 4 posts publiés pour les shorts Dust (accroche-thèse en 1 ligne — citation, constat ou question —,

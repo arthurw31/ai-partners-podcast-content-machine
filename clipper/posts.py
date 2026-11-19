@@ -1,10 +1,13 @@
-"""Rédaction des textes de publication de chaque clip : TROIS textes par short (Arthur, 21/10/2026 : « on poste sur plusieurs
-plateformes » : un post LinkedIn en français, le même en anglais, et un texte français pour Instagram / TikTok / YouTube Shorts).
+"""Rédaction des textes de publication : TROIS textes par short ET pour le teaser (Arthur, 21/10/2026, revu le 19/11/2026 : « pour
+chaque short et teaser, un texte en anglais pour le LinkedIn d'AI Partners, un texte en français pour Insta / YouTube, et un texte en
+français pour le LinkedIn de Thomas, comme si Thomas parlait »).
 
 Entrées : clips.json, transcript.json, le brief `MARQUES/<slug>/posts.md` (règles + posts publiés
 servant de référence de ton) et la section « Publication » de guidelines.md.
 Sortie  : EPISODES/<marque>/<épisode>/travail/posts/clip_NN_<titre>.md (un fichier par clip), les champs
-`linkedin_post` (anglais), `linkedin_post_fr` et `social_post_fr` dans clips.json, et le récap dans summary.md.
+`linkedin_post` (anglais, page AI Partners), `linkedin_thomas_fr` (français, profil de Thomas) et `social_post_fr` dans clips.json
+(et dans teaser_clip.json pour le teaser), et le récap dans summary.md. L'ancien `linkedin_post_fr` (même post que la page, en
+français) n'est plus produit ; les épisodes déjà livrés le gardent.
 Le texte « réseaux » finit toujours par la présentation d'AI Partners + l'invitation à s'abonner à la chaîne YouTube,
 ajoutées par le programme (`publication.social_fr` de brand.yaml), jamais par le modèle. Jamais de tiret cadratin.
 
@@ -27,10 +30,13 @@ console = Console()
 SYSTEM_PROMPT = """Tu es le community manager d'un podcast. Pour chaque clip vidéo (extrait monté d'un épisode)
 tu rédiges TROIS textes qui l'accompagnent sur les réseaux :
 
-1. `linkedin_post` : le post LinkedIn en ANGLAIS, prêt à coller, qui suit STRICTEMENT la méthode « post d'un short »
-   du brief (accroche, contraste, invité, développement concret, chute, puis CTA vers l'épisode). Voix « we » de la page.
-2. `linkedin_post_fr` : le MÊME post LinkedIn en FRANÇAIS : même idée, même structure, même CTA (en français, avec le
-   même lien), mais formulé naturellement en français (pas une traduction mot à mot). Voix « nous ».
+1. `linkedin_post` : le post LinkedIn de la page AI PARTNERS en ANGLAIS, prêt à coller, qui suit STRICTEMENT la méthode
+   « post d'un short » du brief (accroche, contraste, invité, développement concret, chute, puis CTA vers l'épisode). Voix « we ».
+2. `linkedin_thomas_fr` : le post LinkedIn de THOMAS SPITZ (l'animateur, CEO d'AI PARTNERS) en FRANÇAIS, publié sur son profil
+   et écrit comme si c'était lui qui parlait (« lors de notre échange », « il nous a donné un exemple ») : suis la section
+   « Post LinkedIn de Thomas » du brief (accroche en une ligne, ligne de contraste, invité nommé une fois, développement,
+   chute, CTA « 🎬 / 🎙️ Retrouvez l'épisode complet ici : <lien> »). Ce n'est PAS une traduction du post anglais : même idée,
+   texte différent. Une position d'AI PARTNERS (« Chez AI PARTNERS, nous pensons… ») seulement si Thomas la dit dans le clip.
 3. `social_post_fr` : le texte pour Instagram / TikTok / YouTube Shorts, en FRANÇAIS, dans le style des exemples
    « Instagram / TikTok / YouTube Shorts » du brief : la 1re ligne est la thèse du short entre guillemets français
    « … », puis des paragraphes courts (le contraste, l'idée de la personne qui parle, le concret), puis la chute en une
@@ -54,11 +60,13 @@ Règles absolues :
   s'utilisent que si le contexte le demande explicitement.
 - Varie les structures entre les clips d'un même épisode (forme de l'accroche, place de l'invité, formulation du
   CTA) ; deux posts ne doivent pas commencer de la même façon.
+- Le clip d'index 99, s'il est présent, est le TEASER de l'épisode (montage de plusieurs moments forts) : ses trois textes
+  présentent l'épisode à travers ces moments (sujet, invité, ce qu'on va apprendre), sans rien inventer d'autre.
 - Si une URL d'épisode est fournie, elle apparaît en clair dans le CTA des deux posts LinkedIn ; sinon applique la consigne du brief
   (« lien en commentaire » ou équivalent). Ne fabrique jamais d'URL.
 - Les sauts de ligne sont des `\\n` dans la chaîne JSON.
 - Réponds UNIQUEMENT avec un objet JSON valide de la forme :
-{"posts": [{"index": 1, "variant": "citation|constat|question", "linkedin_post": "…", "linkedin_post_fr": "…", "social_post_fr": "…"}]}"""
+{"posts": [{"index": 1, "variant": "citation|constat|question", "linkedin_post": "…", "linkedin_thomas_fr": "…", "social_post_fr": "…"}]}"""
 
 
 def _clip_text(transcript: dict, clip: dict, host: str = "", guest: str = "") -> str:
@@ -102,7 +110,9 @@ def _publication_rules(guidelines: str) -> str:
 
 
 def write_posts(brand: Brand, ep: Path, clips: dict, transcript: dict, episode_url: str = "",
-                only: set[int] | None = None, force: bool = False) -> dict:
+                only: set[int] | None = None, force: bool = False, teaser: dict | None = None) -> dict:
+    """`teaser` : contenu de teaser_clip.json (index 99) ; ses trois textes sont rédigés dans le même appel et écrits dans le
+    dict (le cli le réenregistre dans teaser_clip.json)."""
     cfg = brand.cfg
     pub = cfg.get("publication") or {}
     if not pub.get("enabled", True):
@@ -116,6 +126,9 @@ def write_posts(brand: Brand, ep: Path, clips: dict, transcript: dict, episode_u
         clips["episode_url"] = episode_url
 
     targets = [c for c in clips["clips"] if not only or c["index"] in only]
+    if teaser and (not only or 99 in only):
+        teaser["index"] = 99
+        targets = targets + [teaser]
     todo = [c for c in targets if force or not all(c.get(k) for k in TEXT_KEYS)]
     if not todo:
         console.print(f"[dim]Posts en cache : {posts_dir}[/dim]")
@@ -145,7 +158,7 @@ def write_posts(brand: Brand, ep: Path, clips: dict, transcript: dict, episode_u
 - Podcast : {cfg.get('podcast_name') or cfg.name} · Animateur·ice : {pub.get('host_name') or 'voir brief'}
 - Invité : {guest or 'inconnu'} · Rôle : {clips.get('guest_role') or pub.get('guest_role') or 'inconnu'} · Entreprise : {company or 'inconnue'}
 - Rôle en français : {clips.get('guest_role_fr') or clips.get('guest_role') or pub.get('guest_role') or 'inconnu'}
-- Langues : post LinkedIn en anglais + le même en français + texte réseaux en français (voir le brief)
+- Langues : post LinkedIn de la page en anglais + post LinkedIn de Thomas en français + texte réseaux en français (voir le brief)
 - URL de l'épisode complet : {episode_url or 'non fournie'}
 - Plateformes où écouter : {pub.get('channels') or 'voir brief'}
 - Nombre de clips : {len(todo)} — un post distinct par clip, structures variées.
@@ -182,7 +195,8 @@ def write_posts(brand: Brand, ep: Path, clips: dict, transcript: dict, episode_u
     return clips
 
 
-TEXT_KEYS = ("linkedin_post", "linkedin_post_fr", "social_post_fr")   # anglais, français, réseaux (Insta / TikTok / YT Shorts)
+TEXT_KEYS = ("linkedin_post", "linkedin_thomas_fr", "social_post_fr")   # page AI Partners (EN), profil de Thomas (FR), réseaux (FR)
+LEGACY_FR = "linkedin_post_fr"   # ancien « même post en français » (avant le 19/11/2026), gardé pour les épisodes déjà livrés
 DASH = "\u2014\u2013"                                                    # tiret cadratin et demi-cadratin : interdits
 
 
@@ -202,7 +216,7 @@ def contact_line(pub: dict, language: str) -> str:
 def _add_contact(clips_list: list[dict], pub: dict) -> bool:
     """Ajoute la ligne de contact aux deux posts LinkedIn (EN / FR), idempotent. Désactivé tant qu'Arthur ne l'a pas demandé."""
     changed = False
-    for key, lang in (("linkedin_post", "en"), ("linkedin_post_fr", "fr")):
+    for key, lang in (("linkedin_post", "en"), ("linkedin_thomas_fr", "fr")):
         line = contact_line(pub, lang)
         if not line:
             continue
@@ -293,13 +307,13 @@ def check_texts(c: dict, pub: dict, episode_url: str = "") -> list[str]:
             out.append("social_post_fr : phrase d'abonnement absente")
     url = episode_url or str(pub.get("episode_url") or "")
     if url:
-        for k in ("linkedin_post", "linkedin_post_fr"):
+        for k in ("linkedin_post", "linkedin_thomas_fr"):
             if c.get(k) and url not in c[k]:
                 out.append(f"{k} : lien de l'épisode absent")
     en = (c.get("linkedin_post") or "").lower()
     if len(re.findall(r"\b(les|des|une|est|nous|pour)\b", en)) > 6:
         out.append("linkedin_post : semble contenir du français (il doit être en anglais)")
-    for k in ("linkedin_post_fr", "social_post_fr"):
+    for k in ("linkedin_thomas_fr", "social_post_fr"):
         fr = (c.get(k) or "").lower()
         if len(re.findall(r"\b(the|and|with|our|that)\b", fr)) > 4:
             out.append(f"{k} : semble contenir de l'anglais (il doit être en français)")
@@ -312,10 +326,10 @@ def _write_files(posts_dir: Path, clips_list: list[dict], clips: dict) -> None:
     for c in clips_list:
         if not c.get("linkedin_post"):
             continue
-        name = f"clip_{c['index']:02d}_{slugify(c.get('title', ''))}.md"
+        name = "teaser.md" if int(c["index"]) == 99 else f"clip_{c['index']:02d}_{slugify(c.get('title', ''))}.md"
         body = [f"# Clip #{c['index']} · {c.get('title', '')}", "",
                 f"Invité : {clips.get('guest', '')} ({clips.get('company', '')}) · durée {c.get('duration', 0):.0f}s",
-                "", "## Post LinkedIn (français)", "", c.get("linkedin_post_fr", ""), "",
-                "## Post LinkedIn (English)", "", c["linkedin_post"], "",
+                "", "## Post LinkedIn de Thomas (français)", "", c.get("linkedin_thomas_fr") or c.get(LEGACY_FR, ""), "",
+                "## Post LinkedIn AI PARTNERS (English)", "", c["linkedin_post"], "",
                 "## Instagram / TikTok / YouTube Shorts (français)", "", c.get("social_post_fr", ""), ""]
         (posts_dir / name).write_text("\n".join(body), encoding="utf-8")

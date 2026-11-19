@@ -54,7 +54,7 @@ window.PROCESS = {
     {
       id: "shorts", num: 2, title: "4 shorts", group: "main",
       pitch: "Claude propose 10 passages, l'équipe en garde 4, la machine monte et contrôle chaque short.",
-      deliverable: "4 shorts verticaux + 12 textes (LinkedIn FR et EN, Instagram / TikTok / YouTube Shorts FR)",
+      deliverable: "4 shorts verticaux + 12 textes (LinkedIn de Thomas FR, LinkedIn AI PARTNERS EN, Instagram / TikTok / YouTube Shorts FR), et les 3 mêmes textes pour le teaser",
       duration: "≈ 20 à 30 min de calcul par short",
       status: { level: "ok", text: "Validé sur E23, en cours sur E22" },
       summary: "Le process le plus contrôlé : chaque short passe par un nettoyage du son en plusieurs couches, puis une boucle de contrôle « intransigeante » qui corrige toute seule, avant que l'équipe ne le voie.",
@@ -105,7 +105,7 @@ window.PROCESS = {
           loop: { to: 2, label: "retouche demandée : retour au nettoyage" } },
         { actor: "auto", title: "Rendu 1080p", short: "Version finale en haute qualité, puis contrôle du fichier.",
           duration: "≈ 12 × la durée du short (2 en parallèle)", cmd: "python -m clipper render --only N", files: ["travail/renders/*.mp4"] },
-        { actor: "claude", title: "3 textes par short", short: "Post LinkedIn en français et en anglais, texte Instagram / TikTok / YouTube Shorts en français. Jamais de tiret cadratin.",
+        { actor: "claude", title: "3 textes par short", short: "Post LinkedIn de Thomas en français (comme si Thomas parlait), post LinkedIn d'AI PARTNERS en anglais, texte Instagram / TikTok / YouTube Shorts en français ; les mêmes 3 textes pour le teaser. Jamais de tiret cadratin.",
           details: ["Méthode « post d'un short » tirée des posts déjà publiés : accroche, contraste, invité, développement, chute, lien.",
                     "Rien qui ne soit dit dans l'extrait."],
           cmd: "python -m clipper posts …", files: ["travail/posts/clip_NN_*.md"] },
