@@ -70,7 +70,7 @@ def _accent(titre: str, mot: str, style: str) -> str:
     return t.replace(m, f"<span style='{style}'>{m}</span>", 1) if m in t else t
 
 
-def design(lettre: str, fond: Path, titre: str, mot: str) -> str:
+def design(lettre: str, fond: Path, titre: str, mot: str, invite: Path | None = None) -> str:
     logo = _uri(BRAND / "assets" / "logo.png")
     bg = (f"<img src='{_uri(fond)}' style='position:absolute;inset:-60px;width:{W + 120}px;height:{H + 120}px;object-fit:cover;"
           f"filter:blur(26px) saturate(1.05)'>")
@@ -114,8 +114,10 @@ def design(lettre: str, fond: Path, titre: str, mot: str) -> str:
                    f"<div style='position:absolute;left:80px;right:80px;top:0;bottom:0;display:flex;align-items:center;justify-content:center;text-align:center'>"
                    f"<div style='color:#fff;font-weight:700;font-size:92px;line-height:1.12;text-transform:uppercase;letter-spacing:.02em;"
                    f"text-shadow:0 4px 30px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.4);text-wrap:balance'>{acc}</div></div>"
-                   f"<div style='position:absolute;left:0;right:0;bottom:330px;text-align:center;color:#fff;font-weight:700;font-size:30px;letter-spacing:.14em;"
-                   f"text-shadow:0 2px 12px rgba(0,0,0,.5)'>{label}</div></div></body></html>")
+                   f"<div style='position:absolute;left:0;right:0;bottom:300px;display:flex;flex-direction:column;align-items:center;gap:26px'>"
+                   f"<div style='color:#fff;font-weight:700;font-size:30px;letter-spacing:.14em;text-shadow:0 2px 12px rgba(0,0,0,.5)'>{label} AVEC</div>"
+                   + (f"<img src='{_uri(invite)}' style='height:62px;filter:drop-shadow(0 2px 10px rgba(0,0,0,.45))'>" if invite else "")
+                   + "</div></div></body></html>")
 
 
 def main(episode: str = "E23") -> Path:
@@ -131,11 +133,23 @@ def main(episode: str = "E23") -> Path:
         mp4 = next(d.glob("*.mp4"))
         titre = _fr(clips[i]["title"]) if i < len(clips) else d.name
         shorts.append((n, _frame(mp4, 14.0, out / f"fond_short_{n}.jpg"), titre))
+    # design E retenu par Arthur (19/11/2026) + « extrait du podcast AI Corner avec » le logo de l'entreprise invitée (blanc)
+    company = json.loads((ep / "travail" / "clips.json").read_text(encoding="utf-8")).get("company", "")
+    invite = next((f for f in [BRAND / "assets" / "guests" / f"{company.lower()}.{x}" for x in ("svg", "png")] if f.exists()), None)
+    if "--final" in sys.argv:
+        files = [_shot(design("E", fond, titre, MOTS_CLES.get(n, ""), invite), out / f"short_{n}_miniature.png") for n, fond, titre in shorts]
+        tw, th = 360, 640
+        sheet = Image.new("RGB", (tw * len(files) + 20 * (len(files) + 1), th + 40), "white")
+        for i, f in enumerate(files):
+            sheet.paste(Image.open(f).convert("RGB").resize((tw, th), Image.Resampling.LANCZOS), (20 + i * (tw + 20), 20))
+        p = out / "planche_miniatures.jpg"
+        sheet.save(p, quality=90)
+        return p
     lettres = "ABCDE"
     files = {}
     for n, fond, titre in shorts:
         for l in lettres:
-            files[(n, l)] = _shot(design(l, fond, titre, MOTS_CLES.get(n, "")), out / f"short_{n}_design_{l}.png")
+            files[(n, l)] = _shot(design(l, fond, titre, MOTS_CLES.get(n, ""), invite), out / f"short_{n}_design_{l}.png")
     # planche : une ligne par short, une colonne par design
     tw, th = 270, 480
     sheet = Image.new("RGB", (60 + tw * len(lettres) + 20 * (len(lettres) - 1) + 40, 90 + (th + 30) * len(shorts)), "white")
