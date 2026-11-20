@@ -19,6 +19,7 @@ On relance la commande après chaque retouche : LIVRABLES est refait (ce ne sont
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 from datetime import datetime
@@ -37,9 +38,21 @@ def _qa_status(f: Path) -> str:
 
 
 def _copy(src: Path, dst: Path, done: list) -> None:
+    """Lien dur vers le fichier de travail/ (même contenu, aucune place en plus : Arthur, 20/11/2026, disque plein) ;
+    copie si le lien est impossible (autre disque). Un lien qui pointe vers une ancienne version est refait."""
     dst.parent.mkdir(parents=True, exist_ok=True)
-    if not dst.exists() or dst.stat().st_size != src.stat().st_size or dst.stat().st_mtime < src.stat().st_mtime:
-        shutil.copy2(src, dst)
+    if dst.exists() and os.path.samefile(src, dst):
+        done.append(dst)
+        return
+    if not dst.exists() or dst.stat().st_size != src.stat().st_size or dst.stat().st_mtime < src.stat().st_mtime \
+            or os.stat(dst).st_nlink == 1:
+        tmp = dst.with_name(dst.name + ".tmp")
+        tmp.unlink(missing_ok=True)
+        try:
+            os.link(src, tmp)
+        except OSError:
+            shutil.copy2(src, tmp)
+        os.replace(tmp, dst)
     done.append(dst)
 
 

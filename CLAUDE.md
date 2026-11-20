@@ -40,6 +40,7 @@ AI Partners Podcast Content Machine/
   la main dans `LIVRABLES/`** : `livraison` efface tout ce qu'elle n'a pas copié (04/11/2026 : versions SPOTIFY / YOUTUBE_1440p
   d'E23 effacées). Une version par plateforme de l'épisode se fait dans `travail/episode/<base>_episode_<PLATEFORME>.mp4` ;
   `livraison` la copie dans `1_episode_youtube/`.
+- **`LIVRABLES/` = liens durs vers `travail/`, pas des copies** (Arthur, 20/11/2026 : disque plein, « fais bien gaffe de rien supprimer d'important ») : `livraison._copy` fait un lien dur (aucune place en plus ; copie seulement si impossible) et le refait quand une nouvelle version remplace la source. Supprimer un fichier de `LIVRABLES/` ne touche pas `travail/` ; copier `LIVRABLES/` sur le Drive copie bien le contenu. Ménage E23 du même jour : 66 Go de versions obsolètes supprimées (téléchargements tronqués, anciennes versions de `archives/`, morceaux du montage au logo blanc et aperçus), 11,6 Go de copies de `LIVRABLES/` remplacées par des liens ; gardés : rushs, versions finales, morceaux au logo noir (retouche du teaser en ~5 min), JSON / notes / images. Test `test_livraison_fait_des_liens_pas_des_copies`.
 - `docs/` reste en minuscules : GitHub Pages publie le schéma depuis ce dossier (seuls `/` ou `/docs` sont possibles).
 - Migration du 13/10/2026 (output/ -> EPISODES/…/travail, brands/ -> MARQUES/, depot/ -> DEPOT/) : 4 347 fichiers médias
   vérifiés à l'octet, 28 jonctions `assets/` recréées, chemins absolus ET relatifs des JSON réécrits, tests 14/14 et QA

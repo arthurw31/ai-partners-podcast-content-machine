@@ -577,5 +577,25 @@ def test_format_standard_du_carrousel():
     assert c._cap("avec formation") == "Avec formation"
 
 
+def test_livraison_fait_des_liens_pas_des_copies():
+    """20/11/2026, disque plein : LIVRABLES/ doublait 11 Go de fichiers de travail/. `livraison` fait désormais un lien dur
+    (même contenu, aucune place en plus) et refait le lien quand une nouvelle version remplace la source."""
+    import os
+    import tempfile
+
+    from clipper.livraison import _copy
+    d = Path(tempfile.mkdtemp())
+    src, dst = d / "a.mp4", d / "LIVRABLES" / "b.mp4"
+    src.write_bytes(b"x" * 100)
+    _copy(src, dst, [])
+    assert os.path.samefile(src, dst)
+    (d / "a2.mp4").write_bytes(b"y" * 50)
+    os.replace(d / "a2.mp4", src)
+    _copy(src, dst, [])
+    assert os.path.samefile(src, dst) and dst.read_bytes() == b"y" * 50
+    dst.unlink()
+    assert src.exists()
+
+
 if __name__ == "__main__":
     sys.exit(main())
